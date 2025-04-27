@@ -31,7 +31,17 @@ const AppCard: React.FC<AppCardProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     if (!showManage && !onShowDetails) {
-      window.open(app.url, '_blank', 'noopener,noreferrer');
+      // Use window.open with specific features to ensure opening in a new window
+      const newWindow = window.open(
+        app.url, 
+        '_blank', 
+        'noopener,noreferrer,width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes'
+      );
+      
+      // Force focus on the new window
+      if (newWindow) {
+        newWindow.focus();
+      }
     } else if (onShowDetails) {
       onShowDetails(app);
     }
