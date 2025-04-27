@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -33,6 +32,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const themeColor = getThemeColorClass(color);
   
   const menuItems = [
+    { icon: Home, label: 'Área Personal', path: '/profile' },
     { icon: Home, label: 'Inicio', path: '/' },
     { icon: Grid3X3, label: 'Catálogo', path: '/catalog' },
     { icon: Settings, label: 'Gestionar Mis Apps', path: '/manage' }
@@ -80,39 +80,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
               ))}
             </ul>
           </nav>
-
-          {/* Theme Settings */}
-          <div className="p-4 mt-auto border-t border-white/20">
-            <h3 className="mb-3 text-sm font-medium uppercase opacity-70">Ajustes de tema</h3>
-            
-            {/* Light/Dark Toggle */}
-            <Button 
-              variant="ghost" 
-              className="w-full justify-between mb-4 text-white hover:bg-white/10"
-              onClick={toggleMode}
-            >
-              <span>Modo {mode === 'light' ? 'Claro' : 'Oscuro'}</span>
-              {mode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
-            </Button>
-            
-            {/* Color Selector */}
-            <h4 className="mb-2 text-sm font-medium">Color del tema</h4>
-            <div className="grid grid-cols-3 gap-2">
-              {colorOptions.map((option) => (
-                <Button 
-                  key={option.color}
-                  variant="ghost" 
-                  className={`p-2 flex flex-col items-center hover:bg-white/10 ${
-                    color === option.color ? 'bg-white/20' : ''
-                  }`}
-                  onClick={() => setColor(option.color as any)}
-                >
-                  <option.icon size={16} />
-                  <span className="text-xs mt-1">{option.label}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
         </div>
       </SheetContent>
     </Sheet>

@@ -58,6 +58,10 @@ const App = () => {
                   element={session ? <Manage /> : <Navigate to="/auth" />}
                 />
                 <Route
+                  path="/profile"
+                  element={session ? <Profile /> : <Navigate to="/auth" />}
+                />
+                <Route
                   path="/auth"
                   element={!session ? <Auth /> : <Navigate to="/" />}
                 />
