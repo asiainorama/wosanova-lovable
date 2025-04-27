@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AppData, aiApps } from '@/data/apps';
+import { additionalApps } from '@/data/moreApps';
 import { toast } from 'sonner';
 
 interface AppContextType {
@@ -15,7 +16,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<AppData[]>([]);
-  const [allApps, setAllApps] = useState<AppData[]>(aiApps);
+  const [allApps, setAllApps] = useState<AppData[]>([...aiApps, ...additionalApps]);
   
   // Cargar favoritos desde localStorage al iniciar
   useEffect(() => {

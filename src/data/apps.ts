@@ -1,3 +1,4 @@
+
 export interface AppData {
   id: string;
   name: string;
@@ -21,7 +22,11 @@ export const categories = [
   "Marketing",
   "Presentaciones",
   "Ventas",
-  "Búsqueda"
+  "Búsqueda",
+  "Herramientas",
+  "SEO",
+  "Redes Sociales",
+  "Educación"
 ];
 
 export const aiApps: AppData[] = [
@@ -285,5 +290,412 @@ export const aiApps: AppData[] = [
     category: "Ventas",
     description: "Automatización de ventas y seguimiento con IA",
     isAI: true
+  },
+  // Nuevas aplicaciones
+  {
+    id: "10web",
+    name: "10web",
+    icon: "https://10web.io/wp-content/uploads/2022/03/cropped-10web-favicon-32x32.png",
+    url: "https://10web.io/",
+    category: "Desarrollo",
+    description: "Plataforma de automatización de WordPress con IA",
+    isAI: true
+  },
+  {
+    id: "adcopy",
+    name: "AdCopy",
+    icon: "https://adcopy.ai/favicon.ico",
+    url: "https://adcopy.ai/",
+    category: "Marketing",
+    description: "Crea textos publicitarios optimizados con IA",
+    isAI: true
+  },
+  {
+    id: "adcreative",
+    name: "AdCreative",
+    icon: "https://adcreative.ai/favicon.ico",
+    url: "https://adcreative.ai/",
+    category: "Marketing",
+    description: "Genera creatividades y anuncios impactantes con IA",
+    isAI: true
+  },
+  {
+    id: "ahrefs",
+    name: "Ahrefs",
+    icon: "https://static.ahrefs.com/favicon-32x32.png",
+    url: "https://ahrefs.com/",
+    category: "SEO",
+    description: "Herramienta de análisis SEO con funciones de IA",
+    isAI: true
+  },
+  {
+    id: "alli-ai",
+    name: "Alli AI",
+    icon: "https://alli.io/favicon.ico",
+    url: "https://alli.io/",
+    category: "Productividad",
+    description: "Asistente de IA para ayudar en tareas diarias",
+    isAI: true
+  },
+  {
+    id: "ballonary",
+    name: "Ballonary",
+    icon: "https://www.ballonary.com/favicon.ico",
+    url: "https://www.ballonary.com/",
+    category: "Diseño",
+    description: "Creador de ilustraciones con globos y figuras mediante IA",
+    isAI: true
+  },
+  {
+    id: "beforesunset-ai",
+    name: "BeforeSunset AI",
+    icon: "https://beforesunset.ai/favicon.ico",
+    url: "https://beforesunset.ai/",
+    category: "Productividad",
+    description: "Planificador inteligente que optimiza tu día con IA",
+    isAI: true
+  },
+  {
+    id: "bing",
+    name: "Bing",
+    icon: "https://www.bing.com/sa/simg/favicon-2x.ico",
+    url: "https://www.bing.com/",
+    category: "Búsqueda",
+    description: "Motor de búsqueda de Microsoft con integración de IA",
+    isAI: true
+  },
+  {
+    id: "blackbox-ai",
+    name: "Blackbox AI",
+    icon: "https://www.useblackbox.io/favicon.ico",
+    url: "https://www.useblackbox.io/",
+    category: "Desarrollo",
+    description: "Asistente de código con IA para programadores",
+    isAI: true
+  },
+  {
+    id: "blogseo",
+    name: "Blogseo",
+    icon: "https://blogseo.ai/favicon.ico",
+    url: "https://blogseo.ai/",
+    category: "SEO",
+    description: "Optimización de blogs y contenidos para SEO con IA",
+    isAI: true
+  },
+  {
+    id: "bolt",
+    name: "Bolt",
+    icon: "https://bolt.ai/favicon.ico",
+    url: "https://bolt.ai/",
+    category: "Productividad",
+    description: "Automatización de procesos de negocio con IA",
+    isAI: true
+  },
+  {
+    id: "brandmark",
+    name: "Brandmark",
+    icon: "https://brandmark.io/favicon.ico",
+    url: "https://brandmark.io/",
+    category: "Diseño",
+    description: "Diseño de logos profesionales con IA",
+    isAI: true
+  },
+  {
+    id: "bright-eye",
+    name: "Bright Eye",
+    icon: "https://bright-eye.ai/favicon.ico",
+    url: "https://bright-eye.ai/",
+    category: "Imagen",
+    description: "Mejora y corrección automática de imágenes con IA",
+    isAI: true
+  },
+  {
+    id: "canva",
+    name: "Canva",
+    icon: "https://static.canva.com/static/images/favicon-1.ico",
+    url: "https://www.canva.com/",
+    category: "Diseño",
+    description: "Plataforma de diseño gráfico con funciones de IA integradas",
+    isAI: true
+  },
+  {
+    id: "chatbase",
+    name: "Chatbase",
+    icon: "https://www.chatbase.co/favicon.ico",
+    url: "https://www.chatbase.co/",
+    category: "Asistentes",
+    description: "Crea chatbots personalizados basados en tus datos",
+    isAI: true
+  },
+  {
+    id: "chatbot",
+    name: "Chatbot",
+    icon: "https://www.chatbot.com/favicon.ico",
+    url: "https://www.chatbot.com/",
+    category: "Asistentes",
+    description: "Plataforma para crear chatbots inteligentes",
+    isAI: true
+  },
+  {
+    id: "chatfuel",
+    name: "Chatfuel",
+    icon: "https://chatfuel.com/favicon.ico",
+    url: "https://chatfuel.com/",
+    category: "Asistentes",
+    description: "Constructor de chatbots para redes sociales",
+    isAI: true
+  },
+  {
+    id: "chatgpt-4o-image-generation",
+    name: "ChatGPT-4o Image Generation",
+    icon: "https://chat.openai.com/apple-touch-icon.png",
+    url: "https://chat.openai.com/",
+    category: "Imagen",
+    description: "Generación de imágenes avanzada con el modelo GPT-4o",
+    isAI: true
+  },
+  {
+    id: "chatsimple",
+    name: "ChatSimple",
+    icon: "https://www.chatsimple.ai/favicon.ico",
+    url: "https://www.chatsimple.ai/",
+    category: "Asistentes",
+    description: "Chatbots simples y efectivos para sitios web",
+    isAI: true
+  },
+  {
+    id: "clay",
+    name: "Clay",
+    icon: "https://clay.com/favicon.ico",
+    url: "https://clay.com/",
+    category: "Ventas",
+    description: "Plataforma de enriquecimiento de contactos con IA",
+    isAI: true
+  },
+  {
+    id: "clearscope",
+    name: "Clearscope",
+    icon: "https://www.clearscope.io/favicon.png",
+    url: "https://www.clearscope.io/",
+    category: "SEO",
+    description: "Optimización de contenido para SEO con IA",
+    isAI: true
+  },
+  {
+    id: "clickup-app",
+    name: "ClickUp",
+    icon: "https://clickup.com/landing/images/favicon.png",
+    url: "https://clickup.com",
+    category: "Productividad",
+    description: "Gestión de proyectos y tareas con funciones de IA",
+    isAI: true
+  },
+  {
+    id: "github-copilot-app",
+    name: "Copilot",
+    icon: "https://github.githubassets.com/favicons/favicon.png",
+    url: "https://github.com/features/copilot",
+    category: "Desarrollo",
+    description: "Asistente de programación basado en IA",
+    isAI: true
+  },
+  {
+    id: "copyai-app",
+    name: "CopyAI",
+    icon: "https://assets-global.website-files.com/628288c5cd3e8411b90a36a4/629a702d187117d31fb5489f_copy-favicon-3.png",
+    url: "https://www.copy.ai",
+    category: "Escritura",
+    description: "Genera textos y copys creativos con IA",
+    isAI: true
+  },
+  {
+    id: "coze",
+    name: "COZE",
+    icon: "https://coze.com/favicon.ico",
+    url: "https://coze.com/",
+    category: "Desarrollo",
+    description: "Plataforma para construir bots de IA sin código",
+    isAI: true
+  },
+  {
+    id: "cursor",
+    name: "Cursor",
+    icon: "https://cursor.sh/favicon.ico",
+    url: "https://cursor.sh/",
+    category: "Desarrollo",
+    description: "Editor de código potenciado con IA",
+    isAI: true
+  },
+  {
+    id: "deepai",
+    name: "DeepAI",
+    icon: "https://deepai.org/favicon.ico",
+    url: "https://deepai.org/",
+    category: "Herramientas",
+    description: "Suite de herramientas de IA para diferentes tareas",
+    isAI: true
+  },
+  {
+    id: "descript-app",
+    name: "Descript",
+    icon: "https://www.descript.com/favicon.ico",
+    url: "https://www.descript.com/",
+    category: "Audio",
+    description: "Editor de audio y vídeo con funciones de transcripción de IA",
+    isAI: true
+  },
+  {
+    id: "designs",
+    name: "Designs",
+    icon: "https://designs.ai/favicon.ico",
+    url: "https://designs.ai/",
+    category: "Diseño",
+    description: "Plataforma de diseño gráfico automatizado con IA",
+    isAI: true
+  },
+  {
+    id: "dialogflow",
+    name: "Dialogflow",
+    icon: "https://www.gstatic.com/devrel-devsite/prod/v2210075187f059a839246c2c03840474501c3c6024a99fb78f6293c1b5eb239d/cloud/images/favicons/onecloud/favicon.ico",
+    url: "https://cloud.google.com/dialogflow",
+    category: "Desarrollo",
+    description: "Plataforma de Google para crear interfaces conversacionales",
+    isAI: true
+  },
+  {
+    id: "diamond",
+    name: "Diamond",
+    icon: "https://www.diamond.ai/favicon.ico",
+    url: "https://www.diamond.ai/",
+    category: "Productividad",
+    description: "Asistente virtual basado en IA para equipos",
+    isAI: true
+  },
+  {
+    id: "dribbble",
+    name: "Dribbble",
+    icon: "https://cdn.dribbble.com/assets/favicon-b38525134603b9513174ec887944bde1a869eb6cd414f4d640ee48ab2a15a26b.ico",
+    url: "https://dribbble.com/",
+    category: "Diseño",
+    description: "Comunidad de diseñadores con herramientas de IA",
+    isAI: true
+  },
+  {
+    id: "drippi-ai",
+    name: "Drippi AI",
+    icon: "https://www.drippi.ai/favicon.ico",
+    url: "https://www.drippi.ai/",
+    category: "Marketing",
+    description: "Automatización de campañas de email marketing con IA",
+    isAI: true
+  },
+  {
+    id: "durable",
+    name: "Durable",
+    icon: "https://durable.co/favicon.ico",
+    url: "https://durable.co/",
+    category: "Desarrollo",
+    description: "Constructor de sitios web con IA en minutos",
+    isAI: true
+  },
+  {
+    id: "fliki",
+    name: "Fliki",
+    icon: "https://fliki.ai/favicon.ico",
+    url: "https://fliki.ai/",
+    category: "Video",
+    description: "Convierte texto en videos con voces de IA",
+    isAI: true
+  },
+  {
+    id: "folk",
+    name: "Folk",
+    icon: "https://www.folk.app/favicon.ico",
+    url: "https://www.folk.app/",
+    category: "Ventas",
+    description: "CRM inteligente con asistente de IA",
+    isAI: true
+  },
+  {
+    id: "framer",
+    name: "Framer",
+    icon: "https://framer.com/favicon.ico",
+    url: "https://www.framer.com/",
+    category: "Desarrollo",
+    description: "Herramienta de diseño web y prototipado con IA",
+    isAI: true
+  },
+  {
+    id: "gitfluence",
+    name: "GitFluence",
+    icon: "https://gitfluence.com/favicon.ico",
+    url: "https://gitfluence.com/",
+    category: "Desarrollo",
+    description: "Análisis y optimización de repositorios Git con IA",
+    isAI: true
+  },
+  {
+    id: "gleap",
+    name: "Gleap",
+    icon: "https://gleap.io/favicon.ico",
+    url: "https://gleap.io/",
+    category: "Desarrollo",
+    description: "Plataforma de feedback y reporte de bugs con IA",
+    isAI: true
+  },
+  {
+    id: "gong",
+    name: "Gong",
+    icon: "https://www.gong.io/wp-content/themes/gong/favicon/favicon-32x32.png",
+    url: "https://www.gong.io/",
+    category: "Ventas",
+    description: "Plataforma de inteligencia de ventas con análisis de IA",
+    isAI: true
+  },
+  {
+    id: "google-gemini-app",
+    name: "Google Gemini",
+    icon: "https://gemini.google.com/favicon.ico",
+    url: "https://gemini.google.com/",
+    category: "Asistentes",
+    description: "Asistente de IA multimodal de Google",
+    isAI: true
+  },
+  {
+    id: "grammarly",
+    name: "Grammarly",
+    icon: "https://static.grammarly.com/assets/files/favicon-32x32.png",
+    url: "https://www.grammarly.com/",
+    category: "Escritura",
+    description: "Asistente de escritura y corrección gramatical con IA",
+    isAI: true
+  },
+  {
+    id: "grok-3",
+    name: "Grok 3",
+    icon: "https://grok.x.ai/favicon.ico",
+    url: "https://grok.x.ai/",
+    category: "Asistentes",
+    description: "Asistente de IA conversacional de xAI",
+    isAI: true
+  },
+  {
+    id: "heygen-app",
+    name: "HeyGen",
+    icon: "https://assets-global.website-files.com/63fdcbe48aa020c0a5493507/649e4c3d01fe7455f38f4527_favicon-32x32.png",
+    url: "https://www.heygen.com/",
+    category: "Video",
+    description: "Generador de videos con presentadores virtuales realistas",
+    isAI: true
+  },
+  {
+    id: "hix",
+    name: "Hix",
+    icon: "https://hix.ai/favicon.ico",
+    url: "https://hix.ai/",
+    category: "Asistentes",
+    description: "Asistente de productividad con IA personalizable",
+    isAI: true
   }
 ];
+
