@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
@@ -44,40 +43,21 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
-  const cardClass = isLarge
-    ? "large-app-card"
-    : "app-card";
-
-  return (
-    <div 
-      className={`${cardClass} ${!showManage && !onShowDetails ? 'cursor-pointer' : ''}`}
-      onClick={handleClick}
-    >
-      <div className="relative h-full w-full">
-        {isLarge ? (
-          <>
-            <img 
-              src={app.icon} 
-              alt={`${app.name} icon`}
-              className="large-app-icon"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-lg flex flex-col justify-end p-4 text-left">
-              <span className="text-white text-sm font-medium mb-1">{app.category}</span>
-              <h3 className="text-white font-bold text-lg">{app.name}</h3>
-              <p className="text-white/80 text-sm line-clamp-2">{app.description}</p>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center h-full">
-            <img 
-              src={app.icon} 
-              alt={`${app.name} icon`}
-              className="app-icon mb-3"
-            />
-            <h3 className="text-sm font-medium text-center mb-2">{app.name}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center line-clamp-2 flex-grow mb-4">{app.description}</p>
+  if (isLarge) {
+    return (
+      <div className="large-app-card cursor-pointer" onClick={handleClick}>
+        <div className="relative h-full w-full">
+          <img 
+            src={app.icon} 
+            alt={`${app.name} icon`}
+            className="large-app-icon"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-lg flex flex-col justify-end p-4 text-left">
+            <span className="text-white text-sm font-medium mb-1">{app.category}</span>
+            <h3 className="text-white font-bold text-lg">{app.name}</h3>
+            <p className="text-white/80 text-sm line-clamp-2">{app.description}</p>
           </div>
-        )}
+        </div>
         
         {(showManage || onShowDetails) && (
           <Button 
@@ -105,6 +85,36 @@ const AppCard: React.FC<AppCardProps> = ({
           </div>
         )}
       </div>
+    );
+  }
+
+  return (
+    <div 
+      className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:transform hover:-translate-y-1"
+      onClick={handleClick}
+    >
+      <img 
+        src={app.icon} 
+        alt={`${app.name} icon`}
+        className="w-16 h-16 object-contain mb-2"
+      />
+      <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
+      
+      {(showManage || onShowDetails) && (
+        <Button 
+          size="sm"
+          variant={favorite || showRemove ? "outline" : "outline"}
+          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAction();
+          }}
+        >
+          <Heart 
+            className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+          />
+        </Button>
+      )}
     </div>
   );
 };
