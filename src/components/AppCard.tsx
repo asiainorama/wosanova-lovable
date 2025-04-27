@@ -3,20 +3,22 @@ import React from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
-import { Check, Plus, X, ExternalLink } from 'lucide-react';
+import { Heart, X, ExternalLink } from 'lucide-react';
 
 interface AppCardProps {
   app: AppData; 
   showRemove?: boolean;
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
+  isLarge?: boolean;
 }
 
 const AppCard: React.FC<AppCardProps> = ({ 
   app, 
   showRemove = false,
   showManage = false,
-  onShowDetails 
+  onShowDetails,
+  isLarge = false
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const favorite = isFavorite(app.id);
@@ -47,39 +49,66 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
+  const cardClass = isLarge
+    ? "large-app-card"
+    : "app-card";
+
   return (
     <div 
-      className={`app-card ${!showManage && !onShowDetails ? 'cursor-pointer' : ''}`}
+      className={`${cardClass} ${!showManage && !onShowDetails ? 'cursor-pointer' : ''}`}
       onClick={handleClick}
     >
-      <img 
-        src={app.icon} 
-        alt={`${app.name} icon`}
-        className="app-icon"
-      />
-      <span className="text-sm text-center font-medium truncate w-full">
-        {app.name}
-      </span>
-      {(showManage || onShowDetails) && (
-        <Button 
-          size="sm"
-          variant={favorite || showRemove ? "destructive" : "default"}
-          className="mt-2 h-8 px-3"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAction();
-          }}
-        >
-          {showRemove ? (
-            <X className="h-4 w-4 mr-1" />
-          ) : favorite ? (
-            <Check className="h-4 w-4 mr-1" />
-          ) : (
-            <Plus className="h-4 w-4 mr-1" />
-          )}
-          {showRemove ? 'Quitar' : favorite ? 'Añadido' : 'Añadir'}
-        </Button>
-      )}
+      <div className="relative h-full w-full">
+        {isLarge && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-lg flex flex-col justify-end p-4 text-left">
+            <span className="text-white text-sm font-medium mb-1">{app.category}</span>
+            <h3 className="text-white font-bold text-lg">{app.name}</h3>
+            <p className="text-white/80 text-xs line-clamp-2">{app.description}</p>
+          </div>
+        )}
+        
+        <img 
+          src={app.icon} 
+          alt={`${app.name} icon`}
+          className={isLarge ? "large-app-icon" : "app-icon"}
+        />
+        
+        {!isLarge && (
+          <span className="text-sm text-center font-medium truncate w-full mt-2">
+            {app.name}
+          </span>
+        )}
+        
+        {(showManage || onShowDetails) && (
+          <Button 
+            size="sm"
+            variant={favorite || showRemove ? "outline" : "outline"}
+            className={`absolute top-2 right-2 h-8 w-8 rounded-full p-0 ${
+              favorite || showRemove
+                ? 'bg-white/80 hover:bg-white/90'
+                : 'bg-white/80 hover:bg-white/90'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAction();
+            }}
+          >
+            {showRemove ? (
+              <X className="h-4 w-4 text-red-500" />
+            ) : (
+              <Heart 
+                className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+              />
+            )}
+          </Button>
+        )}
+
+        {!(showManage || onShowDetails) && isLarge && (
+          <div className="absolute right-3 bottom-3">
+            <ExternalLink className="h-4 w-4 text-white/70" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

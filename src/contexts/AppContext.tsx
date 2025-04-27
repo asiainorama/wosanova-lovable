@@ -18,7 +18,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<AppData[]>([]);
   const [allApps, setAllApps] = useState<AppData[]>([...aiApps, ...additionalApps]);
   
-  // Cargar favoritos desde localStorage al iniciar
+  // Load favorites from localStorage on mount
   useEffect(() => {
     const storedFavorites = localStorage.getItem('favorites');
     if (storedFavorites) {
@@ -31,7 +31,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Guardar favoritos en localStorage cuando cambian
+  // Save favorites to localStorage when they change
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
@@ -39,7 +39,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addToFavorites = (app: AppData) => {
     if (!isFavorite(app.id)) {
       setFavorites(prev => [...prev, app]);
-      toast.success(`${app.name} añadida a favoritos`);
+      toast.success(`${app.name} añadida a favoritos`, {
+        className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+      });
     }
   };
 
@@ -48,7 +50,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const app = prev.find(a => a.id === appId);
       const updatedFavorites = prev.filter(a => a.id !== appId);
       if (app) {
-        toast.info(`${app.name} eliminada de favoritos`);
+        toast.info(`${app.name} eliminada de favoritos`, {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+        });
       }
       return updatedFavorites;
     });

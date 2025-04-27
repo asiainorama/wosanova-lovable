@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -15,7 +16,9 @@ const Catalog = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
+  const [featuredApps, setFeaturedApps] = useState<AppData[]>([]);
 
+  // Filter apps based on search term and category
   useEffect(() => {
     let filtered = [...allApps];
     
@@ -33,17 +36,39 @@ const Catalog = () => {
     setFilteredApps(filtered);
   }, [searchTerm, selectedCategory, allApps]);
 
+  // Set featured apps - one from each category
+  useEffect(() => {
+    const uniqueCategories = Array.from(new Set(allApps.map(app => app.category)));
+    const featured = uniqueCategories
+      .map(category => {
+        // Find apps with icons for this category
+        const appsWithIcons = allApps.filter(app => 
+          app.category === category && app.icon && !app.icon.includes('placeholder')
+        );
+        
+        // If we have apps with icons, use one of those, otherwise get any app from this category
+        if (appsWithIcons.length > 0) {
+          return appsWithIcons[0];
+        } else {
+          return allApps.find(app => app.category === category);
+        }
+      })
+      .filter(Boolean) as AppData[];
+    
+    setFeaturedApps(featured.slice(0, 4)); // Limit to 4 featured apps
+  }, [allApps]);
+
   const handleShowDetails = (app: AppData) => {
     setSelectedApp(app);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title="Catálogo" />
       
       <main className="container mx-auto px-4 py-6 flex-1">
         <div className="mb-6 space-y-4">
-          <h2 className="text-xl font-semibold">Aplicaciones de IA</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Aplicaciones de IA</h2>
           
           <div className="flex gap-3 flex-col sm:flex-row">
             <div className="relative flex-1">
@@ -53,7 +78,7 @@ const Catalog = () => {
                 placeholder="Buscar aplicaciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 py-2 w-full bg-gray-100 border-none"
+                className="pl-10 py-2 w-full bg-gray-100 dark:bg-gray-800 border-none"
               />
               {searchTerm && (
                 <button
@@ -67,7 +92,7 @@ const Catalog = () => {
             
             <div className="w-full sm:w-48">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full bg-gray-100 border-none">
+                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none">
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
@@ -83,16 +108,17 @@ const Catalog = () => {
         </div>
         
         <div className="mb-8">
-          <h3 className="text-lg font-medium mb-4">Destacadas</h3>
+          <h3 className="text-lg font-medium mb-4 dark:text-white">Destacadas</h3>
           <AppGrid 
-            apps={filteredApps.slice(0, 8)} 
+            apps={featuredApps} 
             showManage={true}
             onShowDetails={handleShowDetails}
+            isLarge={true}
           />
         </div>
         
         <div>
-          <h3 className="text-lg font-medium mb-4">Todas las aplicaciones</h3>
+          <h3 className="text-lg font-medium mb-4 dark:text-white">Todas las aplicaciones</h3>
           <AppGrid 
             apps={filteredApps}
             showManage={true}

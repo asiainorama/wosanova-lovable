@@ -8,24 +8,26 @@ interface AppGridProps {
   showRemove?: boolean;
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
+  isLarge?: boolean;
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
   apps, 
   showRemove = false,
   showManage = false,
-  onShowDetails 
+  onShowDetails,
+  isLarge = false
 }) => {
   if (apps.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-gray-500">No hay aplicaciones que mostrar</p>
+        <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que mostrar</p>
       </div>
     );
   }
 
   return (
-    <div className="app-grid">
+    <div className={isLarge ? "featured-app-grid" : "app-grid"}>
       {apps.map((app) => (
         <AppCard 
           key={app.id} 
@@ -33,6 +35,7 @@ const AppGrid: React.FC<AppGridProps> = ({
           showRemove={showRemove}
           showManage={showManage}
           onShowDetails={onShowDetails}
+          isLarge={isLarge}
         />
       ))}
     </div>

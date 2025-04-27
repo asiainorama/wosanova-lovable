@@ -1,22 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SidebarMenu from './SidebarMenu';
 
 interface HeaderProps {
   title: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:flex"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-appgarden-primary">{title}</h1>
+          <h1 className="text-2xl font-bold text-appgarden-primary dark:text-white">{title}</h1>
         </div>
         
         <div className="flex items-center gap-2">
@@ -31,6 +39,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             </Button>
           </Link>
         </div>
+
+        <SidebarMenu isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
       </div>
     </header>
   );
