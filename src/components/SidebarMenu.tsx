@@ -7,10 +7,10 @@ import {
   Settings, 
   Sun, 
   Moon,
-  Blue,
-  Gray,
-  Green,
-  Red,
+  CircleDot,
+  SquareDot,
+  Flower2,
+  FlameKindling,
   Heart,
   Palette
 } from 'lucide-react';
@@ -39,10 +39,10 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   ];
 
   const colorOptions = [
-    { color: 'blue', icon: Blue, label: 'Azul' },
-    { color: 'gray', icon: Gray, label: 'Gris' },
-    { color: 'green', icon: Green, label: 'Verde' },
-    { color: 'red', icon: Red, label: 'Rojo' },
+    { color: 'blue', icon: CircleDot, label: 'Azul' },
+    { color: 'gray', icon: SquareDot, label: 'Gris' },
+    { color: 'green', icon: Flower2, label: 'Verde' },
+    { color: 'red', icon: FlameKindling, label: 'Rojo' },
     { color: 'pink', icon: Heart, label: 'Rosa' },
     { color: 'orange', icon: Palette, label: 'Naranja' }
   ];
