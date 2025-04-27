@@ -6,9 +6,16 @@ import AppCard from './AppCard';
 interface AppGridProps {
   apps: AppData[];
   showRemove?: boolean;
+  showManage?: boolean;
+  onShowDetails?: (app: AppData) => void;
 }
 
-const AppGrid: React.FC<AppGridProps> = ({ apps, showRemove = false }) => {
+const AppGrid: React.FC<AppGridProps> = ({ 
+  apps, 
+  showRemove = false,
+  showManage = false,
+  onShowDetails 
+}) => {
   if (apps.length === 0) {
     return (
       <div className="text-center py-10">
@@ -23,7 +30,9 @@ const AppGrid: React.FC<AppGridProps> = ({ apps, showRemove = false }) => {
         <AppCard 
           key={app.id} 
           app={app} 
-          showRemove={showRemove} 
+          showRemove={showRemove}
+          showManage={showManage}
+          onShowDetails={onShowDetails}
         />
       ))}
     </div>

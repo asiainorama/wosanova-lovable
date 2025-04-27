@@ -1,24 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
+import AppDetails from '@/components/AppDetails';
 import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/apps';
 import { Search, X } from 'lucide-react';
+import { AppData } from '@/data/apps';
 
 const Catalog = () => {
   const { allApps } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [filteredApps, setFilteredApps] = useState(allApps);
+  const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
 
-  // Aplicar filtros cuando cambian
   useEffect(() => {
     let filtered = [...allApps];
     
-    // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(app => 
         app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -26,13 +26,16 @@ const Catalog = () => {
       );
     }
     
-    // Filtrar por categoría
     if (selectedCategory !== 'Todas') {
       filtered = filtered.filter(app => app.category === selectedCategory);
     }
     
     setFilteredApps(filtered);
   }, [searchTerm, selectedCategory, allApps]);
+
+  const handleShowDetails = (app: AppData) => {
+    setSelectedApp(app);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -81,13 +84,27 @@ const Catalog = () => {
         
         <div className="mb-8">
           <h3 className="text-lg font-medium mb-4">Destacadas</h3>
-          <AppGrid apps={filteredApps.slice(0, 8)} />
+          <AppGrid 
+            apps={filteredApps.slice(0, 8)} 
+            showManage={true}
+            onShowDetails={handleShowDetails}
+          />
         </div>
         
         <div>
           <h3 className="text-lg font-medium mb-4">Todas las aplicaciones</h3>
-          <AppGrid apps={filteredApps} />
+          <AppGrid 
+            apps={filteredApps}
+            showManage={true}
+            onShowDetails={handleShowDetails}
+          />
         </div>
+
+        <AppDetails 
+          app={selectedApp}
+          isOpen={!!selectedApp}
+          onClose={() => setSelectedApp(null)}
+        />
       </main>
     </div>
   );
