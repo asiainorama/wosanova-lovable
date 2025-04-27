@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Plus, X, ExternalLink } from 'lucide-react';
 
 interface AppCardProps {
-  app: AppData;
+  app: AppData; 
   showRemove?: boolean;
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
@@ -31,7 +31,7 @@ const AppCard: React.FC<AppCardProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     if (!showManage && !onShowDetails) {
-      window.open(app.url, '_blank');
+      window.open(app.url, '_blank', 'noopener,noreferrer');
     } else if (onShowDetails) {
       onShowDetails(app);
     }
