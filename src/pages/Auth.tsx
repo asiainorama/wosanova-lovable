@@ -1,25 +1,43 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      setIsLoading(true);
+      setErrorDetails(null);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/catalog`
+          redirectTo: `${window.location.origin}/catalog`,
+          queryParams: {
+            prompt: 'select_account', // Fuerza a Google a mostrar el selector de cuenta
+          }
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+      
+      // El usuario será redirigido a Google, por lo que este código debajo raramente se ejecuta
+      console.log("Redirección iniciada:", data);
     } catch (error: any) {
-      toast.error(error.message || 'Error al iniciar sesión con Google');
+      console.error("Error de autenticación:", error);
+      setErrorDetails(error.message || JSON.stringify(error));
+      toast.error('Error al iniciar sesión con Google');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,11 +53,30 @@ const Auth = () => {
         
         <Button
           onClick={handleGoogleSignIn}
+          disabled={isLoading}
           className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
         >
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-          Continuar con Google
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+          )}
+          {isLoading ? 'Conectando...' : 'Continuar con Google'}
         </Button>
+        
+        {errorDetails && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+            <p className="font-semibold">Detalles del error:</p>
+            <p className="mt-1 break-all">{errorDetails}</p>
+            <p className="mt-2">
+              Por favor, asegúrate de que las URLs estén correctamente configuradas en Supabase.
+            </p>
+          </div>
+        )}
+        
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <p>Si estás teniendo problemas, verifica la configuración de URL en Supabase.</p>
+        </div>
       </div>
     </div>
   );
