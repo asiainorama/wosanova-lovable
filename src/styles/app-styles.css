@@ -2,21 +2,22 @@
 /* App Grid Styles */
 .app-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Increased from 100px */
+  gap: 24px; /* Increased from 16px */
 }
 
 .app-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px;
+  padding: 16px; /* Increased from 12px */
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   height: 100%;
+  min-height: 160px; /* Added minimum height */
 }
 
 .dark .app-card {
@@ -30,17 +31,18 @@
 }
 
 .app-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px; /* Increased from 48px */
+  height: 64px; /* Increased from 48px */
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 12px;
+  margin-bottom: 12px; /* Added margin */
 }
 
 /* Featured Apps Styles */
 .featured-app-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Increased from 240px */
+  gap: 24px; /* Increased from 20px */
   margin-bottom: 32px;
 }
 
