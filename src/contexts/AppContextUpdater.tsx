@@ -20,6 +20,20 @@ export const AppContextUpdater = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    // Listen for theme changes to potentially refresh icons
+    const handleThemeChange = () => {
+      console.log('Theme changed, refreshing app icons');
+      document.querySelectorAll('img.app-icon').forEach((img: any) => {
+        // Force image reload on theme change by appending timestamp
+        if (img.src && !img.src.includes('data:image')) {
+          const timestamp = new Date().getTime();
+          img.src = img.src.split('?')[0] + '?' + timestamp;
+        }
+      });
+    };
+
+    document.addEventListener('themechange', handleThemeChange);
+    
     // Immediately set some apps with placeholder icons for faster initial render
     const combinedApps = [
       ...aiApps,
@@ -66,7 +80,7 @@ export const AppContextUpdater = () => {
     
     // Cleanup function
     return () => {
-      // Any cleanup needed
+      document.removeEventListener('themechange', handleThemeChange);
     };
   }, [setAllApps]);
 

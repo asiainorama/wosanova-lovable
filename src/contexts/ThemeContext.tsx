@@ -52,25 +52,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     if (storedMode) setMode(storedMode);
     if (storedColor) setColor(storedColor);
-    
-    // Apply dark mode class if needed
-    if (storedMode === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
   }, []);
 
-  // Save theme changes to localStorage
+  // Apply theme changes and save to localStorage
   useEffect(() => {
     localStorage.setItem('themeMode', mode);
     localStorage.setItem('themeColor', color);
     
+    // Apply or remove dark mode class
     if (mode === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
     }
+
+    // Apply color scheme meta tag
+    const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+    if (metaColorScheme) {
+      metaColorScheme.setAttribute('content', mode);
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'color-scheme';
+      meta.content = mode;
+      document.head.appendChild(meta);
+    }
+    
+    // Apply color scheme changes to app theme
+    document.documentElement.style.setProperty('--theme-color', color);
+    
+    // Force redraw on theme change
+    const event = new Event('themechange');
+    document.dispatchEvent(event);
+    
   }, [mode, color]);
 
   const toggleMode = () => {
