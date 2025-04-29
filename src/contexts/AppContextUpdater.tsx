@@ -20,7 +20,7 @@ export const AppContextUpdater = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Listen for theme changes to potentially refresh icons
+    // Listen for theme changes to refresh icons
     const handleThemeChange = () => {
       console.log('Theme changed, refreshing app icons');
       document.querySelectorAll('img.app-icon').forEach((img: any) => {
@@ -63,6 +63,9 @@ export const AppContextUpdater = () => {
           
           // Update the context with what we have so far
           setAllApps([...processedApps, ...combinedApps.slice(i + batchSize)]);
+          
+          // Small delay between batches to not block UI thread
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
         
         // Final update with all processed apps

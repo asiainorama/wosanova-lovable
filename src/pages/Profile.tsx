@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -30,11 +30,20 @@ const Profile = () => {
   const location = useLocation();
   const { mode } = useTheme();
   const [isOpen, setIsOpen] = useState(true);
-  const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+  const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
 
   // Get current user details
   const user = supabase.auth.getSession().then(({ data }) => data.session?.user);
+
+  // Load user preferences from localStorage
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) setUsername(storedUsername);
+    
+    const storedAvatarUrl = localStorage.getItem('avatarUrl');
+    if (storedAvatarUrl) setAvatarUrl(storedAvatarUrl);
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -63,6 +72,10 @@ const Profile = () => {
   };
 
   const handleSaveProfile = () => {
+    // Save user preferences to localStorage
+    localStorage.setItem('username', username);
+    localStorage.setItem('avatarUrl', avatarUrl);
+    
     toast.success('Perfil actualizado correctamente');
   };
 
@@ -163,10 +176,7 @@ const Profile = () => {
           
           <TabsContent value="preferences" className="mt-6">
             <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-4">Tema de la aplicación</h3>
-                <ThemeSelector />
-              </div>
+              <ThemeSelector />
               
               <div className="border-t pt-6">
                 <Button variant="outline" onClick={handleSignOut} className="w-full">

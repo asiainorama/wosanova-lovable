@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ interface AppCardProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   isLarge?: boolean;
+  listView?: boolean; // New prop for list view style
 }
 
 const AppCard: React.FC<AppCardProps> = ({ 
@@ -21,7 +22,8 @@ const AppCard: React.FC<AppCardProps> = ({
   showRemove = false,
   showManage = false,
   onShowDetails,
-  isLarge = false
+  isLarge = false,
+  listView = false
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const favorite = isFavorite(app.id);
@@ -31,8 +33,9 @@ const AppCard: React.FC<AppCardProps> = ({
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   
-  // Función para manejar la acción de favorito
-  const handleAction = () => {
+  // Function to handle favorite action
+  const handleAction = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (showRemove || favorite) {
       removeFromFavorites(app.id);
     } else {
@@ -40,8 +43,8 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
-  // Función para manejar el clic en la tarjeta
-  const handleClick = (e: React.MouseEvent) => {
+  // Function to handle click on the card
+  const handleClick = () => {
     if (!showManage && !onShowDetails) {
       const newWindow = window.open(
         app.url, 
@@ -54,16 +57,16 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
   
-  // Función para manejar error de carga de imagen
+  // Function to handle image error
   const handleImageError = () => {
     setImageError(true);
     setImageLoading(false);
     
-    // Si todavía no hemos intentado varias veces, probamos con un enfoque alternativo
+    // If we haven't tried multiple times, attempt alternative approaches
     if (retryCount < 2) {
       setRetryCount(retryCount + 1);
       
-      // Intentar con Google Favicon como último recurso
+      // Try Google Favicon as last resort
       if (retryCount === 1) {
         const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
         const img = new Image();
@@ -81,11 +84,57 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
-  // Función para manejar la carga exitosa de la imagen
+  // Function to handle image load
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
   };
+
+  // List view style card (as shown in the provided image)
+  if (listView) {
+    return (
+      <div 
+        className="flex items-center justify-between p-4 mb-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleClick}
+      >
+        <div className="flex items-center space-x-4">
+          {imageLoading && <Skeleton className="w-12 h-12 rounded-md" />}
+          
+          {!imageError ? (
+            <img 
+              src={app.icon} 
+              alt={`${app.name} icon`}
+              className={`w-12 h-12 rounded-md object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+            />
+          ) : (
+            <Avatar className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-md">
+              <AvatarFallback className="text-lg font-semibold text-gray-600 dark:text-gray-300">
+                {app.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          
+          <div>
+            <h3 className="text-lg font-medium dark:text-white">{app.name}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{app.description}</p>
+          </div>
+        </div>
+
+        <Button 
+          size="sm"
+          variant="ghost"
+          className="h-10 w-10 rounded-full p-0"
+          onClick={handleAction}
+        >
+          <Heart 
+            className={`h-5 w-5 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+          />
+        </Button>
+      </div>
+    );
+  }
 
   // Simple card with only icon and name for the home page
   if (isHomePage) {
@@ -102,7 +151,7 @@ const AppCard: React.FC<AppCardProps> = ({
           <img 
             src={app.icon} 
             alt={`${app.name} icon`}
-            className={`w-16 h-16 object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+            className={`w-16 h-16 object-contain app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
             onError={handleImageError}
             onLoad={handleImageLoad}
           />
@@ -119,12 +168,9 @@ const AppCard: React.FC<AppCardProps> = ({
         {(showManage || onShowDetails) && (
           <Button 
             size="sm"
-            variant={favorite || showRemove ? "outline" : "outline"}
+            variant="outline"
             className="h-8 w-8 rounded-full p-0 absolute top-0 right-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAction();
-            }}
+            onClick={handleAction}
           >
             <Heart 
               className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
@@ -208,7 +254,7 @@ const AppCard: React.FC<AppCardProps> = ({
         <img 
           src={app.icon} 
           alt={`${app.name} icon`}
-          className={`w-16 h-16 object-contain mb-2 dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+          className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
           onError={handleImageError}
           onLoad={handleImageLoad}
         />
@@ -225,12 +271,9 @@ const AppCard: React.FC<AppCardProps> = ({
       {(showManage || onShowDetails) && (
         <Button 
           size="sm"
-          variant={favorite || showRemove ? "outline" : "outline"}
+          variant="outline"
           className="absolute top-2 right-2 h-8 w-8 rounded-full p-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAction();
-          }}
+          onClick={handleAction}
         >
           <Heart 
             className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 

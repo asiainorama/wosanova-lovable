@@ -9,6 +9,7 @@ interface AppGridProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   isLarge?: boolean;
+  listView?: boolean; // New prop to enable list view
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
@@ -16,7 +17,8 @@ const AppGrid: React.FC<AppGridProps> = ({
   showRemove = false,
   showManage = false,
   onShowDetails,
-  isLarge = false
+  isLarge = false,
+  listView = false
 }) => {
   if (apps.length === 0) {
     return (
@@ -27,7 +29,13 @@ const AppGrid: React.FC<AppGridProps> = ({
   }
 
   return (
-    <div className={isLarge ? "featured-app-grid" : "app-grid"}>
+    <div className={
+      listView 
+        ? "space-y-2" 
+        : isLarge 
+          ? "featured-app-grid" 
+          : "app-grid"
+    }>
       {apps.map((app) => (
         <AppCard 
           key={app.id} 
@@ -36,6 +44,7 @@ const AppGrid: React.FC<AppGridProps> = ({
           showManage={showManage}
           onShowDetails={onShowDetails}
           isLarge={isLarge}
+          listView={listView}
         />
       ))}
     </div>

@@ -79,9 +79,6 @@ const Auth = () => {
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-1">
             Bienvenido a la mayor colección de WebApps del mundo
           </p>
-          <p className="text-gray-500 dark:text-gray-400">
-            Inicia sesión para guardar tus aplicaciones favoritas
-          </p>
         </div>
         
         <Button
@@ -96,26 +93,6 @@ const Auth = () => {
           )}
           {isLoading ? 'Conectando...' : 'Continuar con Google'}
         </Button>
-        
-        {errorDetails && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-            <p className="font-semibold">Detalles del error:</p>
-            <p className="mt-1 break-all">{errorDetails}</p>
-            <p className="mt-2">
-              Por favor, asegúrate de que las URLs estén correctamente configuradas en Supabase.
-            </p>
-          </div>
-        )}
-        
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Si estás teniendo problemas, verifica la configuración de URL en Supabase:</p>
-          <ul className="mt-2 space-y-1 list-disc list-inside">
-            <li>URL del sitio: <code>{window.location.origin}</code></li>
-            <li>URL de redirección: <code>{window.location.origin}/catalog</code></li>
-            <li>URL de redirección alternativa: <code>{window.location.origin}/catalog/</code> (con slash)</li>
-          </ul>
-          <p className="mt-3">Prueba a borrar cookies y caché del navegador si sigues teniendo problemas.</p>
-        </div>
       </div>
     </div>
   );

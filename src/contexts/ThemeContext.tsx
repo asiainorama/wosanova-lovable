@@ -50,17 +50,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const storedMode = localStorage.getItem('themeMode') as ThemeMode;
     const storedColor = localStorage.getItem('themeColor') as ThemeColor;
     
-    if (storedMode) setMode(storedMode);
-    if (storedColor) setColor(storedColor);
+    if (storedMode) {
+      setMode(storedMode);
+      document.documentElement.classList.toggle('dark', storedMode === 'dark');
+    }
+    
+    if (storedColor) {
+      setColor(storedColor);
+    }
   }, []);
 
   // Apply theme changes and save to localStorage
-  useEffect(() => {
-    localStorage.setItem('themeMode', mode);
-    localStorage.setItem('themeColor', color);
+  const updateTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
+    // Save to localStorage
+    localStorage.setItem('themeMode', newMode);
+    localStorage.setItem('themeColor', newColor);
     
     // Apply or remove dark mode class
-    if (mode === 'dark') {
+    if (newMode === 'dark') {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');
     } else {
@@ -71,29 +78,46 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Apply color scheme meta tag
     const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
     if (metaColorScheme) {
-      metaColorScheme.setAttribute('content', mode);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'color-scheme';
-      meta.content = mode;
-      document.head.appendChild(meta);
+      metaColorScheme.setAttribute('content', newMode);
     }
     
     // Apply color scheme changes to app theme
-    document.documentElement.style.setProperty('--theme-color', color);
+    document.documentElement.style.setProperty('--theme-color', newColor);
     
     // Force redraw on theme change
     const event = new Event('themechange');
     document.dispatchEvent(event);
-    
-  }, [mode, color]);
-
-  const toggleMode = () => {
-    setMode(prev => prev === 'light' ? 'dark' : 'light');
   };
 
+  const handleSetMode = (newMode: ThemeMode) => {
+    setMode(newMode);
+    updateTheme(newMode, color);
+  };
+
+  const handleSetColor = (newColor: ThemeColor) => {
+    setColor(newColor);
+    updateTheme(mode, newColor);
+  };
+
+  const toggleMode = () => {
+    const newMode = mode === 'light' ? 'dark' : 'light';
+    setMode(newMode);
+    updateTheme(newMode, color);
+  };
+
+  // Apply initial theme
+  useEffect(() => {
+    updateTheme(mode, color);
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ mode, color, setMode, setColor, toggleMode }}>
+    <ThemeContext.Provider value={{ 
+      mode, 
+      color, 
+      setMode: handleSetMode, 
+      setColor: handleSetColor, 
+      toggleMode 
+    }}>
       {children}
     </ThemeContext.Provider>
   );

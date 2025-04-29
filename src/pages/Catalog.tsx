@@ -7,8 +7,10 @@ import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/apps';
-import { Search, X } from 'lucide-react';
+import { Search, X, List, Grid } from 'lucide-react';
 import { AppData } from '@/data/apps';
+import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 
 const Catalog = () => {
   const { allApps } = useAppContext();
@@ -17,6 +19,7 @@ const Catalog = () => {
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const [featuredApps, setFeaturedApps] = useState<AppData[]>([]);
+  const [listView, setListView] = useState(true); // Default to list view as in the image
 
   // Filter apps based on search term and category
   useEffect(() => {
@@ -62,13 +65,17 @@ const Catalog = () => {
     setSelectedApp(app);
   };
 
+  const toggleViewMode = () => {
+    setListView(!listView);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title="Catálogo" />
       
       <main className="container mx-auto px-4 py-6 flex-1">
         <div className="mb-6 space-y-4">
-          <h2 className="text-xl font-semibold dark:text-white">Aplicaciones de IA</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Aplicaciones</h2>
           
           <div className="flex gap-3 flex-col sm:flex-row">
             <div className="relative flex-1">
@@ -96,6 +103,7 @@ const Catalog = () => {
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Todas">Todas las categorías</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -104,25 +112,50 @@ const Catalog = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="flex items-center">
+              <Toggle 
+                pressed={listView} 
+                onPressedChange={setListView}
+                aria-label="Toggle list view"
+                className="bg-gray-100 dark:bg-gray-800 border-none"
+              >
+                <List className="h-4 w-4" />
+              </Toggle>
+              <Toggle 
+                pressed={!listView} 
+                onPressedChange={(pressed) => setListView(!pressed)}
+                aria-label="Toggle grid view"
+                className="bg-gray-100 dark:bg-gray-800 border-none ml-2"
+              >
+                <Grid className="h-4 w-4" />
+              </Toggle>
+            </div>
           </div>
         </div>
         
-        <div className="mb-8">
-          <h3 className="text-lg font-medium mb-4 dark:text-white">Destacadas</h3>
-          <AppGrid 
-            apps={featuredApps} 
-            showManage={true}
-            onShowDetails={handleShowDetails}
-            isLarge={true}
-          />
-        </div>
+        {featuredApps.length > 0 && !searchTerm && selectedCategory === 'Todas' && (
+          <div className="mb-8">
+            <h3 className="text-lg font-medium mb-4 dark:text-white">Destacadas</h3>
+            <AppGrid 
+              apps={featuredApps} 
+              showManage={true}
+              onShowDetails={handleShowDetails}
+              isLarge={true}
+              listView={false}
+            />
+          </div>
+        )}
         
         <div>
-          <h3 className="text-lg font-medium mb-4 dark:text-white">Todas las aplicaciones</h3>
+          <h3 className="text-lg font-medium mb-4 dark:text-white">
+            {searchTerm || selectedCategory !== 'Todas' ? 'Resultados' : 'Todas las aplicaciones'}
+          </h3>
           <AppGrid 
             apps={filteredApps}
             showManage={true}
             onShowDetails={handleShowDetails}
+            listView={listView}
           />
         </div>
 

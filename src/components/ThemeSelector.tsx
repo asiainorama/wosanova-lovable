@@ -3,6 +3,9 @@ import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Check, Sun, Moon, CircleDot, SquareDot, Flower2, FlameKindling, Heart, Palette } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export const ThemeSelector = () => {
   const { mode, color, toggleMode, setColor, setMode } = useTheme();
@@ -18,60 +21,77 @@ export const ThemeSelector = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-background border rounded-lg p-1 grid grid-cols-2 gap-1">
-        <button
-          onClick={() => setMode('light')}
-          className={cn(
-            "inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-            "hover:bg-accent hover:text-accent-foreground",
-            mode === 'light'
-              ? "bg-primary text-white dark:bg-primary dark:text-primary-foreground"
-              : "bg-transparent"
-          )}
-        >
-          <Sun className="h-4 w-4" />
-          <span>Claro</span>
-          {mode === 'light' && <Check className="h-4 w-4 ml-1" />}
-        </button>
-        <button
-          onClick={() => setMode('dark')}
-          className={cn(
-            "inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-            "hover:bg-accent hover:text-accent-foreground",
-            mode === 'dark'
-              ? "bg-primary text-white dark:bg-primary dark:text-primary-foreground"
-              : "bg-transparent"
-          )}
-        >
-          <Moon className="h-4 w-4" />
-          <span>Oscuro</span>
-          {mode === 'dark' && <Check className="h-4 w-4 ml-1" />}
-        </button>
-      </div>
-      
-      <div>
-        <h4 className="text-sm font-medium mb-2">Color de acento</h4>
-        <div className="grid grid-cols-3 gap-2">
-          {colorOptions.map((option) => (
-            <button
-              key={option.color}
-              className={cn(
-                "flex flex-col items-center gap-1 p-3 rounded-md transition-colors",
-                "border hover:bg-accent hover:text-accent-foreground",
-                color === option.color ? "border-primary bg-accent" : "border-input"
-              )}
-              onClick={() => setColor(option.color as any)}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Modo de apariencia</h3>
+            <RadioGroup 
+              defaultValue={mode} 
+              onValueChange={(value) => setMode(value as 'light' | 'dark')}
+              className="grid grid-cols-2 gap-2"
             >
-              <option.icon className={cn(
-                "h-5 w-5",
-                color === option.color ? "text-primary" : "text-muted-foreground"
-              )} />
-              <span className="text-xs font-medium">{option.label}</span>
-              {color === option.color && <Check className="h-3 w-3 text-primary" />}
-            </button>
-          ))}
-        </div>
-      </div>
+              <div>
+                <RadioGroupItem 
+                  value="light" 
+                  id="light" 
+                  className="peer sr-only" 
+                />
+                <Label 
+                  htmlFor="light"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <Sun className="mb-3 h-6 w-6" />
+                  <span>Claro</span>
+                </Label>
+              </div>
+              <div>
+                <RadioGroupItem 
+                  value="dark" 
+                  id="dark" 
+                  className="peer sr-only" 
+                />
+                <Label 
+                  htmlFor="dark"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <Moon className="mb-3 h-6 w-6" />
+                  <span>Oscuro</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Color de acento</h3>
+            <RadioGroup 
+              defaultValue={color}
+              onValueChange={(value) => setColor(value as any)}
+              className="grid grid-cols-3 gap-2"
+            >
+              {colorOptions.map((option) => (
+                <div key={option.color}>
+                  <RadioGroupItem
+                    value={option.color}
+                    id={`color-${option.color}`}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={`color-${option.color}`}
+                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  >
+                    <option.icon className="mb-2 h-6 w-6" />
+                    <span className="text-xs">{option.label}</span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
