@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AppData, aiApps } from '@/data/apps';
-import { additionalApps } from '@/data/moreApps';
 import { toast } from 'sonner';
 
 interface AppContextType {
@@ -10,13 +9,14 @@ interface AppContextType {
   addToFavorites: (app: AppData) => void;
   removeFromFavorites: (appId: string) => void;
   isFavorite: (appId: string) => boolean;
+  setAllApps: (apps: AppData[]) => void; // Added this line to expose the function
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<AppData[]>([]);
-  const [allApps, setAllApps] = useState<AppData[]>([...aiApps, ...additionalApps]);
+  const [allApps, setAllApps] = useState<AppData[]>([]);
   
   // Load favorites from localStorage on mount
   useEffect(() => {
@@ -63,7 +63,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ favorites, allApps, addToFavorites, removeFromFavorites, isFavorite }}>
+    <AppContext.Provider value={{ 
+      favorites, 
+      allApps, 
+      addToFavorites, 
+      removeFromFavorites, 
+      isFavorite,
+      setAllApps // Added this line to expose the function
+    }}>
       {children}
     </AppContext.Provider>
   );
