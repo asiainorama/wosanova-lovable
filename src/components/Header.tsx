@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:flex"
+            className="md:flex dark:text-white dark:hover:bg-gray-800"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-5 w-5" />
@@ -29,12 +29,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         
         <div className="flex items-center gap-2">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
               <Home className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/catalog">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
               <Search className="h-5 w-5" />
             </Button>
           </Link>

@@ -99,13 +99,13 @@ const Catalog = () => {
             
             <div className="w-full sm:w-48">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none">
+                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
                   <SelectValue placeholder="Categoría" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Todas">Todas las categorías</SelectItem>
+                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                  <SelectItem value="Todas" className="dark:text-white">Todas las categorías</SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
+                    <SelectItem key={category} value={category} className="dark:text-white">
                       {category}
                     </SelectItem>
                   ))}
@@ -118,7 +118,7 @@ const Catalog = () => {
                 pressed={listView} 
                 onPressedChange={setListView}
                 aria-label="Toggle list view"
-                className="bg-gray-100 dark:bg-gray-800 border-none"
+                className="bg-gray-100 dark:bg-gray-800 border-none dark:text-white dark:data-[state=off]:text-gray-400"
               >
                 <List className="h-4 w-4" />
               </Toggle>
@@ -126,7 +126,7 @@ const Catalog = () => {
                 pressed={!listView} 
                 onPressedChange={(pressed) => setListView(!pressed)}
                 aria-label="Toggle grid view"
-                className="bg-gray-100 dark:bg-gray-800 border-none ml-2"
+                className="bg-gray-100 dark:bg-gray-800 border-none ml-2 dark:text-white dark:data-[state=off]:text-gray-400"
               >
                 <Grid className="h-4 w-4" />
               </Toggle>

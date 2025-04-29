@@ -12,18 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2 } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -58,11 +54,6 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     try {
       // In a real app, you'd add proper account deletion logic here
-      // This would typically involve:
-      // 1. Deleting user data from database tables
-      // 2. Deleting the actual user account from auth
-
-      // For now, we'll just sign the user out
       await supabase.auth.signOut();
       toast.success('Cuenta eliminada correctamente');
       navigate('/auth');
@@ -91,7 +82,7 @@ const Profile = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <Rocket size={24} /> Área Personal
@@ -101,14 +92,10 @@ const Profile = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="profile" className="w-full mt-2">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="profile">Perfil</TabsTrigger>
-            <TabsTrigger value="preferences">Preferencias</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="profile" className="space-y-6 mt-6">
-            <div className="flex flex-col items-center space-y-4">
+        <div className="space-y-6 mt-2">
+          {/* Profile Section */}
+          <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col items-center space-y-2">
               <Avatar className="w-24 h-24">
                 <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="bg-primary/10">
@@ -117,7 +104,7 @@ const Profile = () => {
               </Avatar>
               
               <div className="grid w-full items-center gap-2">
-                <Label htmlFor="picture">Imagen de perfil</Label>
+                <Label htmlFor="picture" className="sr-only">Imagen de perfil</Label>
                 <Input 
                   id="picture" 
                   type="url" 
@@ -127,15 +114,17 @@ const Profile = () => {
                   className="w-full"
                 />
               </div>
-              
-              <div className="grid w-full items-center gap-2">
+            </div>
+            
+            <div className="flex-1 space-y-4">
+              <div>
                 <Label htmlFor="username">Nombre de usuario</Label>
                 <Input 
                   id="username" 
                   placeholder="Tu nombre" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full"
+                  className="w-full mt-1"
                 />
               </div>
               
@@ -143,49 +132,60 @@ const Profile = () => {
                 Guardar cambios
               </Button>
             </div>
-
-            <div className="border-t pt-6">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full flex items-center gap-2">
-                    <Trash2 size={16} />
-                    Eliminar mi cuenta
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminará permanentemente tu cuenta
-                      y todos tus datos asociados.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground"
-                    >
-                      Eliminar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="preferences" className="mt-6">
-            <div className="space-y-6">
-              <ThemeSelector />
-              
-              <div className="border-t pt-6">
-                <Button variant="outline" onClick={handleSignOut} className="w-full">
-                  Cerrar sesión
+          <Separator className="my-4" />
+          
+          {/* Theme Selector Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4 dark:text-white">Preferencias de apariencia</h3>
+            <ThemeSelector />
+          </div>
+          
+          <Separator className="my-4" />
+          
+          {/* Actions Section */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <Button 
+              onClick={handleSignOut} 
+              variant="outline" 
+              className="flex-1 flex items-center gap-2"
+            >
+              <LogOut size={16} />
+              Cerrar sesión
+            </Button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  className="flex-1 flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Eliminar mi cuenta
                 </Button>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminará permanentemente tu cuenta
+                    y todos tus datos asociados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    className="bg-destructive text-destructive-foreground"
+                  >
+                    Eliminar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

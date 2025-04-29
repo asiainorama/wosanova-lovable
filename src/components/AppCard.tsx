@@ -241,9 +241,10 @@ const AppCard: React.FC<AppCardProps> = ({
     );
   }
 
+  // Grid view (standard view for catalog)
   return (
     <div 
-      className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:-translate-y-1"
+      className="catalog-grid-item cursor-pointer"
       onClick={handleClick}
     >
       {imageLoading && (
@@ -267,13 +268,17 @@ const AppCard: React.FC<AppCardProps> = ({
       )}
       
       <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 text-center mt-1">{app.description}</p>
       
       {(showManage || onShowDetails) && (
         <Button 
           size="sm"
           variant="outline"
-          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0"
-          onClick={handleAction}
+          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAction(e);
+          }}
         >
           <Heart 
             className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 

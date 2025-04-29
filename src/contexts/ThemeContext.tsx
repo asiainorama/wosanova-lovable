@@ -52,12 +52,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     if (storedMode) {
       setMode(storedMode);
-      document.documentElement.classList.toggle('dark', storedMode === 'dark');
     }
     
     if (storedColor) {
       setColor(storedColor);
     }
+    
+    // Apply initial theme based on stored preferences
+    updateTheme(storedMode || mode, storedColor || color);
   }, []);
 
   // Apply theme changes and save to localStorage
@@ -84,7 +86,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Apply color scheme changes to app theme
     document.documentElement.style.setProperty('--theme-color', newColor);
     
-    // Force redraw on theme change
+    // Force redraw on theme change to refresh icons and UI elements
     const event = new Event('themechange');
     document.dispatchEvent(event);
   };
@@ -104,11 +106,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMode(newMode);
     updateTheme(newMode, color);
   };
-
-  // Apply initial theme
-  useEffect(() => {
-    updateTheme(mode, color);
-  }, []);
 
   return (
     <ThemeContext.Provider value={{ 
