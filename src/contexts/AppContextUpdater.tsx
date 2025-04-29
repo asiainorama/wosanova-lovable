@@ -28,7 +28,7 @@ export const AppContextUpdater = () => {
         ...investmentApps
       ];
       
-      // Fix icons
+      // Fix icons using Brandfetch API and fallbacks
       const appsWithIcons = await fixAppIcons(combinedApps);
       
       // Update the context with all apps

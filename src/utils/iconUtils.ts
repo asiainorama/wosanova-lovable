@@ -2,9 +2,10 @@
 import { AppData } from '@/data/apps';
 
 const DEFAULT_ICON = "/placeholder.svg";
+const BRANDFETCH_API_KEY = "aJ5lYIRJ+USZ1gYZaEjt9iNosNoWh4XtrLxTR1vsPHc=";
 
 /**
- * Fallback icons para aplicaciones conocidas si Brandfetch no funciona
+ * Fallback icons for known applications if Brandfetch doesn't work
  */
 const FALLBACK_ICONS: Record<string, string> = {
   "chatgpt": "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
@@ -32,37 +33,96 @@ const FALLBACK_ICONS: Record<string, string> = {
 };
 
 /**
- * Intenta obtener un icono válido para una aplicación
- * @param app Datos de la aplicación
- * @returns URL del icono o imagen por defecto
+ * Fetches icon from Brandfetch API
+ * @param domain Domain to fetch icon for
+ * @returns Promise with icon URL or null if not found
+ */
+const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
+  try {
+    const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${BRANDFETCH_API_KEY}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Brandfetch API error for ${domain}:`, response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    
+    // Try to find a logo in the response
+    if (data.logos && data.logos.length > 0) {
+      // Look for vector format first (svg)
+      const vectorLogo = data.logos.find((logo: any) => 
+        logo.formats && logo.formats.find((format: any) => format.format === 'svg')
+      );
+      
+      if (vectorLogo && vectorLogo.formats) {
+        const svgFormat = vectorLogo.formats.find((format: any) => format.format === 'svg');
+        if (svgFormat && svgFormat.src) {
+          return svgFormat.src;
+        }
+      }
+      
+      // If no vector, take the first logo with any format
+      for (const logo of data.logos) {
+        if (logo.formats && logo.formats.length > 0 && logo.formats[0].src) {
+          return logo.formats[0].src;
+        }
+      }
+    }
+    
+    // If no logos, try to find an icon
+    if (data.icons && data.icons.length > 0) {
+      for (const icon of data.icons) {
+        if (icon.formats && icon.formats.length > 0 && icon.formats[0].src) {
+          return icon.formats[0].src;
+        }
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`Error fetching Brandfetch icon for ${domain}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Tries to get a valid icon URL for an app
+ * @param app App data
+ * @returns URL of the icon or default image
  */
 export const getValidIconUrl = (app: AppData): string => {
-  // Si la app ya tiene un icono que funciona, lo usamos
-  if (app.icon && !app.icon.includes('brandfetch.com')) {
+  // If the app already has a valid icon (not from Brandfetch), use it
+  if (app.icon && !app.icon.includes('brandfetch.com') && !app.icon.includes('placeholder')) {
     return app.icon;
   }
   
-  // Si tenemos un fallback para esta app, lo usamos
+  // If we have a fallback for this app, use it
   if (app.id && FALLBACK_ICONS[app.id]) {
     return FALLBACK_ICONS[app.id];
   }
   
-  // Para categorías específicas, intentamos diferentes enfoques
+  // For specific categories, try different approaches
   if (app.category === 'Redes Sociales' || 
       app.category === 'Entretenimiento' || 
       app.category === 'Productividad') {
     return `https://logo.clearbit.com/${app.url.replace('https://', '').replace('www.', '').split('/')[0]}`;
   }
   
-  // Para el resto, intentamos con favicon.ico directo
+  // For the rest, try with favicon.ico directly
   const domain = app.url.replace('https://', '').replace('www.', '').split('/')[0];
   return `https://${domain}/favicon.ico`;
 };
 
 /**
- * Verifica si una URL de imagen es válida
- * @param url URL a verificar
- * @returns Promise con un booleano indicando si la imagen es válida
+ * Verifies if an image URL is valid
+ * @param url URL to verify
+ * @returns Promise with a boolean indicating if the image is valid
  */
 export const isValidImage = (url: string): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -74,16 +134,39 @@ export const isValidImage = (url: string): Promise<boolean> => {
 };
 
 /**
- * Corrige los iconos de una lista de aplicaciones
- * @param apps Lista de aplicaciones
- * @returns Lista de aplicaciones con iconos corregidos
+ * Fixes icons for a list of apps
+ * @param apps List of apps
+ * @returns List of apps with fixed icons
  */
 export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
-  return apps.map(app => {
-    const iconUrl = getValidIconUrl(app);
-    return {
+  const appsWithIcons = [];
+  
+  for (const app of apps) {
+    let iconUrl = app.icon;
+    
+    // If no icon, or current icon is placeholder, try to get one from Brandfetch
+    if (!iconUrl || iconUrl.includes('placeholder') || iconUrl.includes('brandfetch.com')) {
+      try {
+        const domain = app.url.replace('https://', '').replace('www.', '').split('/')[0];
+        const brandfetchIcon = await fetchBrandfetchIcon(domain);
+        
+        if (brandfetchIcon) {
+          iconUrl = brandfetchIcon;
+        } else {
+          // If Brandfetch doesn't work, try other methods
+          iconUrl = getValidIconUrl(app);
+        }
+      } catch (error) {
+        console.error('Error fetching icon:', error);
+        iconUrl = getValidIconUrl(app);
+      }
+    }
+    
+    appsWithIcons.push({
       ...app,
       icon: iconUrl
-    };
-  });
+    });
+  }
+  
+  return appsWithIcons;
 };
