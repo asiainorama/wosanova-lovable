@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Heart, ExternalLink } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AppCardProps {
   app: AppData; 
@@ -26,7 +28,10 @@ const AppCard: React.FC<AppCardProps> = ({
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   
+  // Función para manejar la acción de favorito
   const handleAction = () => {
     if (showRemove || favorite) {
       removeFromFavorites(app.id);
@@ -35,6 +40,7 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
+  // Función para manejar el clic en la tarjeta
   const handleClick = (e: React.MouseEvent) => {
     if (!showManage && !onShowDetails) {
       const newWindow = window.open(
@@ -48,8 +54,37 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
   
+  // Función para manejar error de carga de imagen
   const handleImageError = () => {
     setImageError(true);
+    setImageLoading(false);
+    
+    // Si todavía no hemos intentado varias veces, probamos con un enfoque alternativo
+    if (retryCount < 2) {
+      setRetryCount(retryCount + 1);
+      
+      // Intentar con Google Favicon como último recurso
+      if (retryCount === 1) {
+        const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+        const img = new Image();
+        img.onload = () => {
+          setImageError(false);
+          setImageLoading(false);
+          app.icon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        };
+        img.onerror = () => {
+          setImageError(true);
+          setImageLoading(false);
+        };
+        img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      }
+    }
+  };
+
+  // Función para manejar la carga exitosa de la imagen
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
   };
 
   // Simple card with only icon and name for the home page
@@ -59,20 +94,26 @@ const AppCard: React.FC<AppCardProps> = ({
         className="flex flex-col items-center gap-2 p-2 cursor-pointer transition-transform hover:-translate-y-1"
         onClick={handleClick}
       >
+        {imageLoading && (
+          <Skeleton className="w-16 h-16 rounded-lg" />
+        )}
+        
         {!imageError ? (
           <img 
             src={app.icon} 
             alt={`${app.name} icon`}
-            className="w-16 h-16 object-contain dark:brightness-110"
+            className={`w-16 h-16 object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
             onError={handleImageError}
+            onLoad={handleImageLoad}
           />
         ) : (
-          <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <span className="text-xl font-semibold text-gray-500 dark:text-gray-400">
-              {app.name.charAt(0)}
-            </span>
-          </div>
+          <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <AvatarFallback className="text-xl font-semibold text-gray-500 dark:text-gray-400">
+              {app.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         )}
+        
         <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
         
         {(showManage || onShowDetails) && (
@@ -98,17 +139,22 @@ const AppCard: React.FC<AppCardProps> = ({
     return (
       <div className="large-app-card cursor-pointer" onClick={handleClick}>
         <div className="relative h-full w-full">
+          {imageLoading && (
+            <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
+          )}
+          
           {!imageError ? (
             <img 
               src={app.icon} 
               alt={`${app.name} icon`}
-              className="large-app-icon dark:brightness-110"
+              className={`large-app-icon dark:brightness-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
+              onLoad={handleImageLoad}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
               <span className="text-4xl font-bold text-gray-500 dark:text-gray-400">
-                {app.name.charAt(0)}
+                {app.name.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
@@ -154,19 +200,24 @@ const AppCard: React.FC<AppCardProps> = ({
       className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:-translate-y-1"
       onClick={handleClick}
     >
+      {imageLoading && (
+        <Skeleton className="w-16 h-16 rounded-lg mb-2" />
+      )}
+      
       {!imageError ? (
         <img 
           src={app.icon} 
           alt={`${app.name} icon`}
-          className="w-16 h-16 object-contain mb-2 dark:brightness-110"
+          className={`w-16 h-16 object-contain mb-2 dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
           onError={handleImageError}
+          onLoad={handleImageLoad}
         />
       ) : (
-        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg mb-2">
-          <span className="text-xl font-semibold text-gray-500 dark:text-gray-400">
-            {app.name.charAt(0)}
-          </span>
-        </div>
+        <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg mb-2">
+          <AvatarFallback className="text-xl font-semibold text-gray-500 dark:text-gray-400">
+            {app.name.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
       )}
       
       <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>

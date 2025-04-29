@@ -1,7 +1,7 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppContext } from './AppContext';
-import { aiApps } from '@/data/apps';
+import { aiApps, AppData } from '@/data/apps';
 import { 
   entertainmentApps, 
   productivityApps, 
@@ -11,31 +11,63 @@ import {
 } from '@/data/additionalApps';
 import { additionalApps } from '@/data/moreApps';
 import { fixAppIcons } from '@/utils/iconUtils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 export const AppContextUpdater = () => {
   const { setAllApps } = useAppContext();
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const updateApps = async () => {
-      // Combine all app sources
-      const combinedApps = [
-        ...aiApps,
-        ...additionalApps,
-        ...entertainmentApps,
-        ...productivityApps,
-        ...socialMediaApps,
-        ...otherPopularApps,
-        ...investmentApps
-      ];
-      
-      // Fix icons using Brandfetch API and fallbacks
-      const appsWithIcons = await fixAppIcons(combinedApps);
-      
-      // Update the context with all apps
-      setAllApps(appsWithIcons);
+    // Immediately set some apps with placeholder icons for faster initial render
+    const combinedApps = [
+      ...aiApps,
+      ...additionalApps,
+      ...entertainmentApps,
+      ...productivityApps,
+      ...socialMediaApps,
+      ...otherPopularApps,
+      ...investmentApps
+    ];
+    
+    // First add apps with basic placeholder icons for immediate display
+    setAllApps(combinedApps);
+    
+    // Then process icons in the background
+    const processIconsAsync = async () => {
+      try {
+        // Process in smaller batches to avoid overwhelming the browser
+        const batchSize = 20;
+        let processedApps: AppData[] = [];
+        
+        // Process apps in batches for better user experience
+        for (let i = 0; i < combinedApps.length; i += batchSize) {
+          const batch = combinedApps.slice(i, i + batchSize);
+          const processedBatch = await fixAppIcons(batch);
+          processedApps = [...processedApps, ...processedBatch];
+          
+          // Update the context with what we have so far
+          setAllApps([...processedApps, ...combinedApps.slice(i + batchSize)]);
+        }
+        
+        // Final update with all processed apps
+        setAllApps(processedApps);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error processing app icons:', error);
+        toast.error('Error al cargar algunos íconos de aplicaciones', {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+        });
+      }
     };
 
-    updateApps();
+    processIconsAsync();
+    
+    // Cleanup function
+    return () => {
+      // Any cleanup needed
+    };
   }, [setAllApps]);
 
   return null;
