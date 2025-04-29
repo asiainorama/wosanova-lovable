@@ -223,7 +223,7 @@ const AppCard: React.FC<AppCardProps> = ({
             }`}
             onClick={(e) => {
               e.stopPropagation();
-              handleAction();
+              handleAction(e);
             }}
           >
             <Heart 
