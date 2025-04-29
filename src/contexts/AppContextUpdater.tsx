@@ -10,24 +10,32 @@ import {
   investmentApps 
 } from '@/data/additionalApps';
 import { additionalApps } from '@/data/moreApps';
+import { fixAppIcons } from '@/utils/iconUtils';
 
 export const AppContextUpdater = () => {
   const { setAllApps } = useAppContext();
   
   useEffect(() => {
-    // Combine all app sources
-    const combinedApps = [
-      ...aiApps,
-      ...additionalApps,
-      ...entertainmentApps,
-      ...productivityApps,
-      ...socialMediaApps,
-      ...otherPopularApps,
-      ...investmentApps
-    ];
-    
-    // Update the context with all apps
-    setAllApps(combinedApps);
+    const updateApps = async () => {
+      // Combine all app sources
+      const combinedApps = [
+        ...aiApps,
+        ...additionalApps,
+        ...entertainmentApps,
+        ...productivityApps,
+        ...socialMediaApps,
+        ...otherPopularApps,
+        ...investmentApps
+      ];
+      
+      // Fix icons
+      const appsWithIcons = await fixAppIcons(combinedApps);
+      
+      // Update the context with all apps
+      setAllApps(appsWithIcons);
+    };
+
+    updateApps();
   }, [setAllApps]);
 
   return null;

@@ -31,7 +31,12 @@ const Auth = () => {
       
       // Get the current URL to use in the redirect
       const origin = window.location.origin;
-      const redirectTo = `${origin}/catalog`;
+      
+      // Ensure we add trailing slash to the redirect URL to avoid path issues
+      let redirectTo = `${origin}/catalog`;
+      if (!redirectTo.endsWith('/')) {
+        redirectTo = `${redirectTo}/`;
+      }
       
       console.log("Starting OAuth flow with redirect to:", redirectTo);
       
@@ -99,7 +104,9 @@ const Auth = () => {
           <ul className="mt-2 space-y-1 list-disc list-inside">
             <li>URL del sitio: <code>{window.location.origin}</code></li>
             <li>URL de redirección: <code>{window.location.origin}/catalog</code></li>
+            <li>URL de redirección alternativa: <code>{window.location.origin}/catalog/</code> (con slash)</li>
           </ul>
+          <p className="mt-3">Prueba a borrar cookies y caché del navegador si sigues teniendo problemas.</p>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ const AppCard: React.FC<AppCardProps> = ({
   const favorite = isFavorite(app.id);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const [imageError, setImageError] = useState(false);
   
   const handleAction = () => {
     if (showRemove || favorite) {
@@ -46,6 +47,10 @@ const AppCard: React.FC<AppCardProps> = ({
       onShowDetails(app);
     }
   };
+  
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   // Simple card with only icon and name for the home page
   if (isHomePage) {
@@ -54,11 +59,20 @@ const AppCard: React.FC<AppCardProps> = ({
         className="flex flex-col items-center gap-2 p-2 cursor-pointer transition-transform hover:-translate-y-1"
         onClick={handleClick}
       >
-        <img 
-          src={app.icon} 
-          alt={`${app.name} icon`}
-          className="w-16 h-16 object-contain dark:brightness-110"
-        />
+        {!imageError ? (
+          <img 
+            src={app.icon} 
+            alt={`${app.name} icon`}
+            className="w-16 h-16 object-contain dark:brightness-110"
+            onError={handleImageError}
+          />
+        ) : (
+          <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <span className="text-xl font-semibold text-gray-500 dark:text-gray-400">
+              {app.name.charAt(0)}
+            </span>
+          </div>
+        )}
         <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
         
         {(showManage || onShowDetails) && (
@@ -84,11 +98,21 @@ const AppCard: React.FC<AppCardProps> = ({
     return (
       <div className="large-app-card cursor-pointer" onClick={handleClick}>
         <div className="relative h-full w-full">
-          <img 
-            src={app.icon} 
-            alt={`${app.name} icon`}
-            className="large-app-icon dark:brightness-110"
-          />
+          {!imageError ? (
+            <img 
+              src={app.icon} 
+              alt={`${app.name} icon`}
+              className="large-app-icon dark:brightness-110"
+              onError={handleImageError}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
+              <span className="text-4xl font-bold text-gray-500 dark:text-gray-400">
+                {app.name.charAt(0)}
+              </span>
+            </div>
+          )}
+          
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-lg flex flex-col justify-end p-4 text-left">
             <span className="text-white text-sm font-medium mb-1">{app.category}</span>
             <h3 className="text-white font-bold text-lg">{app.name}</h3>
@@ -130,11 +154,21 @@ const AppCard: React.FC<AppCardProps> = ({
       className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:-translate-y-1"
       onClick={handleClick}
     >
-      <img 
-        src={app.icon} 
-        alt={`${app.name} icon`}
-        className="w-16 h-16 object-contain mb-2 dark:brightness-110"
-      />
+      {!imageError ? (
+        <img 
+          src={app.icon} 
+          alt={`${app.name} icon`}
+          className="w-16 h-16 object-contain mb-2 dark:brightness-110"
+          onError={handleImageError}
+        />
+      ) : (
+        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg mb-2">
+          <span className="text-xl font-semibold text-gray-500 dark:text-gray-400">
+            {app.name.charAt(0)}
+          </span>
+        </div>
+      )}
+      
       <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
       
       {(showManage || onShowDetails) && (
