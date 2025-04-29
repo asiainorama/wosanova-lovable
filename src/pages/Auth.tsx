@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,17 +11,36 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
+  // Check for existing session on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // If we already have a session, redirect to the catalog page
+        navigate('/catalog');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
       setErrorDetails(null);
       
+      // Get the current URL to use in the redirect
+      const origin = window.location.origin;
+      const redirectTo = `${origin}/catalog`;
+      
+      console.log("Starting OAuth flow with redirect to:", redirectTo);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/catalog`,
+          redirectTo,
           queryParams: {
-            prompt: 'select_account', // Fuerza a Google a mostrar el selector de cuenta
+            prompt: 'select_account', // Force Google to show the account selector
           }
         }
       });
@@ -30,7 +49,7 @@ const Auth = () => {
         throw error;
       }
       
-      // El usuario será redirigido a Google, por lo que este código debajo raramente se ejecuta
+      // The user will be redirected to Google, so this code below rarely executes
       console.log("Redirección iniciada:", data);
     } catch (error: any) {
       console.error("Error de autenticación:", error);
@@ -75,7 +94,11 @@ const Auth = () => {
         )}
         
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Si estás teniendo problemas, verifica la configuración de URL en Supabase.</p>
+          <p>Si estás teniendo problemas, verifica la configuración de URL en Supabase:</p>
+          <ul className="mt-2 space-y-1 list-disc list-inside">
+            <li>URL del sitio: <code>{window.location.origin}</code></li>
+            <li>URL de redirección: <code>{window.location.origin}/catalog</code></li>
+          </ul>
         </div>
       </div>
     </div>
