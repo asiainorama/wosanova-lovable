@@ -1,4 +1,3 @@
-
 export interface AppData {
   id: string;
   name: string;
@@ -26,7 +25,13 @@ export const categories = [
   "Herramientas",
   "SEO",
   "Redes Sociales",
-  "Educación"
+  "Educación",
+  "Entretenimiento",
+  "Inversión",
+  "Criptomonedas",
+  "Compras",
+  "Viajes",
+  "Servicios"
 ];
 
 export const aiApps: AppData[] = [
@@ -698,4 +703,3 @@ export const aiApps: AppData[] = [
     isAI: true
   }
 ];
-

@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { AppContextUpdater } from "./contexts/AppContextUpdater";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AppProvider>
+          <AppContextUpdater />
           <TooltipProvider>
             <Toaster />
             <Sonner />

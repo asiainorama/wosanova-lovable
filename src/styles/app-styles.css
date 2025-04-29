@@ -1,3 +1,4 @@
+
 /* App Grid Styles */
 .app-grid {
   display: grid;
@@ -17,15 +18,19 @@
 }
 
 .dark img {
-  filter: brightness(1.1);
+  filter: brightness(1.2);
 }
 
 .dark .text-gray-500 {
-  color: #d1d5db;
+  color: #e2e8f0;
+}
+
+.dark .text-gray-600 {
+  color: #f1f5f9;
 }
 
 .dark .border-gray-300 {
-  border-color: #4b5563;
+  color: #f8fafc;
 }
 
 .app-card {
@@ -94,6 +99,14 @@
   border-radius: 10px;
 }
 
+/* Styles for the home page grid */
+.home-app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  padding: 0;
+}
+
 /* Styles for the new card design */
 .app-list-card {
   display: flex;
@@ -131,7 +144,7 @@
 }
 
 .dark .app-list-description {
-  color: #9ca3af;
+  color: #e5e7eb;
 }
 
 .app-list-badge {
@@ -156,12 +169,12 @@
   --secondary: 217.2 32.6% 17.5%;
   --secondary-foreground: 210 40% 98%;
   --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted-foreground: 215 20.2% 95.1%;
   --accent: 217.2 32.6% 17.5%;
   --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --ring: 224.3 76.3% 78%;
 }

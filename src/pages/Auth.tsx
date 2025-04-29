@@ -41,7 +41,8 @@ const Auth = () => {
           redirectTo,
           queryParams: {
             prompt: 'select_account', // Force Google to show the account selector
-          }
+          },
+          skipBrowserRedirect: false // Ensure browser redirect happens
         }
       });
       

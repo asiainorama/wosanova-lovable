@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Heart, ExternalLink } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface AppCardProps {
   app: AppData; 
@@ -21,6 +23,8 @@ const AppCard: React.FC<AppCardProps> = ({
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const favorite = isFavorite(app.id);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   
   const handleAction = () => {
     if (showRemove || favorite) {
@@ -43,6 +47,39 @@ const AppCard: React.FC<AppCardProps> = ({
     }
   };
 
+  // Simple card with only icon and name for the home page
+  if (isHomePage) {
+    return (
+      <div 
+        className="flex flex-col items-center gap-2 p-2 cursor-pointer transition-transform hover:-translate-y-1"
+        onClick={handleClick}
+      >
+        <img 
+          src={app.icon} 
+          alt={`${app.name} icon`}
+          className="w-16 h-16 object-contain dark:brightness-110"
+        />
+        <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
+        
+        {(showManage || onShowDetails) && (
+          <Button 
+            size="sm"
+            variant={favorite || showRemove ? "outline" : "outline"}
+            className="h-8 w-8 rounded-full p-0 absolute top-0 right-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAction();
+            }}
+          >
+            <Heart 
+              className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+            />
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (isLarge) {
     return (
       <div className="large-app-card cursor-pointer" onClick={handleClick}>
@@ -50,7 +87,7 @@ const AppCard: React.FC<AppCardProps> = ({
           <img 
             src={app.icon} 
             alt={`${app.name} icon`}
-            className="large-app-icon"
+            className="large-app-icon dark:brightness-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-lg flex flex-col justify-end p-4 text-left">
             <span className="text-white text-sm font-medium mb-1">{app.category}</span>
@@ -90,13 +127,13 @@ const AppCard: React.FC<AppCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:transform hover:-translate-y-1"
+      className="flex flex-col items-center p-4 cursor-pointer transition-transform hover:-translate-y-1"
       onClick={handleClick}
     >
       <img 
         src={app.icon} 
         alt={`${app.name} icon`}
-        className="w-16 h-16 object-contain mb-2"
+        className="w-16 h-16 object-contain mb-2 dark:brightness-110"
       />
       <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
       
