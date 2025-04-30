@@ -129,8 +129,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                   category: appData.category || 'other',
                   icon: appData.icon || '/placeholder.svg',
                   description: appData.description || '',
-                  tags: Array.isArray(appData.tags) ? appData.tags : [],
-                  features: Array.isArray(appData.features) ? appData.features : [],
+                  isAI: appData.isAI !== undefined ? appData.isAI : false,
                 };
                 
                 favoriteApps.push(validAppData);

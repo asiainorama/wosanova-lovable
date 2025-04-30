@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useAppContext } from './AppContext';
 import { aiApps, AppData } from '@/data/apps';
