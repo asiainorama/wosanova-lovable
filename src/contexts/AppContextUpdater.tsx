@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
 import { aiApps, AppData } from '@/data/apps';
 import { 
@@ -9,11 +10,11 @@ import {
   investmentApps 
 } from '@/data/additionalApps';
 import { additionalApps } from '@/data/moreApps';
-import { fixAppIcons } from '@/utils/iconUtils';
+import { fixAppIcons, preloadCommonAppIcons } from '@/utils/iconUtils';
 import { toast } from 'sonner';
 
 export const AppContextUpdater = () => {
-  const { setAllApps } = useAppContext();
+  const { setAllApps, favorites } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [processingStats, setProcessingStats] = useState({
     total: 0,
@@ -21,6 +22,12 @@ export const AppContextUpdater = () => {
     successful: 0,
     failed: 0
   });
+
+  // Debounced function to update apps in context
+  const updateAppsList = useCallback((apps: AppData[]) => {
+    setAllApps(apps);
+    console.log(`Updated app list with ${apps.length} apps`);
+  }, [setAllApps]);
   
   useEffect(() => {
     console.log('AppContextUpdater initialized');
@@ -39,7 +46,7 @@ export const AppContextUpdater = () => {
 
     document.addEventListener('themechange', handleThemeChange);
     
-    // Immediately set some apps with placeholder icons for faster initial render
+    // Combine all app data
     const combinedApps = [
       ...aiApps,
       ...additionalApps,
@@ -61,21 +68,47 @@ export const AppContextUpdater = () => {
     console.log(`Setting initial ${combinedApps.length} apps with placeholder icons`);
     setAllApps(combinedApps);
     
-    // Then process icons in the background
+    // Preload icons for favorite apps first as they're most important
+    const priorityApps = favorites.length > 0 
+      ? [...favorites]
+      : combinedApps.slice(0, 10); // If no favorites, preload first 10 apps
+      
+    // Preload common app icons
+    preloadCommonAppIcons(priorityApps);
+    
+    // Then process all icons in the background with improved batching
     const processIconsAsync = async () => {
       try {
         // Process in smaller batches to avoid overwhelming the browser
-        const batchSize = 10; // Reduced batch size for better responsiveness
+        const batchSize = 12; // Adjusted batch size for better performance
         let processedApps: AppData[] = [];
         let successful = 0;
         let failed = 0;
         
         // Process apps in batches for better user experience
-        for (let i = 0; i < combinedApps.length; i += batchSize) {
-          const batch = combinedApps.slice(i, i + batchSize);
+        // First process AI apps and favorites (most important)
+        const importantApps = [...aiApps, ...favorites];
+        const remainingApps = combinedApps.filter(app => 
+          !importantApps.some(impApp => impApp.id === app.id)
+        );
+        
+        // Process important apps first
+        const processedImportantApps = await fixAppIcons(importantApps);
+        processedApps = [...processedImportantApps];
+        
+        // Update immediately with important apps
+        const initialUpdate = [
+          ...processedImportantApps,
+          ...remainingApps
+        ];
+        updateAppsList(initialUpdate);
+        
+        // Process the rest in batches
+        for (let i = 0; i < remainingApps.length; i += batchSize) {
+          const batch = remainingApps.slice(i, i + batchSize);
           
           try {
-            console.log(`Processing batch ${i}-${i+batchSize} of ${combinedApps.length} apps`);
+            console.log(`Processing batch ${i}-${i+batchSize} of ${remainingApps.length} remaining apps`);
             const processedBatch = await fixAppIcons(batch);
             
             // Count successful and failed icons
@@ -87,22 +120,30 @@ export const AppContextUpdater = () => {
               }
             });
             
-            processedApps = [...processedApps, ...processedBatch];
-            
-            // Update the context with what we have so far
+            // Replace the corresponding apps in our processed list
             const updatedApps = [
               ...processedApps,
-              ...combinedApps.slice(i + batchSize)
+              ...processedBatch,
+              ...remainingApps.slice(i + batchSize)
             ];
             
-            console.log(`Updating with ${processedApps.length} processed apps, ${successful} successful, ${failed} failed`);
-            setAllApps(updatedApps);
+            // Filter out duplicates (when an app appears in multiple categories)
+            const uniqueApps = Array.from(
+              new Map(updatedApps.map(app => [app.id, app])).values()
+            );
+            
+            // Update the context with what we have so far
+            updateAppsList(uniqueApps);
+            processedApps = [
+              ...processedApps,
+              ...processedBatch
+            ];
             
             // Update processing stats
             setProcessingStats(prev => ({
               ...prev,
-              processed: i + batchSize > combinedApps.length ? combinedApps.length : i + batchSize,
-              successful,
+              processed: importantApps.length + Math.min(i + batchSize, remainingApps.length),
+              successful: importantApps.length + successful,
               failed
             }));
             
@@ -136,8 +177,11 @@ export const AppContextUpdater = () => {
         // Log detailed statistics
         console.log(`App icons processing complete. Total: ${combinedApps.length}, Success: ${successful}, Failed: ${failed}`);
         
-        // Final update with all processed apps
-        setAllApps(processedApps);
+        // Final update with all processed apps - filter out duplicates
+        const finalApps = Array.from(
+          new Map(processedApps.map(app => [app.id, app])).values()
+        );
+        updateAppsList(finalApps);
         setLoading(false);
       } catch (error) {
         console.error('Error processing app icons:', error);
@@ -154,7 +198,7 @@ export const AppContextUpdater = () => {
       document.removeEventListener('themechange', handleThemeChange);
       console.log('AppContextUpdater cleanup');
     };
-  }, [setAllApps]);
+  }, [setAllApps, updateAppsList, favorites]);
 
   return null;
 };

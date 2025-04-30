@@ -36,6 +36,44 @@ const AppCard: React.FC<AppCardProps> = ({
   const maxRetries = 2;
   const imageRef = useRef<HTMLImageElement>(null);
   
+  // Generate initials for avatar fallback
+  const getInitials = () => {
+    if (!app.name) return '?';
+    const words = app.name.trim().split(' ');
+    if (words.length >= 2) {
+      return `${words[0][0]}${words[1][0]}`.toUpperCase();
+    }
+    return app.name.charAt(0).toUpperCase();
+  };
+  
+  // Generate background color based on app name
+  const getAvatarColor = () => {
+    if (!app.name) return 'bg-gray-200 dark:bg-gray-700';
+    
+    // Simple hash function for consistent color
+    let hash = 0;
+    for (let i = 0; i < app.name.length; i++) {
+      hash = app.name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Choose from a set of pleasant colors
+    const colors = [
+      'bg-red-100 dark:bg-red-900',
+      'bg-blue-100 dark:bg-blue-900',
+      'bg-green-100 dark:bg-green-900',
+      'bg-yellow-100 dark:bg-yellow-900',
+      'bg-purple-100 dark:bg-purple-900',
+      'bg-pink-100 dark:bg-pink-900',
+      'bg-indigo-100 dark:bg-indigo-900',
+      'bg-teal-100 dark:bg-teal-900',
+      'bg-orange-100 dark:bg-orange-900',
+      'bg-cyan-100 dark:bg-cyan-900'
+    ];
+    
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+  
   // On mount, check if the image is already in cache
   useEffect(() => {
     // If we have an icon URL and it's likely cached in browser
@@ -51,10 +89,18 @@ const AppCard: React.FC<AppCardProps> = ({
   // Function to handle favorite action
   const handleAction = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    
     if (showRemove || favorite) {
       removeFromFavorites(app.id);
+      toast.success(`${app.name} eliminada de favoritos`, {
+        className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+      });
     } else {
       addToFavorites(app);
+      toast.success(`${app.name} añadida a favoritos`, {
+        className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+      });
     }
   };
 
@@ -74,28 +120,34 @@ const AppCard: React.FC<AppCardProps> = ({
   
   // Function to handle image error
   const handleImageError = () => {
-    setImageError(true);
-    setImageLoading(false);
+    // If we've already retried too many times, show fallback
+    if (retryCount >= maxRetries) {
+      setImageError(true);
+      setImageLoading(false);
+      return;
+    }
     
-    // If we haven't tried multiple times, attempt alternative approaches
-    if (retryCount < maxRetries) {
-      setRetryCount(retryCount + 1);
-      
-      // Try Google Favicon API as a fallback
-      if (retryCount === 1) {
-        const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-        const img = new Image();
-        img.onload = () => {
-          setImageError(false);
-          setImageLoading(false);
-          app.icon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-        };
-        img.onerror = () => {
-          setImageError(true);
-          setImageLoading(false);
-        };
-        img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    setRetryCount(retryCount + 1);
+    
+    // Try different image strategies based on retry count
+    if (retryCount === 0) {
+      // First retry: add a cache buster
+      const timestamp = new Date().getTime();
+      if (imageRef.current && imageRef.current.src) {
+        imageRef.current.src = imageRef.current.src.split('?')[0] + '?' + timestamp;
       }
+    } 
+    else if (retryCount === 1) {
+      // Second retry: try Google Favicon API as a fallback
+      const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+      if (imageRef.current) {
+        imageRef.current.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      }
+    }
+    else {
+      // If all retries failed, show fallback
+      setImageError(true);
+      setImageLoading(false);
     }
   };
 
@@ -126,9 +178,9 @@ const AppCard: React.FC<AppCardProps> = ({
               loading="lazy"
             />
           ) : (
-            <Avatar className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
+            <Avatar className={`w-12 h-12 rounded-md flex items-center justify-center ${getAvatarColor()}`}>
               <AvatarFallback className="text-lg font-semibold text-gray-600 dark:text-gray-300 flex items-center justify-center">
-                {app.name.charAt(0).toUpperCase()}
+                {getInitials()}
               </AvatarFallback>
             </Avatar>
           )}
@@ -175,9 +227,9 @@ const AppCard: React.FC<AppCardProps> = ({
             loading="lazy"
           />
         ) : (
-          <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <AvatarFallback className="text-xl font-semibold text-gray-500 dark:text-gray-400">
-              {app.name.charAt(0).toUpperCase()}
+          <Avatar className={`w-16 h-16 rounded-lg ${getAvatarColor()}`}>
+            <AvatarFallback className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+              {getInitials()}
             </AvatarFallback>
           </Avatar>
         )}
@@ -202,8 +254,8 @@ const AppCard: React.FC<AppCardProps> = ({
 
   if (isLarge) {
     return (
-      <div className="large-app-card cursor-pointer" onClick={handleClick}>
-        <div className="relative h-full w-full">
+      <div className="large-app-card cursor-pointer relative" onClick={handleClick}>
+        <div className="h-full w-full">
           {imageLoading && (
             <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
           )}
@@ -219,9 +271,9 @@ const AppCard: React.FC<AppCardProps> = ({
               loading="lazy"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
-              <span className="text-4xl font-bold text-gray-500 dark:text-gray-400">
-                {app.name.charAt(0).toUpperCase()}
+            <div className={`absolute inset-0 ${getAvatarColor()} rounded-lg flex items-center justify-center`}>
+              <span className="text-4xl font-bold text-gray-700 dark:text-gray-300">
+                {getInitials()}
               </span>
             </div>
           )}
@@ -268,30 +320,32 @@ const AppCard: React.FC<AppCardProps> = ({
       className="catalog-grid-item relative cursor-pointer"
       onClick={handleClick}
     >
-      {imageLoading && (
-        <Skeleton className="w-16 h-16 rounded-lg mb-2" />
-      )}
-      
-      {!imageError ? (
-        <img 
-          ref={imageRef}
-          src={app.icon} 
-          alt={`${app.name} icon`}
-          className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-          loading="lazy"
-        />
-      ) : (
-        <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg mb-2">
-          <AvatarFallback className="text-xl font-semibold text-gray-500 dark:text-gray-400">
-            {app.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      
-      <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 text-center mt-1">{app.description}</p>
+      <div className="flex flex-col items-center">
+        {imageLoading && (
+          <Skeleton className="w-16 h-16 rounded-lg mb-2" />
+        )}
+        
+        {!imageError ? (
+          <img 
+            ref={imageRef}
+            src={app.icon} 
+            alt={`${app.name} icon`}
+            className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            loading="lazy"
+          />
+        ) : (
+          <Avatar className={`w-16 h-16 rounded-lg mb-2 ${getAvatarColor()}`}>
+            <AvatarFallback className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
+        )}
+        
+        <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 text-center mt-1">{app.description}</p>
+      </div>
       
       {(showManage || onShowDetails) && (
         <Button 
