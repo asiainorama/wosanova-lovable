@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
@@ -7,10 +7,18 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { prefetchAppLogos } from '@/services/LogoCacheService';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+
+  // Prefetch logos for favorite apps as soon as home page loads
+  useEffect(() => {
+    if (favorites.length > 0) {
+      prefetchAppLogos(favorites);
+    }
+  }, [favorites]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">

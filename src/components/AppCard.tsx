@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { registerSuccessfulIcon } from '@/utils/iconUtils';
+import { getCachedLogo, registerSuccessfulLogo } from '@/services/LogoCacheService';
 
 interface AppCardProps {
   app: AppData; 
@@ -35,7 +35,7 @@ const AppCard: React.FC<AppCardProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 2;
   const imageRef = useRef<HTMLImageElement>(null);
-  const [iconUrl, setIconUrl] = useState<string>(app.icon || '');
+  const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
   
   // Store icon URL when successfully loaded
   const storeSuccessfulIcon = () => {
@@ -43,7 +43,7 @@ const AppCard: React.FC<AppCardProps> = ({
       try {
         // Extract domain from the app URL
         const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
-        registerSuccessfulIcon(domain, iconUrl);
+        registerSuccessfulLogo(app.id, iconUrl, domain);
       } catch (e) {
         console.warn('Failed to register successful icon:', e);
       }
@@ -90,9 +90,11 @@ const AppCard: React.FC<AppCardProps> = ({
   
   // On mount, check if the image is already in cache
   useEffect(() => {
-    // If we have an icon URL and it's likely cached in browser
-    if (app.icon && !app.icon.includes('placeholder') && imageRef.current) {
-      setIconUrl(app.icon);
+    // Get logo from cache service
+    const cachedLogo = getCachedLogo(app);
+    setIconUrl(cachedLogo);
+    
+    if (cachedLogo && imageRef.current) {
       const img = imageRef.current;
       if (img.complete) {
         // Image is already loaded (likely from cache)
@@ -100,7 +102,7 @@ const AppCard: React.FC<AppCardProps> = ({
         storeSuccessfulIcon();
       }
     }
-  }, [app.icon]);
+  }, [app.id]);
   
   // Function to handle favorite action
   const handleAction = (e: React.MouseEvent) => {

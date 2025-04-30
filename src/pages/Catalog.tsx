@@ -12,6 +12,8 @@ import { AppData } from '@/data/apps';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { prefetchAppLogos } from '@/services/LogoCacheService';
+import { toast } from 'sonner';
 
 // Define category groups
 interface CategoryGroup {
@@ -64,6 +66,7 @@ const Catalog = () => {
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const [listView, setListView] = useState(false);
+  const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
 
   // Filter apps based on search term and selected filter
   useEffect(() => {
@@ -92,6 +95,37 @@ const Catalog = () => {
     
     setFilteredApps(filtered);
   }, [searchTerm, selectedFilter, allApps]);
+
+  // Prefetch logos when the catalog page loads
+  useEffect(() => {
+    const prefetchIcons = async () => {
+      if (prefetchStatus !== 'idle' || !allApps.length) return;
+      
+      setPrefetchStatus('loading');
+      
+      // Start with visible apps (first 20 or so)
+      const visibleApps = filteredApps.slice(0, 20);
+      await prefetchAppLogos(visibleApps);
+      
+      // Then process the rest in the background
+      setTimeout(async () => {
+        const remainingApps = allApps.filter(app => 
+          !visibleApps.some(visibleApp => visibleApp.id === app.id)
+        );
+        await prefetchAppLogos(remainingApps);
+        setPrefetchStatus('complete');
+        
+        // Only show toast if we've prefetched a significant number of apps
+        if (allApps.length > 50) {
+          toast.success(t('catalog.iconsLoaded') || "App icons loaded", {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+          });
+        }
+      }, 2000);
+    };
+    
+    prefetchIcons();
+  }, [allApps, filteredApps]);
 
   const handleShowDetails = (app: AppData) => {
     setSelectedApp(app);
