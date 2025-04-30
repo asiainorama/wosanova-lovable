@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
@@ -8,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
+import { registerSuccessfulIcon } from '@/utils/iconUtils';
 
 interface AppCardProps {
   app: AppData; 
@@ -35,6 +35,20 @@ const AppCard: React.FC<AppCardProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 2;
   const imageRef = useRef<HTMLImageElement>(null);
+  const [iconUrl, setIconUrl] = useState<string>(app.icon || '');
+  
+  // Store icon URL when successfully loaded
+  const storeSuccessfulIcon = () => {
+    if (app.url && !imageError && iconUrl && !iconUrl.includes('placeholder')) {
+      try {
+        // Extract domain from the app URL
+        const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
+        registerSuccessfulIcon(domain, iconUrl);
+      } catch (e) {
+        console.warn('Failed to register successful icon:', e);
+      }
+    }
+  };
   
   // Generate initials for avatar fallback
   const getInitials = () => {
@@ -78,10 +92,12 @@ const AppCard: React.FC<AppCardProps> = ({
   useEffect(() => {
     // If we have an icon URL and it's likely cached in browser
     if (app.icon && !app.icon.includes('placeholder') && imageRef.current) {
+      setIconUrl(app.icon);
       const img = imageRef.current;
       if (img.complete) {
         // Image is already loaded (likely from cache)
         setImageLoading(false);
+        storeSuccessfulIcon();
       }
     }
   }, [app.icon]);
@@ -133,15 +149,19 @@ const AppCard: React.FC<AppCardProps> = ({
     if (retryCount === 0) {
       // First retry: add a cache buster
       const timestamp = new Date().getTime();
-      if (imageRef.current && imageRef.current.src) {
-        imageRef.current.src = imageRef.current.src.split('?')[0] + '?' + timestamp;
+      const newUrl = iconUrl.split('?')[0] + '?' + timestamp;
+      setIconUrl(newUrl);
+      if (imageRef.current) {
+        imageRef.current.src = newUrl;
       }
     } 
     else if (retryCount === 1) {
       // Second retry: try Google Favicon API as a fallback
       const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+      const newUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      setIconUrl(newUrl);
       if (imageRef.current) {
-        imageRef.current.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        imageRef.current.src = newUrl;
       }
     }
     else {
@@ -155,6 +175,7 @@ const AppCard: React.FC<AppCardProps> = ({
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
+    storeSuccessfulIcon();
   };
 
   // List view style card
@@ -170,7 +191,7 @@ const AppCard: React.FC<AppCardProps> = ({
           {!imageError ? (
             <img 
               ref={imageRef}
-              src={app.icon} 
+              src={iconUrl} 
               alt={`${app.name} icon`}
               className={`w-12 h-12 rounded-md object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
               onError={handleImageError}
@@ -219,7 +240,7 @@ const AppCard: React.FC<AppCardProps> = ({
         {!imageError ? (
           <img 
             ref={imageRef}
-            src={app.icon} 
+            src={iconUrl} 
             alt={`${app.name} icon`}
             className={`w-16 h-16 object-contain app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
             onError={handleImageError}
@@ -263,7 +284,7 @@ const AppCard: React.FC<AppCardProps> = ({
           {!imageError ? (
             <img 
               ref={imageRef}
-              src={app.icon} 
+              src={iconUrl} 
               alt={`${app.name} icon`}
               className={`large-app-icon dark:brightness-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
@@ -328,7 +349,7 @@ const AppCard: React.FC<AppCardProps> = ({
         {!imageError ? (
           <img 
             ref={imageRef}
-            src={app.icon} 
+            src={iconUrl} 
             alt={`${app.name} icon`}
             className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
             onError={handleImageError}

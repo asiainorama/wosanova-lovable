@@ -23,6 +23,9 @@ export const AppContextUpdater = () => {
     failed: 0
   });
 
+  // Track whether this is the first load or a refresh
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
   // Debounced function to update apps in context
   const updateAppsList = useCallback((apps: AppData[]) => {
     setAllApps(apps);
@@ -31,6 +34,14 @@ export const AppContextUpdater = () => {
   
   useEffect(() => {
     console.log('AppContextUpdater initialized');
+    
+    // Check if this is a first load or a refresh
+    let loadIndicator = sessionStorage.getItem('app_load_indicator');
+    if (!loadIndicator) {
+      sessionStorage.setItem('app_load_indicator', 'loaded');
+    } else {
+      setIsFirstLoad(false);
+    }
     
     // Listen for theme changes to refresh icons
     const handleThemeChange = () => {
@@ -68,6 +79,46 @@ export const AppContextUpdater = () => {
     console.log(`Setting initial ${combinedApps.length} apps with placeholder icons`);
     setAllApps(combinedApps);
     
+    // Try to restore cached icons from previous sessions
+    const restoreCachedIcons = async () => {
+      try {
+        // Check if we have a recently cached complete app list
+        const cachedAppList = localStorage.getItem('complete_app_list');
+        const cachedTimestamp = localStorage.getItem('complete_app_list_timestamp');
+        
+        // If we have a recent cache (less than 1 day old), use it
+        if (cachedAppList && cachedTimestamp) {
+          const timestamp = parseInt(cachedTimestamp, 10);
+          const now = Date.now();
+          const maxAge = 24 * 60 * 60 * 1000; // 1 day
+          
+          if (now - timestamp < maxAge) {
+            try {
+              const parsedApps = JSON.parse(cachedAppList);
+              console.log(`Restored ${parsedApps.length} apps with icons from cache`);
+              updateAppsList(parsedApps);
+              
+              // Still process icons in the background, but with lower priority
+              setTimeout(() => {
+                processIconsAsync(true);
+              }, 5000);
+              
+              return;
+            } catch (e) {
+              console.error('Error parsing cached app list:', e);
+              // Continue with normal flow if parsing fails
+            }
+          }
+        }
+        
+        // No cache or expired cache, proceed with normal icon processing
+        processIconsAsync(false);
+      } catch (e) {
+        console.error('Error restoring cached icons:', e);
+        processIconsAsync(false);
+      }
+    };
+    
     // Preload icons for favorite apps first as they're most important
     const priorityApps = favorites.length > 0 
       ? [...favorites]
@@ -76,11 +127,14 @@ export const AppContextUpdater = () => {
     // Preload common app icons
     preloadCommonAppIcons(priorityApps);
     
-    // Then process all icons in the background with improved batching
-    const processIconsAsync = async () => {
+    // Then start icon processing
+    restoreCachedIcons();
+    
+    // Main icon processing function
+    const processIconsAsync = async (isBackgroundRefresh = false) => {
       try {
         // Process in smaller batches to avoid overwhelming the browser
-        const batchSize = 12; // Adjusted batch size for better performance
+        const batchSize = isBackgroundRefresh ? 20 : 12; // Larger batches for background refresh
         let processedApps: AppData[] = [];
         let successful = 0;
         let failed = 0;
@@ -147,8 +201,21 @@ export const AppContextUpdater = () => {
               failed
             }));
             
+            // Save the complete app list to localStorage periodically (every 3 batches)
+            if ((i / batchSize) % 3 === 0 || i + batchSize >= remainingApps.length) {
+              try {
+                const currentApps = Array.from(
+                  new Map(processedApps.map(app => [app.id, app])).values()
+                );
+                localStorage.setItem('complete_app_list', JSON.stringify(currentApps));
+                localStorage.setItem('complete_app_list_timestamp', Date.now().toString());
+              } catch (e) {
+                console.warn('Failed to save complete app list to cache:', e);
+              }
+            }
+            
             // Small delay between batches to not block UI thread
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, isBackgroundRefresh ? 300 : 100));
           } catch (batchError) {
             console.error(`Error processing batch ${i}-${i+batchSize}:`, batchError);
             
@@ -158,20 +225,23 @@ export const AppContextUpdater = () => {
           }
         }
         
-        // Show success message if most icons were loaded successfully
-        const successRate = (successful / combinedApps.length) * 100;
-        if (successRate > 80) {
-          toast.success(`Íconos cargados: ${Math.round(successRate)}%`, {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-          });
-        } else if (successRate > 50) {
-          toast.info(`Íconos cargados: ${Math.round(successRate)}%`, {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-          });
-        } else {
-          toast.warning(`Algunos íconos no se pudieron cargar`, {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-          });
+        // Only show toast on first load, not on background refreshes
+        if (!isBackgroundRefresh) {
+          // Show success message if most icons were loaded successfully
+          const successRate = (successful / combinedApps.length) * 100;
+          if (successRate > 80) {
+            toast.success(`Íconos cargados: ${Math.round(successRate)}%`, {
+              className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+            });
+          } else if (successRate > 50) {
+            toast.info(`Íconos cargados: ${Math.round(successRate)}%`, {
+              className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+            });
+          } else {
+            toast.warning(`Algunos íconos no se pudieron cargar`, {
+              className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+            });
+          }
         }
         
         // Log detailed statistics
@@ -182,16 +252,25 @@ export const AppContextUpdater = () => {
           new Map(processedApps.map(app => [app.id, app])).values()
         );
         updateAppsList(finalApps);
+        
+        // Save the final complete list to localStorage
+        try {
+          localStorage.setItem('complete_app_list', JSON.stringify(finalApps));
+          localStorage.setItem('complete_app_list_timestamp', Date.now().toString());
+        } catch (e) {
+          console.warn('Failed to save final app list to cache:', e);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error processing app icons:', error);
-        toast.error('Error al cargar algunos íconos de aplicaciones', {
-          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-        });
+        if (!isBackgroundRefresh) {
+          toast.error('Error al cargar algunos íconos de aplicaciones', {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+          });
+        }
       }
     };
-
-    processIconsAsync();
     
     // Cleanup function
     return () => {

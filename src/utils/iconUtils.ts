@@ -2,18 +2,27 @@ import { AppData } from '@/data/apps';
 
 const DEFAULT_ICON = "/placeholder.svg";
 const BRANDFETCH_API_KEY = "aJ5lYIRJ+USZ1gYZaEjt9iNosNoWh4XtrLxTR1vsPHc=";
-const ICON_CACHE_KEY = "app_icon_cache_v2";
-const ICON_CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
+const ICON_CACHE_KEY = "app_icon_cache_v3"; // Updated version for new cache format
+const ICON_CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // Extended to 30 days
 
 // Cache structure for storing icons with expiry times
 interface IconCacheEntry {
   url: string;
   timestamp: number;
   source: string; // Track which source provided the icon
+  success: boolean; // Track if the icon was successfully loaded
 }
 
 interface IconCache {
   [key: string]: IconCacheEntry;
+}
+
+// Store successful icon URLs by domain for quick lookups
+interface SuccessfulIcons {
+  [domain: string]: {
+    url: string;
+    lastVerified: number;
+  };
 }
 
 /**
@@ -156,7 +165,7 @@ const ICON_SOURCES = [
 ];
 
 /**
- * Load the icon cache from localStorage
+ * Load the icon cache from localStorage with improved error handling
  */
 const loadIconCache = (): IconCache => {
   try {
@@ -166,20 +175,79 @@ const loadIconCache = (): IconCache => {
     }
   } catch (error) {
     console.warn('Failed to load icon cache:', error);
+    // If there's an error parsing, clear the cache
+    try {
+      localStorage.removeItem(ICON_CACHE_KEY);
+    } catch (e) {
+      console.error('Failed to clear corrupted icon cache:', e);
+    }
   }
   return {};
 };
 
 /**
- * Save the icon cache to localStorage
+ * Save the icon cache to localStorage with safety mechanisms
  */
 const saveIconCache = (cache: IconCache): void => {
   try {
+    // Limit cache size to avoid localStorage quota issues
+    const cacheEntries = Object.entries(cache);
+    // Keep most recent 500 entries if cache grows too large
+    if (cacheEntries.length > 500) {
+      const sortedEntries = cacheEntries.sort(
+        ([, a], [, b]) => b.timestamp - a.timestamp
+      );
+      const trimmedCache = Object.fromEntries(sortedEntries.slice(0, 500));
+      localStorage.setItem(ICON_CACHE_KEY, JSON.stringify(trimmedCache));
+      console.log(`Trimmed icon cache from ${cacheEntries.length} to 500 entries`);
+      return;
+    }
+    
     localStorage.setItem(ICON_CACHE_KEY, JSON.stringify(cache));
   } catch (error) {
     console.warn('Failed to save icon cache:', error);
+    
+    // If quota exceeded, try to save a smaller cache with just the most critical entries
+    try {
+      const importantDomains = Object.entries(cache)
+        .filter(([key, entry]) => entry.success && entry.url && !entry.url.includes('placeholder'))
+        .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+        .slice(0, 250);
+      
+      const reducedCache = Object.fromEntries(importantDomains);
+      localStorage.setItem(ICON_CACHE_KEY, JSON.stringify(reducedCache));
+      console.log('Saved reduced icon cache due to quota issues');
+    } catch (e) {
+      console.error('Failed to save reduced icon cache:', e);
+    }
   }
 };
+
+/**
+ * Load successful icons from sessionStorage for rapid access
+ */
+const loadSuccessfulIcons = (): SuccessfulIcons => {
+  try {
+    const data = sessionStorage.getItem('successful_icons');
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    return {};
+  }
+};
+
+/**
+ * Save successful icons to sessionStorage
+ */
+const saveSuccessfulIcons = (icons: SuccessfulIcons): void => {
+  try {
+    sessionStorage.setItem('successful_icons', JSON.stringify(icons));
+  } catch (e) {
+    console.warn('Failed to save successful icons:', e);
+  }
+};
+
+// Track successful icons in memory and sessionStorage
+let successfulIcons = loadSuccessfulIcons();
 
 /**
  * Clean expired entries from the cache
@@ -187,12 +255,19 @@ const saveIconCache = (cache: IconCache): void => {
 const cleanExpiredCache = (cache: IconCache): IconCache => {
   const now = Date.now();
   const freshCache: IconCache = {};
+  let expiredCount = 0;
   
-  Object.keys(cache).forEach(key => {
-    if (now - cache[key].timestamp < ICON_CACHE_EXPIRY) {
-      freshCache[key] = cache[key];
+  Object.entries(cache).forEach(([key, entry]) => {
+    if (now - entry.timestamp < ICON_CACHE_EXPIRY) {
+      freshCache[key] = entry;
+    } else {
+      expiredCount++;
     }
   });
+  
+  if (expiredCount > 0) {
+    console.log(`Removed ${expiredCount} expired entries from icon cache`);
+  }
   
   return freshCache;
 };
@@ -216,6 +291,37 @@ const extractDomain = (url: string): string => {
   } catch (error) {
     console.error('Error extracting domain:', error);
     return '';
+  }
+};
+
+/**
+ * Register a successfully loaded icon
+ */
+export const registerSuccessfulIcon = (domain: string, iconUrl: string): void => {
+  if (!domain || !iconUrl || iconUrl.includes('placeholder')) return;
+  
+  // Store in memory cache
+  successfulIcons[domain] = {
+    url: iconUrl,
+    lastVerified: Date.now()
+  };
+  
+  // Persist to sessionStorage
+  saveSuccessfulIcons(successfulIcons);
+  
+  // Update the main cache with success flag
+  const cacheKey = domain;
+  iconCache[cacheKey] = {
+    url: iconUrl,
+    timestamp: Date.now(),
+    source: 'verified-success',
+    success: true
+  };
+  
+  // Only save to localStorage periodically to avoid excessive writes
+  const shouldSave = Math.random() < 0.1; // 10% chance to save on each registration
+  if (shouldSave) {
+    saveIconCache(iconCache);
   }
 };
 
@@ -459,6 +565,12 @@ const fetchLogoFromExternalSources = async (domain: string): Promise<string | nu
  * @returns URL of the icon or default image
  */
 export const getValidIconUrl = (app: AppData): string => {
+  // First check our memory/session cache of successful icons
+  const domain = extractDomain(app.url);
+  if (successfulIcons[domain]?.url) {
+    return successfulIcons[domain].url;
+  }
+  
   // If the app already has a valid icon (not a placeholder), use it
   if (app.icon && !app.icon.includes('placeholder')) {
     return app.icon;
@@ -469,8 +581,18 @@ export const getValidIconUrl = (app: AppData): string => {
     return FALLBACK_ICONS[app.id];
   }
   
-  // Get a lowercase domain for consistent checks
-  const domain = extractDomain(app.url);
+  // Check if we have a cached successful icon in localStorage
+  const cacheKey = domain;
+  if (iconCache[cacheKey]?.success && iconCache[cacheKey].url) {
+    // Also update our in-memory cache
+    successfulIcons[domain] = {
+      url: iconCache[cacheKey].url,
+      lastVerified: iconCache[cacheKey].timestamp
+    };
+    saveSuccessfulIcons(successfulIcons);
+    
+    return iconCache[cacheKey].url;
+  }
   
   // For specific categories, try different approaches (customize as needed)
   if (app.category === 'Redes Sociales') {
@@ -499,6 +621,15 @@ export const isValidImage = (url: string): Promise<boolean> => {
       clearTimeout(timeoutId);
       // Check if the image has actual dimensions
       if (img.naturalWidth > 1 && img.naturalHeight > 1) {
+        // Extract domain from the source URL if possible
+        try {
+          const urlObj = new URL(url);
+          const domain = urlObj.hostname.replace('www.', '');
+          // Register as a successful icon
+          registerSuccessfulIcon(domain, url);
+        } catch (e) {
+          // Unable to parse URL, skip registration
+        }
         resolve(true);
       } else {
         resolve(false);
@@ -552,31 +683,60 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
   const startTime = performance.now();
   let successCount = 0;
   let fallbackCount = 0;
+  let cacheHits = 0;
   
   for (const app of apps) {
     let iconUrl = app.icon;
     let iconSource = 'original';
+    const domain = extractDomain(app.url);
+    
+    // First check in-memory/session cache for instant access
+    if (successfulIcons[domain]?.url) {
+      appsWithIcons.push({
+        ...app,
+        icon: successfulIcons[domain].url
+      });
+      cacheHits++;
+      continue;
+    }
     
     // Skip if the icon is already valid and not a placeholder
     if (iconUrl && !iconUrl.includes('placeholder') && await isValidImage(iconUrl)) {
+      // Register this as successful
+      registerSuccessfulIcon(domain, iconUrl);
       appsWithIcons.push(app);
       successCount++;
       continue;
     }
     
     try {
-      const domain = extractDomain(app.url);
-      
       // 1. First try our hardcoded fallbacks (highest quality)
       if (app.id && FALLBACK_ICONS[app.id]) {
         iconUrl = FALLBACK_ICONS[app.id];
         iconSource = 'fallback';
         fallbackCount++;
+        
+        // Verify the fallback is valid
+        const isValid = await isValidImage(iconUrl);
+        if (isValid) {
+          registerSuccessfulIcon(domain, iconUrl);
+        }
       } 
       // 2. Then check if we have it in cache
       else {
         const cacheKey = domain;
-        if (iconCache[cacheKey]) {
+        if (iconCache[cacheKey] && iconCache[cacheKey].success) {
+          iconUrl = iconCache[cacheKey].url;
+          iconSource = 'cache-success';
+          cacheHits++;
+          
+          // Update in-memory cache
+          successfulIcons[domain] = {
+            url: iconUrl,
+            lastVerified: Date.now()
+          };
+        }
+        else if (iconCache[cacheKey]) {
           iconUrl = iconCache[cacheKey].url;
           iconSource = 'cache';
           successCount++;
@@ -589,6 +749,8 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
             iconUrl = brandfetchIcon;
             iconSource = 'brandfetch';
             successCount++;
+            // Register as successful
+            registerSuccessfulIcon(domain, brandfetchIcon);
           } 
           // 4. Try to extract from website metadata
           else {
@@ -598,6 +760,8 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
               iconUrl = metadataIcon;
               iconSource = 'metadata';
               successCount++;
+              // Register as successful
+              registerSuccessfulIcon(domain, metadataIcon);
             }
             // 5. Try common icon paths and external services
             else {
@@ -607,6 +771,8 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
                 iconUrl = externalIcon;
                 iconSource = 'external';
                 successCount++;
+                // Register as successful
+                registerSuccessfulIcon(domain, externalIcon);
               } else {
                 // 6. Last resort is our getValidIconUrl function
                 iconUrl = getValidIconUrl(app);
@@ -628,10 +794,13 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
     
     // If not valid and we haven't tried Google yet, use Google as last resort
     if (!isValid && !iconUrl.includes('google.com/s2')) {
-      const domain = extractDomain(app.url);
       iconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
       isValid = await isValidImage(iconUrl);
       iconSource = 'google-fallback';
+      
+      if (isValid) {
+        registerSuccessfulIcon(domain, iconUrl);
+      }
     }
     
     appsWithIcons.push({
@@ -641,10 +810,13 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
   }
   
   const endTime = performance.now();
-  const stats = getIconStats();
   
-  console.log(`Icon processing completed in ${Math.round(endTime - startTime)}ms. Success: ${successCount}, Fallback: ${fallbackCount}`);
-  console.log(`Icon cache stats:`, stats);
+  // Periodically save the full cache to localStorage (not on every operation)
+  if (Math.random() < 0.2) { // 20% chance to save on each batch
+    saveIconCache(iconCache);
+  }
+  
+  console.log(`Icon processing completed in ${Math.round(endTime - startTime)}ms. Success: ${successCount}, Cache hits: ${cacheHits}, Fallback: ${fallbackCount}`);
   
   return appsWithIcons;
 };
