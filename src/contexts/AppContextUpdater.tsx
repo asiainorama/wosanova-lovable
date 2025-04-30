@@ -16,6 +16,12 @@ import { toast } from 'sonner';
 export const AppContextUpdater = () => {
   const { setAllApps } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const [processingStats, setProcessingStats] = useState({
+    total: 0,
+    processed: 0,
+    successful: 0,
+    failed: 0
+  });
   
   useEffect(() => {
     console.log('AppContextUpdater initialized');
@@ -45,6 +51,13 @@ export const AppContextUpdater = () => {
       ...investmentApps
     ];
     
+    setProcessingStats({
+      total: combinedApps.length,
+      processed: 0,
+      successful: 0,
+      failed: 0
+    });
+    
     // First add apps with basic placeholder icons for immediate display
     setAllApps(combinedApps);
     
@@ -52,26 +65,71 @@ export const AppContextUpdater = () => {
     const processIconsAsync = async () => {
       try {
         // Process in smaller batches to avoid overwhelming the browser
-        const batchSize = 20;
+        const batchSize = 10; // Reduced batch size for better responsiveness
         let processedApps: AppData[] = [];
+        let successful = 0;
+        let failed = 0;
         
         // Process apps in batches for better user experience
         for (let i = 0; i < combinedApps.length; i += batchSize) {
           const batch = combinedApps.slice(i, i + batchSize);
-          const processedBatch = await fixAppIcons(batch);
-          processedApps = [...processedApps, ...processedBatch];
           
-          // Update the context with what we have so far
-          setAllApps([...processedApps, ...combinedApps.slice(i + batchSize)]);
-          
-          // Small delay between batches to not block UI thread
-          await new Promise(resolve => setTimeout(resolve, 50));
+          try {
+            const processedBatch = await fixAppIcons(batch);
+            
+            // Count successful and failed icons
+            processedBatch.forEach(app => {
+              if (app.icon && !app.icon.includes('placeholder')) {
+                successful++;
+              } else {
+                failed++;
+              }
+            });
+            
+            processedApps = [...processedApps, ...processedBatch];
+            
+            // Update the context with what we have so far
+            setAllApps([...processedApps, ...combinedApps.slice(i + batchSize)]);
+            
+            // Update processing stats
+            setProcessingStats(prev => ({
+              ...prev,
+              processed: i + batchSize > combinedApps.length ? combinedApps.length : i + batchSize,
+              successful,
+              failed
+            }));
+            
+            // Small delay between batches to not block UI thread
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (batchError) {
+            console.error(`Error processing batch ${i}-${i+batchSize}:`, batchError);
+            
+            // Still update with unprocessed batch to avoid stopping the entire process
+            processedApps = [...processedApps, ...batch];
+            failed += batch.length;
+          }
+        }
+        
+        // Show success message if most icons were loaded successfully
+        const successRate = (successful / combinedApps.length) * 100;
+        if (successRate > 80) {
+          toast.success(`Íconos cargados: ${Math.round(successRate)}%`, {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+          });
+        } else if (successRate > 50) {
+          toast.info(`Íconos cargados: ${Math.round(successRate)}%`, {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+          });
+        } else {
+          toast.warning(`Algunos íconos no se pudieron cargar`, {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+          });
         }
         
         // Final update with all processed apps
         setAllApps(processedApps);
         setLoading(false);
-        console.log('App icons processing complete');
+        console.log(`App icons processing complete. Success: ${successful}, Failed: ${failed}`);
       } catch (error) {
         console.error('Error processing app icons:', error);
         toast.error('Error al cargar algunos íconos de aplicaciones', {

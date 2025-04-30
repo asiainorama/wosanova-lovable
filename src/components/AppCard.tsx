@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
-import { Heart, ExternalLink } from 'lucide-react';
+import { Heart, ExternalLink, ImageIcon } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 
 interface AppCardProps {
   app: AppData; 
@@ -31,6 +33,20 @@ const AppCard: React.FC<AppCardProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 2;
+  const imageRef = useRef<HTMLImageElement>(null);
+  
+  // On mount, check if the image is already in cache
+  useEffect(() => {
+    // If we have an icon URL and it's likely cached in browser
+    if (app.icon && !app.icon.includes('placeholder') && imageRef.current) {
+      const img = imageRef.current;
+      if (img.complete) {
+        // Image is already loaded (likely from cache)
+        setImageLoading(false);
+      }
+    }
+  }, [app.icon]);
   
   // Function to handle favorite action
   const handleAction = (e: React.MouseEvent) => {
@@ -62,10 +78,10 @@ const AppCard: React.FC<AppCardProps> = ({
     setImageLoading(false);
     
     // If we haven't tried multiple times, attempt alternative approaches
-    if (retryCount < 2) {
+    if (retryCount < maxRetries) {
       setRetryCount(retryCount + 1);
       
-      // Try Google Favicon as last resort
+      // Try Google Favicon API as a fallback
       if (retryCount === 1) {
         const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
         const img = new Image();
@@ -101,15 +117,17 @@ const AppCard: React.FC<AppCardProps> = ({
           
           {!imageError ? (
             <img 
+              ref={imageRef}
               src={app.icon} 
               alt={`${app.name} icon`}
               className={`w-12 h-12 rounded-md object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
               onError={handleImageError}
               onLoad={handleImageLoad}
+              loading="lazy"
             />
           ) : (
-            <Avatar className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-md">
-              <AvatarFallback className="text-lg font-semibold text-gray-600 dark:text-gray-300">
+            <Avatar className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
+              <AvatarFallback className="text-lg font-semibold text-gray-600 dark:text-gray-300 flex items-center justify-center">
                 {app.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -148,11 +166,13 @@ const AppCard: React.FC<AppCardProps> = ({
         
         {!imageError ? (
           <img 
+            ref={imageRef}
             src={app.icon} 
             alt={`${app.name} icon`}
             className={`w-16 h-16 object-contain app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
             onError={handleImageError}
             onLoad={handleImageLoad}
+            loading="lazy"
           />
         ) : (
           <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -190,11 +210,13 @@ const AppCard: React.FC<AppCardProps> = ({
           
           {!imageError ? (
             <img 
+              ref={imageRef}
               src={app.icon} 
               alt={`${app.name} icon`}
               className={`large-app-icon dark:brightness-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
               onLoad={handleImageLoad}
+              loading="lazy"
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg flex items-center justify-center">
@@ -252,11 +274,13 @@ const AppCard: React.FC<AppCardProps> = ({
       
       {!imageError ? (
         <img 
+          ref={imageRef}
           src={app.icon} 
           alt={`${app.name} icon`}
           className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
           onError={handleImageError}
           onLoad={handleImageLoad}
+          loading="lazy"
         />
       ) : (
         <Avatar className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg mb-2">

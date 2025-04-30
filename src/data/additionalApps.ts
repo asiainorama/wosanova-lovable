@@ -5,7 +5,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "netflix",
     name: "Netflix",
-    icon: "https://brandfetch.com/netflix/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
     url: "https://www.netflix.com",
     category: "Entretenimiento",
     description: "Servicio de streaming con series, películas y documentales",
@@ -14,7 +14,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "disney-plus",
     name: "Disney+",
-    icon: "https://brandfetch.com/disneyplus/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
     url: "https://www.disneyplus.com",
     category: "Entretenimiento",
     description: "Plataforma de streaming de Disney, Pixar, Marvel, Star Wars y National Geographic",
@@ -23,7 +23,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "hbo",
     name: "HBO",
-    icon: "https://brandfetch.com/hbo/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/1/17/HBO_Max_Logo.svg",
     url: "https://www.hbo.com",
     category: "Entretenimiento",
     description: "Plataforma de streaming con series y películas exclusivas",
@@ -32,7 +32,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "amazon-prime",
     name: "Amazon Prime",
-    icon: "https://brandfetch.com/amazon-prime/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.svg",
     url: "https://www.primevideo.com",
     category: "Entretenimiento",
     description: "Servicio de streaming de Amazon con películas, series y contenido original",
@@ -41,7 +41,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "spotify",
     name: "Spotify",
-    icon: "https://brandfetch.com/spotify/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg",
     url: "https://www.spotify.com",
     category: "Entretenimiento",
     description: "Servicio de streaming de música, podcasts y audiolibros",
@@ -50,7 +50,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "apple-music",
     name: "Apple Music",
-    icon: "https://brandfetch.com/apple-music/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Apple_Music_logo.svg",
     url: "https://music.apple.com",
     category: "Entretenimiento",
     description: "Servicio de streaming musical de Apple",
@@ -59,7 +59,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "youtube-music",
     name: "YouTube Music",
-    icon: "https://brandfetch.com/youtube-music/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Youtube_Music_icon.svg",
     url: "https://music.youtube.com",
     category: "Entretenimiento",
     description: "Servicio de streaming musical de YouTube",
@@ -68,7 +68,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "youtube",
     name: "YouTube",
-    icon: "https://brandfetch.com/youtube/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg",
     url: "https://www.youtube.com",
     category: "Entretenimiento",
     description: "Plataforma para compartir y ver videos",
@@ -77,7 +77,7 @@ export const entertainmentApps: AppData[] = [
   {
     id: "youtube-kids",
     name: "YouTube Kids",
-    icon: "https://brandfetch.com/youtube-kids/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/f/fb/YouTube_Kids_LogoVector.svg",
     url: "https://www.youtubekids.com",
     category: "Entretenimiento",
     description: "Versión de YouTube diseñada para niños",
@@ -90,7 +90,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-drive",
     name: "Google Drive",
-    icon: "https://brandfetch.com/google-drive/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg",
     url: "https://drive.google.com",
     category: "Productividad",
     description: "Almacenamiento en la nube y edición colaborativa de documentos",
@@ -99,7 +99,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-sheets",
     name: "Google Sheets",
-    icon: "https://brandfetch.com/google-sheets/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg",
     url: "https://sheets.google.com",
     category: "Productividad",
     description: "Hojas de cálculo en línea de Google",
@@ -108,7 +108,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-docs",
     name: "Google Docs",
-    icon: "https://brandfetch.com/google-docs/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/0/01/Google_Docs_logo_%282014-2020%29.svg",
     url: "https://docs.google.com",
     category: "Productividad",
     description: "Procesador de textos en línea de Google",
@@ -117,7 +117,7 @@ export const productivityApps: AppData[] = [
   {
     id: "dropbox",
     name: "Dropbox",
-    icon: "https://brandfetch.com/dropbox/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/4/47/Dropbox_logo_%282013-2020%29.svg",
     url: "https://www.dropbox.com",
     category: "Productividad",
     description: "Servicio de alojamiento de archivos en la nube",
@@ -126,7 +126,7 @@ export const productivityApps: AppData[] = [
   {
     id: "excel-online",
     name: "Excel Online",
-    icon: "https://brandfetch.com/microsoft-excel/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel_%282019%E2%80%93present%29.svg",
     url: "https://www.office.com/launch/excel",
     category: "Productividad",
     description: "Versión web de Microsoft Excel",
@@ -135,7 +135,7 @@ export const productivityApps: AppData[] = [
   {
     id: "word-online",
     name: "Word Online",
-    icon: "https://brandfetch.com/microsoft-word/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg",
     url: "https://www.office.com/launch/word",
     category: "Productividad",
     description: "Versión web de Microsoft Word",
@@ -144,7 +144,7 @@ export const productivityApps: AppData[] = [
   {
     id: "powerpoint-online",
     name: "PowerPoint Online",
-    icon: "https://brandfetch.com/microsoft-powerpoint/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg",
     url: "https://www.office.com/launch/powerpoint",
     category: "Productividad",
     description: "Versión web de Microsoft PowerPoint",
@@ -153,7 +153,7 @@ export const productivityApps: AppData[] = [
   {
     id: "onedrive",
     name: "OneDrive",
-    icon: "https://brandfetch.com/microsoft-onedrive/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/b/b4/OneDrive_icon.svg",
     url: "https://onedrive.live.com",
     category: "Productividad",
     description: "Servicio de almacenamiento en la nube de Microsoft",
@@ -162,7 +162,7 @@ export const productivityApps: AppData[] = [
   {
     id: "icloud",
     name: "iCloud",
-    icon: "https://brandfetch.com/icloud/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
     url: "https://www.icloud.com",
     category: "Productividad",
     description: "Servicio de almacenamiento en la nube de Apple",
@@ -171,7 +171,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-fotos",
     name: "Google Fotos",
-    icon: "https://brandfetch.com/google-photos/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Google_Photos_icon.svg",
     url: "https://photos.google.com",
     category: "Productividad",
     description: "Servicio de almacenamiento y compartición de fotos",
@@ -180,7 +180,7 @@ export const productivityApps: AppData[] = [
   {
     id: "gmail",
     name: "Gmail",
-    icon: "https://brandfetch.com/gmail/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg",
     url: "https://mail.google.com",
     category: "Productividad",
     description: "Servicio de correo electrónico de Google",
@@ -189,7 +189,7 @@ export const productivityApps: AppData[] = [
   {
     id: "outlook",
     name: "Outlook",
-    icon: "https://brandfetch.com/microsoft-outlook/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Office_Outlook_%282018%E2%80%93present%29.svg",
     url: "https://outlook.live.com",
     category: "Productividad",
     description: "Servicio de correo electrónico de Microsoft",
@@ -198,7 +198,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-keep",
     name: "Google Keep",
-    icon: "https://brandfetch.com/google-keep/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Keep_icon_%282020%29.svg",
     url: "https://keep.google.com",
     category: "Productividad",
     description: "Servicio de notas de Google",
@@ -207,7 +207,7 @@ export const productivityApps: AppData[] = [
   {
     id: "google-calendar",
     name: "Google Calendar",
-    icon: "https://brandfetch.com/google-calendar/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg",
     url: "https://calendar.google.com",
     category: "Productividad",
     description: "Calendario en línea de Google",
@@ -216,7 +216,7 @@ export const productivityApps: AppData[] = [
   {
     id: "power-bi",
     name: "Power BI",
-    icon: "https://brandfetch.com/microsoft-power-bi/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Power_BI_logo.svg",
     url: "https://app.powerbi.com",
     category: "Productividad",
     description: "Servicio de análisis de datos de Microsoft",
@@ -225,7 +225,7 @@ export const productivityApps: AppData[] = [
   {
     id: "prezi",
     name: "Prezi",
-    icon: "https://brandfetch.com/prezi/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Prezi_Logo.svg",
     url: "https://prezi.com",
     category: "Productividad",
     description: "Software de presentaciones alternativo a PowerPoint",
@@ -234,7 +234,7 @@ export const productivityApps: AppData[] = [
   {
     id: "todo",
     name: "Microsoft To Do",
-    icon: "https://brandfetch.com/microsoft-todo/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Microsoft_To-Do_icon.svg",
     url: "https://to-do.microsoft.com",
     category: "Productividad",
     description: "Aplicación de gestión de tareas de Microsoft",
@@ -243,7 +243,7 @@ export const productivityApps: AppData[] = [
   {
     id: "slack",
     name: "Slack",
-    icon: "https://brandfetch.com/slack/icon",
+    icon: "https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_128.png",
     url: "https://slack.com",
     category: "Productividad",
     description: "Plataforma de comunicación en equipo",
@@ -252,7 +252,7 @@ export const productivityApps: AppData[] = [
   {
     id: "trello",
     name: "Trello",
-    icon: "https://brandfetch.com/trello/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Trello-logo-blue.svg",
     url: "https://trello.com",
     category: "Productividad",
     description: "Herramienta de gestión de proyectos basada en tableros",
@@ -261,7 +261,7 @@ export const productivityApps: AppData[] = [
   {
     id: "monday-app",
     name: "Monday",
-    icon: "https://brandfetch.com/monday/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Monday.com_logo.svg",
     url: "https://monday.com",
     category: "Productividad",
     description: "Plataforma de gestión del trabajo visual",
@@ -270,7 +270,7 @@ export const productivityApps: AppData[] = [
   {
     id: "anydo",
     name: "Any.do",
-    icon: "https://brandfetch.com/any.do/icon",
+    icon: "https://static.any.do/web/v2/images/new_design/favicon.svg",
     url: "https://www.any.do",
     category: "Productividad",
     description: "Aplicación de listas de tareas y calendario",
@@ -279,7 +279,7 @@ export const productivityApps: AppData[] = [
   {
     id: "asana",
     name: "Asana",
-    icon: "https://brandfetch.com/asana/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/3b/Asana_logo.svg",
     url: "https://asana.com",
     category: "Productividad",
     description: "Herramienta de gestión de proyectos y tareas en equipo",
@@ -292,7 +292,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "facebook",
     name: "Facebook",
-    icon: "https://brandfetch.com/facebook/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg",
     url: "https://www.facebook.com",
     category: "Redes Sociales",
     description: "Red social para conectar con amigos y familiares",
@@ -301,7 +301,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "instagram",
     name: "Instagram",
-    icon: "https://brandfetch.com/instagram/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg",
     url: "https://www.instagram.com",
     category: "Redes Sociales",
     description: "Red social de fotos y videos",
@@ -310,7 +310,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "xcom",
     name: "X",
-    icon: "https://brandfetch.com/x/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/5/57/X_logo_2023.svg",
     url: "https://x.com",
     category: "Redes Sociales",
     description: "Plataforma de microblogging anteriormente conocida como Twitter",
@@ -319,7 +319,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "messenger",
     name: "Messenger",
-    icon: "https://brandfetch.com/messenger/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/9/98/Facebook_Messenger_logo.svg",
     url: "https://www.messenger.com",
     category: "Redes Sociales",
     description: "Aplicación de mensajería instantánea de Facebook",
@@ -328,7 +328,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "tinder",
     name: "Tinder",
-    icon: "https://brandfetch.com/tinder/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Tinder_logo_2017.svg",
     url: "https://tinder.com",
     category: "Redes Sociales",
     description: "Aplicación de citas en línea",
@@ -337,7 +337,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "twitch",
     name: "Twitch",
-    icon: "https://brandfetch.com/twitch/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/2/26/Twitch_logo.svg",
     url: "https://www.twitch.tv",
     category: "Redes Sociales",
     description: "Plataforma de streaming de video en vivo",
@@ -346,7 +346,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "tiktok",
     name: "TikTok",
-    icon: "https://brandfetch.com/tiktok/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg",
     url: "https://www.tiktok.com",
     category: "Redes Sociales",
     description: "Red social de videos cortos",
@@ -355,7 +355,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "telegram",
     name: "Telegram",
-    icon: "https://brandfetch.com/telegram/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
     url: "https://web.telegram.org",
     category: "Redes Sociales",
     description: "Aplicación de mensajería instantánea",
@@ -364,7 +364,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "discord",
     name: "Discord",
-    icon: "https://brandfetch.com/discord/icon",
+    icon: "https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg",
     url: "https://discord.com",
     category: "Redes Sociales",
     description: "Plataforma de chat y voz para comunidades",
@@ -373,7 +373,7 @@ export const socialMediaApps: AppData[] = [
   {
     id: "whatsapp-web",
     name: "WhatsApp Web",
-    icon: "https://brandfetch.com/whatsapp/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
     url: "https://web.whatsapp.com",
     category: "Redes Sociales",
     description: "Versión web de la aplicación de mensajería instantánea",
@@ -386,7 +386,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "duolingo",
     name: "Duolingo",
-    icon: "https://brandfetch.com/duolingo/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/8/8c/Duolingo_logo.svg",
     url: "https://www.duolingo.com",
     category: "Educación",
     description: "Plataforma de aprendizaje de idiomas",
@@ -395,7 +395,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "airbnb",
     name: "Airbnb",
-    icon: "https://brandfetch.com/airbnb/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_logo_b%C3%A9lo.svg",
     url: "https://www.airbnb.com",
     category: "Viajes",
     description: "Plataforma de alquiler de alojamientos",
@@ -404,7 +404,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "temu",
     name: "Temu",
-    icon: "https://brandfetch.com/temu/icon",
+    icon: "https://s.alicdn.com/@sc04/kf/H6e543b6b996e43999399a979739449a4E.png",
     url: "https://www.temu.com",
     category: "Compras",
     description: "Tienda online de productos a bajo precio",
@@ -413,7 +413,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "aliexpress",
     name: "AliExpress",
-    icon: "https://brandfetch.com/aliexpress/icon",
+    icon: "https://ae01.alicdn.com/kf/H7e494c96a28a479ca939999669549724V.png",
     url: "https://www.aliexpress.com",
     category: "Compras",
     description: "Plataforma de comercio electrónico de productos chinos",
@@ -422,7 +422,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "amazon",
     name: "Amazon",
-    icon: "https://brandfetch.com/amazon/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
     url: "https://www.amazon.com",
     category: "Compras",
     description: "Tienda online con millones de productos",
@@ -431,7 +431,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "ikea",
     name: "IKEA",
-    icon: "https://brandfetch.com/ikea/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/IKEA_logo.svg/800px-IKEA_logo.svg.png",
     url: "https://www.ikea.com",
     category: "Compras",
     description: "Tienda de muebles y decoración del hogar",
@@ -440,7 +440,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "blablacar",
     name: "BlaBlaCar",
-    icon: "https://brandfetch.com/blablacar/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/BlaBlaCar_logo.svg/1200px-BlaBlaCar_logo.svg.png",
     url: "https://www.blablacar.es",
     category: "Viajes",
     description: "Plataforma para compartir viajes en coche",
@@ -449,7 +449,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "uber",
     name: "Uber",
-    icon: "https://brandfetch.com/uber/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.svg",
     url: "https://www.uber.com",
     category: "Viajes",
     description: "Servicio de transporte privado",
@@ -458,7 +458,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "cabify",
     name: "Cabify",
-    icon: "https://brandfetch.com/cabify/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Cabify_Logo.svg/2560px-Cabify_Logo.svg.png",
     url: "https://cabify.com",
     category: "Viajes",
     description: "Servicio de transporte privado",
@@ -467,7 +467,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "evernote",
     name: "Evernote",
-    icon: "https://brandfetch.com/evernote/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Evernote_logo_2018.svg",
     url: "https://evernote.com",
     category: "Productividad",
     description: "Aplicación para tomar notas y organizar tareas",
@@ -476,7 +476,7 @@ export const otherPopularApps: AppData[] = [
   {
     id: "glovo",
     name: "Glovo",
-    icon: "https://brandfetch.com/glovo/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Glovo_logo.svg/2560px-Glovo_logo.svg.png",
     url: "https://glovoapp.com",
     category: "Servicios",
     description: "Servicio de entrega a domicilio",
@@ -489,7 +489,7 @@ export const investmentApps: AppData[] = [
   {
     id: "quantfury",
     name: "Quantfury",
-    icon: "https://brandfetch.com/quantfury/icon",
+    icon: "https://quantfury.com/favicon.ico",
     url: "https://quantfury.com",
     category: "Inversión",
     description: "Plataforma de trading sin comisiones",
@@ -498,7 +498,7 @@ export const investmentApps: AppData[] = [
   {
     id: "tradingview",
     name: "TradingView",
-    icon: "https://brandfetch.com/tradingview/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/e/e4/TradingView_logo.svg",
     url: "https://www.tradingview.com",
     category: "Inversión",
     description: "Plataforma de gráficos y análisis de mercados",
@@ -507,7 +507,7 @@ export const investmentApps: AppData[] = [
   {
     id: "binance",
     name: "Binance",
-    icon: "https://brandfetch.com/binance/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Binance-coin-bnb-logo.png",
     url: "https://www.binance.com",
     category: "Criptomonedas",
     description: "Exchange de criptomonedas líder mundial",
@@ -516,7 +516,7 @@ export const investmentApps: AppData[] = [
   {
     id: "coinbase",
     name: "Coinbase",
-    icon: "https://brandfetch.com/coinbase/icon",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/1/1f/Coinbase.svg",
     url: "https://www.coinbase.com",
     category: "Criptomonedas",
     description: "Plataforma para comprar, vender y almacenar criptomonedas",
@@ -525,7 +525,7 @@ export const investmentApps: AppData[] = [
   {
     id: "kucoin",
     name: "KuCoin",
-    icon: "https://brandfetch.com/kucoin/icon",
+    icon: "https://assets.kucoin.com/www/kucoin_logo.png",
     url: "https://www.kucoin.com",
     category: "Criptomonedas",
     description: "Exchange de criptomonedas con amplia variedad de tokens",
@@ -534,7 +534,7 @@ export const investmentApps: AppData[] = [
   {
     id: "investing",
     name: "Investing.com",
-    icon: "https://brandfetch.com/investing.com/icon",
+    icon: "https://i-invdn-com.investing.com/content/nologo.svg",
     url: "https://www.investing.com",
     category: "Inversión",
     description: "Portal de información financiera y análisis de mercados",
@@ -543,7 +543,7 @@ export const investmentApps: AppData[] = [
   {
     id: "etoro",
     name: "eToro",
-    icon: "https://brandfetch.com/etoro/icon",
+    icon: "https://etoro.tw/wp-content/uploads/2021/08/etoro_sq_logo.svg",
     url: "https://www.etoro.com",
     category: "Inversión",
     description: "Plataforma de trading e inversión social",
@@ -552,7 +552,7 @@ export const investmentApps: AppData[] = [
   {
     id: "degiro",
     name: "DEGIRO",
-    icon: "https://brandfetch.com/degiro/icon",
+    icon: "https://static.degiro.com/assets/img/favicons/favicon-192x192.png",
     url: "https://www.degiro.es",
     category: "Inversión",
     description: "Broker en línea con bajas comisiones",
@@ -561,7 +561,7 @@ export const investmentApps: AppData[] = [
   {
     id: "interactive-brokers",
     name: "Interactive Brokers",
-    icon: "https://brandfetch.com/interactive-brokers/icon",
+    icon: "https://www.interactivebrokers.com/favicon.ico",
     url: "https://www.interactivebrokers.com",
     category: "Inversión",
     description: "Broker global con acceso a múltiples mercados",

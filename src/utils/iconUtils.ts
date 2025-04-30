@@ -1,3 +1,4 @@
+
 import { AppData } from '@/data/apps';
 
 const DEFAULT_ICON = "/placeholder.svg";
@@ -50,6 +51,7 @@ const FALLBACK_ICONS: Record<string, string> = {
   "google-docs": "https://upload.wikimedia.org/wikipedia/commons/0/01/Google_Docs_logo_%282014-2020%29.svg",
   "google-sheets": "https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg",
   "google-slides": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Google_Slides_logo_%282014-2020%29.svg",
+  "google-drive": "https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg",
   // Finance
   "paypal": "https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg",
   "venmo": "https://upload.wikimedia.org/wikipedia/commons/0/09/Venmo_logo.svg",
@@ -61,6 +63,18 @@ const FALLBACK_ICONS: Record<string, string> = {
   "airbnb": "https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_logo_b%C3%A9lo.svg",
   "doordash": "https://upload.wikimedia.org/wikipedia/commons/0/0c/DoorDash_Logo.svg",
   "github-copilot": "https://logohistory.net/wp-content/uploads/2023/08/GitHub-Copilot-Symbol.png",
+  
+  // New additions
+  "hyperwrite": "https://assets-global.website-files.com/60de2701a7b28f19ce5c8211/60de4efb8ce8a53964cce60b_hyperwrite-logo-symbol.svg",
+  "jasper": "https://assets-global.website-files.com/60e7f99b504baaa72a6526d1/62b4fa0aad0a937b14090a57_jasper-logomark.svg",
+  "leonardo": "https://leonardo.ai/favicon-32x32.png",
+  "runway": "https://runwayml.com/images/favicon.png",
+  "wordstream": "https://www.wordstream.com/wp-content/uploads/2022/03/favicon-32x32.png",
+  "zapier": "https://cdn.zapier.com/zapier/images/favicon.png",
+  "duolingo": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Duolingo_logo.svg",
+  "simplify": "https://simplified.com/favicon.ico",
+  "excel-online": "https://upload.wikimedia.org/wikipedia/commons/3/34/Microsoft_Office_Excel_%282019%E2%80%93present%29.svg",
+  "word-online": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg",
 };
 
 /**
@@ -69,17 +83,26 @@ const FALLBACK_ICONS: Record<string, string> = {
 const ICON_APIS = [
   // Function to get Clearbit icon
   (domain: string) => `https://logo.clearbit.com/${domain}`,
-  // Function to get Logo.dev icon
-  (domain: string) => `https://api.logo.dev/v1/company?domain=${domain}`,
-  // Function to get direct favicon
+  // Function to get favicon.ico directly
   (domain: string) => `https://${domain}/favicon.ico`,
   // Function to get alternative favicon
   (domain: string) => `https://${domain}/favicon.png`,
   // Function to get touch icon
   (domain: string) => `https://${domain}/apple-touch-icon.png`,
-  // Function to get google icons
-  (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+  // Function to get touch icon alternative
+  (domain: string) => `https://${domain}/apple-touch-icon-precomposed.png`,
+  // Function to get google icons (more reliable as last resort)
+  (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+  // Function to get Logo.dev icon
+  (domain: string) => `https://api.logo.dev/v1/company?domain=${domain}`,
+  // DuckDuckGo favicon service (can be more reliable than others)
+  (domain: string) => `https://icons.duckduckgo.com/ip3/${domain}.ico`
 ];
+
+/**
+ * Improved cache to avoid multiple identical API calls
+ */
+const iconCache: Record<string, string> = {};
 
 /**
  * Fetches icon from Brandfetch API
@@ -88,6 +111,12 @@ const ICON_APIS = [
  */
 const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
   try {
+    // Check if we have this in cache
+    const cacheKey = `brandfetch_${domain}`;
+    if (iconCache[cacheKey]) {
+      return iconCache[cacheKey];
+    }
+    
     // Avoid making too many requests if we're getting rate limited
     if (window.localStorage.getItem('brandfetch_rate_limited') === 'true') {
       const timestamp = Number(window.localStorage.getItem('brandfetch_rate_limit_time') || '0');
@@ -98,6 +127,7 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
       }
     }
 
+    console.log(`Fetching Brandfetch icon for ${domain}`);
     const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
       method: 'GET',
       headers: {
@@ -129,6 +159,7 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
       if (vectorLogo && vectorLogo.formats) {
         const svgFormat = vectorLogo.formats.find((format: any) => format.format === 'svg');
         if (svgFormat && svgFormat.src) {
+          iconCache[cacheKey] = svgFormat.src; // Cache the result
           return svgFormat.src;
         }
       }
@@ -136,6 +167,7 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
       // If no vector, take the first logo with any format
       for (const logo of data.logos) {
         if (logo.formats && logo.formats.length > 0 && logo.formats[0].src) {
+          iconCache[cacheKey] = logo.formats[0].src; // Cache the result
           return logo.formats[0].src;
         }
       }
@@ -145,6 +177,7 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
     if (data.icons && data.icons.length > 0) {
       for (const icon of data.icons) {
         if (icon.formats && icon.formats.length > 0 && icon.formats[0].src) {
+          iconCache[cacheKey] = icon.formats[0].src; // Cache the result
           return icon.formats[0].src;
         }
       }
@@ -163,12 +196,24 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
  * @returns Promise with the logo URL or null if not found
  */
 const fetchLogoFromExternalSources = async (domain: string): Promise<string | null> => {
+  // Check cache first
+  const cacheKey = `external_${domain}`;
+  if (iconCache[cacheKey]) {
+    return iconCache[cacheKey];
+  }
+  
   // For each source, try to get a valid image
   for (const getIconUrl of ICON_APIS) {
-    const iconUrl = getIconUrl(domain);
-    const isValid = await isValidImage(iconUrl);
-    if (isValid) {
-      return iconUrl;
+    try {
+      const iconUrl = getIconUrl(domain);
+      const isValid = await isValidImage(iconUrl);
+      if (isValid) {
+        iconCache[cacheKey] = iconUrl; // Cache the result
+        return iconUrl;
+      }
+    } catch (error) {
+      console.warn(`Error checking icon URL for ${domain}:`, error);
+      continue; // Try the next API if this one fails
     }
   }
   
@@ -212,8 +257,24 @@ export const getValidIconUrl = (app: AppData): string => {
 export const isValidImage = (url: string): Promise<boolean> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
+    const timeoutId = setTimeout(() => {
+      img.src = '';
+      resolve(false);
+    }, 3000); // 3 second timeout for image loading
+    
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      // Check if the image has actual dimensions
+      if (img.naturalWidth > 1 && img.naturalHeight > 1) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    };
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      resolve(false);
+    };
     img.src = url;
   });
 };
@@ -225,9 +286,13 @@ export const isValidImage = (url: string): Promise<boolean> => {
  */
 export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
   const appsWithIcons = [];
+  const startTime = performance.now();
+  let successCount = 0;
+  let fallbackCount = 0;
   
   for (const app of apps) {
     let iconUrl = app.icon;
+    let iconSource = 'original';
     
     // If no icon, or current icon is placeholder, try to get a better one
     if (!iconUrl || iconUrl.includes('placeholder')) {
@@ -237,6 +302,8 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
         // First try our hardcoded fallbacks (highest quality)
         if (app.id && FALLBACK_ICONS[app.id]) {
           iconUrl = FALLBACK_ICONS[app.id];
+          iconSource = 'fallback';
+          fallbackCount++;
         } 
         // Then try Brandfetch API
         else {
@@ -244,6 +311,8 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
           
           if (brandfetchIcon) {
             iconUrl = brandfetchIcon;
+            iconSource = 'brandfetch';
+            successCount++;
           } 
           // If Brandfetch doesn't work, try other icon sources
           else {
@@ -251,26 +320,42 @@ export const fixAppIcons = async (apps: AppData[]): Promise<AppData[]> => {
             
             if (externalIcon) {
               iconUrl = externalIcon;
+              iconSource = 'external';
+              successCount++;
             } else {
               // Last resort is our getValidIconUrl function
               iconUrl = getValidIconUrl(app);
+              iconSource = 'fallback';
+              fallbackCount++;
             }
           }
         }
       } catch (error) {
         console.error('Error fetching icon for', app.name, error);
         iconUrl = getValidIconUrl(app);
+        iconSource = 'error-fallback';
       }
     }
     
     // Verify the icon is valid before setting it
-    const isValid = await isValidImage(iconUrl);
+    let isValid = await isValidImage(iconUrl);
+    
+    // If not valid and we haven't tried Google yet, use Google as last resort
+    if (!isValid && !iconUrl.includes('google.com/s2')) {
+      const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+      iconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      isValid = await isValidImage(iconUrl);
+      iconSource = 'google-fallback';
+    }
     
     appsWithIcons.push({
       ...app,
       icon: isValid ? iconUrl : DEFAULT_ICON
     });
   }
+  
+  const endTime = performance.now();
+  console.log(`Icon processing completed in ${Math.round(endTime - startTime)}ms. Success: ${successCount}, Fallback: ${fallbackCount}`);
   
   return appsWithIcons;
 };
