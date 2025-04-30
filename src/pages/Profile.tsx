@@ -23,6 +23,17 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
+// Define profile type based on the actual database structure
+interface UserProfile {
+  username?: string;
+  avatar_url?: string;
+  theme_mode?: string;
+  language?: string;
+}
+
+type ThemeMode = 'light' | 'dark' | 'system';
+type Language = 'es' | 'en';
+
 const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,28 +53,33 @@ const Profile = () => {
         setUserId(session.user.id);
         
         // Try to get user profile data from Supabase
-        const { data: profileData } = await supabase
-          .from('user_profiles')
-          .select('username, avatar_url, theme_mode, language')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (profileData) {
-          setUsername(profileData.username || '');
-          setAvatarUrl(profileData.avatar_url || '');
-          
-          // Set theme and language if available
-          if (profileData.theme_mode) {
-            setMode(profileData.theme_mode);
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('username, avatar_url, theme_mode, language')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (data && !error) {
+            const profileData = data as UserProfile;
+            setUsername(profileData.username || '');
+            setAvatarUrl(profileData.avatar_url || '');
+            
+            // Set theme and language if available
+            if (profileData.theme_mode) {
+              setMode(profileData.theme_mode as ThemeMode);
+            }
+            
+            if (profileData.language) {
+              setLanguage(profileData.language as Language);
+            }
+            
+            // Also update localStorage for immediate use
+            localStorage.setItem('username', profileData.username || '');
+            localStorage.setItem('avatarUrl', profileData.avatar_url || '');
           }
-          
-          if (profileData.language) {
-            setLanguage(profileData.language);
-          }
-          
-          // Also update localStorage for immediate use
-          localStorage.setItem('username', profileData.username || '');
-          localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
         }
       }
     };
@@ -97,19 +113,24 @@ const Profile = () => {
     
     try {
       // Save to Supabase
-      const { error } = await supabase
-        .from('user_profiles')
-        .upsert({ 
-          id: userId,
-          username,
-          avatar_url: avatarUrl,
-          theme_mode: mode,
-          language: language
-        }, { 
-          onConflict: 'id'
-        });
-        
-      if (error) throw error;
+      try {
+        const { error } = await supabase
+          .from('user_profiles')
+          .upsert({ 
+            id: userId,
+            username,
+            avatar_url: avatarUrl,
+            theme_mode: mode,
+            language: language
+          }, { 
+            onConflict: 'id'
+          });
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error upserting to user_profiles:', error);
+        throw error;
+      }
       
       // Save to localStorage as well for immediate use
       localStorage.setItem('username', username);

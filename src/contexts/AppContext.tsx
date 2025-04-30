@@ -13,6 +13,11 @@ interface AppContextType {
   setAllApps: (apps: AppData[]) => void; 
 }
 
+// Define favorites type based on the actual database structure
+interface UserFavorite {
+  app_data: AppData;
+}
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -43,33 +48,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const loadFavorites = async () => {
       if (userId) {
         // Try to load from Supabase
-        const { data, error } = await supabase
-          .from('user_favorites')
-          .select('app_data')
-          .eq('user_id', userId);
-          
-        if (data && data.length > 0 && !error) {
-          // Use favorites from Supabase
-          const favoriteApps = data.map(item => item.app_data);
-          setFavorites(favoriteApps);
-        } else {
-          // If no favorites in Supabase, try localStorage
+        try {
+          const { data, error } = await supabase
+            .from('user_favorites')
+            .select('app_data');
+            
+          if (data && data.length > 0 && !error) {
+            // Use favorites from Supabase
+            const favoriteApps = data.map((item: UserFavorite) => item.app_data);
+            setFavorites(favoriteApps);
+          } else {
+            // If no favorites in Supabase, try localStorage
+            const storedFavorites = localStorage.getItem('favorites');
+            if (storedFavorites) {
+              try {
+                const parsedFavorites = JSON.parse(storedFavorites);
+                setFavorites(parsedFavorites);
+                
+                // Save to Supabase for next time
+                parsedFavorites.forEach(async (app: AppData) => {
+                  try {
+                    await supabase
+                      .from('user_favorites')
+                      .upsert({ 
+                        user_id: userId, 
+                        app_id: app.id,
+                        app_data: app 
+                      });
+                  } catch (error) {
+                    console.error('Error saving favorite to Supabase:', error);
+                  }
+                });
+              } catch (error) {
+                console.error('Error parsing favorites from localStorage', error);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error loading favorites from Supabase:', error);
+          // Fall back to localStorage
           const storedFavorites = localStorage.getItem('favorites');
           if (storedFavorites) {
             try {
-              const parsedFavorites = JSON.parse(storedFavorites);
-              setFavorites(parsedFavorites);
-              
-              // Save to Supabase for next time
-              parsedFavorites.forEach(async (app: AppData) => {
-                await supabase
-                  .from('user_favorites')
-                  .upsert({ 
-                    user_id: userId, 
-                    app_id: app.id,
-                    app_data: app 
-                  });
-              });
+              setFavorites(JSON.parse(storedFavorites));
             } catch (error) {
               console.error('Error parsing favorites from localStorage', error);
             }
@@ -99,23 +120,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('favorites', JSON.stringify(favorites));
       
       if (userId) {
-        // Remove all existing favorites for this user
-        await supabase
-          .from('user_favorites')
-          .delete()
-          .eq('user_id', userId);
-          
-        // Insert new favorites
-        if (favorites.length > 0) {
-          const favoritesToInsert = favorites.map(app => ({
-            user_id: userId,
-            app_id: app.id,
-            app_data: app
-          }));
-          
+        try {
+          // Remove all existing favorites for this user
           await supabase
             .from('user_favorites')
-            .insert(favoritesToInsert);
+            .delete()
+            .eq('user_id', userId);
+            
+          // Insert new favorites
+          if (favorites.length > 0) {
+            const favoritesToInsert = favorites.map(app => ({
+              user_id: userId,
+              app_id: app.id,
+              app_data: app
+            }));
+            
+            try {
+              await supabase
+                .from('user_favorites')
+                .insert(favoritesToInsert);
+            } catch (error) {
+              console.error('Error inserting favorites to Supabase:', error);
+            }
+          }
+        } catch (error) {
+          console.error('Error saving favorites to Supabase:', error);
         }
       }
     };

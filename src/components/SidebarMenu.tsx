@@ -22,6 +22,12 @@ interface SidebarMenuProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Define profile type based on the actual database structure
+interface UserProfile {
+  username?: string;
+  avatar_url?: string;
+}
+
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const location = useLocation();
   const { mode, color } = useTheme();
@@ -46,20 +52,25 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       if (session?.user) {
         setUserId(session.user.id);
         
-        // Try to get user profile data from Supabase
-        const { data: profileData } = await supabase
-          .from('user_profiles')
-          .select('username, avatar_url')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (profileData) {
-          setUsername(profileData.username || '');
-          setAvatarUrl(profileData.avatar_url || '');
-          
-          // Also update localStorage for immediate use
-          localStorage.setItem('username', profileData.username || '');
-          localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+        // Try to get user profile data
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('username, avatar_url')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (data && !error) {
+            const profileData = data as UserProfile;
+            setUsername(profileData.username || '');
+            setAvatarUrl(profileData.avatar_url || '');
+            
+            // Also update localStorage for immediate use
+            localStorage.setItem('username', profileData.username || '');
+            localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
         }
       }
     };
