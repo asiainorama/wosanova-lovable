@@ -59,6 +59,7 @@ export const AppContextUpdater = () => {
     });
     
     // First add apps with basic placeholder icons for immediate display
+    console.log(`Setting initial ${combinedApps.length} apps with placeholder icons`);
     setAllApps(combinedApps);
     
     // Then process icons in the background
@@ -75,6 +76,7 @@ export const AppContextUpdater = () => {
           const batch = combinedApps.slice(i, i + batchSize);
           
           try {
+            console.log(`Processing batch ${i}-${i+batchSize} of ${combinedApps.length} apps`);
             const processedBatch = await fixAppIcons(batch);
             
             // Count successful and failed icons
@@ -89,7 +91,13 @@ export const AppContextUpdater = () => {
             processedApps = [...processedApps, ...processedBatch];
             
             // Update the context with what we have so far
-            setAllApps([...processedApps, ...combinedApps.slice(i + batchSize)]);
+            const updatedApps = [
+              ...processedApps,
+              ...combinedApps.slice(i + batchSize)
+            ];
+            
+            console.log(`Updating with ${processedApps.length} processed apps, ${successful} successful, ${failed} failed`);
+            setAllApps(updatedApps);
             
             // Update processing stats
             setProcessingStats(prev => ({
@@ -126,10 +134,12 @@ export const AppContextUpdater = () => {
           });
         }
         
+        // Log detailed statistics
+        console.log(`App icons processing complete. Total: ${combinedApps.length}, Success: ${successful}, Failed: ${failed}`);
+        
         // Final update with all processed apps
         setAllApps(processedApps);
         setLoading(false);
-        console.log(`App icons processing complete. Success: ${successful}, Failed: ${failed}`);
       } catch (error) {
         console.error('Error processing app icons:', error);
         toast.error('Error al cargar algunos íconos de aplicaciones', {
