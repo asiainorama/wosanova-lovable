@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppData } from '@/data/apps';
 import { useAppContext } from '@/contexts/AppContext';
@@ -14,7 +13,7 @@ interface AppCardProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   isLarge?: boolean;
-  listView?: boolean; // New prop for list view style
+  listView?: boolean;
 }
 
 const AppCard: React.FC<AppCardProps> = ({ 
@@ -90,7 +89,7 @@ const AppCard: React.FC<AppCardProps> = ({
     setImageError(false);
   };
 
-  // List view style card (as shown in the provided image)
+  // List view style card
   if (listView) {
     return (
       <div 
@@ -244,7 +243,7 @@ const AppCard: React.FC<AppCardProps> = ({
   // Grid view (standard view for catalog)
   return (
     <div 
-      className="catalog-grid-item cursor-pointer"
+      className="catalog-grid-item relative cursor-pointer"
       onClick={handleClick}
     >
       {imageLoading && (
@@ -274,7 +273,7 @@ const AppCard: React.FC<AppCardProps> = ({
         <Button 
           size="sm"
           variant="outline"
-          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
+          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 z-10"
           onClick={(e) => {
             e.stopPropagation();
             handleAction(e);

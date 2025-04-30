@@ -24,18 +24,18 @@ const Index = () => {
         {favorites.length > 0 ? (
           <AppGrid apps={favorites} compact={true} />
         ) : (
-          <div className="text-center py-16 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+          <div className="text-center py-12 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
             <div className="flex justify-center mb-4">
               <span className="inline-block p-4 rounded-full bg-primary/10">
-                <Store size={48} className="text-primary" />
+                <Store size={64} className="text-primary" />
               </span>
             </div>
             <h3 className="text-xl font-medium mb-2 dark:text-white">{t('home.noApps') || "No tienes aplicaciones añadidas"}</h3>
             <p className="text-gray-500 mb-6 dark:text-gray-400">{t('home.addFromCatalog') || "Agrega aplicaciones desde el catálogo para verlas aquí"}</p>
             <div className="flex justify-center">
               <Link to="/catalog">
-                <Button className="flex items-center gap-2">
-                  <Store className="h-4 w-4" />
+                <Button size="lg" className="flex items-center gap-2">
+                  <Store className="h-5 w-5" />
                   <span>{t('home.exploreCatalog') || "Explorar Catálogo"}</span>
                 </Button>
               </Link>

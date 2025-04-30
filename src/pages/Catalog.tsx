@@ -21,7 +21,7 @@ const Catalog = () => {
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const [featuredApps, setFeaturedApps] = useState<AppData[]>([]);
-  const [listView, setListView] = useState(true); // Default to list view as in the image
+  const [listView, setListView] = useState(false); // Changed to false to default to grid view
 
   // Filter apps based on search term and category
   useEffect(() => {
