@@ -384,7 +384,8 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
           iconCache[cacheKey] = {
             url: svgFormat.src,
             timestamp: Date.now(),
-            source: 'brandfetch-svg'
+            source: 'brandfetch-svg',
+            success: true
           }; 
           saveIconCache(iconCache);
           return svgFormat.src;
@@ -398,7 +399,8 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
           iconCache[cacheKey] = {
             url: logo.formats[0].src,
             timestamp: Date.now(),
-            source: 'brandfetch-logo'
+            source: 'brandfetch-logo',
+            success: true
           };
           saveIconCache(iconCache);
           return logo.formats[0].src;
@@ -414,7 +416,8 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
           iconCache[cacheKey] = {
             url: icon.formats[0].src,
             timestamp: Date.now(),
-            source: 'brandfetch-icon'
+            source: 'brandfetch-icon',
+            success: true
           };
           saveIconCache(iconCache);
           return icon.formats[0].src;
@@ -496,7 +499,8 @@ const extractSiteMetadata = async (domain: string): Promise<string | null> => {
       iconCache[cacheKey] = {
         url: iconUrl,
         timestamp: Date.now(),
-        source: 'metadata-favicon'
+        source: 'metadata-favicon',
+        success: true
       };
       saveIconCache(iconCache);
       return iconUrl;
@@ -511,7 +515,8 @@ const extractSiteMetadata = async (domain: string): Promise<string | null> => {
       iconCache[cacheKey] = {
         url: ogImageUrl,
         timestamp: Date.now(),
-        source: 'metadata-og'
+        source: 'metadata-og',
+        success: true
       };
       saveIconCache(iconCache);
       return ogImageUrl;
@@ -546,7 +551,8 @@ const fetchLogoFromExternalSources = async (domain: string): Promise<string | nu
         iconCache[cacheKey] = {
           url: iconUrl,
           timestamp: Date.now(),
-          source: 'external-source'
+          source: 'external-source',
+          success: true
         };
         saveIconCache(iconCache);
         return iconUrl;
