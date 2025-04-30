@@ -11,8 +11,6 @@ import {
 } from '@/data/additionalApps';
 import { additionalApps } from '@/data/moreApps';
 import { fixAppIcons } from '@/utils/iconUtils';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
 export const AppContextUpdater = () => {
@@ -20,6 +18,8 @@ export const AppContextUpdater = () => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    console.log('AppContextUpdater initialized');
+    
     // Listen for theme changes to refresh icons
     const handleThemeChange = () => {
       console.log('Theme changed, refreshing app icons');
@@ -71,6 +71,7 @@ export const AppContextUpdater = () => {
         // Final update with all processed apps
         setAllApps(processedApps);
         setLoading(false);
+        console.log('App icons processing complete');
       } catch (error) {
         console.error('Error processing app icons:', error);
         toast.error('Error al cargar algunos íconos de aplicaciones', {
@@ -84,6 +85,7 @@ export const AppContextUpdater = () => {
     // Cleanup function
     return () => {
       document.removeEventListener('themechange', handleThemeChange);
+      console.log('AppContextUpdater cleanup');
     };
   }, [setAllApps]);
 

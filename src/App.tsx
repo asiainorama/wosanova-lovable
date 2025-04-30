@@ -16,10 +16,22 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { AppContextUpdater } from "./contexts/AppContextUpdater";
 import { toast } from "sonner";
 
+// Move AppContextUpdater import here but don't render it at the top level
+import { AppContextUpdater } from "./contexts/AppContextUpdater";
+
 const queryClient = new QueryClient();
+
+// Create a wrapper component that uses AppContextUpdater safely
+const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      <AppContextUpdater />
+      {children}
+    </>
+  );
+};
 
 const App = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -76,7 +88,6 @@ const App = () => {
       <ThemeProvider>
         <LanguageProvider>
           <AppProvider>
-            <AppContextUpdater />
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -84,19 +95,39 @@ const App = () => {
                 <Routes>
                   <Route
                     path="/"
-                    element={session ? <Index /> : <Navigate to="/auth" />}
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Index />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
                   />
                   <Route
                     path="/catalog"
-                    element={session ? <Catalog /> : <Navigate to="/auth" />}
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Catalog />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
                   />
                   <Route
                     path="/manage"
-                    element={session ? <Manage /> : <Navigate to="/auth" />}
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Manage />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
                   />
                   <Route
                     path="/profile"
-                    element={session ? <Profile /> : <Navigate to="/auth" />}
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Profile />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
                   />
                   <Route
                     path="/auth"
