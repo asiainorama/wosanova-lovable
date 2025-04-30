@@ -5,7 +5,7 @@ import AppGrid from '@/components/AppGrid';
 import AppDetails from '@/components/AppDetails';
 import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/apps';
 import { Search, X, List, Grid } from 'lucide-react';
 import { AppData } from '@/data/apps';
@@ -13,17 +13,60 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+// Define category groups
+interface CategoryGroup {
+  name: string;
+  categories: string[];
+}
+
+const categoryGroups: CategoryGroup[] = [
+  {
+    name: "Productivity",
+    categories: ["Productividad", "Organización", "Trabajo", "Educación"]
+  },
+  {
+    name: "Entertainment",
+    categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
+  },
+  {
+    name: "Utilities",
+    categories: ["Utilidades", "Herramientas", "Desarrollo"]
+  },
+  {
+    name: "Lifestyle",
+    categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
+  },
+  {
+    name: "Finance",
+    categories: ["Finanzas", "Negocios", "Compras"]
+  },
+  {
+    name: "Other",
+    categories: ["Otros", "Arte", "Fotografía", "Música"]
+  }
+];
+
+// Function to get group for a category
+const getCategoryGroup = (category: string): string => {
+  for (const group of categoryGroups) {
+    if (group.categories.includes(category)) {
+      return group.name;
+    }
+  }
+  return "Other";
+};
+
 const Catalog = () => {
   const { allApps } = useAppContext();
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
+  const [selectedGroup, setSelectedGroup] = useState('Todas');
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
-  const [featuredApps, setFeaturedApps] = useState<AppData[]>([]);
-  const [listView, setListView] = useState(false); // Changed to false to default to grid view
+  const [listView, setListView] = useState(false);
 
-  // Filter apps based on search term and category
+  // Filter apps based on search term, group and category
   useEffect(() => {
     let filtered = [...allApps];
     
@@ -34,34 +77,17 @@ const Catalog = () => {
       );
     }
     
-    if (selectedCategory !== 'Todas') {
+    if (selectedGroup !== 'Todas' && selectedCategory === 'Todas') {
+      // Filter by group only
+      const categoriesInGroup = categoryGroups.find(group => group.name === selectedGroup)?.categories || [];
+      filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
+    } else if (selectedCategory !== 'Todas') {
+      // Filter by specific category
       filtered = filtered.filter(app => app.category === selectedCategory);
     }
     
     setFilteredApps(filtered);
-  }, [searchTerm, selectedCategory, allApps]);
-
-  // Set featured apps - one from each category
-  useEffect(() => {
-    const uniqueCategories = Array.from(new Set(allApps.map(app => app.category)));
-    const featured = uniqueCategories
-      .map(category => {
-        // Find apps with icons for this category
-        const appsWithIcons = allApps.filter(app => 
-          app.category === category && app.icon && !app.icon.includes('placeholder')
-        );
-        
-        // If we have apps with icons, use one of those, otherwise get any app from this category
-        if (appsWithIcons.length > 0) {
-          return appsWithIcons[0];
-        } else {
-          return allApps.find(app => app.category === category);
-        }
-      })
-      .filter(Boolean) as AppData[];
-    
-    setFeaturedApps(featured.slice(0, 4)); // Limit to 4 featured apps
-  }, [allApps]);
+  }, [searchTerm, selectedCategory, selectedGroup, allApps]);
 
   const handleShowDetails = (app: AppData) => {
     setSelectedApp(app);
@@ -69,6 +95,23 @@ const Catalog = () => {
 
   const toggleViewMode = () => {
     setListView(!listView);
+  };
+
+  // Handle category selection
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (value !== 'Todas') {
+      // Set the corresponding group when a category is selected
+      setSelectedGroup(getCategoryGroup(value));
+    }
+  };
+
+  // Handle group selection
+  const handleGroupChange = (value: string) => {
+    setSelectedGroup(value);
+    if (value !== 'Todas') {
+      setSelectedCategory('Todas'); // Reset category when group is selected
+    }
   };
 
   return (
@@ -99,8 +142,27 @@ const Catalog = () => {
               )}
             </div>
             
+            {/* Category and Group Filters */}
             <div className="w-full sm:w-48">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedGroup} onValueChange={handleGroupChange}>
+                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
+                  <SelectValue placeholder={t('catalog.categoryGroup') || "Grupo de categoría"} />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                  <SelectItem value="Todas" className="dark:text-white">
+                    {t('catalog.allCategories') || "Todos los grupos"}
+                  </SelectItem>
+                  {categoryGroups.map((group) => (
+                    <SelectItem key={group.name} value={group.name} className="dark:text-white">
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="w-full sm:w-48">
+              <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={selectedGroup !== 'Todas'}>
                 <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
                   <SelectValue placeholder={t('catalog.category') || "Categoría"} />
                 </SelectTrigger>
@@ -108,10 +170,17 @@ const Catalog = () => {
                   <SelectItem value="Todas" className="dark:text-white">
                     {t('catalog.allCategories') || "Todas las categorías"}
                   </SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="dark:text-white">
-                      {category}
-                    </SelectItem>
+                  
+                  {/* Group categories in the dropdown */}
+                  {categoryGroups.map((group) => (
+                    <SelectGroup key={group.name}>
+                      <SelectLabel className="dark:text-gray-400">{group.name}</SelectLabel>
+                      {group.categories.map((category) => (
+                        <SelectItem key={category} value={category} className="dark:text-white pl-6">
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>
@@ -138,24 +207,15 @@ const Catalog = () => {
           </div>
         </div>
         
-        {featuredApps.length > 0 && !searchTerm && selectedCategory === 'Todas' && (
-          <div className="mb-8">
-            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('catalog.featured') || "Destacadas"}</h3>
-            <AppGrid 
-              apps={featuredApps} 
-              showManage={true}
-              onShowDetails={handleShowDetails}
-              isLarge={true}
-              listView={false}
-            />
-          </div>
-        )}
+        {/* Removed featured section as requested */}
         
         <div>
           <h3 className="text-lg font-medium mb-4 dark:text-white">
-            {searchTerm || selectedCategory !== 'Todas' 
+            {searchTerm || selectedCategory !== 'Todas' || selectedGroup !== 'Todas'
               ? (t('catalog.results') || "Resultados") 
               : (t('catalog.allApps') || "Todas las aplicaciones")}
+            {selectedGroup !== 'Todas' && selectedGroup}
+            {selectedCategory !== 'Todas' && ` > ${selectedCategory}`}
           </h3>
           <AppGrid 
             apps={filteredApps}

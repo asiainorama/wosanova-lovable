@@ -22,13 +22,16 @@ export const ThemeSelector = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Mode Selection */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">{t('profile.theme.mode')}</h3>
         <RadioGroup 
           value={mode}
-          onValueChange={(value) => setMode(value as 'light' | 'dark')}
+          onValueChange={(value) => {
+            console.log("Changing theme mode to:", value);
+            setMode(value as 'light' | 'dark');
+          }}
           className="grid grid-cols-2 gap-2"
         >
           <div>
@@ -40,13 +43,13 @@ export const ThemeSelector = () => {
             <Label 
               htmlFor="light"
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
+                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "light" ? "border-primary" : "border-muted",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
             >
-              <Sun className="mb-3 h-6 w-6" />
-              <span className="dark:text-white">{t('profile.theme.light')}</span>
+              <Sun className="mb-2 h-5 w-5" />
+              <span className="text-sm dark:text-white">{t('profile.theme.light')}</span>
             </Label>
           </div>
           <div>
@@ -58,13 +61,13 @@ export const ThemeSelector = () => {
             <Label 
               htmlFor="dark"
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
+                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "dark" ? "border-primary" : "border-muted",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
             >
-              <Moon className="mb-3 h-6 w-6" />
-              <span className="dark:text-white">{t('profile.theme.dark')}</span>
+              <Moon className="mb-2 h-5 w-5" />
+              <span className="text-sm dark:text-white">{t('profile.theme.dark')}</span>
             </Label>
           </div>
         </RadioGroup>
@@ -78,13 +81,13 @@ export const ThemeSelector = () => {
             <button
               key={option.color}
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground",
+                "flex flex-col items-center justify-between rounded-md border-2 p-3 hover:bg-accent hover:text-accent-foreground",
                 color === option.color ? "border-primary" : "border-muted bg-popover",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
               onClick={() => setColor(option.color as any)}
             >
-              <option.icon className="mb-2 h-6 w-6" />
+              <option.icon className="mb-1 h-5 w-5" />
               <span className="text-xs dark:text-white">{option.label}</span>
             </button>
           ))}

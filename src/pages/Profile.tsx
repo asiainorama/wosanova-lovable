@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -159,7 +160,7 @@ const Profile = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2 dark:text-white">
             <Rocket size={24} /> {t('profile.title')}
@@ -169,13 +170,13 @@ const Profile = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 mt-2">
+        <div className="space-y-4 mt-2">
           {/* Profile Section with aligned username and avatar */}
           <div className="flex items-center gap-6">
-            <Avatar className="w-24 h-24">
+            <Avatar className="w-20 h-20">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/10">
-                <User size={36} />
+                <User size={32} />
               </AvatarFallback>
             </Avatar>
             
@@ -205,14 +206,17 @@ const Profile = () => {
             </div>
           </div>
           
-          <Separator className="my-4" />
+          <Separator className="my-2" />
           
           {/* Language Selection */}
           <div className="space-y-2">
-            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('profile.language')}</h3>
+            <h3 className="text-lg font-medium mb-2 dark:text-white">{t('profile.language')}</h3>
             <RadioGroup 
               value={language}
-              onValueChange={(value) => setLanguage(value as 'es' | 'en')}
+              onValueChange={(value) => {
+                console.log("Changing language to:", value);
+                setLanguage(value as 'es' | 'en');
+              }}
               className="grid grid-cols-2 gap-2"
             >
               <div>
@@ -224,13 +228,13 @@ const Profile = () => {
                 <Label 
                   htmlFor="es"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "es" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-3 h-6 w-6" />
-                  <span className="dark:text-white">{t('profile.spanish')}</span>
+                  <Languages className="mb-2 h-5 w-5" />
+                  <span className="text-sm dark:text-white">{t('profile.spanish')}</span>
                 </Label>
               </div>
               <div>
@@ -242,37 +246,38 @@ const Profile = () => {
                 <Label 
                   htmlFor="en"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "en" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-3 h-6 w-6" />
-                  <span className="dark:text-white">{t('profile.english')}</span>
+                  <Languages className="mb-2 h-5 w-5" />
+                  <span className="text-sm dark:text-white">{t('profile.english')}</span>
                 </Label>
               </div>
             </RadioGroup>
           </div>
           
-          <Separator className="my-4" />
+          <Separator className="my-2" />
           
           {/* Theme Selector Section */}
           <div>
-            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('profile.appearance')}</h3>
+            <h3 className="text-lg font-medium mb-2 dark:text-white">{t('profile.appearance')}</h3>
             <ThemeSelector />
           </div>
           
-          <Separator className="my-4" />
+          <Separator className="my-2" />
           
-          {/* Actions Section - Moved to the bottom */}
+          {/* Actions Section - Moved to the bottom and made smaller */}
           <div className="pt-2">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 justify-between">
               <Button 
                 onClick={handleSignOut} 
                 variant="outline" 
-                className="flex-1 flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                size="sm"
+                className="flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
               >
-                <LogOut size={16} />
+                <LogOut size={14} />
                 {t('profile.logout')}
               </Button>
               
@@ -280,9 +285,10 @@ const Profile = () => {
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="destructive" 
-                    className="flex-1 flex items-center gap-2"
+                    size="sm"
+                    className="flex items-center gap-2"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                     {t('profile.delete')}
                   </Button>
                 </AlertDialogTrigger>
@@ -306,10 +312,11 @@ const Profile = () => {
               </AlertDialog>
             </div>
             
-            {/* Save button moved to the bottom */}
+            {/* Save button moved to the bottom and made smaller */}
             <Button 
-              onClick={handleSaveProfile} 
-              className="w-full mt-4"
+              onClick={handleSaveProfile}
+              size="sm"
+              className="w-full mt-3"
             >
               {t('profile.save')}
             </Button>

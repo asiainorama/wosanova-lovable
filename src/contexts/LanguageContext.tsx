@@ -40,6 +40,7 @@ const translations = {
     'catalog.gridView': 'Vista de cuadrícula',
     'catalog.listView': 'Vista de lista',
     'catalog.category': 'Categoría',
+    'catalog.categoryGroup': 'Grupo de categoría',
     
     // Profile Page
     'profile.title': 'Área Personal',
@@ -66,6 +67,14 @@ const translations = {
     'profile.color.red': 'Rojo',
     'profile.color.pink': 'Rosa',
     'profile.color.orange': 'Naranja',
+
+    // Category Groups
+    'category.productivity': 'Productividad',
+    'category.entertainment': 'Entretenimiento',
+    'category.utilities': 'Utilidades',
+    'category.lifestyle': 'Estilo de Vida',
+    'category.finance': 'Finanzas',
+    'category.other': 'Otros',
   },
   en: {
     // Global
@@ -97,6 +106,7 @@ const translations = {
     'catalog.gridView': 'Grid view',
     'catalog.listView': 'List view',
     'catalog.category': 'Category',
+    'catalog.categoryGroup': 'Category Group',
     
     // Profile Page
     'profile.title': 'Personal Area',
@@ -123,6 +133,14 @@ const translations = {
     'profile.color.red': 'Red',
     'profile.color.pink': 'Pink',
     'profile.color.orange': 'Orange',
+
+    // Category Groups
+    'category.productivity': 'Productivity',
+    'category.entertainment': 'Entertainment',
+    'category.utilities': 'Utilities',
+    'category.lifestyle': 'Lifestyle',
+    'category.finance': 'Finance',
+    'category.other': 'Other',
   }
 };
 
@@ -146,6 +164,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   });
 
   const setLanguage = (newLanguage: Language) => {
+    console.log("Setting language to:", newLanguage);
     localStorage.setItem('language', newLanguage);
     setLanguageState(newLanguage);
   };
@@ -156,6 +175,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   useEffect(() => {
     localStorage.setItem('language', language);
+    console.log("Language set in localStorage:", language);
   }, [language]);
 
   return (

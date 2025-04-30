@@ -4,47 +4,108 @@ import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { useAppContext } from '@/contexts/AppContext';
 import { Trash2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+// Define category groups (same as in Catalog.tsx)
+interface CategoryGroup {
+  name: string;
+  categories: string[];
+}
+
+const categoryGroups: CategoryGroup[] = [
+  {
+    name: "Productivity",
+    categories: ["Productividad", "Organización", "Trabajo", "Educación"]
+  },
+  {
+    name: "Entertainment",
+    categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
+  },
+  {
+    name: "Utilities",
+    categories: ["Utilidades", "Herramientas", "Desarrollo"]
+  },
+  {
+    name: "Lifestyle",
+    categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
+  },
+  {
+    name: "Finance",
+    categories: ["Finanzas", "Negocios", "Compras"]
+  },
+  {
+    name: "Other",
+    categories: ["Otros", "Arte", "Fotografía", "Música"]
+  }
+];
+
+// Function to get group for a category
+const getCategoryGroup = (category: string): string => {
+  for (const group of categoryGroups) {
+    if (group.categories.includes(category)) {
+      return group.name;
+    }
+  }
+  return "Other";
+};
 
 const Manage = () => {
   const { favorites, removeFromFavorites } = useAppContext();
+  const { t } = useLanguage();
+  
+  // Group favorites by category group
+  const groupedFavorites = favorites.reduce((groups: Record<string, typeof favorites>, app) => {
+    const groupName = getCategoryGroup(app.category);
+    if (!groups[groupName]) {
+      groups[groupName] = [];
+    }
+    groups[groupName].push(app);
+    return groups;
+  }, {});
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header title="Gestionar Apps" />
+      <Header title={t('header.manage') || "Gestionar Apps"} />
       
       <main className="container mx-auto px-4 py-6 flex-1">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Mis Aplicaciones Favoritas</h2>
-          <div className="space-y-2">
-            {favorites.length === 0 ? (
-              <p className="text-gray-500">No hay aplicaciones que mostrar</p>
-            ) : (
-              favorites.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={app.icon}
-                      alt={`${app.name} icon`}
-                      className="w-10 h-10 object-contain"
-                    />
-                    <div>
-                      <h3 className="font-medium">{app.name}</h3>
-                      <p className="text-sm text-gray-500">{app.description}</p>
+          <h2 className="text-lg font-semibold mb-4">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
+          
+          {favorites.length === 0 ? (
+            <p className="text-gray-500">{t('home.noApps') || "No hay aplicaciones que mostrar"}</p>
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(groupedFavorites).map(([groupName, apps]) => (
+                <div key={groupName} className="space-y-2">
+                  <h3 className="font-medium text-sm text-gray-500">{groupName}</h3>
+                  {apps.map((app) => (
+                    <div
+                      key={app.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={app.icon}
+                          alt={`${app.name} icon`}
+                          className="w-8 h-8 object-contain"
+                        />
+                        <div>
+                          <h3 className="font-medium text-sm">{app.name}</h3>
+                          <p className="text-xs text-gray-500">{app.category}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeFromFavorites(app.id)}
+                        className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                  </div>
-                  <button
-                    onClick={() => removeFromFavorites(app.id)}
-                    className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
       </main>
     </div>
