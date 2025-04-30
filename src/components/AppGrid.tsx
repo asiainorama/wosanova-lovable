@@ -11,6 +11,7 @@ interface AppGridProps {
   isLarge?: boolean;
   listView?: boolean;
   compact?: boolean;
+  moreCompact?: boolean;
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
@@ -20,7 +21,8 @@ const AppGrid: React.FC<AppGridProps> = ({
   onShowDetails,
   isLarge = false,
   listView = false,
-  compact = false
+  compact = false,
+  moreCompact = false
 }) => {
   if (apps.length === 0) {
     return (
@@ -36,9 +38,11 @@ const AppGrid: React.FC<AppGridProps> = ({
         ? "space-y-2" 
         : isLarge 
           ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
-          : compact
-            ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1"
-            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          : moreCompact
+            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-1"
+            : compact
+              ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1"
+              : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     }>
       {apps.map((app) => (
         <AppCard 

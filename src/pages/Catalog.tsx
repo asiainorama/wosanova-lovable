@@ -60,13 +60,12 @@ const Catalog = () => {
   const { allApps } = useAppContext();
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [selectedGroup, setSelectedGroup] = useState('Todas');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [filteredApps, setFilteredApps] = useState(allApps);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const [listView, setListView] = useState(false);
 
-  // Filter apps based on search term, group and category
+  // Filter apps based on search term and selected filter
   useEffect(() => {
     let filtered = [...allApps];
     
@@ -77,41 +76,25 @@ const Catalog = () => {
       );
     }
     
-    if (selectedGroup !== 'Todas' && selectedCategory === 'Todas') {
-      // Filter by group only
-      const categoriesInGroup = categoryGroups.find(group => group.name === selectedGroup)?.categories || [];
-      filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
-    } else if (selectedCategory !== 'Todas') {
-      // Filter by specific category
-      filtered = filtered.filter(app => app.category === selectedCategory);
+    if (selectedFilter !== 'all') {
+      // Check if selected filter is a group or a category
+      const isGroup = categoryGroups.some(group => group.name === selectedFilter);
+      
+      if (isGroup) {
+        // Filter by group
+        const categoriesInGroup = categoryGroups.find(group => group.name === selectedFilter)?.categories || [];
+        filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
+      } else {
+        // Filter by specific category
+        filtered = filtered.filter(app => app.category === selectedFilter);
+      }
     }
     
     setFilteredApps(filtered);
-  }, [searchTerm, selectedCategory, selectedGroup, allApps]);
+  }, [searchTerm, selectedFilter, allApps]);
 
   const handleShowDetails = (app: AppData) => {
     setSelectedApp(app);
-  };
-
-  const toggleViewMode = () => {
-    setListView(!listView);
-  };
-
-  // Handle category selection
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    if (value !== 'Todas') {
-      // Set the corresponding group when a category is selected
-      setSelectedGroup(getCategoryGroup(value));
-    }
-  };
-
-  // Handle group selection
-  const handleGroupChange = (value: string) => {
-    setSelectedGroup(value);
-    if (value !== 'Todas') {
-      setSelectedCategory('Todas'); // Reset category when group is selected
-    }
   };
 
   return (
@@ -142,39 +125,23 @@ const Catalog = () => {
               )}
             </div>
             
-            {/* Category and Group Filters */}
-            <div className="w-full sm:w-48">
-              <Select value={selectedGroup} onValueChange={handleGroupChange}>
+            {/* Unified Category Filter */}
+            <div className="w-full sm:w-64">
+              <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                 <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
-                  <SelectValue placeholder={t('catalog.categoryGroup') || "Grupo de categoría"} />
+                  <SelectValue placeholder={t('catalog.filter') || "Filtrar por categoría"} />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                  <SelectItem value="Todas" className="dark:text-white">
-                    {t('catalog.allCategories') || "Todos los grupos"}
-                  </SelectItem>
-                  {categoryGroups.map((group) => (
-                    <SelectItem key={group.name} value={group.name} className="dark:text-white">
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="w-full sm:w-48">
-              <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={selectedGroup !== 'Todas'}>
-                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
-                  <SelectValue placeholder={t('catalog.category') || "Categoría"} />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                  <SelectItem value="Todas" className="dark:text-white">
+                  <SelectItem value="all" className="dark:text-white">
                     {t('catalog.allCategories') || "Todas las categorías"}
                   </SelectItem>
                   
                   {/* Group categories in the dropdown */}
                   {categoryGroups.map((group) => (
                     <SelectGroup key={group.name}>
-                      <SelectLabel className="dark:text-gray-400">{group.name}</SelectLabel>
+                      <SelectItem value={group.name} className="dark:text-white font-semibold">
+                        {group.name}
+                      </SelectItem>
                       {group.categories.map((category) => (
                         <SelectItem key={category} value={category} className="dark:text-white pl-6">
                           {category}
@@ -207,15 +174,12 @@ const Catalog = () => {
           </div>
         </div>
         
-        {/* Removed featured section as requested */}
-        
         <div>
           <h3 className="text-lg font-medium mb-4 dark:text-white">
-            {searchTerm || selectedCategory !== 'Todas' || selectedGroup !== 'Todas'
+            {searchTerm || selectedFilter !== 'all'
               ? (t('catalog.results') || "Resultados") 
               : (t('catalog.allApps') || "Todas las aplicaciones")}
-            {selectedGroup !== 'Todas' && selectedGroup}
-            {selectedCategory !== 'Todas' && ` > ${selectedCategory}`}
+            {selectedFilter !== 'all' && ` > ${selectedFilter}`}
           </h3>
           <AppGrid 
             apps={filteredApps}

@@ -22,7 +22,7 @@ const Index = () => {
         </div>
         
         {favorites.length > 0 ? (
-          <AppGrid apps={favorites} compact={true} />
+          <AppGrid apps={favorites} compact={true} moreCompact={true} />
         ) : (
           <div className="text-center py-12 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">
