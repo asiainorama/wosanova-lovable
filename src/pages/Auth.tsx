@@ -5,11 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, Rocket } from 'lucide-react';
+import SpaceBackground from '@/components/SpaceBackground';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   // Check for existing session on component mount
   useEffect(() => {
@@ -27,7 +27,6 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      setErrorDetails(null);
       
       // Get the current URL to use in the redirect
       const origin = window.location.origin;
@@ -55,11 +54,9 @@ const Auth = () => {
         throw error;
       }
       
-      // The user will be redirected to Google, so this code below rarely executes
       console.log("Redirección iniciada:", data);
     } catch (error: any) {
       console.error("Error de autenticación:", error);
-      setErrorDetails(error.message || JSON.stringify(error));
       toast.error('Error al iniciar sesión con Google');
     } finally {
       setIsLoading(false);
@@ -67,16 +64,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-md w-full px-6 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+      <SpaceBackground />
+      <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
             <span className="inline-block p-3 rounded-full bg-primary/10 text-primary dark:bg-primary/20">
-              <Rocket size={48} className="text-primary" />
+              <Rocket size={48} className="text-primary animate-pulse" />
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">WosaNova</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-1">
+          <h1 className="text-4xl font-bold text-white mb-3">WosaNova</h1>
+          <p className="text-xl text-gray-300 mb-1">
             Bienvenido a la mayor colección de WebApps del mundo
           </p>
         </div>

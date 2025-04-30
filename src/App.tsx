@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import Manage from "./pages/Manage";
@@ -41,38 +42,40 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AppProvider>
-          <AppContextUpdater />
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  path="/"
-                  element={session ? <Index /> : <Navigate to="/auth" />}
-                />
-                <Route
-                  path="/catalog"
-                  element={session ? <Catalog /> : <Navigate to="/auth" />}
-                />
-                <Route
-                  path="/manage"
-                  element={session ? <Manage /> : <Navigate to="/auth" />}
-                />
-                <Route
-                  path="/profile"
-                  element={session ? <Profile /> : <Navigate to="/auth" />}
-                />
-                <Route
-                  path="/auth"
-                  element={!session ? <Auth /> : <Navigate to="/" />}
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AppProvider>
+        <LanguageProvider>
+          <AppProvider>
+            <AppContextUpdater />
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={session ? <Index /> : <Navigate to="/auth" />}
+                  />
+                  <Route
+                    path="/catalog"
+                    element={session ? <Catalog /> : <Navigate to="/auth" />}
+                  />
+                  <Route
+                    path="/manage"
+                    element={session ? <Manage /> : <Navigate to="/auth" />}
+                  />
+                  <Route
+                    path="/profile"
+                    element={session ? <Profile /> : <Navigate to="/auth" />}
+                  />
+                  <Route
+                    path="/auth"
+                    element={!session ? <Auth /> : <Navigate to="/" />}
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </AppProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

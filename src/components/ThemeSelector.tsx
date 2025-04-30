@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Check, Sun, Moon, CircleDot, SquareDot, Flower2, FlameKindling, Heart, Palette } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -9,21 +10,22 @@ import { Label } from "@/components/ui/label";
 
 export const ThemeSelector = () => {
   const { mode, color, toggleMode, setColor, setMode } = useTheme();
+  const { t } = useLanguage();
 
   const colorOptions = [
-    { color: 'blue', icon: CircleDot, label: 'Azul' },
-    { color: 'gray', icon: SquareDot, label: 'Gris' },
-    { color: 'green', icon: Flower2, label: 'Verde' },
-    { color: 'red', icon: FlameKindling, label: 'Rojo' },
-    { color: 'pink', icon: Heart, label: 'Rosa' },
-    { color: 'orange', icon: Palette, label: 'Naranja' }
+    { color: 'blue', icon: CircleDot, label: t('profile.color.blue') },
+    { color: 'gray', icon: SquareDot, label: t('profile.color.gray') },
+    { color: 'green', icon: Flower2, label: t('profile.color.green') },
+    { color: 'red', icon: FlameKindling, label: t('profile.color.red') },
+    { color: 'pink', icon: Heart, label: t('profile.color.pink') },
+    { color: 'orange', icon: Palette, label: t('profile.color.orange') }
   ];
 
   return (
     <div className="space-y-6">
       {/* Mode Selection */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Modo de apariencia</h3>
+        <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">{t('profile.theme.mode')}</h3>
         <RadioGroup 
           value={mode}
           onValueChange={(value) => setMode(value as 'light' | 'dark')}
@@ -44,7 +46,7 @@ export const ThemeSelector = () => {
               )}
             >
               <Sun className="mb-3 h-6 w-6" />
-              <span className="dark:text-white">Claro</span>
+              <span className="dark:text-white">{t('profile.theme.light')}</span>
             </Label>
           </div>
           <div>
@@ -62,7 +64,7 @@ export const ThemeSelector = () => {
               )}
             >
               <Moon className="mb-3 h-6 w-6" />
-              <span className="dark:text-white">Oscuro</span>
+              <span className="dark:text-white">{t('profile.theme.dark')}</span>
             </Label>
           </div>
         </RadioGroup>
@@ -70,7 +72,7 @@ export const ThemeSelector = () => {
       
       {/* Color Selection */}
       <div className="space-y-2">
-        <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Color de acento</h3>
+        <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">{t('profile.theme.accent')}</h3>
         <div className="grid grid-cols-3 gap-2">
           {colorOptions.map((option) => (
             <button

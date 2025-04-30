@@ -1,0 +1,116 @@
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+type Language = 'es' | 'en';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (language: Language) => void;
+  t: (key: string) => string;
+}
+
+const translations = {
+  es: {
+    // Global
+    'app.name': 'WosaNova',
+    'app.description': 'La mayor colección de WebApps del mundo',
+    
+    // Profile Page
+    'profile.title': 'Área Personal',
+    'profile.description': 'Gestiona tu perfil y preferencias de la aplicación',
+    'profile.username': 'Nombre de usuario',
+    'profile.avatar': 'Imagen de perfil',
+    'profile.save': 'Guardar cambios',
+    'profile.appearance': 'Preferencias de apariencia',
+    'profile.language': 'Idioma',
+    'profile.spanish': 'Español',
+    'profile.english': 'Inglés',
+    'profile.logout': 'Cerrar sesión',
+    'profile.delete': 'Eliminar mi cuenta',
+    'profile.delete.confirm': '¿Estás seguro?',
+    'profile.delete.description': 'Esta acción no se puede deshacer. Se eliminará permanentemente tu cuenta y todos tus datos asociados.',
+    'profile.cancel': 'Cancelar',
+    'profile.theme.light': 'Claro',
+    'profile.theme.dark': 'Oscuro',
+    'profile.theme.mode': 'Modo de apariencia',
+    'profile.theme.accent': 'Color de acento',
+    'profile.color.blue': 'Azul',
+    'profile.color.gray': 'Gris',
+    'profile.color.green': 'Verde',
+    'profile.color.red': 'Rojo',
+    'profile.color.pink': 'Rosa',
+    'profile.color.orange': 'Naranja',
+  },
+  en: {
+    // Global
+    'app.name': 'WosaNova',
+    'app.description': 'The largest collection of WebApps in the world',
+    
+    // Profile Page
+    'profile.title': 'Personal Area',
+    'profile.description': 'Manage your profile and application preferences',
+    'profile.username': 'Username',
+    'profile.avatar': 'Profile picture',
+    'profile.save': 'Save changes',
+    'profile.appearance': 'Appearance preferences',
+    'profile.language': 'Language',
+    'profile.spanish': 'Spanish',
+    'profile.english': 'English',
+    'profile.logout': 'Log out',
+    'profile.delete': 'Delete my account',
+    'profile.delete.confirm': 'Are you sure?',
+    'profile.delete.description': 'This action cannot be undone. It will permanently delete your account and all your associated data.',
+    'profile.cancel': 'Cancel',
+    'profile.theme.light': 'Light',
+    'profile.theme.dark': 'Dark',
+    'profile.theme.mode': 'Appearance mode',
+    'profile.theme.accent': 'Accent color',
+    'profile.color.blue': 'Blue',
+    'profile.color.gray': 'Gray',
+    'profile.color.green': 'Green',
+    'profile.color.red': 'Red',
+    'profile.color.pink': 'Pink',
+    'profile.color.orange': 'Orange',
+  }
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
+
+interface LanguageProviderProps {
+  children: ReactNode;
+}
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>(() => {
+    return (localStorage.getItem('language') as Language) || 'es';
+  });
+
+  const setLanguage = (newLanguage: Language) => {
+    localStorage.setItem('language', newLanguage);
+    setLanguageState(newLanguage);
+  };
+
+  const t = (key: string): string => {
+    return translations[language][key as keyof typeof translations['es']] || key;
+  };
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export default LanguageContext;
