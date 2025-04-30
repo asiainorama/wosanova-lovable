@@ -14,10 +14,19 @@ const Auth = () => {
   // Check for existing session on component mount
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // If we already have a session, redirect to the catalog page
-        navigate('/catalog');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking session:", error.message);
+        } else if (session) {
+          console.log("Existing session found in Auth page, redirecting");
+          navigate('/catalog');
+        } else {
+          console.log("No session found in Auth page");
+        }
+      } catch (err) {
+        console.error("Unexpected error checking session:", err);
       }
     };
     
@@ -51,12 +60,13 @@ const Auth = () => {
       });
       
       if (error) {
+        console.error("OAuth error:", error.message);
         throw error;
       }
       
-      console.log("Redirección iniciada:", data);
+      console.log("OAuth redirect initiated:", data);
     } catch (error: any) {
-      console.error("Error de autenticación:", error);
+      console.error("Authentication error:", error);
       toast.error('Error al iniciar sesión con Google');
     } finally {
       setIsLoading(false);
