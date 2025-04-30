@@ -1,322 +1,290 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ThemeSelector } from '@/components/ThemeSelector';
+import Header from '@/components/Header';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
-import { cn } from "@/lib/utils";
-import { ThemeMode } from '@/contexts/ThemeContext';
-
-// Define profile type based on the actual database structure
-interface UserProfile {
-  username?: string;
-  avatar_url?: string;
-  theme_mode?: string;
-  language?: string;
-}
-
-type Language = 'es' | 'en';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { toast } from 'sonner';
+import { useTheme, ThemeMode } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LogOut, Trash2, Save } from 'lucide-react';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { mode, color, setMode } = useTheme();
+  const { mode, color, setMode, setColor } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const [isOpen, setIsOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [userId, setUserId] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState('');
+  const [activeTab, setActiveTab] = useState('profile');
 
-  // Get current user details and profile data
   useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUserId(session.user.id);
-        
-        // Try to get user profile data from Supabase
-        try {
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .select('username, avatar_url, theme_mode, language')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (data && !error) {
-            // Use type assertion to ensure proper typing
-            const profileData = data as unknown as UserProfile;
-            setUsername(profileData.username || '');
-            setAvatarUrl(profileData.avatar_url || '');
-            
-            // Set theme and language if available
-            if (profileData.theme_mode) {
-              // Safe cast to ThemeMode
-              const themeMode = profileData.theme_mode as ThemeMode;
-              setMode(themeMode);
-            }
-            
-            if (profileData.language) {
-              // Safe cast to Language
-              const lang = profileData.language as Language;
-              setLanguage(lang);
-            }
-            
-            // Also update localStorage for immediate use
-            localStorage.setItem('username', profileData.username || '');
-            localStorage.setItem('avatarUrl', profileData.avatar_url || '');
-          }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser(user);
+          setUsername(user.user_metadata?.username || '');
+          setAvatar(user.user_metadata?.avatar_url || '');
         }
+      } catch (error) {
+        console.error('Error fetching user:', error);
       }
     };
-    
-    fetchUserData();
-  }, [setMode, setLanguage]);
+    getUser();
+  }, []);
 
-  const handleSignOut = async () => {
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setFormLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.updateUser({
+        data: { username: username || undefined }
+      });
+      
       if (error) throw error;
-      navigate('/auth');
+      
+      toast.success(t('profile.saved') || 'Perfil actualizado correctamente');
     } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al cerrar sesión' : 'Error signing out');
+      toast.error(`Error: ${error.message}`);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await supabase.auth.signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    try {
-      // In a real app, you'd add proper account deletion logic here
-      await supabase.auth.signOut();
-      toast.success(language === 'es' ? 'Cuenta eliminada correctamente' : 'Account deleted successfully');
-      navigate('/auth');
-    } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al eliminar la cuenta' : 'Error deleting account');
-    }
+    // Placeholder for delete account functionality
+    // This would typically involve API calls to delete user data
+    toast.error('Función no implementada: Eliminar cuenta');
   };
 
-  const handleSaveProfile = async () => {
-    if (!userId) return;
-    
-    try {
-      // Save to Supabase with proper typing
-      try {
-        const { error } = await supabase
-          .from('user_profiles')
-          .upsert({ 
-            id: userId,
-            username,
-            avatar_url: avatarUrl,
-            theme_mode: mode,
-            language
-          }, { 
-            onConflict: 'id'
-          });
-          
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error upserting to user_profiles:', error);
-        throw error;
-      }
-      
-      // Save to localStorage as well for immediate use
-      localStorage.setItem('username', username);
-      localStorage.setItem('avatarUrl', avatarUrl);
-      
-      toast.success(language === 'es' ? 'Perfil actualizado correctamente' : 'Profile updated successfully');
-    } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al actualizar el perfil' : 'Error updating profile');
-      console.error(error);
-    }
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-    // Go back to the previous page, or to catalog if we can't
-    if (location.key === "default") {
-      navigate("/catalog");
-    } else {
-      navigate(-1);
-    }
-  };
-
+  // Simplified layout with reduced height
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2 dark:text-white">
-            <Rocket size={24} /> {t('profile.title')}
-          </DialogTitle>
-          <DialogDescription className="dark:text-gray-300">
-            {t('profile.description')}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-6 mt-2">
-          {/* Profile Section with aligned username and avatar */}
-          <div className="flex items-center gap-6">
-            <Avatar className="w-24 h-24">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback className="bg-primary/10">
-                <User size={36} />
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <div>
-                <Label htmlFor="username" className="dark:text-white">{t('profile.username')}</Label>
-                <Input 
-                  id="username" 
-                  placeholder={t('profile.username')}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                />
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <Header title={t('profile.title') || "Área Personal"} />
+      
+      <main className="container mx-auto px-4 py-4 flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Sidebar with user info */}
+          <div className="md:col-span-1">
+            <Card className="p-4 md:p-6 flex flex-col items-center md:items-start">
+              <div className="flex flex-col items-center w-full mb-4">
+                <Avatar className="h-16 w-16 mb-2">
+                  <AvatarImage src={avatar} alt={username} />
+                  <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="text-center md:text-left">
+                  <h2 className="font-bold text-lg dark:text-white">{username || t('profile.user') || 'Usuario'}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
+                </div>
               </div>
               
-              <div className="mt-4">
-                <Label htmlFor="picture" className="dark:text-white">{t('profile.avatar')}</Label>
-                <Input 
-                  id="picture" 
-                  type="url" 
-                  placeholder={t('profile.avatar')}
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <Separator className="my-4" />
-          
-          {/* Language Selection */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('profile.language')}</h3>
-            <RadioGroup 
-              value={language}
-              onValueChange={(value) => setLanguage(value as 'es' | 'en')}
-              className="grid grid-cols-2 gap-2"
-            >
-              <div>
-                <RadioGroupItem 
-                  value="es" 
-                  id="es" 
-                  className="peer sr-only" 
-                />
-                <Label 
-                  htmlFor="es"
-                  className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
-                    language === "es" ? "border-primary" : "border-muted",
-                    "dark:border-gray-700 dark:hover:bg-gray-700"
-                  )}
+              <div className="flex flex-col w-full gap-2">
+                <Button 
+                  onClick={handleLogout} 
+                  disabled={loading} 
+                  variant="outline" 
+                  className="w-full justify-start"
                 >
-                  <Languages className="mb-3 h-6 w-6" />
-                  <span className="dark:text-white">{t('profile.spanish')}</span>
-                </Label>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t('profile.logout') || 'Cerrar sesión'}
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full justify-start">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {t('profile.delete') || 'Eliminar mi cuenta'}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('profile.delete.confirm') || '¿Estás seguro?'}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('profile.delete.description') || 
+                          'Esta acción no se puede deshacer. Se eliminará permanentemente tu cuenta y todos tus datos asociados.'}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('profile.cancel') || 'Cancelar'}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAccount}>{t('profile.delete') || 'Eliminar'}</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-              <div>
-                <RadioGroupItem 
-                  value="en" 
-                  id="en" 
-                  className="peer sr-only" 
-                />
-                <Label 
-                  htmlFor="en"
-                  className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground",
-                    language === "en" ? "border-primary" : "border-muted",
-                    "dark:border-gray-700 dark:hover:bg-gray-700"
-                  )}
-                >
-                  <Languages className="mb-3 h-6 w-6" />
-                  <span className="dark:text-white">{t('profile.english')}</span>
-                </Label>
-              </div>
-            </RadioGroup>
+            </Card>
           </div>
           
-          <Separator className="my-4" />
-          
-          {/* Theme Selector Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('profile.appearance')}</h3>
-            <ThemeSelector />
-          </div>
-          
-          <Separator className="my-4" />
-          
-          {/* Actions Section - Moved to the bottom */}
-          <div className="pt-2">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-              <Button 
-                onClick={handleSignOut} 
-                variant="outline" 
-                className="flex-1 flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-              >
-                <LogOut size={16} />
-                {t('profile.logout')}
-              </Button>
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+          {/* Main content area */}
+          <div className="md:col-span-2">
+            <Card className="p-4 md:p-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-2 mb-4">
+                  <TabsTrigger value="profile">{t('profile.account') || 'Cuenta'}</TabsTrigger>
+                  <TabsTrigger value="appearance">{t('profile.appearance') || 'Apariencia'}</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="profile" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">{t('profile.username') || 'Nombre de usuario'}</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder={t('profile.username') || 'Nombre de usuario'}
+                    />
+                  </div>
+                  
                   <Button 
-                    variant="destructive" 
-                    className="flex-1 flex items-center gap-2"
+                    onClick={handleSaveProfile} 
+                    disabled={formLoading}
+                    className="w-full sm:w-auto"
                   >
-                    <Trash2 size={16} />
-                    {t('profile.delete')}
+                    <Save className="mr-2 h-4 w-4" />
+                    {formLoading 
+                      ? (t('profile.saving') || 'Guardando...') 
+                      : (t('profile.save') || 'Guardar cambios')}
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                    <AlertDialogDescription className="dark:text-gray-300">
-                      {t('profile.delete.description')}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground"
-                    >
-                      {t('profile.delete')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-            
-            {/* Save button moved to the bottom */}
-            <Button 
-              onClick={handleSaveProfile} 
-              className="w-full mt-4"
-            >
-              {t('profile.save')}
-            </Button>
+                </TabsContent>
+                
+                <TabsContent value="appearance" className="space-y-4">
+                  {/* Theme mode selection */}
+                  <div className="space-y-2">
+                    <Label>{t('profile.theme.mode') || 'Modo de apariencia'}</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant={mode === 'light' ? 'default' : 'outline'} 
+                        className="justify-center"
+                        onClick={() => setMode('light')}
+                      >
+                        {t('profile.theme.light') || 'Claro'}
+                      </Button>
+                      <Button 
+                        variant={mode === 'dark' ? 'default' : 'outline'} 
+                        className="justify-center"
+                        onClick={() => setMode('dark')}
+                      >
+                        {t('profile.theme.dark') || 'Oscuro'}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Language selection */}
+                  <div className="space-y-2">
+                    <Label>{t('profile.language') || 'Idioma'}</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant={language === 'es' ? 'default' : 'outline'} 
+                        className="justify-center"
+                        onClick={() => setLanguage('es')}
+                      >
+                        {t('profile.spanish') || 'Español'}
+                      </Button>
+                      <Button 
+                        variant={language === 'en' ? 'default' : 'outline'} 
+                        className="justify-center"
+                        onClick={() => setLanguage('en')}
+                      >
+                        {t('profile.english') || 'Inglés'}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Theme color selection */}
+                  <div className="space-y-2">
+                    <Label>{t('profile.theme.accent') || 'Color de acento'}</Label>
+                    <RadioGroup value={color} onValueChange={(val) => setColor(val as any)}>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="blue" id="blue" />
+                          <Label htmlFor="blue" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
+                            {t('profile.color.blue') || 'Azul'}
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="green" id="green" />
+                          <Label htmlFor="green" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
+                            {t('profile.color.green') || 'Verde'}
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="red" id="red" />
+                          <Label htmlFor="red" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
+                            {t('profile.color.red') || 'Rojo'}
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="pink" id="pink" />
+                          <Label htmlFor="pink" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-pink-500 mr-2"></div>
+                            {t('profile.color.pink') || 'Rosa'}
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="orange" id="orange" />
+                          <Label htmlFor="orange" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-orange-500 mr-2"></div>
+                            {t('profile.color.orange') || 'Naranja'}
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="gray" id="gray" />
+                          <Label htmlFor="gray" className="flex items-center">
+                            <div className="w-4 h-4 rounded-full bg-gray-500 mr-2"></div>
+                            {t('profile.color.gray') || 'Gris'}
+                          </Label>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </Card>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </main>
+    </div>
   );
 };
 

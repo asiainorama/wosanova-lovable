@@ -13,6 +13,31 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+// Definimos los grupos de categorías
+const categoryGroups = {
+  'Productividad': ['Productividad', 'Herramientas', 'Organización', 'Documentos', 'Gestión', 'Business'],
+  'Comunicación': ['Comunicación', 'Social', 'Email', 'Chat', 'Mensajería'],
+  'Multimedia': ['Multimedia', 'Vídeo', 'Audio', 'Imágenes', 'Diseño', 'Gráficos'],
+  'Educación': ['Educación', 'Aprendizaje', 'Idiomas', 'Conocimiento'],
+  'Tecnología': ['Desarrollo', 'Programación', 'Tecnología', 'IA', 'Code', 'Tech'],
+  'Entretenimiento': ['Juegos', 'Ocio', 'Entretenimiento', 'Música'],
+  'Finanzas': ['Finanzas', 'Economía', 'Banca', 'Inversión'],
+  'Otros': ['Otros', 'Viajes', 'Salud', 'Compras', 'Estilo de vida'] 
+};
+
+// Función para obtener el grupo de una categoría
+const getCategoryGroup = (category: string) => {
+  for (const [group, cats] of Object.entries(categoryGroups)) {
+    if (cats.includes(category)) {
+      return group;
+    }
+  }
+  return 'Otros';
+};
+
+// Obtenemos los nombres de los grupos únicos
+const uniqueGroups = Object.keys(categoryGroups);
+
 const Catalog = () => {
   const { allApps } = useAppContext();
   const { t } = useLanguage();
@@ -35,28 +60,38 @@ const Catalog = () => {
     }
     
     if (selectedCategory !== 'Todas') {
-      filtered = filtered.filter(app => app.category === selectedCategory);
+      if (uniqueGroups.includes(selectedCategory)) {
+        // Si es un grupo, filtramos por todas las categorías que pertenecen a ese grupo
+        const categoriesInGroup = categoryGroups[selectedCategory as keyof typeof categoryGroups];
+        filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
+      } else {
+        // Filtrado por categoría específica
+        filtered = filtered.filter(app => app.category === selectedCategory);
+      }
     }
     
     setFilteredApps(filtered);
   }, [searchTerm, selectedCategory, allApps]);
 
-  // Set featured apps - one from each category
+  // Set featured apps - one from each category group
   useEffect(() => {
-    const uniqueCategories = Array.from(new Set(allApps.map(app => app.category)));
-    const featured = uniqueCategories
-      .map(category => {
-        // Find apps with icons for this category
-        const appsWithIcons = allApps.filter(app => 
-          app.category === category && app.icon && !app.icon.includes('placeholder')
+    const featured = uniqueGroups
+      .map(group => {
+        const categoriesInGroup = categoryGroups[group as keyof typeof categoryGroups];
+        const appsInGroup = allApps.filter(app => categoriesInGroup.includes(app.category));
+        
+        // Find apps with icons for this group
+        const appsWithIcons = appsInGroup.filter(app => 
+          app.icon && !app.icon.includes('placeholder')
         );
         
-        // If we have apps with icons, use one of those, otherwise get any app from this category
+        // If we have apps with icons, use one of those, otherwise get any app from this group
         if (appsWithIcons.length > 0) {
           return appsWithIcons[0];
-        } else {
-          return allApps.find(app => app.category === category);
+        } else if (appsInGroup.length > 0) {
+          return appsInGroup[0];
         }
+        return null;
       })
       .filter(Boolean) as AppData[];
     
@@ -108,9 +143,18 @@ const Catalog = () => {
                   <SelectItem value="Todas" className="dark:text-white">
                     {t('catalog.allCategories') || "Todas las categorías"}
                   </SelectItem>
+                  
+                  {/* Añadimos los grupos como opciones separadas */}
+                  {uniqueGroups.map((group) => (
+                    <SelectItem key={group} value={group} className="dark:text-white font-semibold">
+                      {group}
+                    </SelectItem>
+                  ))}
+                  
+                  {/* Mantenemos las categorías originales para selecciones más específicas */}
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="dark:text-white">
-                      {category}
+                    <SelectItem key={category} value={category} className="dark:text-white pl-6">
+                      {category} ({getCategoryGroup(category)})
                     </SelectItem>
                   ))}
                 </SelectContent>
