@@ -26,23 +26,50 @@ import { cn } from "@/lib/utils";
 const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { mode } = useTheme();
+  const { mode, color, setMode } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(true);
-  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
-  const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
+  const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Get current user details
-  const user = supabase.auth.getSession().then(({ data }) => data.session?.user);
-
-  // Load user preferences from localStorage
+  // Get current user details and profile data
   useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) setUsername(storedUsername);
+    const fetchUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUserId(session.user.id);
+        
+        // Try to get user profile data from Supabase
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('username, avatar_url, theme_mode, language')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (profileData) {
+          setUsername(profileData.username || '');
+          setAvatarUrl(profileData.avatar_url || '');
+          
+          // Set theme and language if available
+          if (profileData.theme_mode) {
+            setMode(profileData.theme_mode);
+          }
+          
+          if (profileData.language) {
+            setLanguage(profileData.language);
+          }
+          
+          // Also update localStorage for immediate use
+          localStorage.setItem('username', profileData.username || '');
+          localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+        }
+      }
+    };
     
-    const storedAvatarUrl = localStorage.getItem('avatarUrl');
-    if (storedAvatarUrl) setAvatarUrl(storedAvatarUrl);
-  }, []);
+    fetchUserData();
+  }, [setMode, setLanguage]);
 
   const handleSignOut = async () => {
     try {
@@ -65,12 +92,34 @@ const Profile = () => {
     }
   };
 
-  const handleSaveProfile = () => {
-    // Save user preferences to localStorage
-    localStorage.setItem('username', username);
-    localStorage.setItem('avatarUrl', avatarUrl);
+  const handleSaveProfile = async () => {
+    if (!userId) return;
     
-    toast.success(language === 'es' ? 'Perfil actualizado correctamente' : 'Profile updated successfully');
+    try {
+      // Save to Supabase
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({ 
+          id: userId,
+          username,
+          avatar_url: avatarUrl,
+          theme_mode: mode,
+          language: language
+        }, { 
+          onConflict: 'id'
+        });
+        
+      if (error) throw error;
+      
+      // Save to localStorage as well for immediate use
+      localStorage.setItem('username', username);
+      localStorage.setItem('avatarUrl', avatarUrl);
+      
+      toast.success(language === 'es' ? 'Perfil actualizado correctamente' : 'Profile updated successfully');
+    } catch (error: any) {
+      toast.error(language === 'es' ? 'Error al actualizar el perfil' : 'Error updating profile');
+      console.error(error);
+    }
   };
 
   const handleClose = () => {
@@ -96,30 +145,16 @@ const Profile = () => {
         </DialogHeader>
         
         <div className="space-y-6 mt-2">
-          {/* Profile Section */}
-          <div className="flex flex-col sm:flex-row gap-6">
-            <div className="flex flex-col items-center space-y-2">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="bg-primary/10">
-                  <User size={36} />
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="grid w-full items-center gap-2">
-                <Label htmlFor="picture" className="sr-only">{t('profile.avatar')}</Label>
-                <Input 
-                  id="picture" 
-                  type="url" 
-                  placeholder={t('profile.avatar')}
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                />
-              </div>
-            </div>
+          {/* Profile Section with aligned username and avatar */}
+          <div className="flex items-center gap-6">
+            <Avatar className="w-24 h-24">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback className="bg-primary/10">
+                <User size={36} />
+              </AvatarFallback>
+            </Avatar>
             
-            <div className="flex-1 space-y-4">
+            <div className="flex-1">
               <div>
                 <Label htmlFor="username" className="dark:text-white">{t('profile.username')}</Label>
                 <Input 
@@ -127,6 +162,18 @@ const Profile = () => {
                   placeholder={t('profile.username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                />
+              </div>
+              
+              <div className="mt-4">
+                <Label htmlFor="picture" className="dark:text-white">{t('profile.avatar')}</Label>
+                <Input 
+                  id="picture" 
+                  type="url" 
+                  placeholder={t('profile.avatar')}
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
                   className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
               </div>
@@ -194,13 +241,6 @@ const Profile = () => {
           
           {/* Actions Section - Moved to the bottom */}
           <div className="pt-2">
-            <Button 
-              onClick={handleSaveProfile} 
-              className="w-full mb-4"
-            >
-              {t('profile.save')}
-            </Button>
-            
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <Button 
                 onClick={handleSignOut} 
@@ -240,6 +280,14 @@ const Profile = () => {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+            
+            {/* Save button moved to the bottom */}
+            <Button 
+              onClick={handleSaveProfile} 
+              className="w-full mt-4"
+            >
+              {t('profile.save')}
+            </Button>
           </div>
         </div>
       </DialogContent>

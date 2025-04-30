@@ -13,7 +13,7 @@ const Index = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-4 py-6 flex-1">
@@ -24,9 +24,9 @@ const Index = () => {
         {favorites.length > 0 ? (
           <AppGrid apps={favorites} compact={true} />
         ) : (
-          <div className="text-center py-12 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+          <div className="text-center py-12 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">
-              <span className="inline-block p-4 rounded-full bg-primary/10">
+              <span className="inline-block p-6 rounded-full bg-primary/10">
                 <Store size={64} className="text-primary" />
               </span>
             </div>

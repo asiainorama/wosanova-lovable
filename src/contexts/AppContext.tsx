@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AppData, aiApps } from '@/data/apps';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AppContextType {
   favorites: AppData[];
@@ -9,7 +10,7 @@ interface AppContextType {
   addToFavorites: (app: AppData) => void;
   removeFromFavorites: (appId: string) => void;
   isFavorite: (appId: string) => boolean;
-  setAllApps: (apps: AppData[]) => void; // Added this line to expose the function
+  setAllApps: (apps: AppData[]) => void; 
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -17,24 +18,110 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<AppData[]>([]);
   const [allApps, setAllApps] = useState<AppData[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   
-  // Load favorites from localStorage on mount
+  // Get user session and update userId
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('favorites');
-    if (storedFavorites) {
-      try {
-        const parsedFavorites = JSON.parse(storedFavorites);
-        setFavorites(parsedFavorites);
-      } catch (error) {
-        console.error('Error parsing favorites from localStorage', error);
-      }
-    }
+    const fetchUserSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUserId(session?.user?.id || null);
+    };
+    
+    fetchUserSession();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-
-  // Save favorites to localStorage when they change
+  
+  // Load favorites from Supabase or localStorage on mount
   useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }, [favorites]);
+    const loadFavorites = async () => {
+      if (userId) {
+        // Try to load from Supabase
+        const { data, error } = await supabase
+          .from('user_favorites')
+          .select('app_data')
+          .eq('user_id', userId);
+          
+        if (data && data.length > 0 && !error) {
+          // Use favorites from Supabase
+          const favoriteApps = data.map(item => item.app_data);
+          setFavorites(favoriteApps);
+        } else {
+          // If no favorites in Supabase, try localStorage
+          const storedFavorites = localStorage.getItem('favorites');
+          if (storedFavorites) {
+            try {
+              const parsedFavorites = JSON.parse(storedFavorites);
+              setFavorites(parsedFavorites);
+              
+              // Save to Supabase for next time
+              parsedFavorites.forEach(async (app: AppData) => {
+                await supabase
+                  .from('user_favorites')
+                  .upsert({ 
+                    user_id: userId, 
+                    app_id: app.id,
+                    app_data: app 
+                  });
+              });
+            } catch (error) {
+              console.error('Error parsing favorites from localStorage', error);
+            }
+          }
+        }
+      } else {
+        // Not logged in, use localStorage
+        const storedFavorites = localStorage.getItem('favorites');
+        if (storedFavorites) {
+          try {
+            const parsedFavorites = JSON.parse(storedFavorites);
+            setFavorites(parsedFavorites);
+          } catch (error) {
+            console.error('Error parsing favorites from localStorage', error);
+          }
+        }
+      }
+    };
+    
+    loadFavorites();
+  }, [userId]);
+
+  // Save favorites to Supabase and localStorage when they change
+  useEffect(() => {
+    const saveFavorites = async () => {
+      // Always save to localStorage for immediate use
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      
+      if (userId) {
+        // Remove all existing favorites for this user
+        await supabase
+          .from('user_favorites')
+          .delete()
+          .eq('user_id', userId);
+          
+        // Insert new favorites
+        if (favorites.length > 0) {
+          const favoritesToInsert = favorites.map(app => ({
+            user_id: userId,
+            app_id: app.id,
+            app_data: app
+          }));
+          
+          await supabase
+            .from('user_favorites')
+            .insert(favoritesToInsert);
+        }
+      }
+    };
+    
+    saveFavorites();
+  }, [favorites, userId]);
 
   const addToFavorites = (app: AppData) => {
     if (!isFavorite(app.id)) {
@@ -69,7 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addToFavorites, 
       removeFromFavorites, 
       isFavorite,
-      setAllApps // Added this line to expose the function
+      setAllApps
     }}>
       {children}
     </AppContext.Provider>
