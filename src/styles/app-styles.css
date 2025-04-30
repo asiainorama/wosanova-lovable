@@ -103,8 +103,8 @@
 .home-app-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 8px;
-  padding: 0;
+  gap: 16px;
+  padding: 4px;
 }
 
 /* Styles for the new card design */
