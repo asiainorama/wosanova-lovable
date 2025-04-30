@@ -64,6 +64,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Apply theme changes and save to localStorage
   const updateTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
+    console.log("Applying theme:", newMode, newColor);
+    
     // Save to localStorage
     localStorage.setItem('themeMode', newMode);
     localStorage.setItem('themeColor', newColor);
@@ -85,6 +87,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     // Apply color scheme changes to app theme
     document.documentElement.style.setProperty('--theme-color', newColor);
+
+    // Apply primary color based on selected color
+    const colorMap = {
+      blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
+      gray: { hue: 220, saturation: "13%", lightness: "50%" },
+      green: { hue: 142, saturation: "71.4%", lightness: "49.8%" },
+      red: { hue: 0, saturation: "84.2%", lightness: "60.2%" },
+      pink: { hue: 322, saturation: "100%", lightness: "50%" },
+      orange: { hue: 24, saturation: "95%", lightness: "53%" }
+    };
+    
+    const selectedColor = colorMap[newColor] || colorMap.blue;
+    document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
     
     // Force redraw on theme change to refresh icons and UI elements
     const event = new Event('themechange');

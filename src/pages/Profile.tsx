@@ -130,10 +130,6 @@ const Profile = () => {
                   className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
               </div>
-              
-              <Button onClick={handleSaveProfile} className="w-full">
-                {t('profile.save')}
-              </Button>
             </div>
           </div>
           
@@ -196,45 +192,54 @@ const Profile = () => {
           
           <Separator className="my-4" />
           
-          {/* Actions Section */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          {/* Actions Section - Moved to the bottom */}
+          <div className="pt-2">
             <Button 
-              onClick={handleSignOut} 
-              variant="outline" 
-              className="flex-1 flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+              onClick={handleSaveProfile} 
+              className="w-full mb-4"
             >
-              <LogOut size={16} />
-              {t('profile.logout')}
+              {t('profile.save')}
             </Button>
             
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="destructive" 
-                  className="flex-1 flex items-center gap-2"
-                >
-                  <Trash2 size={16} />
-                  {t('profile.delete')}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                  <AlertDialogDescription className="dark:text-gray-300">
-                    {t('profile.delete.description')}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    className="bg-destructive text-destructive-foreground"
+            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+              <Button 
+                onClick={handleSignOut} 
+                variant="outline" 
+                className="flex-1 flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+              >
+                <LogOut size={16} />
+                {t('profile.logout')}
+              </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1 flex items-center gap-2"
                   >
+                    <Trash2 size={16} />
                     {t('profile.delete')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
+                    <AlertDialogDescription className="dark:text-gray-300">
+                      {t('profile.delete.description')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      className="bg-destructive text-destructive-foreground"
+                    >
+                      {t('profile.delete')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       </DialogContent>

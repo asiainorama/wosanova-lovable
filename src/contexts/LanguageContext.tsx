@@ -14,6 +14,32 @@ const translations = {
     // Global
     'app.name': 'WosaNova',
     'app.description': 'La mayor colección de WebApps del mundo',
+    'app.preview': 'Previsualizar',
+    
+    // Header
+    'header.home': 'Inicio',
+    'header.catalog': 'Catálogo',
+    'header.manage': 'Gestionar',
+    'header.profile': 'Perfil',
+    
+    // Home Page
+    'home.title': 'Inicio',
+    'home.myApps': 'Mis Aplicaciones',
+    'home.noApps': 'No tienes aplicaciones añadidas',
+    'home.addFromCatalog': 'Agrega aplicaciones desde el catálogo para verlas aquí',
+    'home.exploreCatalog': 'Explorar Catálogo',
+    
+    // Catalog Page
+    'catalog.title': 'Catálogo',
+    'catalog.applications': 'Aplicaciones',
+    'catalog.search': 'Buscar aplicaciones...',
+    'catalog.allCategories': 'Todas las categorías',
+    'catalog.featured': 'Destacadas',
+    'catalog.allApps': 'Todas las aplicaciones',
+    'catalog.results': 'Resultados',
+    'catalog.gridView': 'Vista de cuadrícula',
+    'catalog.listView': 'Vista de lista',
+    'catalog.category': 'Categoría',
     
     // Profile Page
     'profile.title': 'Área Personal',
@@ -45,6 +71,32 @@ const translations = {
     // Global
     'app.name': 'WosaNova',
     'app.description': 'The largest collection of WebApps in the world',
+    'app.preview': 'Preview',
+    
+    // Header
+    'header.home': 'Home',
+    'header.catalog': 'Catalog',
+    'header.manage': 'Manage',
+    'header.profile': 'Profile',
+    
+    // Home Page
+    'home.title': 'Home',
+    'home.myApps': 'My Applications',
+    'home.noApps': 'You have no added applications',
+    'home.addFromCatalog': 'Add applications from the catalog to see them here',
+    'home.exploreCatalog': 'Explore Catalog',
+    
+    // Catalog Page
+    'catalog.title': 'Catalog',
+    'catalog.applications': 'Applications',
+    'catalog.search': 'Search applications...',
+    'catalog.allCategories': 'All categories',
+    'catalog.featured': 'Featured',
+    'catalog.allApps': 'All applications',
+    'catalog.results': 'Results',
+    'catalog.gridView': 'Grid view',
+    'catalog.listView': 'List view',
+    'catalog.category': 'Category',
     
     // Profile Page
     'profile.title': 'Personal Area',

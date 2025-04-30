@@ -11,9 +11,11 @@ import { Search, X, List, Grid } from 'lucide-react';
 import { AppData } from '@/data/apps';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Catalog = () => {
   const { allApps } = useAppContext();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [filteredApps, setFilteredApps] = useState(allApps);
@@ -71,18 +73,18 @@ const Catalog = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header title="Catálogo" />
+      <Header title={t('catalog.title') || "Catálogo"} />
       
       <main className="container mx-auto px-4 py-6 flex-1">
         <div className="mb-6 space-y-4">
-          <h2 className="text-xl font-semibold dark:text-white">Aplicaciones</h2>
+          <h2 className="text-xl font-semibold dark:text-white">{t('catalog.applications') || "Aplicaciones"}</h2>
           
           <div className="flex gap-3 flex-col sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Buscar aplicaciones..."
+                placeholder={t('catalog.search') || "Buscar aplicaciones..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 py-2 w-full bg-gray-100 dark:bg-gray-800 border-none"
@@ -100,10 +102,12 @@ const Catalog = () => {
             <div className="w-full sm:w-48">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
-                  <SelectValue placeholder="Categoría" />
+                  <SelectValue placeholder={t('catalog.category') || "Categoría"} />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                  <SelectItem value="Todas" className="dark:text-white">Todas las categorías</SelectItem>
+                  <SelectItem value="Todas" className="dark:text-white">
+                    {t('catalog.allCategories') || "Todas las categorías"}
+                  </SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category} className="dark:text-white">
                       {category}
@@ -117,7 +121,7 @@ const Catalog = () => {
               <Toggle 
                 pressed={listView} 
                 onPressedChange={setListView}
-                aria-label="Toggle list view"
+                aria-label={t('catalog.listView') || "Toggle list view"}
                 className="bg-gray-100 dark:bg-gray-800 border-none dark:text-white dark:data-[state=off]:text-gray-400"
               >
                 <List className="h-4 w-4" />
@@ -125,7 +129,7 @@ const Catalog = () => {
               <Toggle 
                 pressed={!listView} 
                 onPressedChange={(pressed) => setListView(!pressed)}
-                aria-label="Toggle grid view"
+                aria-label={t('catalog.gridView') || "Toggle grid view"}
                 className="bg-gray-100 dark:bg-gray-800 border-none ml-2 dark:text-white dark:data-[state=off]:text-gray-400"
               >
                 <Grid className="h-4 w-4" />
@@ -136,7 +140,7 @@ const Catalog = () => {
         
         {featuredApps.length > 0 && !searchTerm && selectedCategory === 'Todas' && (
           <div className="mb-8">
-            <h3 className="text-lg font-medium mb-4 dark:text-white">Destacadas</h3>
+            <h3 className="text-lg font-medium mb-4 dark:text-white">{t('catalog.featured') || "Destacadas"}</h3>
             <AppGrid 
               apps={featuredApps} 
               showManage={true}
@@ -149,7 +153,9 @@ const Catalog = () => {
         
         <div>
           <h3 className="text-lg font-medium mb-4 dark:text-white">
-            {searchTerm || selectedCategory !== 'Todas' ? 'Resultados' : 'Todas las aplicaciones'}
+            {searchTerm || selectedCategory !== 'Todas' 
+              ? (t('catalog.results') || "Resultados") 
+              : (t('catalog.allApps') || "Todas las aplicaciones")}
           </h3>
           <AppGrid 
             apps={filteredApps}

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppData } from '@/data/apps';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AppDetailsProps {
   app: AppData | null;
@@ -12,6 +13,8 @@ interface AppDetailsProps {
 }
 
 const AppDetails: React.FC<AppDetailsProps> = ({ app, isOpen, onClose }) => {
+  const { t } = useLanguage();
+  
   if (!app) return null;
 
   return (
@@ -26,18 +29,10 @@ const AppDetails: React.FC<AppDetailsProps> = ({ app, isOpen, onClose }) => {
         </DialogHeader>
         
         <div className="mt-4">
-          <div className="rounded-lg overflow-hidden bg-gray-100">
-            <img 
-              src={`https://source.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop`} 
-              alt={`${app.name} screenshot`}
-              className="w-full h-48 object-cover"
-            />
-          </div>
-          
-          <div className="mt-4 flex justify-end">
+          <div className="flex justify-end">
             <Button onClick={() => window.open(app.url, '_blank')} className="flex items-center gap-2">
               <ExternalLink className="h-4 w-4" />
-              Abrir Aplicación
+              {t('app.preview') || "Previsualizar"}
             </Button>
           </div>
         </div>
