@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// Update ThemeMode to include 'system' as a valid value
+export type ThemeMode = 'light' | 'dark' | 'system';
 type ThemeColor = 'blue' | 'gray' | 'green' | 'red' | 'pink' | 'orange';
-type ThemeMode = 'light' | 'dark';
 
 interface ThemeContextType {
   mode: ThemeMode;

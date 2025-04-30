@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { ThemeMode } from '@/contexts/ThemeContext';
 
 // Define profile type based on the actual database structure
 interface UserProfile {
@@ -31,7 +31,6 @@ interface UserProfile {
   language?: string;
 }
 
-type ThemeMode = 'light' | 'dark' | 'system';
 type Language = 'es' | 'en';
 
 const Profile = () => {
@@ -61,17 +60,22 @@ const Profile = () => {
             .single();
             
           if (data && !error) {
-            const profileData = data as UserProfile;
+            // Use type assertion to ensure proper typing
+            const profileData = data as unknown as UserProfile;
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             
             // Set theme and language if available
             if (profileData.theme_mode) {
-              setMode(profileData.theme_mode as ThemeMode);
+              // Safe cast to ThemeMode
+              const themeMode = profileData.theme_mode as ThemeMode;
+              setMode(themeMode);
             }
             
             if (profileData.language) {
-              setLanguage(profileData.language as Language);
+              // Safe cast to Language
+              const lang = profileData.language as Language;
+              setLanguage(lang);
             }
             
             // Also update localStorage for immediate use
@@ -112,7 +116,7 @@ const Profile = () => {
     if (!userId) return;
     
     try {
-      // Save to Supabase
+      // Save to Supabase with proper typing
       try {
         const { error } = await supabase
           .from('user_profiles')
@@ -121,7 +125,7 @@ const Profile = () => {
             username,
             avatar_url: avatarUrl,
             theme_mode: mode,
-            language: language
+            language
           }, { 
             onConflict: 'id'
           });

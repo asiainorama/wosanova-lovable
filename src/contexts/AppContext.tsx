@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AppData, aiApps } from '@/data/apps';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 interface AppContextType {
   favorites: AppData[];
@@ -16,6 +17,11 @@ interface AppContextType {
 // Define favorites type based on the actual database structure
 interface UserFavorite {
   app_data: AppData;
+}
+
+// We need this type to help with type conversion from Json to AppData
+interface DbUserFavorite {
+  app_data: Json;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -54,8 +60,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             .select('app_data');
             
           if (data && data.length > 0 && !error) {
-            // Use favorites from Supabase
-            const favoriteApps = data.map((item: UserFavorite) => item.app_data);
+            // Use favorites from Supabase - convert Json to AppData
+            const favoriteApps = data.map((item: DbUserFavorite) => {
+              // Safely convert the Json to AppData
+              try {
+                return item.app_data as unknown as AppData;
+              } catch (e) {
+                console.error('Error converting app_data to AppData:', e);
+                return null;
+              }
+            }).filter(Boolean) as AppData[];
+            
             setFavorites(favoriteApps);
           } else {
             // If no favorites in Supabase, try localStorage
@@ -73,7 +88,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                       .upsert({ 
                         user_id: userId, 
                         app_id: app.id,
-                        app_data: app 
+                        app_data: app as unknown as Json 
                       });
                   } catch (error) {
                     console.error('Error saving favorite to Supabase:', error);
@@ -129,10 +144,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             
           // Insert new favorites
           if (favorites.length > 0) {
+            // Create properly typed favorites for insertion
             const favoritesToInsert = favorites.map(app => ({
               user_id: userId,
               app_id: app.id,
-              app_data: app
+              app_data: app as unknown as Json
             }));
             
             try {

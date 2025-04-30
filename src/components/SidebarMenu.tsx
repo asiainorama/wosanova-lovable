@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -61,7 +60,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
             .single();
             
           if (data && !error) {
-            const profileData = data as UserProfile;
+            // Type assertion to ensure data is treated as UserProfile
+            const profileData = data as unknown as UserProfile;
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             
