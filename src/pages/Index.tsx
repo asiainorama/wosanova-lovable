@@ -22,7 +22,7 @@ const Index = () => {
   useEffect(() => {
     if (favorites.length > 0) {
       // Use silent mode to avoid notifications
-      prefetchAppLogos(favorites, true);
+      prefetchAppLogos(favorites);
     }
   }, [favorites]);
 
