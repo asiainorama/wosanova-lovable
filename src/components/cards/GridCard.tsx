@@ -17,7 +17,7 @@ interface GridCardProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   handleAction: (e: React.MouseEvent) => void;
-  handleClick: () => void;
+  handleClick?: () => void;
   smallerIcons?: boolean;
 }
 
@@ -35,8 +35,8 @@ const GridCard: React.FC<GridCardProps> = ({
   
   return (
     <Card 
-      className="relative overflow-hidden hover:shadow-md transition-shadow duration-300"
-      onClick={handleClick}
+      className={`relative overflow-hidden transition-shadow duration-300 ${handleClick ? 'hover:shadow-md cursor-pointer' : ''}`}
+      onClick={handleClick ? handleClick : undefined}
     >
       <div className="p-4 flex flex-col">
         <div className="flex items-center justify-between mb-2">

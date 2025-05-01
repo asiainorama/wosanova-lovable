@@ -33,6 +33,7 @@ const AppCard: React.FC<AppCardProps> = ({
   const favorite = isFavorite(app.id);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isCatalogPage = location.pathname === '/catalog';
   
   // Function to handle favorite action
   const handleAction = (e: React.MouseEvent) => {
@@ -54,8 +55,10 @@ const AppCard: React.FC<AppCardProps> = ({
 
   // Function to handle click on the card
   const handleClick = () => {
-    // Always open the app URL directly
-    safeOpenWindow(app.url);
+    // Only open the app URL directly if not on catalog page
+    if (!isCatalogPage) {
+      safeOpenWindow(app.url);
+    }
   };
 
   // List view style card
@@ -65,7 +68,7 @@ const AppCard: React.FC<AppCardProps> = ({
         app={app} 
         favorite={favorite} 
         handleAction={handleAction} 
-        handleClick={handleClick} 
+        handleClick={isCatalogPage ? undefined : handleClick} 
       />
     );
   }
@@ -95,7 +98,7 @@ const AppCard: React.FC<AppCardProps> = ({
         showManage={showManage}
         onShowDetails={onShowDetails}
         handleAction={handleAction} 
-        handleClick={handleClick}
+        handleClick={isCatalogPage ? undefined : handleClick}
       />
     );
   }
@@ -109,7 +112,7 @@ const AppCard: React.FC<AppCardProps> = ({
       showRemove={showRemove}
       onShowDetails={onShowDetails}
       handleAction={handleAction} 
-      handleClick={handleClick}
+      handleClick={isCatalogPage ? undefined : handleClick}
       smallerIcons={smallerIcons}
     />
   );
