@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import AppDetails from '@/components/AppDetails';
@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
-import { toast } from 'sonner';
 
 // Define category groups
 interface CategoryGroup {
@@ -68,9 +67,14 @@ const Catalog = () => {
   const [listView, setListView] = useState(false);
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
 
+  // Sort apps by name alphabetically
+  const sortedApps = useMemo(() => {
+    return [...allApps].sort((a, b) => a.name.localeCompare(b.name));
+  }, [allApps]);
+
   // Filter apps based on search term and selected filter
   useEffect(() => {
-    let filtered = [...allApps];
+    let filtered = [...sortedApps];
     
     if (searchTerm) {
       filtered = filtered.filter(app => 
@@ -94,9 +98,9 @@ const Catalog = () => {
     }
     
     setFilteredApps(filtered);
-  }, [searchTerm, selectedFilter, allApps]);
+  }, [searchTerm, selectedFilter, sortedApps]);
 
-  // Prefetch logos when the catalog page loads
+  // Prefetch logos when the catalog page loads - removed toast notification
   useEffect(() => {
     const prefetchIcons = async () => {
       if (prefetchStatus !== 'idle' || !allApps.length) return;
@@ -115,12 +119,7 @@ const Catalog = () => {
         await prefetchAppLogos(remainingApps);
         setPrefetchStatus('complete');
         
-        // Only show toast if we've prefetched a significant number of apps
-        if (allApps.length > 50) {
-          toast.success(t('catalog.iconsLoaded') || "App icons loaded", {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
-          });
-        }
+        // Removed toast notification
       }, 2000);
     };
     
@@ -131,13 +130,35 @@ const Catalog = () => {
     setSelectedApp(app);
   };
 
+  // Group apps by category for display
+  const groupedApps = useMemo(() => {
+    const grouped: Record<string, AppData[]> = {};
+    
+    filteredApps.forEach(app => {
+      if (!grouped[app.category]) {
+        grouped[app.category] = [];
+      }
+      grouped[app.category].push(app);
+    });
+    
+    // Sort categories alphabetically
+    return Object.keys(grouped)
+      .sort()
+      .reduce((result, category) => {
+        // Sort apps within each category alphabetically
+        result[category] = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
+        return result;
+      }, {} as Record<string, AppData[]>);
+  }, [filteredApps]);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
       
-      <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="mb-6 space-y-4">
-          <h2 className="text-xl font-semibold dark:text-white">{t('catalog.applications') || "Aplicaciones"}</h2>
+      {/* Fixed search/filter bar */}
+      <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
+        <div className="container mx-auto">
+          <h2 className="text-xl font-semibold dark:text-white mb-3">{t('catalog.applications') || "Aplicaciones"}</h2>
           
           <div className="flex gap-3 flex-col sm:flex-row">
             <div className="relative flex-1">
@@ -207,21 +228,38 @@ const Catalog = () => {
             </div>
           </div>
         </div>
+      </div>
+      
+      <main className="container mx-auto px-4 py-4 flex-1">
+        <h3 className="text-lg font-medium mb-4 dark:text-white">
+          {searchTerm || selectedFilter !== 'all'
+            ? (t('catalog.results') || "Resultados") 
+            : (t('catalog.allApps') || "Todas las aplicaciones")}
+          {selectedFilter !== 'all' && ` > ${selectedFilter}`}
+        </h3>
         
-        <div>
-          <h3 className="text-lg font-medium mb-4 dark:text-white">
-            {searchTerm || selectedFilter !== 'all'
-              ? (t('catalog.results') || "Resultados") 
-              : (t('catalog.allApps') || "Todas las aplicaciones")}
-            {selectedFilter !== 'all' && ` > ${selectedFilter}`}
-          </h3>
-          <AppGrid 
-            apps={filteredApps}
-            showManage={true}
-            onShowDetails={handleShowDetails}
-            listView={listView}
-          />
-        </div>
+        {/* Display apps grouped by category */}
+        {Object.keys(groupedApps).length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(groupedApps).map(([category, apps]) => (
+              <div key={category} className="space-y-3">
+                <h2 className="text-md font-medium border-b pb-2 dark:text-white dark:border-gray-700">
+                  {category}
+                </h2>
+                <AppGrid 
+                  apps={apps}
+                  showManage={true}
+                  onShowDetails={handleShowDetails}
+                  listView={listView}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <AppDetails 
           app={selectedApp}

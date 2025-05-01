@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { useAppContext } from '@/contexts/AppContext';
@@ -53,15 +53,30 @@ const Manage = () => {
   const { favorites, removeFromFavorites } = useAppContext();
   const { t } = useLanguage();
   
-  // Group favorites by category group
-  const groupedFavorites = favorites.reduce((groups: Record<string, typeof favorites>, app) => {
-    const groupName = getCategoryGroup(app.category);
-    if (!groups[groupName]) {
-      groups[groupName] = [];
-    }
-    groups[groupName].push(app);
-    return groups;
-  }, {});
+  // Group favorites by category group and sort alphabetically
+  const groupedFavorites = useMemo(() => {
+    // First sort all favorites by name
+    const sortedFavorites = [...favorites].sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Then group them
+    const groups: Record<string, typeof favorites> = {};
+    
+    sortedFavorites.forEach(app => {
+      const groupName = getCategoryGroup(app.category);
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+      groups[groupName].push(app);
+    });
+    
+    // Sort groups alphabetically by group name
+    return Object.keys(groups)
+      .sort()
+      .reduce((sortedGroups: Record<string, typeof favorites>, groupName) => {
+        sortedGroups[groupName] = groups[groupName];
+        return sortedGroups;
+      }, {});
+  }, [favorites]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -81,7 +96,7 @@ const Manage = () => {
                   {apps.map((app) => (
                     <div
                       key={app.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:border-gray-700"
                     >
                       <div className="flex items-center space-x-3">
                         <img
@@ -90,13 +105,13 @@ const Manage = () => {
                           className="w-8 h-8 object-contain"
                         />
                         <div>
-                          <h3 className="font-medium text-sm">{app.name}</h3>
-                          <p className="text-xs text-gray-500">{app.category}</p>
+                          <h3 className="font-medium text-sm dark:text-white">{app.name}</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
                         </div>
                       </div>
                       <button
                         onClick={() => removeFromFavorites(app.id)}
-                        className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                        className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

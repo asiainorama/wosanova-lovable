@@ -25,6 +25,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         e.stopPropagation();
         onClick(e);
       }}
+      aria-label={favorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
+      title={favorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
     >
       <Heart 
         className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 

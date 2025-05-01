@@ -20,7 +20,7 @@ const AppDetails: React.FC<AppDetailsProps> = ({ app, isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <img src={app.icon} alt={app.name} className="w-8 h-8" />
@@ -30,6 +30,12 @@ const AppDetails: React.FC<AppDetailsProps> = ({ app, isOpen, onClose }) => {
         </DialogHeader>
         
         <div className="mt-4">
+          {/* Mostrar la categoría */}
+          <div className="mb-4">
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Categoría: </span>
+            <span className="text-sm dark:text-gray-300">{app.category}</span>
+          </div>
+          
           <div className="flex justify-end">
             <Button onClick={() => safeOpenWindow(app.url)} className="flex items-center gap-2">
               <ExternalLink className="h-4 w-4" />

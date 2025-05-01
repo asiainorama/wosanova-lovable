@@ -170,13 +170,13 @@ const Profile = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 mt-2">
-          {/* Profile Section with aligned username and avatar */}
-          <div className="flex items-center gap-6">
-            <Avatar className="w-20 h-20">
+        <div className="space-y-3 mt-2">
+          {/* Profile Section with aligned username and avatar - more compact */}
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/10">
-                <User size={32} />
+                <User size={24} />
               </AvatarFallback>
             </Avatar>
             
@@ -192,7 +192,7 @@ const Profile = () => {
                 />
               </div>
               
-              <div className="mt-4">
+              <div className="mt-2">
                 <Label htmlFor="picture" className="dark:text-white">{t('profile.avatar')}</Label>
                 <Input 
                   id="picture" 
@@ -208,12 +208,12 @@ const Profile = () => {
           
           <Separator className="my-2" />
           
-          {/* Language Selection */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium mb-2 dark:text-white">{t('profile.language')}</h3>
+          {/* Language Selection - Fixed selection issue */}
+          <div className="space-y-1">
+            <h3 className="text-base font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
             <RadioGroup 
               value={language}
-              onValueChange={(value) => {
+              onValueChange={(value: string) => {
                 console.log("Changing language to:", value);
                 setLanguage(value as 'es' | 'en');
               }}
@@ -228,13 +228,13 @@ const Profile = () => {
                 <Label 
                   htmlFor="es"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "es" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-2 h-5 w-5" />
-                  <span className="text-sm dark:text-white">{t('profile.spanish')}</span>
+                  <Languages className="mb-1 h-4 w-4" />
+                  <span className="text-xs dark:text-white">{t('profile.spanish')}</span>
                 </Label>
               </div>
               <div>
@@ -246,13 +246,13 @@ const Profile = () => {
                 <Label 
                   htmlFor="en"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "en" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-2 h-5 w-5" />
-                  <span className="text-sm dark:text-white">{t('profile.english')}</span>
+                  <Languages className="mb-1 h-4 w-4" />
+                  <span className="text-xs dark:text-white">{t('profile.english')}</span>
                 </Label>
               </div>
             </RadioGroup>
@@ -260,66 +260,68 @@ const Profile = () => {
           
           <Separator className="my-2" />
           
-          {/* Theme Selector Section */}
+          {/* Theme Selector Section - More compact */}
           <div>
-            <h3 className="text-lg font-medium mb-2 dark:text-white">{t('profile.appearance')}</h3>
+            <h3 className="text-base font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
             <ThemeSelector />
           </div>
           
           <Separator className="my-2" />
           
-          {/* Actions Section - Moved to the bottom and made smaller */}
-          <div className="pt-2">
-            <div className="flex flex-col sm:flex-row gap-3 justify-between">
-              <Button 
-                onClick={handleSignOut} 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-              >
-                <LogOut size={14} />
-                {t('profile.logout')}
-              </Button>
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <Trash2 size={14} />
-                    {t('profile.delete')}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                    <AlertDialogDescription className="dark:text-gray-300">
-                      {t('profile.delete.description')}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground"
+          {/* Actions Section - Made more compact */}
+          <div className="pt-1">
+            <div className="flex justify-between">
+              <div className="space-x-2">
+                <Button 
+                  onClick={handleSignOut} 
+                  variant="outline" 
+                  size="sm"
+                  className="h-7 px-2 text-xs flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                >
+                  <LogOut size={12} />
+                  {t('profile.logout')}
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="h-7 px-2 text-xs flex items-center gap-1"
                     >
+                      <Trash2 size={12} />
                       {t('profile.delete')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
+                      <AlertDialogDescription className="dark:text-gray-300">
+                        {t('profile.delete.description')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-destructive text-destructive-foreground"
+                      >
+                        {t('profile.delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+              
+              {/* Save button - Made more prominently visible */}
+              <Button 
+                onClick={handleSaveProfile}
+                size="sm"
+                className="h-7 px-3 text-xs"
+              >
+                {t('profile.save')}
+              </Button>
             </div>
-            
-            {/* Save button moved to the bottom and made smaller */}
-            <Button 
-              onClick={handleSaveProfile}
-              size="sm"
-              className="w-full mt-3"
-            >
-              {t('profile.save')}
-            </Button>
           </div>
         </div>
       </DialogContent>

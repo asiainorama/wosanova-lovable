@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
@@ -13,7 +13,12 @@ const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
 
-  // Prefetch logos for favorite apps as soon as home page loads
+  // Sort favorites alphabetically
+  const sortedFavorites = useMemo(() => {
+    return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
+  }, [favorites]);
+
+  // Prefetch logos for favorite apps as soon as home page loads (without toast)
   useEffect(() => {
     if (favorites.length > 0) {
       prefetchAppLogos(favorites);
@@ -29,8 +34,8 @@ const Index = () => {
           <h2 className="text-xl font-semibold dark:text-white">{t('home.myApps') || "Mis Aplicaciones"}</h2>
         </div>
         
-        {favorites.length > 0 ? (
-          <AppGrid apps={favorites} compact={true} />
+        {sortedFavorites.length > 0 ? (
+          <AppGrid apps={sortedFavorites} compact={true} />
         ) : (
           <div className="text-center py-12 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">
