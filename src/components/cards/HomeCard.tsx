@@ -14,6 +14,7 @@ interface HomeCardProps {
   handleClick: () => void;
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
+  smallerIcons?: boolean;
 }
 
 const HomeCard: React.FC<HomeCardProps> = ({ 
@@ -22,9 +23,14 @@ const HomeCard: React.FC<HomeCardProps> = ({
   handleAction, 
   handleClick,
   showManage = false,
-  onShowDetails
+  onShowDetails,
+  smallerIcons = false
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+  
+  const iconSize = smallerIcons ? "w-10 h-10" : "w-12 h-12";
+  const buttonSize = smallerIcons ? "h-5 w-5" : "h-6 w-6";
+  const buttonIconSize = smallerIcons ? "h-2.5 w-2.5" : "h-3 w-3";
 
   return (
     <div 
@@ -32,7 +38,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
       onClick={handleClick}
     >
       {imageLoading && (
-        <Skeleton className="w-12 h-12 rounded-lg" />
+        <Skeleton className={`${iconSize} rounded-lg`} />
       )}
       
       {!imageError ? (
@@ -40,7 +46,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
           ref={imageRef}
           src={iconUrl} 
           alt={`${app.name} icon`}
-          className={`w-12 h-12 object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+          className={`${iconSize} object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
           onError={handleImageError}
           onLoad={handleImageLoad}
           loading="lazy"
@@ -48,21 +54,21 @@ const HomeCard: React.FC<HomeCardProps> = ({
       ) : (
         <AppAvatarFallback
           appName={app.name}
-          className="w-12 h-12 rounded-lg"
+          className={`${iconSize} rounded-lg`}
         />
       )}
       
-      <h3 className="text-xs font-medium text-center dark:text-white mt-1">{app.name}</h3>
+      <h3 className="text-xs font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
       
       {(showManage || onShowDetails) && (
         <Button 
           size="sm"
           variant="outline"
-          className="h-6 w-6 rounded-full p-0 absolute top-0 right-0"
+          className={`${buttonSize} rounded-full p-0 absolute top-0 right-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90`}
           onClick={handleAction}
         >
           <Heart 
-            className={`h-3 w-3 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+            className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
           />
         </Button>
       )}

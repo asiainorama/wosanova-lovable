@@ -57,51 +57,6 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "kling",
-    name: "Kling",
-    icon: "https://www.kling.ai/favicon.ico",
-    url: "https://www.kling.ai/",
-    category: "Ventas",
-    description: "Automatización de procesos de ventas con IA",
-    isAI: true
-  },
-  {
-    id: "leap",
-    name: "Leap",
-    icon: "https://www.leap.ai/favicon.ico",
-    url: "https://www.leap.ai/",
-    category: "Imagen",
-    description: "Plataforma para crear y editar imágenes con IA",
-    isAI: true
-  },
-  {
-    id: "leonardo",
-    name: "Leonardo",
-    icon: "https://leonardo.ai/favicon-32x32.png",
-    url: "https://leonardo.ai/",
-    category: "Imagen",
-    description: "Generación de imágenes de alta calidad con IA",
-    isAI: true
-  },
-  {
-    id: "logoa",
-    name: "Logoa",
-    icon: "https://www.logoa.com/favicon.ico",
-    url: "https://www.logoa.com/",
-    category: "Diseño",
-    description: "Creador de logos profesionales con IA",
-    isAI: true
-  },
-  {
-    id: "longshot",
-    name: "LongShot",
-    icon: "https://www.longshot.ai/favicon.ico",
-    url: "https://www.longshot.ai/",
-    category: "Escritura",
-    description: "Generador de artículos largos optimizados para SEO",
-    isAI: true
-  },
-  {
     id: "looka",
     name: "Looka",
     icon: "https://looka.com/favicon.ico",
@@ -126,33 +81,6 @@ export const additionalApps: AppData[] = [
     url: "https://madgicx.com/",
     category: "Marketing",
     description: "Plataforma de marketing para Facebook e Instagram con IA",
-    isAI: true
-  },
-  {
-    id: "maklogo",
-    name: "Maklogo",
-    icon: "https://www.maklogo.com/favicon.ico",
-    url: "https://www.maklogo.com/",
-    category: "Diseño",
-    description: "Creador de logos rápido y sencillo con IA",
-    isAI: true
-  },
-  {
-    id: "marsai",
-    name: "MarsAI",
-    icon: "https://www.marsai.co/favicon.ico",
-    url: "https://www.marsai.co/",
-    category: "Productividad",
-    description: "Automatización de tareas y procesos con IA",
-    isAI: true
-  },
-  {
-    id: "me-bot",
-    name: "Me Bot",
-    icon: "https://me-bot.ai/favicon.ico",
-    url: "https://me-bot.ai/",
-    category: "Asistentes",
-    description: "Crea un clon digital de ti mismo con IA",
     isAI: true
   },
   {
@@ -189,15 +117,6 @@ export const additionalApps: AppData[] = [
     url: "https://www.napkin.ai/",
     category: "Desarrollo",
     description: "Convierte ideas en código utilizando IA",
-    isAI: true
-  },
-  {
-    id: "notefolio",
-    name: "NoteFolio",
-    icon: "https://www.notefolio.ai/favicon.ico",
-    url: "https://www.notefolio.ai/",
-    category: "Productividad",
-    description: "Organizador de notas y documentos con IA",
     isAI: true
   },
   {
@@ -255,15 +174,6 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "pixelme",
-    name: "PixelMe",
-    icon: "https://pixelme.ai/favicon.ico",
-    url: "https://pixelme.ai/",
-    category: "Imagen",
-    description: "Editor de fotos para retratos con IA",
-    isAI: true
-  },
-  {
     id: "plai",
     name: "Plai",
     icon: "https://plai.io/favicon.ico",
@@ -282,30 +192,12 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "podnotes",
-    name: "Podnotes",
-    icon: "https://www.podnotes.co/favicon.ico",
-    url: "https://www.podnotes.co/",
-    category: "Audio",
-    description: "Transcripción y resumen de podcasts con IA",
-    isAI: true
-  },
-  {
     id: "pollo-ai",
     name: "Pollo AI",
     icon: "https://www.pollo.ai/favicon.ico",
     url: "https://www.pollo.ai/",
     category: "Marketing",
     description: "Automatización de marketing por email con IA",
-    isAI: true
-  },
-  {
-    id: "popai",
-    name: "POPAI",
-    icon: "https://www.popai.io/favicon.ico",
-    url: "https://www.popai.io/",
-    category: "Marketing",
-    description: "Análisis predictivo para e-commerce con IA",
     isAI: true
   },
   {
@@ -318,30 +210,12 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "repell",
-    name: "Repell",
-    icon: "https://repell.co/favicon.ico",
-    url: "https://repell.co/",
-    category: "Desarrollo",
-    description: "Protección de modelos de IA contra ataques",
-    isAI: true
-  },
-  {
     id: "runway",
     name: "Runway",
     icon: "https://runway.com/favicon.ico",
     url: "https://runway.com/",
     category: "Video",
     description: "Herramientas creativas de vídeo con IA",
-    isAI: true
-  },
-  {
-    id: "ryrr",
-    name: "Ryrr",
-    icon: "https://ryrr.ai/favicon.ico",
-    url: "https://ryrr.ai/",
-    category: "Ventas",
-    description: "Asistente de ventas predictivo con IA",
     isAI: true
   },
   {
@@ -399,15 +273,6 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "sortext",
-    name: "Sortext",
-    icon: "https://www.sortext.ai/favicon.ico",
-    url: "https://www.sortext.ai/",
-    category: "Escritura",
-    description: "Organizador y clasificador de textos con IA",
-    isAI: true
-  },
-  {
     id: "suno",
     name: "Suno",
     icon: "https://suno.ai/favicon.ico",
@@ -435,15 +300,6 @@ export const additionalApps: AppData[] = [
     isAI: true
   },
   {
-    id: "text-fx",
-    name: "Text FX",
-    icon: "https://textfx.ai/favicon.ico",
-    url: "https://textfx.ai/",
-    category: "Escritura",
-    description: "Editor de texto con efectos de IA",
-    isAI: true
-  },
-  {
     id: "tidv",
     name: "TI;dv",
     icon: "https://tldv.io/favicon.ico",
@@ -468,15 +324,6 @@ export const additionalApps: AppData[] = [
     url: "https://vidiq.com/",
     category: "Video",
     description: "Optimización de vídeos para YouTube con IA",
-    isAI: true
-  },
-  {
-    id: "voicepal",
-    name: "VoicePal",
-    icon: "https://voicepal.ai/favicon.ico",
-    url: "https://voicepal.ai/",
-    category: "Audio",
-    description: "Generador de voces realistas con IA",
     isAI: true
   },
   {

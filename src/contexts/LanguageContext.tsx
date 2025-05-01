@@ -167,15 +167,23 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     console.log("Setting language to:", newLanguage);
     localStorage.setItem('language', newLanguage);
     setLanguageState(newLanguage);
+    
+    // Force event to notify about language change
+    const event = new Event('languagechange');
+    document.dispatchEvent(event);
   };
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations['es']] || key;
+    const currentTranslations = translations[language] || translations.es;
+    return currentTranslations[key as keyof typeof translations.es] || key;
   };
 
   useEffect(() => {
     localStorage.setItem('language', language);
     console.log("Language set in localStorage:", language);
+    
+    // Update document language
+    document.documentElement.lang = language;
   }, [language]);
 
   return (

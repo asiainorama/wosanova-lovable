@@ -167,6 +167,8 @@ const Profile = () => {
       // Save to localStorage as well for immediate use
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
+      localStorage.setItem('themeMode', mode);
+      localStorage.setItem('language', language);
       
       console.log('Profile updated successfully:', { username, avatarUrl, mode, language });
       // No toast notification for auto-save to avoid interruptions
@@ -249,7 +251,7 @@ const Profile = () => {
           
           {/* Language Selection - Fixed selection issue */}
           <div className="space-y-1">
-            <h3 className="text-sm font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
+            <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
             <RadioGroup 
               value={language}
               onValueChange={(value: string) => {
@@ -274,7 +276,7 @@ const Profile = () => {
                   )}
                 >
                   <Languages className="mb-1 h-3 w-3" />
-                  <span className="text-xs dark:text-white">{t('profile.spanish')}</span>
+                  <span className="text-[9px] dark:text-white">{t('profile.spanish')}</span>
                 </Label>
               </div>
               <div>
@@ -292,7 +294,7 @@ const Profile = () => {
                   )}
                 >
                   <Languages className="mb-1 h-3 w-3" />
-                  <span className="text-xs dark:text-white">{t('profile.english')}</span>
+                  <span className="text-[9px] dark:text-white">{t('profile.english')}</span>
                 </Label>
               </div>
             </RadioGroup>
@@ -302,7 +304,7 @@ const Profile = () => {
           
           {/* Theme Selector Section - More compact */}
           <div>
-            <h3 className="text-sm font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
+            <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
             <ThemeSelector onThemeChange={autoSaveChanges} />
           </div>
           
@@ -315,9 +317,9 @@ const Profile = () => {
                 onClick={handleSignOut} 
                 variant="outline" 
                 size="sm"
-                className="h-6 px-2 text-xs flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                className="h-6 px-2 text-[9px] flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
               >
-                <LogOut size={12} />
+                <LogOut size={10} />
                 {t('profile.logout')}
               </Button>
               
@@ -326,9 +328,9 @@ const Profile = () => {
                   <Button 
                     variant="destructive" 
                     size="sm"
-                    className="h-6 px-2 text-xs flex items-center gap-1"
+                    className="h-6 px-2 text-[9px] flex items-center gap-1"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={10} />
                     {t('profile.delete')}
                   </Button>
                 </AlertDialogTrigger>

@@ -12,6 +12,7 @@ interface AppGridProps {
   listView?: boolean;
   compact?: boolean;
   moreCompact?: boolean;
+  smallerIcons?: boolean;
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
@@ -22,7 +23,8 @@ const AppGrid: React.FC<AppGridProps> = ({
   isLarge = false,
   listView = false,
   compact = false,
-  moreCompact = false
+  moreCompact = false,
+  smallerIcons = false
 }) => {
   if (apps.length === 0) {
     return (
@@ -39,7 +41,7 @@ const AppGrid: React.FC<AppGridProps> = ({
         : isLarge 
           ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
           : moreCompact
-            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-3"
+            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-2"
             : compact
               ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-3"
               : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
@@ -53,6 +55,7 @@ const AppGrid: React.FC<AppGridProps> = ({
           onShowDetails={onShowDetails}
           isLarge={isLarge}
           listView={listView}
+          smallerIcons={smallerIcons}
         />
       ))}
     </div>

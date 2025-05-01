@@ -46,6 +46,19 @@ const App = () => {
         console.log("Auth state changed:", event, session ? "session exists" : "no session");
         setSession(session);
         
+        // Apply saved theme and language preferences on login/logout
+        const themeMode = localStorage.getItem('themeMode');
+        const themeColor = localStorage.getItem('themeColor');
+        const language = localStorage.getItem('language');
+        
+        if (themeMode === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.body.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.body.classList.remove('dark'); 
+        }
+        
         // Show toast for login/logout events
         if (event === 'SIGNED_IN') {
           toast.success('Sesión iniciada correctamente', {

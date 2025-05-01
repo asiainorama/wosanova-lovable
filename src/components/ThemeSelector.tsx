@@ -32,6 +32,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
   };
 
   const handleColorChange = (newColor: string) => {
+    console.log("Changing theme color to:", newColor);
     setColor(newColor as any);
     if (onThemeChange) onThemeChange();
   };
@@ -61,7 +62,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
               )}
             >
               <Sun className="mb-1 h-3 w-3" />
-              <span className="text-xs dark:text-white">{t('profile.theme.light')}</span>
+              <span className="text-[9px] dark:text-white">{t('profile.theme.light')}</span>
             </Label>
           </div>
           <div>
@@ -79,7 +80,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
               )}
             >
               <Moon className="mb-1 h-3 w-3" />
-              <span className="text-xs dark:text-white">{t('profile.theme.dark')}</span>
+              <span className="text-[9px] dark:text-white">{t('profile.theme.dark')}</span>
             </Label>
           </div>
         </RadioGroup>
@@ -92,8 +93,9 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
           {colorOptions.map((option) => (
             <button
               key={option.color}
+              type="button"
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 p-1 hover:bg-accent hover:text-accent-foreground",
+                "flex flex-col items-center justify-between rounded-md border-2 p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 color === option.color ? "border-primary" : "border-muted bg-popover",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}

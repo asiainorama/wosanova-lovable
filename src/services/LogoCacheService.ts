@@ -1,3 +1,4 @@
+
 /**
  * Logo Cache Service
  * 
@@ -7,7 +8,7 @@
 import { AppData } from '@/data/apps';
 
 // Cache version - increment when making breaking changes to cache structure
-const CACHE_VERSION = 'logo-cache-v1';
+const CACHE_VERSION = 'logo-cache-v2';
 
 // Storage keys
 const LOCAL_STORAGE_KEY = `${CACHE_VERSION}-persistent`;
@@ -242,6 +243,51 @@ const persistToLocalStorage = (): void => {
 };
 
 /**
+ * Find better quality alternative icon URLs for common domains
+ */
+const getBetterQualityIconUrl = (app: AppData): string | null => {
+  const domain = extractDomain(app.url);
+  
+  // Map of known high-quality icon URLs for common domains
+  const highQualityIcons: Record<string, string> = {
+    // Productivity
+    'notion.so': 'https://www.notion.so/images/favicon.ico',
+    'slack.com': 'https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png',
+    'trello.com': 'https://trello.com/favicon.ico',
+    'airtable.com': 'https://airtable.com/favicon.ico',
+    'monday.com': 'https://monday.com/favicon.ico',
+    'clickup.com': 'https://clickup.com/landing/images/logo-clickup.svg',
+    
+    // Creative
+    'canva.com': 'https://static.canva.com/static/images/favicon-1.ico',
+    'figma.com': 'https://static.figma.com/app/icon/1/favicon.svg',
+    'leonardo.ai': 'https://leonardo.ai/favicon-32x32.png',
+    
+    // AI tools
+    'openai.com': 'https://openai.com/favicon.ico',
+    'jasper.ai': 'https://assets-global.website-files.com/60e5f2de011b86acebc30db7/60e5f2de011b86c429c30e1e_Favicon%2032.png',
+    'anthropic.com': 'https://www.anthropic.com/images/favicon.ico',
+    'gemini.google.com': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_192px.png',
+    
+    // Social  
+    'linkedin.com': 'https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca',
+    'twitter.com': 'https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc727a.png',
+    'instagram.com': 'https://static.cdninstagram.com/rsrc.php/v3/yb/r/lswP1OF1o6P.png',
+    
+    // Video  
+    'youtube.com': 'https://www.youtube.com/s/desktop/3cbce0d4/img/favicon_144x144.png',
+    'vimeo.com': 'https://i.vimeocdn.com/favicon/main-touch_180',
+    'loom.com': 'https://cdn.loom.com/assets/favicons/favicon-192.png',
+  };
+  
+  if (domain && highQualityIcons[domain]) {
+    return highQualityIcons[domain];
+  }
+  
+  return null;
+};
+
+/**
  * Get cached logo URL for an app
  * @param app The app to get a logo for
  * @returns The cached logo URL or default icon
@@ -253,6 +299,22 @@ export const getCachedLogo = (app: AppData): string => {
     if (cached && cached.url) {
       return cached.url;
     }
+  }
+  
+  // Try to find better quality icon from our mapping
+  const highQualityIcon = getBetterQualityIconUrl(app);
+  if (highQualityIcon) {
+    const domain = extractDomain(app.url);
+    memoryCache.set(app.id, {
+      appId: app.id,
+      url: highQualityIcon,
+      timestamp: Date.now(),
+      validated: false,
+      domain,
+      source: 'high-quality-map'
+    });
+    
+    return highQualityIcon;
   }
   
   // If app already has a valid icon that's not a placeholder, use it
