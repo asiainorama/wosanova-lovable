@@ -1,3 +1,4 @@
+
 export interface AppData {
   id: string;
   name: string;
@@ -53,6 +54,7 @@ export const aiApps: AppData[] = [
     description: "Asistente de IA conversacional desarrollado por Anthropic",
     isAI: true
   },
+  // Eliminamos la duplicación de Gemini, solo dejamos esta instancia
   {
     id: "gemini",
     name: "Gemini",
@@ -125,6 +127,7 @@ export const aiApps: AppData[] = [
     description: "Editor de vídeo online con IA para subtítulos automáticos y efectos",
     isAI: true
   },
+  // Eliminamos la duplicación de HeyGen, solo dejamos esta instancia
   {
     id: "heygen",
     name: "HeyGen",
@@ -242,6 +245,7 @@ export const aiApps: AppData[] = [
     description: "Convierte texto en vídeos profesionales con IA",
     isAI: true
   },
+  // Eliminamos la duplicación de Monday, solo dejamos esta instancia
   {
     id: "monday",
     name: "Monday",
@@ -251,6 +255,7 @@ export const aiApps: AppData[] = [
     description: "Gestión de proyectos con automatización y plantillas inteligentes",
     isAI: true
   },
+  // Eliminamos la duplicación de ClickUp, solo dejamos esta instancia
   {
     id: "clickup",
     name: "ClickUp",
@@ -342,15 +347,7 @@ export const aiApps: AppData[] = [
     description: "Asistente de IA para ayudar en tareas diarias",
     isAI: true
   },
-  {
-    id: "ballonary",
-    name: "Ballonary",
-    icon: "https://www.ballonary.com/favicon.ico",
-    url: "https://www.ballonary.com/",
-    category: "Diseño",
-    description: "Creador de ilustraciones con globos y figuras mediante IA",
-    isAI: true
-  },
+  // Eliminada la app Ballonary
   {
     id: "beforesunset-ai",
     name: "BeforeSunset AI",
@@ -387,15 +384,7 @@ export const aiApps: AppData[] = [
     description: "Optimización de blogs y contenidos para SEO con IA",
     isAI: true
   },
-  {
-    id: "bolt",
-    name: "Bolt",
-    icon: "https://bolt.ai/favicon.ico",
-    url: "https://bolt.ai/",
-    category: "Productividad",
-    description: "Automatización de procesos de negocio con IA",
-    isAI: true
-  },
+  // Eliminada la app Bolt
   {
     id: "brandmark",
     name: "Brandmark",
@@ -405,15 +394,7 @@ export const aiApps: AppData[] = [
     description: "Diseño de logos profesionales con IA",
     isAI: true
   },
-  {
-    id: "bright-eye",
-    name: "Bright Eye",
-    icon: "https://bright-eye.ai/favicon.ico",
-    url: "https://bright-eye.ai/",
-    category: "Imagen",
-    description: "Mejora y corrección automática de imágenes con IA",
-    isAI: true
-  },
+  // Eliminada la app Bright Eye
   {
     id: "canva",
     name: "Canva",
@@ -486,15 +467,7 @@ export const aiApps: AppData[] = [
     description: "Optimización de contenido para SEO con IA",
     isAI: true
   },
-  {
-    id: "clickup-app",
-    name: "ClickUp",
-    icon: "https://clickup.com/landing/images/favicon.png",
-    url: "https://clickup.com",
-    category: "Productividad",
-    description: "Gestión de proyectos y tareas con funciones de IA",
-    isAI: true
-  },
+  // Eliminamos las duplicadas de ClickUp
   {
     id: "github-copilot-app",
     name: "Copilot",
@@ -540,6 +513,7 @@ export const aiApps: AppData[] = [
     description: "Suite de herramientas de IA para diferentes tareas",
     isAI: true
   },
+  // Eliminada la app Diamond
   {
     id: "descript-app",
     name: "Descript",
@@ -565,15 +539,6 @@ export const aiApps: AppData[] = [
     url: "https://cloud.google.com/dialogflow",
     category: "Desarrollo",
     description: "Plataforma de Google para crear interfaces conversacionales",
-    isAI: true
-  },
-  {
-    id: "diamond",
-    name: "Diamond",
-    icon: "https://www.diamond.ai/favicon.ico",
-    url: "https://www.diamond.ai/",
-    category: "Productividad",
-    description: "Asistente virtual basado en IA para equipos",
     isAI: true
   },
   {
@@ -657,15 +622,7 @@ export const aiApps: AppData[] = [
     description: "Plataforma de inteligencia de ventas con análisis de IA",
     isAI: true
   },
-  {
-    id: "google-gemini-app",
-    name: "Google Gemini",
-    icon: "https://gemini.google.com/favicon.ico",
-    url: "https://gemini.google.com/",
-    category: "Asistentes",
-    description: "Asistente de IA multimodal de Google",
-    isAI: true
-  },
+  // Eliminamos la duplicación de Google Gemini
   {
     id: "grammarly",
     name: "Grammarly",
@@ -684,15 +641,7 @@ export const aiApps: AppData[] = [
     description: "Asistente de IA conversacional de xAI",
     isAI: true
   },
-  {
-    id: "heygen-app",
-    name: "HeyGen",
-    icon: "https://assets-global.website-files.com/63fdcbe48aa020c0a5493507/649e4c3d01fe7455f38f4527_favicon-32x32.png",
-    url: "https://www.heygen.com/",
-    category: "Video",
-    description: "Generador de videos con presentadores virtuales realistas",
-    isAI: true
-  },
+  // Eliminamos la duplicación de HeyGen
   {
     id: "hix",
     name: "Hix",

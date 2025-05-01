@@ -31,7 +31,7 @@ const Index = () => {
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="mb-4">
+        <div className="mb-5">
           <h2 className="text-lg font-semibold dark:text-white">{t('home.myApps') || "Mis Aplicaciones"}</h2>
         </div>
         
