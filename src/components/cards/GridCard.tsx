@@ -1,80 +1,104 @@
 
 import React from 'react';
 import { AppData } from '@/data/apps';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
+import FavoriteButton from './FavoriteButton';
 
 interface GridCardProps {
   app: AppData;
   favorite: boolean;
-  showManage?: boolean;
   showRemove?: boolean;
+  showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   handleAction: (e: React.MouseEvent) => void;
   handleClick: () => void;
+  smallerIcons?: boolean;
 }
 
 const GridCard: React.FC<GridCardProps> = ({ 
   app, 
   favorite, 
-  showManage = false,
   showRemove = false,
+  showManage = false,
   onShowDetails,
   handleAction, 
-  handleClick 
+  handleClick,
+  smallerIcons = false
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
-
+  
   return (
-    <div 
-      className="catalog-grid-item relative cursor-pointer"
+    <Card 
+      className="relative overflow-hidden hover:shadow-md transition-shadow duration-300"
       onClick={handleClick}
     >
-      <div className="flex flex-col items-center">
-        {imageLoading && (
-          <Skeleton className="w-16 h-16 rounded-lg mb-2" />
-        )}
+      <div className="p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            {imageLoading && (
+              <Skeleton className="h-10 w-10 rounded-md" />
+            )}
+            
+            {!imageError ? (
+              <img 
+                ref={imageRef}
+                src={iconUrl} 
+                alt={`${app.name} icon`}
+                className={`${smallerIcons ? 'h-8 w-8' : 'h-10 w-10'} object-contain rounded-md dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+                onError={handleImageError}
+                onLoad={handleImageLoad}
+                loading="lazy"
+              />
+            ) : (
+              <AppAvatarFallback
+                appName={app.name}
+                className={`${smallerIcons ? 'h-8 w-8' : 'h-10 w-10'} rounded-md`}
+              />
+            )}
+            
+            <div className="ml-3 flex-grow">
+              <h3 className="font-medium line-clamp-1 dark:text-white">{app.name}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
+            </div>
+          </div>
+
+          {app.isAI && (
+            <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20">AI</Badge>
+          )}
+        </div>
         
-        {!imageError ? (
-          <img 
-            ref={imageRef}
-            src={iconUrl} 
-            alt={`${app.name} icon`}
-            className={`w-16 h-16 object-contain mb-2 app-icon dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-            loading="lazy"
-          />
-        ) : (
-          <AppAvatarFallback
-            appName={app.name}
-            className="w-16 h-16 rounded-lg mb-2"
-          />
-        )}
+        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2 flex-grow">
+          {app.description}
+        </p>
         
-        <h3 className="text-sm font-medium text-center dark:text-white">{app.name}</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 text-center mt-1">{app.description}</p>
+        <div className="flex justify-between items-center mt-2">
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(app.url, "_blank");
+            }}
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            Visitar
+          </Button>
+          
+          <FavoriteButton
+            favorite={favorite}
+            showRemove={showRemove}
+            onClick={handleAction}
+          />
+        </div>
       </div>
-      
-      {(showManage || onShowDetails) && (
-        <Button 
-          size="sm"
-          variant="outline"
-          className="absolute top-2 right-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 z-10"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAction(e);
-          }}
-        >
-          <Heart 
-            className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
-          />
-        </Button>
-      )}
-    </div>
+    </Card>
   );
 };
 
