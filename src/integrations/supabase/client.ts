@@ -14,11 +14,11 @@ export const supabase = createClient<Database>(
   SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
-      storage: localStorage,
+      storage: window.localStorage,
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: 'pkce' // Changed from 'implicit' to 'pkce' for better security
+      flowType: 'pkce' // Using PKCE flow for better security and compatibility
     }
   }
 );

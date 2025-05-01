@@ -10,15 +10,29 @@ import SpaceBackground from '@/components/SpaceBackground';
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
 
-  // Check for existing session on component mount
+  // Check for existing session and query params on component mount
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Check URL for auth callback
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const queryParams = new URLSearchParams(window.location.search);
+
+        // Special handling for redirects from OAuth providers
+        if (hashParams.has('access_token') || queryParams.has('code')) {
+          console.log("Detected auth callback parameters");
+          toast.info('Iniciando sesión...', { duration: 2000 });
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Error checking session:", error.message);
+          toast.error(`Error al verificar sesión: ${error.message}`, {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+          });
         } else if (session) {
           console.log("Existing session found in Auth page, redirecting");
           navigate('/catalog');
@@ -27,6 +41,11 @@ const Auth = () => {
         }
       } catch (err) {
         console.error("Unexpected error checking session:", err);
+        toast.error('Error inesperado al verificar la sesión', {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+        });
+      } finally {
+        setIsAuthenticating(false);
       }
     };
     
@@ -53,6 +72,7 @@ const Auth = () => {
         options: {
           redirectTo,
           queryParams: {
+            access_type: 'offline', // Request a refresh token
             prompt: 'select_account', // Force Google to show the account selector
           },
           skipBrowserRedirect: false // Ensure browser redirect happens
@@ -68,10 +88,22 @@ const Auth = () => {
     } catch (error: any) {
       console.error("Authentication error:", error);
       toast.error('Error al iniciar sesión con Google');
-    } finally {
       setIsLoading(false);
     }
   };
+
+  // Show loading when checking authentication
+  if (isAuthenticating) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+        <SpaceBackground />
+        <div className="z-10 flex flex-col items-center justify-center">
+          <Loader2 size={48} className="text-primary animate-spin mb-4" />
+          <p className="text-white text-lg">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">

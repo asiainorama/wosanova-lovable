@@ -42,9 +42,20 @@ const App = () => {
     
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        console.log("Auth state changed:", _event, session ? "session exists" : "no session");
+      (event, session) => {
+        console.log("Auth state changed:", event, session ? "session exists" : "no session");
         setSession(session);
+        
+        // Show toast for login/logout events
+        if (event === 'SIGNED_IN') {
+          toast.success('Sesión iniciada correctamente', {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+          });
+        } else if (event === 'SIGNED_OUT') {
+          toast.info('Sesión cerrada', {
+            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+          });
+        }
       }
     );
 
