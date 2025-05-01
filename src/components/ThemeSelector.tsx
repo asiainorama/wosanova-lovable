@@ -8,7 +8,11 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-export const ThemeSelector = () => {
+interface ThemeSelectorProps {
+  onThemeChange?: () => void;
+}
+
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) => {
   const { mode, color, toggleMode, setColor, setMode } = useTheme();
   const { t } = useLanguage();
 
@@ -21,17 +25,25 @@ export const ThemeSelector = () => {
     { color: 'orange', icon: Palette, label: t('profile.color.orange') }
   ];
 
+  const handleModeChange = (value: string) => {
+    console.log("Changing theme mode to:", value);
+    setMode(value as 'light' | 'dark');
+    if (onThemeChange) onThemeChange();
+  };
+
+  const handleColorChange = (newColor: string) => {
+    setColor(newColor as any);
+    if (onThemeChange) onThemeChange();
+  };
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Mode Selection - More compact */}
       <div className="space-y-1">
         <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('profile.theme.mode')}</h3>
         <RadioGroup 
           value={mode}
-          onValueChange={(value: string) => {
-            console.log("Changing theme mode to:", value);
-            setMode(value as 'light' | 'dark');
-          }}
+          onValueChange={handleModeChange}
           className="grid grid-cols-2 gap-2"
         >
           <div>
@@ -43,12 +55,12 @@ export const ThemeSelector = () => {
             <Label 
               htmlFor="light"
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "light" ? "border-primary" : "border-muted",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
             >
-              <Sun className="mb-1 h-4 w-4" />
+              <Sun className="mb-1 h-3 w-3" />
               <span className="text-xs dark:text-white">{t('profile.theme.light')}</span>
             </Label>
           </div>
@@ -61,12 +73,12 @@ export const ThemeSelector = () => {
             <Label 
               htmlFor="dark"
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "dark" ? "border-primary" : "border-muted",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
             >
-              <Moon className="mb-1 h-4 w-4" />
+              <Moon className="mb-1 h-3 w-3" />
               <span className="text-xs dark:text-white">{t('profile.theme.dark')}</span>
             </Label>
           </div>
@@ -81,14 +93,14 @@ export const ThemeSelector = () => {
             <button
               key={option.color}
               className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 p-1.5 hover:bg-accent hover:text-accent-foreground",
+                "flex flex-col items-center justify-between rounded-md border-2 p-1 hover:bg-accent hover:text-accent-foreground",
                 color === option.color ? "border-primary" : "border-muted bg-popover",
                 "dark:border-gray-700 dark:hover:bg-gray-700"
               )}
-              onClick={() => setColor(option.color as any)}
+              onClick={() => handleColorChange(option.color)}
             >
-              <option.icon className="h-4 w-4" />
-              <span className="text-[10px] dark:text-white">{option.label}</span>
+              <option.icon className="h-3 w-3" />
+              <span className="text-[9px] dark:text-white">{option.label}</span>
             </button>
           ))}
         </div>

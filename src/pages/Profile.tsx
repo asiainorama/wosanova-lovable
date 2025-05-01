@@ -43,6 +43,9 @@ const Profile = () => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  
+  // Debounce timer for auto-save
+  const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Get current user details and profile data
   useEffect(() => {
@@ -91,6 +94,30 @@ const Profile = () => {
     
     fetchUserData();
   }, [setMode, setLanguage]);
+
+  // Auto-save function with debounce
+  const autoSaveChanges = () => {
+    // Clear any existing timer
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+    }
+    
+    // Set a new timer to save after 1 second of inactivity
+    const timer = setTimeout(() => {
+      handleSaveProfile();
+    }, 1000);
+    
+    setSaveTimer(timer);
+  };
+  
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimer) {
+        clearTimeout(saveTimer);
+      }
+    };
+  }, [saveTimer]);
 
   const handleSignOut = async () => {
     try {
@@ -141,11 +168,23 @@ const Profile = () => {
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
       
-      toast.success(language === 'es' ? 'Perfil actualizado correctamente' : 'Profile updated successfully');
+      console.log('Profile updated successfully:', { username, avatarUrl, mode, language });
+      // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
       toast.error(language === 'es' ? 'Error al actualizar el perfil' : 'Error updating profile');
       console.error(error);
     }
+  };
+
+  // Updated input handlers to trigger auto-save
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+    autoSaveChanges();
+  };
+  
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAvatarUrl(e.target.value);
+    autoSaveChanges();
   };
 
   const handleClose = () => {
@@ -170,37 +209,37 @@ const Profile = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-3 mt-2">
+        <div className="space-y-2 mt-2">
           {/* Profile Section with aligned username and avatar - more compact */}
           <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16">
+            <Avatar className="w-14 h-14">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/10">
-                <User size={24} />
+                <User size={20} />
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div>
-                <Label htmlFor="username" className="dark:text-white">{t('profile.username')}</Label>
+                <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
                 <Input 
                   id="username" 
                   placeholder={t('profile.username')}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  onChange={handleUsernameChange}
+                  className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
               </div>
               
-              <div className="mt-2">
-                <Label htmlFor="picture" className="dark:text-white">{t('profile.avatar')}</Label>
+              <div className="mt-1">
+                <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
                 <Input 
                   id="picture" 
                   type="url" 
                   placeholder={t('profile.avatar')}
                   value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full mt-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  onChange={handleAvatarChange}
+                  className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 />
               </div>
             </div>
@@ -210,12 +249,13 @@ const Profile = () => {
           
           {/* Language Selection - Fixed selection issue */}
           <div className="space-y-1">
-            <h3 className="text-base font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
+            <h3 className="text-sm font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
             <RadioGroup 
               value={language}
               onValueChange={(value: string) => {
                 console.log("Changing language to:", value);
                 setLanguage(value as 'es' | 'en');
+                autoSaveChanges();
               }}
               className="grid grid-cols-2 gap-2"
             >
@@ -228,12 +268,12 @@ const Profile = () => {
                 <Label 
                   htmlFor="es"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "es" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-1 h-4 w-4" />
+                  <Languages className="mb-1 h-3 w-3" />
                   <span className="text-xs dark:text-white">{t('profile.spanish')}</span>
                 </Label>
               </div>
@@ -246,12 +286,12 @@ const Profile = () => {
                 <Label 
                   htmlFor="en"
                   className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "en" ? "border-primary" : "border-muted",
                     "dark:border-gray-700 dark:hover:bg-gray-700"
                   )}
                 >
-                  <Languages className="mb-1 h-4 w-4" />
+                  <Languages className="mb-1 h-3 w-3" />
                   <span className="text-xs dark:text-white">{t('profile.english')}</span>
                 </Label>
               </div>
@@ -262,65 +302,54 @@ const Profile = () => {
           
           {/* Theme Selector Section - More compact */}
           <div>
-            <h3 className="text-base font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
-            <ThemeSelector />
+            <h3 className="text-sm font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
+            <ThemeSelector onThemeChange={autoSaveChanges} />
           </div>
           
           <Separator className="my-2" />
           
-          {/* Actions Section - Made more compact */}
+          {/* Actions Section - Centered and aligned */}
           <div className="pt-1">
-            <div className="flex justify-between">
-              <div className="space-x-2">
-                <Button 
-                  onClick={handleSignOut} 
-                  variant="outline" 
-                  size="sm"
-                  className="h-7 px-2 text-xs flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                >
-                  <LogOut size={12} />
-                  {t('profile.logout')}
-                </Button>
-                
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      className="h-7 px-2 text-xs flex items-center gap-1"
-                    >
-                      <Trash2 size={12} />
-                      {t('profile.delete')}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                      <AlertDialogDescription className="dark:text-gray-300">
-                        {t('profile.delete.description')}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteAccount}
-                        className="bg-destructive text-destructive-foreground"
-                      >
-                        {t('profile.delete')}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-              
-              {/* Save button - Made more prominently visible */}
+            <div className="flex justify-center gap-2">
               <Button 
-                onClick={handleSaveProfile}
+                onClick={handleSignOut} 
+                variant="outline" 
                 size="sm"
-                className="h-7 px-3 text-xs"
+                className="h-6 px-2 text-xs flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
               >
-                {t('profile.save')}
+                <LogOut size={12} />
+                {t('profile.logout')}
               </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    className="h-6 px-2 text-xs flex items-center gap-1"
+                  >
+                    <Trash2 size={12} />
+                    {t('profile.delete')}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
+                    <AlertDialogDescription className="dark:text-gray-300">
+                      {t('profile.delete.description')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      className="bg-destructive text-destructive-foreground"
+                    >
+                      {t('profile.delete')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>

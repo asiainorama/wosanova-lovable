@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Update ThemeMode to include 'system' as a valid value
@@ -83,6 +84,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
     if (metaColorScheme) {
       metaColorScheme.setAttribute('content', newMode);
+    } else {
+      // Create meta tag if it doesn't exist
+      const meta = document.createElement('meta');
+      meta.name = 'color-scheme';
+      meta.content = newMode;
+      document.head.appendChild(meta);
     }
     
     // Apply color scheme changes to app theme
