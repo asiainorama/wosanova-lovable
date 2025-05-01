@@ -37,14 +37,14 @@ const AppGrid: React.FC<AppGridProps> = ({
   return (
     <div className={
       listView 
-        ? "space-y-4" // Aumentado de 3 a 4 para más espacio
+        ? "space-y-5" // Increased from 4 to 5 for more space between rows
         : isLarge 
-          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" // Aumentado de 5 a 6
+          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
           : moreCompact
-            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-5" // Aumentado de 4 a 5
+            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-6" // Increased from 5 to 6 for more space
             : compact
-              ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-5" // Aumentado de 4 a 5
-              : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" // Aumentado de 5 a 6
+              ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-6" // Increased from 5 to 6 for more space
+              : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
     }>
       {apps.map((app) => (
         <AppCard 

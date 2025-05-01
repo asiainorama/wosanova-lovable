@@ -5,6 +5,9 @@ import { Card } from '@/components/ui/card';
 import { useAppContext } from '@/contexts/AppContext';
 import { Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAppLogo } from '@/hooks/useAppLogo';
+import { Skeleton } from '@/components/ui/skeleton';
+import AppAvatarFallback from '@/components/cards/AvatarFallback';
 
 // Define category groups (same as in Catalog.tsx)
 interface CategoryGroup {
@@ -62,6 +65,51 @@ const getGroupDisplayName = (groupName: string): string => {
   return group ? group.displayName : "Otros";
 };
 
+// Create a new component for app list item with proper image handling
+const AppListItem = ({ app, onRemove }: { app: any, onRemove: () => void }) => {
+  const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+
+  return (
+    <div
+      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:border-gray-700"
+    >
+      <div className="flex items-center space-x-3">
+        {imageLoading && (
+          <Skeleton className="w-8 h-8 rounded-md" />
+        )}
+        
+        {!imageError ? (
+          <img
+            ref={imageRef}
+            src={iconUrl}
+            alt={`${app.name} icon`}
+            className={`w-8 h-8 object-contain rounded-md dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            loading="lazy"
+          />
+        ) : (
+          <AppAvatarFallback 
+            appName={app.name}
+            className="w-8 h-8 rounded-md"
+          />
+        )}
+        
+        <div>
+          <h3 className="font-medium text-sm dark:text-white">{app.name}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
+        </div>
+      </div>
+      <button
+        onClick={onRemove}
+        className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
+  );
+};
+
 const Manage = () => {
   const { favorites, removeFromFavorites } = useAppContext();
   const { t } = useLanguage();
@@ -107,28 +155,11 @@ const Manage = () => {
                 <div key={groupName} className="space-y-2">
                   <h3 className="font-medium text-sm text-gray-500">{getGroupDisplayName(groupName)}</h3>
                   {apps.map((app) => (
-                    <div
-                      key={app.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:border-gray-700"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={app.icon}
-                          alt={`${app.name} icon`}
-                          className="w-8 h-8 object-contain"
-                        />
-                        <div>
-                          <h3 className="font-medium text-sm dark:text-white">{app.name}</h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removeFromFavorites(app.id)}
-                        className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <AppListItem 
+                      key={app.id} 
+                      app={app} 
+                      onRemove={() => removeFromFavorites(app.id)} 
+                    />
                   ))}
                 </div>
               ))}

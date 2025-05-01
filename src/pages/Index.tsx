@@ -30,13 +30,13 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="mb-5">
+      <main className="container mx-auto px-4 py-8 flex-1">
+        <div className="mb-6">
           <h2 className="text-lg font-semibold dark:text-white">{t('home.myApps') || "Mis Aplicaciones"}</h2>
         </div>
         
         {sortedFavorites.length > 0 ? (
-          <div className="py-2">
+          <div className="py-3">
             <AppGrid 
               apps={sortedFavorites} 
               compact={true} 
