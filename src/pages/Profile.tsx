@@ -199,6 +199,12 @@ const Profile = () => {
     }
   };
 
+  const handleLanguageChange = (value: string) => {
+    console.log("Changing language to:", value);
+    setLanguage(value as Language);
+    autoSaveChanges();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -254,21 +260,17 @@ const Profile = () => {
             <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
             <RadioGroup 
               value={language}
-              onValueChange={(value: string) => {
-                console.log("Changing language to:", value);
-                setLanguage(value as 'es' | 'en');
-                autoSaveChanges();
-              }}
+              onValueChange={handleLanguageChange}
               className="grid grid-cols-2 gap-2"
             >
               <div>
                 <RadioGroupItem 
                   value="es" 
-                  id="es" 
+                  id="es-lang" 
                   className="peer sr-only" 
                 />
                 <Label 
-                  htmlFor="es"
+                  htmlFor="es-lang"
                   className={cn(
                     "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "es" ? "border-primary" : "border-muted",
@@ -282,11 +284,11 @@ const Profile = () => {
               <div>
                 <RadioGroupItem 
                   value="en" 
-                  id="en" 
+                  id="en-lang" 
                   className="peer sr-only" 
                 />
                 <Label 
-                  htmlFor="en"
+                  htmlFor="en-lang"
                   className={cn(
                     "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     language === "en" ? "border-primary" : "border-muted",

@@ -27,7 +27,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
 
   const handleModeChange = (value: string) => {
     console.log("Changing theme mode to:", value);
-    setMode(value as 'light' | 'dark');
+    setMode(value as 'light' | 'dark' | 'system');
     if (onThemeChange) onThemeChange();
   };
 
@@ -50,11 +50,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
           <div>
             <RadioGroupItem 
               value="light" 
-              id="light" 
+              id="light-mode" 
               className="peer sr-only" 
             />
             <Label 
-              htmlFor="light"
+              htmlFor="light-mode"
               className={cn(
                 "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "light" ? "border-primary" : "border-muted",
@@ -68,11 +68,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
           <div>
             <RadioGroupItem 
               value="dark" 
-              id="dark" 
+              id="dark-mode" 
               className="peer sr-only" 
             />
             <Label 
-              htmlFor="dark"
+              htmlFor="dark-mode"
               className={cn(
                 "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                 mode === "dark" ? "border-primary" : "border-muted",
