@@ -36,12 +36,14 @@ const Index = () => {
         </div>
         
         {sortedFavorites.length > 0 ? (
-          <AppGrid 
-            apps={sortedFavorites} 
-            compact={true} 
-            moreCompact={true}
-            smallerIcons={true}
-          />
+          <div className="py-2">
+            <AppGrid 
+              apps={sortedFavorites} 
+              compact={true} 
+              moreCompact={true}
+              smallerIcons={true}
+            />
+          </div>
         ) : (
           <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">

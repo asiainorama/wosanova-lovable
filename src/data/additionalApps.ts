@@ -259,12 +259,12 @@ export const productivityApps: AppData[] = [
     isAI: false
   },
   {
-    id: "monday-app",
-    name: "Monday",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Monday.com_logo.svg",
-    url: "https://monday.com",
+    id: "clickup",
+    name: "ClickUp",
+    icon: "https://clickup.com/landing/images/clickup-logo.svg",
+    url: "https://clickup.com",
     category: "Productividad",
-    description: "Plataforma de gestión del trabajo visual",
+    description: "Plataforma de productividad todo en uno",
     isAI: false
   },
   {

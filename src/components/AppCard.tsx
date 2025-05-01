@@ -54,11 +54,8 @@ const AppCard: React.FC<AppCardProps> = ({
 
   // Function to handle click on the card
   const handleClick = () => {
-    if (!showManage && !onShowDetails) {
-      safeOpenWindow(app.url);
-    } else if (onShowDetails) {
-      onShowDetails(app);
-    }
+    // Always open the app URL directly
+    safeOpenWindow(app.url);
   };
 
   // List view style card

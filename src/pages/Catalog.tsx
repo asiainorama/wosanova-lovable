@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
-import AppDetails from '@/components/AppDetails';
 import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -63,7 +62,6 @@ const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [filteredApps, setFilteredApps] = useState(allApps);
-  const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const [listView, setListView] = useState(false);
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
 
@@ -118,17 +116,11 @@ const Catalog = () => {
         );
         await prefetchAppLogos(remainingApps);
         setPrefetchStatus('complete');
-        
-        // Removed toast notification
       }, 2000);
     };
     
     prefetchIcons();
   }, [allApps, filteredApps]);
-
-  const handleShowDetails = (app: AppData) => {
-    setSelectedApp(app);
-  };
 
   // Group apps by category for display
   const groupedApps = useMemo(() => {
@@ -158,8 +150,6 @@ const Catalog = () => {
       {/* Fixed search/filter bar */}
       <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
         <div className="container mx-auto">
-          <h2 className="text-xl font-semibold dark:text-white mb-3">{t('catalog.applications') || "Aplicaciones"}</h2>
-          
           <div className="flex gap-3 flex-col sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -234,7 +224,7 @@ const Catalog = () => {
         <h3 className="text-lg font-medium mb-4 dark:text-white">
           {searchTerm || selectedFilter !== 'all'
             ? (t('catalog.results') || "Resultados") 
-            : (t('catalog.allApps') || "Todas las aplicaciones")}
+            : ""}
           {selectedFilter !== 'all' && ` > ${selectedFilter}`}
         </h3>
         
@@ -247,25 +237,18 @@ const Catalog = () => {
           <div className="space-y-8">
             {Object.entries(groupedApps).map(([category, apps]) => (
               <div key={category} className="space-y-3">
-                <h2 className="text-md font-medium border-b pb-2 dark:text-white dark:border-gray-700">
+                <h2 className="text-xl font-semibold border-b pb-2 dark:text-white dark:border-gray-700">
                   {category}
                 </h2>
                 <AppGrid 
                   apps={apps}
-                  showManage={true}
-                  onShowDetails={handleShowDetails}
+                  showManage={false}
                   listView={listView}
                 />
               </div>
             ))}
           </div>
         )}
-
-        <AppDetails 
-          app={selectedApp}
-          isOpen={!!selectedApp}
-          onClose={() => setSelectedApp(null)}
-        />
       </main>
     </div>
   );

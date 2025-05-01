@@ -9,32 +9,39 @@ import { useLanguage } from '@/contexts/LanguageContext';
 // Define category groups (same as in Catalog.tsx)
 interface CategoryGroup {
   name: string;
+  displayName: string; // Add display name for translation
   categories: string[];
 }
 
 const categoryGroups: CategoryGroup[] = [
   {
     name: "Productivity",
+    displayName: "Productividad",
     categories: ["Productividad", "Organización", "Trabajo", "Educación"]
   },
   {
     name: "Entertainment",
+    displayName: "Entretenimiento",
     categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
   },
   {
     name: "Utilities",
+    displayName: "Utilidades",
     categories: ["Utilidades", "Herramientas", "Desarrollo"]
   },
   {
     name: "Lifestyle",
+    displayName: "Estilo de vida",
     categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
   },
   {
     name: "Finance",
+    displayName: "Finanzas",
     categories: ["Finanzas", "Negocios", "Compras"]
   },
   {
     name: "Other",
+    displayName: "Otros",
     categories: ["Otros", "Arte", "Fotografía", "Música"]
   }
 ];
@@ -47,6 +54,12 @@ const getCategoryGroup = (category: string): string => {
     }
   }
   return "Other";
+};
+
+// Function to get display name for a group
+const getGroupDisplayName = (groupName: string): string => {
+  const group = categoryGroups.find(g => g.name === groupName);
+  return group ? group.displayName : "Otros";
 };
 
 const Manage = () => {
@@ -92,7 +105,7 @@ const Manage = () => {
             <div className="space-y-6">
               {Object.entries(groupedFavorites).map(([groupName, apps]) => (
                 <div key={groupName} className="space-y-2">
-                  <h3 className="font-medium text-sm text-gray-500">{groupName}</h3>
+                  <h3 className="font-medium text-sm text-gray-500">{getGroupDisplayName(groupName)}</h3>
                   {apps.map((app) => (
                     <div
                       key={app.id}
