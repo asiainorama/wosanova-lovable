@@ -43,25 +43,22 @@ const themeColorClasses: Record<ThemeColor, { background: string, text: string }
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('light');
-  const [color, setColor] = useState<ThemeColor>('blue');
+  // Initialize with values from localStorage or defaults
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    const savedMode = localStorage.getItem('themeMode') as ThemeMode;
+    return savedMode || 'light';
+  });
+  
+  const [color, setColor] = useState<ThemeColor>(() => {
+    const savedColor = localStorage.getItem('themeColor') as ThemeColor;
+    return savedColor || 'blue';
+  });
 
-  // Load theme from localStorage on mount
+  // Apply theme when component mounts and when theme changes
   useEffect(() => {
-    const storedMode = localStorage.getItem('themeMode') as ThemeMode;
-    const storedColor = localStorage.getItem('themeColor') as ThemeColor;
-    
-    if (storedMode) {
-      setMode(storedMode);
-    }
-    
-    if (storedColor) {
-      setColor(storedColor);
-    }
-    
-    // Apply initial theme based on stored preferences
-    updateTheme(storedMode || mode, storedColor || color);
-  }, []);
+    console.log("ThemeProvider effect running - applying theme:", {mode, color});
+    updateTheme(mode, color);
+  }, [mode, color]);
 
   // Apply theme changes and save to localStorage
   const updateTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
@@ -92,9 +89,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.head.appendChild(meta);
     }
     
-    // Apply color scheme changes to app theme
-    document.documentElement.style.setProperty('--theme-color', newColor);
-
     // Apply primary color based on selected color
     const colorMap = {
       blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
@@ -116,19 +110,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const handleSetMode = (newMode: ThemeMode) => {
     console.log("Setting mode to:", newMode);
     setMode(newMode);
-    updateTheme(newMode, color);
   };
 
   const handleSetColor = (newColor: ThemeColor) => {
     setColor(newColor);
-    updateTheme(mode, newColor);
   };
 
   const toggleMode = () => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     console.log("Toggle mode from", mode, "to", newMode);
     setMode(newMode);
-    updateTheme(newMode, color);
   };
 
   return (

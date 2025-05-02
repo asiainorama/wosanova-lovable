@@ -39,13 +39,16 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     if (onThemeChange) onThemeChange();
   };
 
-  // Simple toggle for light/dark mode
   const handleDarkModeToggle = () => {
+    console.log("Explicit dark mode toggle requested. Current mode:", mode);
+    // We'll directly set the mode instead of toggling to avoid any race conditions
     const newMode = mode === 'dark' ? 'light' : 'dark';
-    console.log("Toggling dark mode:", newMode);
     setMode(newMode);
     if (onThemeChange) onThemeChange();
   };
+
+  // Log current theme state each render for debugging
+  console.log("ThemeSelector rendering with mode:", mode);
 
   return (
     <div className="space-y-4">
