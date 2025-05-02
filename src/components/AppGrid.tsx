@@ -9,7 +9,6 @@ interface AppGridProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   isLarge?: boolean;
-  listView?: boolean;
   compact?: boolean;
   moreCompact?: boolean;
   smallerIcons?: boolean;
@@ -21,7 +20,6 @@ const AppGrid: React.FC<AppGridProps> = ({
   showManage = false,
   onShowDetails,
   isLarge = false,
-  listView = false,
   compact = false,
   moreCompact = false,
   smallerIcons = false
@@ -36,15 +34,13 @@ const AppGrid: React.FC<AppGridProps> = ({
 
   return (
     <div className={
-      listView 
-        ? "space-y-5" // Increased from 4 to 5 for more space between rows
-        : isLarge 
-          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
-          : moreCompact
-            ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-6" // Increased from 5 to 6 for more space
-            : compact
-              ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-6" // Increased from 5 to 6 for more space
-              : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
+      isLarge 
+        ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
+        : moreCompact
+          ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-6" 
+          : compact
+            ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-6" 
+            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
     }>
       {apps.map((app) => (
         <AppCard 
@@ -54,7 +50,6 @@ const AppGrid: React.FC<AppGridProps> = ({
           showManage={showManage}
           onShowDetails={onShowDetails}
           isLarge={isLarge}
-          listView={listView}
           smallerIcons={smallerIcons}
         />
       ))}

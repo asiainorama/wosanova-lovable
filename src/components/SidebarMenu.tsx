@@ -105,9 +105,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-bold dark:text-white">Menú</h2>
             
-            {/* User profile section at the top of sidebar */}
+            {/* User profile section at the top of sidebar - now clickable */}
             {userId && (
-              <div className="flex items-center mt-4 mb-2">
+              <Link to="/profile" onClick={() => onOpenChange(false)} className="flex items-center mt-4 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md p-2 transition-colors">
                 <Avatar className="h-10 w-10 mr-3">
                   <AvatarImage src={avatarUrl} />
                   <AvatarFallback className="bg-primary/10">
@@ -115,7 +115,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                   </AvatarFallback>
                 </Avatar>
                 <span className="font-medium dark:text-white truncate">{username || 'Usuario'}</span>
-              </div>
+              </Link>
             )}
           </div>
 

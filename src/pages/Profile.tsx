@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut, Languages, ArrowLeft } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ThemeMode } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
@@ -181,10 +180,6 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   const handleLanguageChange = (value: string) => {
     console.log("Changing language to:", value);
     setLanguage(value as Language);
@@ -195,11 +190,6 @@ const Profile = () => {
     <div className="flex flex-col min-h-screen bg-background">
       <Header title={t('profile.title')} />
       <div className="container max-w-3xl mx-auto px-4 py-8">
-        <button onClick={handleGoBack} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-4">
-          <ArrowLeft size={16} />
-          {t('profile.goBack')}
-        </button>
-        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />

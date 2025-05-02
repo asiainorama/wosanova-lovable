@@ -6,10 +6,9 @@ import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { categories } from '@/data/apps';
-import { Search, X, List, Grid } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { AppData } from '@/data/apps';
 import { Button } from '@/components/ui/button';
-import { Toggle } from '@/components/ui/toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 
@@ -62,7 +61,6 @@ const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [filteredApps, setFilteredApps] = useState(allApps);
-  const [listView, setListView] = useState(false);
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
 
   // Sort apps by name alphabetically
@@ -147,7 +145,7 @@ const Catalog = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
       
-      {/* Fixed search/filter bar */}
+      {/* Fixed search/filter bar - removed list/grid view toggles */}
       <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
         <div className="container mx-auto">
           <div className="flex gap-3 flex-col sm:flex-row">
@@ -197,25 +195,6 @@ const Catalog = () => {
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="flex items-center">
-              <Toggle 
-                pressed={listView} 
-                onPressedChange={setListView}
-                aria-label={t('catalog.listView') || "Toggle list view"}
-                className="bg-gray-100 dark:bg-gray-800 border-none dark:text-white dark:data-[state=off]:text-gray-400"
-              >
-                <List className="h-4 w-4" />
-              </Toggle>
-              <Toggle 
-                pressed={!listView} 
-                onPressedChange={(pressed) => setListView(!pressed)}
-                aria-label={t('catalog.gridView') || "Toggle grid view"}
-                className="bg-gray-100 dark:bg-gray-800 border-none ml-2 dark:text-white dark:data-[state=off]:text-gray-400"
-              >
-                <Grid className="h-4 w-4" />
-              </Toggle>
-            </div>
           </div>
         </div>
       </div>
@@ -228,7 +207,7 @@ const Catalog = () => {
           {selectedFilter !== 'all' && ` > ${selectedFilter}`}
         </h3>
         
-        {/* Display apps grouped by category */}
+        {/* Display apps grouped by category - always using grid view */}
         {Object.keys(groupedApps).length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
@@ -243,7 +222,6 @@ const Catalog = () => {
                 <AppGrid 
                   apps={apps}
                   showManage={false}
-                  listView={listView}
                 />
               </div>
             ))}
