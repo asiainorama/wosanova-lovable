@@ -21,6 +21,9 @@ const translations = {
     'header.catalog': 'Catálogo',
     'header.manage': 'Gestionar',
     'header.profile': 'Perfil',
+    'header.language': 'Idioma',
+    'header.spanish': 'Español',
+    'header.english': 'Inglés',
     
     // Home Page
     'home.title': 'Inicio',
@@ -75,6 +78,18 @@ const translations = {
     'category.lifestyle': 'Estilo de Vida',
     'category.finance': 'Finanzas',
     'category.other': 'Otros',
+    
+    // Auth page
+    'auth.welcome': 'Bienvenido a WosaNova',
+    'auth.description': 'Inicia sesión o regístrate para continuar',
+    'auth.login': 'Iniciar sesión',
+    'auth.signup': 'Registrarse',
+    'auth.email': 'Correo electrónico',
+    'auth.password': 'Contraseña',
+    'auth.remember': 'Recordarme',
+    'auth.forgotPassword': '¿Olvidaste tu contraseña?',
+    'auth.noAccount': '¿No tienes una cuenta?',
+    'auth.haveAccount': '¿Ya tienes una cuenta?',
   },
   en: {
     // Global
@@ -87,6 +102,9 @@ const translations = {
     'header.catalog': 'Catalog',
     'header.manage': 'Manage',
     'header.profile': 'Profile',
+    'header.language': 'Language',
+    'header.spanish': 'Spanish',
+    'header.english': 'English',
     
     // Home Page
     'home.title': 'Home',
@@ -141,6 +159,18 @@ const translations = {
     'category.lifestyle': 'Lifestyle',
     'category.finance': 'Finance',
     'category.other': 'Other',
+    
+    // Auth page
+    'auth.welcome': 'Welcome to WosaNova',
+    'auth.description': 'Log in or sign up to continue',
+    'auth.login': 'Log in',
+    'auth.signup': 'Sign up',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.remember': 'Remember me',
+    'auth.forgotPassword': 'Forgot password?',
+    'auth.noAccount': 'Don\'t have an account?',
+    'auth.haveAccount': 'Already have an account?',
   }
 };
 
@@ -159,18 +189,24 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  // Use state initialization with a callback to ensure we only read from localStorage once
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem('language') as Language) || 'es';
+    const savedLanguage = localStorage.getItem('language');
+    return (savedLanguage === 'en' || savedLanguage === 'es') ? savedLanguage : 'es';
   });
 
   const setLanguage = (newLanguage: Language) => {
     console.log("Setting language to:", newLanguage);
-    localStorage.setItem('language', newLanguage);
-    setLanguageState(newLanguage);
-    
-    // Force event to notify about language change
-    const event = new Event('languagechange');
-    document.dispatchEvent(event);
+    if (newLanguage === 'en' || newLanguage === 'es') {
+      localStorage.setItem('language', newLanguage);
+      setLanguageState(newLanguage);
+      
+      // Force event to notify about language change
+      const event = new Event('languagechange');
+      document.dispatchEvent(event);
+    } else {
+      console.error("Invalid language:", newLanguage);
+    }
   };
 
   const t = (key: string): string => {
@@ -179,11 +215,25 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   };
 
   useEffect(() => {
-    localStorage.setItem('language', language);
     console.log("Language set in localStorage:", language);
     
     // Update document language
     document.documentElement.lang = language;
+    
+    // Add debugging info for language changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'language') {
+        console.log("Language changed in storage:", e.newValue);
+        if (e.newValue === 'en' || e.newValue === 'es') {
+          setLanguageState(e.newValue as Language);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [language]);
 
   return (

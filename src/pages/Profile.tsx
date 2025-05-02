@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -181,9 +182,15 @@ const Profile = () => {
   };
 
   const handleLanguageChange = (value: string) => {
-    console.log("Changing language to:", value);
-    setLanguage(value as Language);
-    autoSaveChanges();
+    if (value === 'es' || value === 'en') {
+      console.log("Profile page: changing language to:", value);
+      const newLanguage = value as Language;
+      setLanguage(newLanguage);
+      // Wait for state to update then trigger save
+      setTimeout(autoSaveChanges, 100);
+    } else {
+      console.error("Invalid language selected:", value);
+    }
   };
 
   return (
@@ -239,7 +246,7 @@ const Profile = () => {
             <div className="space-y-1">
               <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
               <RadioGroup 
-                value={language}
+                value={language} 
                 onValueChange={handleLanguageChange}
                 className="grid grid-cols-2 gap-2"
               >
