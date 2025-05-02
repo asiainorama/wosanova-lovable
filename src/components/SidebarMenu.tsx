@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
-  Grid3X3, 
-  Settings,
   User,
   Calendar,
   Clock,
@@ -62,11 +60,12 @@ const TimeWidget = () => {
   );
 };
 
-// Widget para mostrar el clima
+// Widget para mostrar el clima con API real
 const WeatherWidget = () => {
   const [weather, setWeather] = useState({ temp: null, condition: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const API_KEY = 'ce46da3d0d80c45822b28b8f001e838f';
 
   useEffect(() => {
     const getWeather = async () => {
@@ -76,21 +75,27 @@ const WeatherWidget = () => {
         navigator.geolocation.getCurrentPosition(async (position) => {
           const { latitude, longitude } = position.coords;
           
-          // Llamada a la API de OpenWeatherMap (para una implementación real necesitarías una API key)
-          // Simulando datos para el ejemplo
-          setTimeout(() => {
-            setWeather({ 
-              temp: Math.round(15 + Math.random() * 10), 
-              condition: 'Parcialmente nublado'
-            });
-            setLoading(false);
-          }, 1000);
+          // Llamada a la API de OpenWeatherMap
+          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`);
+          
+          if (!response.ok) {
+            throw new Error('Error al obtener datos del clima');
+          }
+          
+          const data = await response.json();
+          setWeather({ 
+            temp: Math.round(data.main.temp), 
+            condition: data.weather[0].description
+          });
+          setLoading(false);
         }, 
-        () => {
+        (err) => {
+          console.error('Error de geolocalización:', err);
           setError('No se pudo obtener la ubicación');
           setLoading(false);
         });
       } catch (err) {
+        console.error('Error al obtener el clima:', err);
         setError('Error al obtener el clima');
         setLoading(false);
       }
@@ -150,14 +155,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
   const [userId, setUserId] = useState<string | null>(null);
   
-  // Menu items using translation keys
-  const menuItems = [
-    { icon: Home, label: t('header.home'), path: '/' },
-    { icon: Grid3X3, label: t('header.catalog'), path: '/catalog' },
-    { icon: Settings, label: t('header.manage'), path: '/manage' },
-    { icon: User, label: t('profile.title'), path: '/profile' }
-  ];
-
   // Get user session and profile data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -213,13 +210,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:w-[20%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-y-auto"
+        className="w-full sm:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-y-auto"
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-bold dark:text-white theme-text">{t('app.name')}</h2>
             
-            {/* User profile section at the top of sidebar - now clickable */}
+            {/* User profile section at the top of sidebar */}
             {userId && (
               <Link to="/profile" onClick={() => onOpenChange(false)} className="flex items-center mt-4 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md p-2 transition-colors">
                 <Avatar className="h-10 w-10 mr-3">
@@ -241,27 +238,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
             <WeatherWidget />
           </div>
 
-          <nav className="flex-1 p-4">
-            <ul className="space-y-2">
-              {menuItems.map((item) => (
-                <li key={item.path}>
-                  <Link 
-                    to={item.path}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors dark:text-white dark:hover:bg-gray-800 ${
-                      location.pathname === item.path 
-                        ? 'bg-gray-100 font-medium dark:bg-gray-800 text-primary' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => onOpenChange(false)}
-                  >
-                    <item.icon size={18} className={location.pathname === item.path ? 'text-primary' : ''} />
-                    <span className="theme-text">{item.label}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          
           <Separator className="my-2" />
           
           <div className="px-4 py-2">

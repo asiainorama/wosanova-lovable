@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Home, Search } from 'lucide-react';
+import { Menu, Home, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SidebarMenu from './SidebarMenu';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -40,6 +40,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           <Link to="/catalog">
             <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
               <Search className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/manage">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+              <Trash2 className="h-5 w-5" />
             </Button>
           </Link>
         </div>
