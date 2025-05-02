@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -181,7 +180,7 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  // Fixed to prevent automatic toggling
+  // Fixed to prevent automatic toggling and fixed the TypeScript Promise error
   const handleLanguageChange = (newLanguage: string) => {
     console.log("Profile language selection:", newLanguage);
     
