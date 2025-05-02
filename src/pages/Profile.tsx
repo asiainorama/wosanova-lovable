@@ -117,7 +117,7 @@ const Profile = () => {
       if (error) throw error;
       navigate('/auth');
     } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al cerrar sesión' : 'Error signing out');
+      toast.error(t('error.signout'));
     }
   };
 
@@ -125,10 +125,10 @@ const Profile = () => {
     try {
       // In a real app, you'd add proper account deletion logic here
       await supabase.auth.signOut();
-      toast.success(language === 'es' ? 'Cuenta eliminada correctamente' : 'Account deleted successfully');
+      toast.success(t('profile.deleted'));
       navigate('/auth');
     } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al eliminar la cuenta' : 'Error deleting account');
+      toast.error(t('error.delete'));
     }
   };
 
@@ -165,7 +165,7 @@ const Profile = () => {
       console.log('Profile updated successfully:', { username, avatarUrl, mode, language });
       // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
-      toast.error(language === 'es' ? 'Error al actualizar el perfil' : 'Error updating profile');
+      toast.error(t('error.profile'));
       console.error(error);
     }
   };
@@ -182,14 +182,16 @@ const Profile = () => {
   };
 
   const handleLanguageChange = (value: string) => {
+    console.log("Profile page language change:", value);
     if (value === 'es' || value === 'en') {
-      console.log("Profile page: changing language to:", value);
-      const newLanguage = value as Language;
-      setLanguage(newLanguage);
-      // Wait for state to update then trigger save
-      setTimeout(autoSaveChanges, 100);
-    } else {
-      console.error("Invalid language selected:", value);
+      // Update language state directly
+      setLanguage(value as 'es' | 'en');
+      
+      // Force the save to happen immediately instead of using autoSaveChanges
+      // which has a delay, ensuring the change is persisted immediately
+      setTimeout(() => {
+        handleSaveProfile();
+      }, 100);
     }
   };
 
@@ -200,7 +202,7 @@ const Profile = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
-            <h1 className="text-2xl font-bold dark:text-white">{t('profile.title')}</h1>
+            <h1 className="text-2xl font-bold dark:text-white theme-text">{t('profile.title')}</h1>
           </div>
           <p className="text-gray-600 dark:text-gray-300 mb-6">{t('profile.description')}</p>
 

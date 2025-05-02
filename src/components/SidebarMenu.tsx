@@ -36,12 +36,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
   const [userId, setUserId] = useState<string | null>(null);
   
-  // Original menu items with restored names
+  // Menu items using translation keys
   const menuItems = [
-    { icon: Home, label: 'Inicio', path: '/' },
-    { icon: Grid3X3, label: 'Catálogo', path: '/catalog' },
-    { icon: Settings, label: 'Gestionar Mis Apps', path: '/manage' },
-    { icon: User, label: 'Área Personal', path: '/profile' }
+    { icon: Home, label: t('header.home'), path: '/' },
+    { icon: Grid3X3, label: t('header.catalog'), path: '/catalog' },
+    { icon: Settings, label: t('header.manage'), path: '/manage' },
+    { icon: User, label: t('profile.title'), path: '/profile' }
   ];
 
   // Get user session and profile data
@@ -103,7 +103,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-bold dark:text-white">Menú</h2>
+            <h2 className="text-xl font-bold dark:text-white theme-text">{t('app.name')}</h2>
             
             {/* User profile section at the top of sidebar - now clickable */}
             {userId && (
@@ -114,7 +114,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                     <User size={20} />
                   </AvatarFallback>
                 </Avatar>
-                <span className="font-medium dark:text-white truncate">{username || 'Usuario'}</span>
+                <span className="font-medium dark:text-white truncate theme-text">{username || t('profile.username')}</span>
               </Link>
             )}
           </div>
@@ -133,7 +133,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                     onClick={() => onOpenChange(false)}
                   >
                     <item.icon size={18} className={location.pathname === item.path ? 'text-primary' : ''} />
-                    <span>{item.label}</span>
+                    <span className="theme-text">{item.label}</span>
                   </Link>
                 </li>
               ))}

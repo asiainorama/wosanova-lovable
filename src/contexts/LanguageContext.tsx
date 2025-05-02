@@ -70,6 +70,7 @@ const translations = {
     'profile.color.red': 'Rojo',
     'profile.color.pink': 'Rosa',
     'profile.color.orange': 'Naranja',
+    'profile.deleted': 'Cuenta eliminada correctamente',
 
     // Category Groups
     'category.productivity': 'Productividad',
@@ -90,6 +91,11 @@ const translations = {
     'auth.forgotPassword': '¿Olvidaste tu contraseña?',
     'auth.noAccount': '¿No tienes una cuenta?',
     'auth.haveAccount': '¿Ya tienes una cuenta?',
+
+    // Error messages
+    'error.signout': 'Error al cerrar sesión',
+    'error.delete': 'Error al eliminar la cuenta',
+    'error.profile': 'Error al actualizar el perfil',
   },
   en: {
     // Global
@@ -151,6 +157,7 @@ const translations = {
     'profile.color.red': 'Red',
     'profile.color.pink': 'Pink',
     'profile.color.orange': 'Orange',
+    'profile.deleted': 'Account successfully deleted',
 
     // Category Groups
     'category.productivity': 'Productivity',
@@ -171,6 +178,11 @@ const translations = {
     'auth.forgotPassword': 'Forgot password?',
     'auth.noAccount': 'Don\'t have an account?',
     'auth.haveAccount': 'Already have an account?',
+
+    // Error messages
+    'error.signout': 'Error signing out',
+    'error.delete': 'Error deleting account',
+    'error.profile': 'Error updating profile',
   }
 };
 
@@ -202,7 +214,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       setLanguageState(newLanguage);
       
       // Force event to notify about language change
-      const event = new Event('languagechange');
+      const event = new CustomEvent('languagechange', { detail: { language: newLanguage } });
       document.dispatchEvent(event);
     } else {
       console.error("Invalid language:", newLanguage);
@@ -211,7 +223,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const t = (key: string): string => {
     const currentTranslations = translations[language] || translations.es;
-    return currentTranslations[key as keyof typeof translations.es] || key;
+    return currentTranslations[key as keyof typeof currentTranslations] || key;
   };
 
   useEffect(() => {
@@ -231,8 +243,25 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     };
     
     window.addEventListener('storage', handleStorageChange);
+    
+    // Listen for custom language change events
+    const handleLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      console.log("Language change event detected:", customEvent.detail?.language);
+      
+      // Force rerender of components using translations
+      document.querySelectorAll('.theme-text').forEach(el => {
+        // This forces a small DOM update which helps refresh translations
+        el.classList.add('language-updated');
+        setTimeout(() => el.classList.remove('language-updated'), 0);
+      });
+    };
+    
+    document.addEventListener('languagechange', handleLanguageChange);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('languagechange', handleLanguageChange);
     };
   }, [language]);
 

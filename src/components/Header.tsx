@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,9 +20,18 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { mode, color } = useTheme();
   const { language, setLanguage, t } = useLanguage();
+  const [currentLanguage, setCurrentLanguage] = useState(language);
+
+  // Keep component state in sync with context
+  useEffect(() => {
+    setCurrentLanguage(language);
+  }, [language]);
 
   const handleLanguageChange = (newLanguage: 'es' | 'en') => {
     console.log("Header language change:", newLanguage);
+    // First update local state to prevent UI flicker
+    setCurrentLanguage(newLanguage);
+    // Then update context
     setLanguage(newLanguage);
   };
 
@@ -63,15 +71,15 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             <DropdownMenuContent align="end" className="dark:bg-gray-800 dark:border-gray-700">
               <DropdownMenuItem 
                 onClick={() => handleLanguageChange('es')}
-                className={`${language === 'es' ? 'bg-primary/10 dark:bg-primary/20' : ''} cursor-pointer`}
+                className={`${currentLanguage === 'es' ? 'bg-primary/10 dark:bg-primary/20' : ''} cursor-pointer`}
               >
-                🇪🇸 Español
+                🇪🇸 {t('profile.spanish')}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleLanguageChange('en')}
-                className={`${language === 'en' ? 'bg-primary/10 dark:bg-primary/20' : ''} cursor-pointer`}
+                className={`${currentLanguage === 'en' ? 'bg-primary/10 dark:bg-primary/20' : ''} cursor-pointer`}
               >
-                🇬🇧 English
+                🇬🇧 {t('profile.english')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
