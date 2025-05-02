@@ -1,13 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Check, Sun, Moon, CircleDot, SquareDot, Flower2, FlameKindling, Heart, Palette } from 'lucide-react';
+import { Sun, Moon, CircleDot, SquareDot, Flower2, FlameKindling, Heart, Palette } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "@/components/ui/switch";
 
 interface ThemeSelectorProps {
@@ -15,7 +11,7 @@ interface ThemeSelectorProps {
 }
 
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) => {
-  const { mode, color, toggleMode, setColor, setMode } = useTheme();
+  const { mode, color, setColor, setMode } = useTheme();
   const { t } = useLanguage();
 
   const colorOptions = [
@@ -27,32 +23,28 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     { color: 'orange', icon: Palette, label: t('profile.color.orange') }
   ];
 
-  const handleModeChange = (value: string) => {
-    console.log("Changing theme mode to:", value);
-    setMode(value as 'light' | 'dark' | 'system');
-    if (onThemeChange) onThemeChange();
-  };
-
   const handleColorChange = (newColor: string) => {
     console.log("Changing theme color to:", newColor);
     setColor(newColor as any);
     if (onThemeChange) onThemeChange();
   };
 
-  // Simplified handler with direct mode setting
+  // Fixed dark mode toggle handler
   const handleDarkModeToggle = (checked: boolean) => {
     console.log("Dark mode toggle switch changed to:", checked ? "dark" : "light");
-    const newMode = checked ? 'dark' : 'light';
-    setMode(newMode);
-    if (onThemeChange) onThemeChange();
+    setTimeout(() => {
+      const newMode = checked ? 'dark' : 'light';
+      setMode(newMode);
+      if (onThemeChange) onThemeChange();
+    }, 0);
   };
 
   // Log current theme state each render for debugging
-  console.log("ThemeSelector rendering with mode:", mode, "isDark:", mode === 'dark');
+  console.log("ThemeSelector rendering with mode:", mode, "isDarkMode:", mode === 'dark');
 
   return (
     <div className="space-y-4">
-      {/* Mode Selection - Simplified with a single switch */}
+      {/* Mode Selection - Fixed toggle implementation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Sun className="h-4 w-4" />

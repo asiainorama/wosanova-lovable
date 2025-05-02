@@ -44,96 +44,111 @@ const themeColorClasses: Record<ThemeColor, { background: string, text: string }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
-  const [mode, setModeState] = useState<ThemeMode>(() => {
-    // Get from localStorage or default to 'light'
-    const savedMode = localStorage.getItem('themeMode') as ThemeMode;
-    return savedMode || 'light';
+  const [mode, setModeInternal] = useState<ThemeMode>(() => {
+    try {
+      const savedMode = localStorage.getItem('themeMode') as ThemeMode;
+      console.log("Initial theme mode from localStorage:", savedMode);
+      return savedMode || 'light';
+    } catch (e) {
+      console.error("Error reading theme from localStorage:", e);
+      return 'light';
+    }
   });
   
-  const [color, setColorState] = useState<ThemeColor>(() => {
-    // Get from localStorage or default to 'blue'
-    const savedColor = localStorage.getItem('themeColor') as ThemeColor;
-    return savedColor || 'blue';
+  const [color, setColorInternal] = useState<ThemeColor>(() => {
+    try {
+      const savedColor = localStorage.getItem('themeColor') as ThemeColor;
+      console.log("Initial theme color from localStorage:", savedColor);
+      return savedColor || 'blue';
+    } catch (e) {
+      console.error("Error reading color from localStorage:", e);
+      return 'blue';
+    }
   });
 
-  // Ensure theme changes are applied immediately and stored persistently
-  const applyTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
+  // Function to actually apply theme changes to DOM
+  const applyTheme = React.useCallback((newMode: ThemeMode, newColor: ThemeColor) => {
     console.log("Applying theme:", newMode, newColor);
     
-    // Save to localStorage
-    localStorage.setItem('themeMode', newMode);
-    localStorage.setItem('themeColor', newColor);
-    
-    // Apply or remove dark mode class
-    if (newMode === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
+    try {
+      // Save to localStorage
+      localStorage.setItem('themeMode', newMode);
+      localStorage.setItem('themeColor', newColor);
+      
+      // Apply or remove dark mode class
+      if (newMode === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
+  
+      // Apply color scheme meta tag
+      const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
+      if (metaColorScheme) {
+        metaColorScheme.setAttribute('content', newMode);
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = 'color-scheme';
+        meta.content = newMode;
+        document.head.appendChild(meta);
+      }
+      
+      // Apply primary color based on selected color
+      const colorMap = {
+        blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
+        gray: { hue: 220, saturation: "13%", lightness: "50%" },
+        green: { hue: 142, saturation: "71.4%", lightness: "49.8%" },
+        red: { hue: 0, saturation: "84.2%", lightness: "60.2%" },
+        pink: { hue: 322, saturation: "100%", lightness: "50%" },
+        orange: { hue: 24, saturation: "95%", lightness: "53%" }
+      };
+      
+      const selectedColor = colorMap[newColor] || colorMap.blue;
+      document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
+      
+      // Force redraw on theme change to refresh icons and UI elements
+      const event = new Event('themechange');
+      document.dispatchEvent(event);
+    } catch (e) {
+      console.error("Error applying theme:", e);
     }
+  }, []);
 
-    // Apply color scheme meta tag
-    const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
-    if (metaColorScheme) {
-      metaColorScheme.setAttribute('content', newMode);
-    } else {
-      // Create meta tag if it doesn't exist
-      const meta = document.createElement('meta');
-      meta.name = 'color-scheme';
-      meta.content = newMode;
-      document.head.appendChild(meta);
-    }
-    
-    // Apply primary color based on selected color
-    const colorMap = {
-      blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
-      gray: { hue: 220, saturation: "13%", lightness: "50%" },
-      green: { hue: 142, saturation: "71.4%", lightness: "49.8%" },
-      red: { hue: 0, saturation: "84.2%", lightness: "60.2%" },
-      pink: { hue: 322, saturation: "100%", lightness: "50%" },
-      orange: { hue: 24, saturation: "95%", lightness: "53%" }
-    };
-    
-    const selectedColor = colorMap[newColor] || colorMap.blue;
-    document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
-    
-    // Force redraw on theme change to refresh icons and UI elements
-    const event = new Event('themechange');
-    document.dispatchEvent(event);
-  };
-
-  // Apply theme changes when component mounts or when theme state changes
+  // Apply theme when component mounts or when theme state changes
   useEffect(() => {
     console.log("ThemeContext effect running - applying theme:", {mode, color});
     applyTheme(mode, color);
-  }, [mode, color]);
+  }, [mode, color, applyTheme]);
 
-  // Wrapper functions to update theme state
-  const setMode = (newMode: ThemeMode) => {
+  // Wrapper functions to update theme state with debounce
+  const setMode = React.useCallback((newMode: ThemeMode) => {
     console.log("Setting mode to:", newMode);
-    setModeState(newMode);
-  };
+    setModeInternal(newMode);
+  }, []);
 
-  const setColor = (newColor: ThemeColor) => {
+  const setColor = React.useCallback((newColor: ThemeColor) => {
     console.log("Setting color to:", newColor);
-    setColorState(newColor);
-  };
+    setColorInternal(newColor);
+  }, []);
 
-  const toggleMode = () => {
+  const toggleMode = React.useCallback(() => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     console.log("Toggle mode from", mode, "to", newMode);
-    setModeState(newMode);
-  };
+    setModeInternal(newMode);
+  }, [mode]);
+
+  const contextValue = React.useMemo(() => ({
+    mode, 
+    color, 
+    setMode, 
+    setColor, 
+    toggleMode
+  }), [mode, color, setMode, setColor, toggleMode]);
 
   return (
-    <ThemeContext.Provider value={{ 
-      mode, 
-      color, 
-      setMode, 
-      setColor, 
-      toggleMode 
-    }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
