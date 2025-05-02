@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Languages } from 'lucide-react';
@@ -29,10 +30,20 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const handleLanguageChange = (newLanguage: 'es' | 'en') => {
     console.log("Header language change:", newLanguage);
+    
     // First update local state to prevent UI flicker
     setCurrentLanguage(newLanguage);
+    
     // Then update context
     setLanguage(newLanguage);
+    
+    // Force a page refresh to ensure all translations are applied
+    setTimeout(() => {
+      const event = new CustomEvent('languagechange', { 
+        detail: { language: newLanguage }
+      });
+      document.dispatchEvent(event);
+    }, 200);
   };
 
   return (

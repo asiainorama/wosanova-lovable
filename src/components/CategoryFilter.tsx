@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { categories } from '@/data/apps';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,12 +10,30 @@ interface CategoryFilterProps {
 }
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [, updateState] = useState<{}>({});
+  const forceUpdate = React.useCallback(() => updateState({}), []);
 
   // Función para traducir categorías
   const translateCategory = (category: string) => {
-    return t(`category.${category.toLowerCase()}`) || category;
+    // Convertir a minúsculas y normalizar el identificador para la traducción
+    const key = `category.${category.toLowerCase()}`;
+    return t(key) || category;
   };
+  
+  // Responder a los cambios de idioma
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      console.log("CategoryFilter detected language change:", language);
+      forceUpdate();
+    };
+    
+    document.addEventListener('languagechange', handleLanguageChange);
+    
+    return () => {
+      document.removeEventListener('languagechange', handleLanguageChange);
+    };
+  }, [language, forceUpdate]);
 
   return (
     <Select value={selectedCategory} onValueChange={onCategoryChange}>

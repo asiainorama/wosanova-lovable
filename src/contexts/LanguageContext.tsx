@@ -79,6 +79,33 @@ const translations = {
     'category.lifestyle': 'Estilo de Vida',
     'category.finance': 'Finanzas',
     'category.other': 'Otros',
+    'category.social': 'Social',
+    'category.education': 'Educación',
+    'category.shopping': 'Compras',
+    'category.travel': 'Viajes',
+    'category.health': 'Salud',
+    'category.sports': 'Deportes',
+    'category.news': 'Noticias',
+    'category.business': 'Negocios',
+    'category.food': 'Alimentación',
+    'category.music': 'Música',
+    'category.video': 'Vídeo',
+    'category.photo': 'Fotografía',
+    'category.games': 'Juegos',
+    'category.weather': 'El Tiempo',
+    'category.books': 'Libros',
+    'category.art': 'Arte',
+    'category.development': 'Desarrollo',
+    'category.dating': 'Citas',
+    
+    // App Info
+    'app.info.category': 'Categoría',
+    'app.info.rating': 'Valoración',
+    'app.info.author': 'Creador',
+    'app.info.lastUpdate': 'Última actualización',
+    'app.info.size': 'Tamaño',
+    'app.info.languages': 'Idiomas',
+    'app.info.platforms': 'Plataformas',
     
     // Auth page
     'auth.welcome': 'Bienvenido a WosaNova',
@@ -166,6 +193,33 @@ const translations = {
     'category.lifestyle': 'Lifestyle',
     'category.finance': 'Finance',
     'category.other': 'Other',
+    'category.social': 'Social',
+    'category.education': 'Education',
+    'category.shopping': 'Shopping',
+    'category.travel': 'Travel',
+    'category.health': 'Health',
+    'category.sports': 'Sports',
+    'category.news': 'News',
+    'category.business': 'Business',
+    'category.food': 'Food',
+    'category.music': 'Music',
+    'category.video': 'Video',
+    'category.photo': 'Photography',
+    'category.games': 'Games',
+    'category.weather': 'Weather',
+    'category.books': 'Books',
+    'category.art': 'Art',
+    'category.development': 'Development',
+    'category.dating': 'Dating',
+    
+    // App Info
+    'app.info.category': 'Category',
+    'app.info.rating': 'Rating',
+    'app.info.author': 'Author',
+    'app.info.lastUpdate': 'Last update',
+    'app.info.size': 'Size',
+    'app.info.languages': 'Languages',
+    'app.info.platforms': 'Platforms',
     
     // Auth page
     'auth.welcome': 'Welcome to WosaNova',
@@ -223,7 +277,13 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const t = (key: string): string => {
     const currentTranslations = translations[language] || translations.es;
-    return currentTranslations[key as keyof typeof currentTranslations] || key;
+    const result = currentTranslations[key as keyof typeof currentTranslations];
+    
+    if (!result) {
+      console.debug(`Missing translation for key: ${key} in ${language}`);
+    }
+    
+    return result || key;
   };
 
   useEffect(() => {

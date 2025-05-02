@@ -181,17 +181,24 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  const handleLanguageChange = (value: string) => {
-    console.log("Profile page language change:", value);
-    if (value === 'es' || value === 'en') {
-      // Update language state directly
-      setLanguage(value as 'es' | 'en');
+  const handleLanguageChange = (newLanguage: string) => {
+    console.log("Profile page language change:", newLanguage);
+    if (newLanguage === 'es' || newLanguage === 'en') {
+      // Update language in context and trigger auto-save
+      setLanguage(newLanguage as 'es' | 'en');
       
-      // Force the save to happen immediately instead of using autoSaveChanges
-      // which has a delay, ensuring the change is persisted immediately
+      // Force save immediately
       setTimeout(() => {
         handleSaveProfile();
       }, 100);
+      
+      // Force a page refresh to ensure all translations are applied
+      setTimeout(() => {
+        const event = new CustomEvent('languagechange', { 
+          detail: { language: newLanguage }
+        });
+        document.dispatchEvent(event);
+      }, 200);
     }
   };
 
