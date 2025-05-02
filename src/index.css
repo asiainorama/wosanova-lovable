@@ -80,7 +80,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 322 100% 50%;
+    --primary: 322 100% 50%; /* Mantener el mismo tono primario */
     --primary-foreground: 0 0% 100%;
     --primary-border: 322 100% 40%;
 
@@ -100,7 +100,7 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
-    /* Maintain color brightness in dark mode */
+    /* Colores más brillantes en modo oscuro */
     --blue-400: 217 91% 75%;
     --blue-500: 217 91% 65%;
     --blue-700: 217 91% 55%;
@@ -171,6 +171,37 @@
   /* Header fixes for dark mode */
   .dark header svg {
     @apply text-white;
+  }
+  
+  /* Asegurarse de que los botones de colores funcionen en modo oscuro */
+  .dark button[style*="--blue-500"] {
+    background-color: hsl(217, 91%, 65%);
+    border-color: hsl(217, 91%, 55%);
+  }
+  
+  .dark button[style*="--gray-500"] {
+    background-color: hsl(220, 13%, 60%);
+    border-color: hsl(220, 13%, 50%);
+  }
+  
+  .dark button[style*="--green-500"] {
+    background-color: hsl(142, 71%, 60%);
+    border-color: hsl(142, 71%, 50%);
+  }
+  
+  .dark button[style*="--red-500"] {
+    background-color: hsl(0, 84%, 65%);
+    border-color: hsl(0, 84%, 55%);
+  }
+  
+  .dark button[style*="--pink-500"] {
+    background-color: hsl(322, 100%, 65%);
+    border-color: hsl(322, 100%, 55%);
+  }
+  
+  .dark button[style*="--orange-500"] {
+    background-color: hsl(24, 95%, 65%);
+    border-color: hsl(24, 95%, 55%);
   }
 }
 

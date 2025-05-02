@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Update ThemeMode to include 'system' as a valid value
 export type ThemeMode = 'light' | 'dark' | 'system';
-type ThemeColor = 'blue' | 'gray' | 'green' | 'red' | 'pink' | 'orange';
+export type ThemeColor = 'blue' | 'gray' | 'green' | 'red' | 'pink' | 'orange';
 
 interface ThemeContextType {
   mode: ThemeMode;
@@ -95,35 +95,50 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.head.appendChild(meta);
       }
       
-      // Color mapping for both light and dark modes - ensuring consistent colors
+      // Color mapping - using the same values for consistency
       const colorMap = {
-        blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
+        blue: { hue: 217, saturation: "91%", lightness: "60%" },
         gray: { hue: 220, saturation: "13%", lightness: "50%" },
-        green: { hue: 142, saturation: "71.4%", lightness: "49.8%" },
-        red: { hue: 0, saturation: "84.2%", lightness: "60.2%" },
+        green: { hue: 142, saturation: "71%", lightness: "50%" },
+        red: { hue: 0, saturation: "84%", lightness: "60%" },
         pink: { hue: 322, saturation: "100%", lightness: "50%" },
         orange: { hue: 24, saturation: "95%", lightness: "53%" }
       };
       
       const selectedColor = colorMap[newColor] || colorMap.blue;
       
-      // Set the primary color CSS variable, with consistent lightness regardless of mode
+      // Set the primary color CSS variable with consistent values
       document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
       
-      // Update primary-foreground to ensure text is visible against the background
-      // Always use light text on dark backgrounds and dark text on light backgrounds
+      // Set primary-foreground to be always white in dark mode and always dark in light mode
       document.documentElement.style.setProperty(
         '--primary-foreground', 
         newMode === 'dark' ? '0 0% 100%' : '222.2 47.4% 11.2%'
       );
       
-      // Also update border colors for toggle buttons to match the theme color
+      // Ensure the border color matches the theme
       document.documentElement.style.setProperty(
         '--primary-border', 
         `${selectedColor.hue} ${selectedColor.saturation} ${newMode === 'dark' ? '40%' : '70%'}`
       );
       
-      // Force redraw on theme change to refresh icons and UI elements
+      // Set normal and dark theme colors for each theme color
+      const colors = ['blue', 'gray', 'green', 'red', 'pink', 'orange'];
+      colors.forEach(c => {
+        const color = colorMap[c as ThemeColor];
+        const baseLightness = newMode === 'dark' ? 65 : 50; // Brighter in dark mode
+        
+        document.documentElement.style.setProperty(
+          `--${c}-500`, 
+          `hsl(${color.hue}, ${color.saturation}, ${baseLightness}%)`
+        );
+        document.documentElement.style.setProperty(
+          `--${c}-700`, 
+          `hsl(${color.hue}, ${color.saturation}, ${baseLightness - 10}%)`
+        );
+      });
+      
+      // Force redraw to refresh UI elements
       const event = new Event('themechange');
       document.dispatchEvent(event);
     } catch (e) {
