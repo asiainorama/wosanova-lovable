@@ -15,7 +15,7 @@
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 322 100% 50%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 7%;
     --primary-border: 322 100% 70%;
 
     --secondary: 210 40% 96.1%;
@@ -36,7 +36,7 @@
 
     --radius: 0.5rem;
 
-    --blue-400: 217 91% 60%;
+    --blue-400: 217 91% 70%;
     --blue-500: 217 91% 50%;
     --blue-700: 217 91% 40%;
     
@@ -80,9 +80,9 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 322 100% 50%; /* Mantener el mismo tono primario */
+    --primary: 322 100% 65%; /* Brighter primary in dark mode */
     --primary-foreground: 0 0% 100%;
-    --primary-border: 322 100% 40%;
+    --primary-border: 322 100% 80%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -100,34 +100,34 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
-    /* Colores más brillantes en modo oscuro */
+    /* Brighter colors in dark mode */
     --blue-400: 217 91% 75%;
     --blue-500: 217 91% 65%;
-    --blue-700: 217 91% 55%;
+    --blue-700: 217 91% 60%;
     
-    --gray-400: 220 13% 70%;
-    --gray-500: 220 13% 60%;
-    --gray-700: 220 13% 50%;
+    --gray-400: 220 13% 75%;
+    --gray-500: 220 13% 65%;
+    --gray-700: 220 13% 60%;
     
-    --green-400: 142 71% 70%;
-    --green-500: 142 71% 60%;
-    --green-700: 142 71% 50%;
+    --green-400: 142 71% 75%;
+    --green-500: 142 71% 65%;
+    --green-700: 142 71% 60%;
     
     --red-400: 0 84% 75%;
     --red-500: 0 84% 65%;
-    --red-700: 0 84% 55%;
+    --red-700: 0 84% 60%;
     
     --pink-400: 322 100% 75%;
     --pink-500: 322 100% 65%;
-    --pink-700: 322 100% 55%;
+    --pink-700: 322 100% 60%;
     
     --orange-400: 24 95% 75%;
     --orange-500: 24 95% 65%;
-    --orange-700: 24 95% 55%;
+    --orange-700: 24 95% 60%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 322 100% 50%;
+    --sidebar-primary: 322 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
@@ -173,35 +173,43 @@
     @apply text-white;
   }
   
-  /* Asegurarse de que los botones de colores funcionen en modo oscuro */
+  /* Color theme buttons in dark mode - this is crucial */
+  .dark button[style*="--blue-500"],
+  .dark button[style*="--gray-500"],
+  .dark button[style*="--green-500"],
+  .dark button[style*="--red-500"],
+  .dark button[style*="--pink-500"],
+  .dark button[style*="--orange-500"] {
+    color: white !important;
+  }
+  
+  /* Apply specific theme colors in dark mode to ensure they're visible */
+  .dark button[style*="backgroundColor"] {
+    border-color: white;
+  }
+  
   .dark button[style*="--blue-500"] {
-    background-color: hsl(217, 91%, 65%);
-    border-color: hsl(217, 91%, 55%);
+    background-color: hsl(217, 91%, 65%) !important;
   }
   
   .dark button[style*="--gray-500"] {
-    background-color: hsl(220, 13%, 60%);
-    border-color: hsl(220, 13%, 50%);
+    background-color: hsl(220, 13%, 65%) !important;
   }
   
   .dark button[style*="--green-500"] {
-    background-color: hsl(142, 71%, 60%);
-    border-color: hsl(142, 71%, 50%);
+    background-color: hsl(142, 71%, 65%) !important;
   }
   
   .dark button[style*="--red-500"] {
-    background-color: hsl(0, 84%, 65%);
-    border-color: hsl(0, 84%, 55%);
+    background-color: hsl(0, 84%, 65%) !important;
   }
   
   .dark button[style*="--pink-500"] {
-    background-color: hsl(322, 100%, 65%);
-    border-color: hsl(322, 100%, 55%);
+    background-color: hsl(322, 100%, 65%) !important;
   }
   
   .dark button[style*="--orange-500"] {
-    background-color: hsl(24, 95%, 65%);
-    border-color: hsl(24, 95%, 55%);
+    background-color: hsl(24, 95%, 65%) !important;
   }
 }
 

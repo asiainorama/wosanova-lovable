@@ -95,46 +95,57 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.head.appendChild(meta);
       }
       
-      // Color mapping - using the same values for consistency
+      // Color mapping with specific HSL values
       const colorMap = {
-        blue: { hue: 217, saturation: "91%", lightness: "60%" },
-        gray: { hue: 220, saturation: "13%", lightness: "50%" },
-        green: { hue: 142, saturation: "71%", lightness: "50%" },
-        red: { hue: 0, saturation: "84%", lightness: "60%" },
-        pink: { hue: 322, saturation: "100%", lightness: "50%" },
-        orange: { hue: 24, saturation: "95%", lightness: "53%" }
+        blue: { hue: 217, saturation: "91%", lightness: newMode === 'dark' ? "65%" : "50%" },
+        gray: { hue: 220, saturation: "13%", lightness: newMode === 'dark' ? "65%" : "50%" },
+        green: { hue: 142, saturation: "71%", lightness: newMode === 'dark' ? "65%" : "50%" },
+        red: { hue: 0, saturation: "84%", lightness: newMode === 'dark' ? "65%" : "60%" },
+        pink: { hue: 322, saturation: "100%", lightness: newMode === 'dark' ? "65%" : "50%" },
+        orange: { hue: 24, saturation: "95%", lightness: newMode === 'dark' ? "65%" : "53%" }
       };
       
       const selectedColor = colorMap[newColor] || colorMap.blue;
       
-      // Set the primary color CSS variable with consistent values
-      document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
+      // Set the primary color CSS variable with adjusted values for dark mode
+      document.documentElement.style.setProperty(
+        '--primary', 
+        `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`
+      );
       
-      // Set primary-foreground to be always white in dark mode and always dark in light mode
+      // Always white text on colored backgrounds in dark mode
       document.documentElement.style.setProperty(
         '--primary-foreground', 
-        newMode === 'dark' ? '0 0% 100%' : '222.2 47.4% 11.2%'
+        newMode === 'dark' ? '0 0% 100%' : '0 0% 7%'
       );
       
-      // Ensure the border color matches the theme
+      // Adjust border color for better contrast in dark mode
       document.documentElement.style.setProperty(
         '--primary-border', 
-        `${selectedColor.hue} ${selectedColor.saturation} ${newMode === 'dark' ? '40%' : '70%'}`
+        `${selectedColor.hue} ${selectedColor.saturation} ${newMode === 'dark' ? '80%' : '70%'}`
       );
       
-      // Set normal and dark theme colors for each theme color
+      // Set all theme colors with appropriate adjustments for dark mode
       const colors = ['blue', 'gray', 'green', 'red', 'pink', 'orange'];
       colors.forEach(c => {
         const color = colorMap[c as ThemeColor];
-        const baseLightness = newMode === 'dark' ? 65 : 50; // Brighter in dark mode
         
+        // Base colors are brighter in dark mode
         document.documentElement.style.setProperty(
           `--${c}-500`, 
-          `hsl(${color.hue}, ${color.saturation}, ${baseLightness}%)`
+          `hsl(${color.hue}, ${color.saturation}, ${color.lightness})`
         );
+        
+        // Border/highlight colors
         document.documentElement.style.setProperty(
           `--${c}-700`, 
-          `hsl(${color.hue}, ${color.saturation}, ${baseLightness - 10}%)`
+          `hsl(${color.hue}, ${color.saturation}, ${parseFloat(color.lightness) - (newMode === 'dark' ? 5 : 10)}%)`
+        );
+        
+        // Lighter variants for highlights
+        document.documentElement.style.setProperty(
+          `--${c}-400`, 
+          `hsl(${color.hue}, ${color.saturation}, ${parseFloat(color.lightness) + (newMode === 'dark' ? 10 : 10)}%)`
         );
       });
       
