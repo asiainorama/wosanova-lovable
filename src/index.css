@@ -68,6 +68,8 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    --theme-color: var(--primary);
   }
 
   .dark {
@@ -133,6 +135,8 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    --theme-color: var(--primary);
   }
 }
 
@@ -143,6 +147,43 @@
 
   body {
     @apply bg-appgarden-background text-appgarden-text dark:bg-gray-900 dark:text-gray-100;
+  }
+  
+  /* Theme text color classes for each color */
+  .theme-blue h1, .theme-blue h2, .theme-blue h3, 
+  .theme-blue .theme-text, 
+  .theme-blue .sidebar-menu-item.active {
+    color: hsl(var(--blue-500)) !important;
+  }
+  
+  .theme-gray h1, .theme-gray h2, .theme-gray h3, 
+  .theme-gray .theme-text, 
+  .theme-gray .sidebar-menu-item.active {
+    color: hsl(var(--gray-500)) !important;
+  }
+  
+  .theme-green h1, .theme-green h2, .theme-green h3, 
+  .theme-green .theme-text, 
+  .theme-green .sidebar-menu-item.active {
+    color: hsl(var(--green-500)) !important;
+  }
+  
+  .theme-red h1, .theme-red h2, .theme-red h3, 
+  .theme-red .theme-text, 
+  .theme-red .sidebar-menu-item.active {
+    color: hsl(var(--red-500)) !important;
+  }
+  
+  .theme-pink h1, .theme-pink h2, .theme-pink h3, 
+  .theme-pink .theme-text, 
+  .theme-pink .sidebar-menu-item.active {
+    color: hsl(var(--pink-500)) !important;
+  }
+  
+  .theme-orange h1, .theme-orange h2, .theme-orange h3, 
+  .theme-orange .theme-text, 
+  .theme-orange .sidebar-menu-item.active {
+    color: hsl(var(--orange-500)) !important;
   }
   
   /* Fixes for dark mode UI elements */

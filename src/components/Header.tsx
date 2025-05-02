@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-primary dark:text-white">{title}</h1>
+          <h1 className={`text-2xl font-bold text-primary dark:text-white theme-text`}>{title}</h1>
         </div>
         
         <div className="flex items-center gap-2">

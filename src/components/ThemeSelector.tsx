@@ -65,6 +65,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         <div className="grid grid-cols-3 gap-2">
           {colorOptions.map((option) => {
             const isSelected = color === option.color;
+            const colorVar = `var(--${option.color}-500)`;
+            const borderColorVar = `var(--${option.color}-700)`;
             
             return (
               <button
@@ -82,15 +84,15 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
                 )}
                 onClick={() => handleColorChange(option.color)}
                 style={{
-                  backgroundColor: isSelected ? `var(--${option.color}-500)` : '',
-                  borderColor: isSelected ? `var(--${option.color}-700)` : ''
+                  backgroundColor: isSelected ? colorVar : '',
+                  borderColor: isSelected ? borderColorVar : ''
                 }}
               >
                 <option.icon className={cn(
                   "h-3 w-3 mb-1",
                   isSelected ? "text-white" : ""
                 )} 
-                style={!isSelected ? { color: `var(--${option.color}-500)` } : {}} />
+                style={!isSelected ? { color: colorVar } : {}} />
                 
                 <span className={cn(
                   "text-[9px]",

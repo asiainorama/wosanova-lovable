@@ -18,27 +18,27 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const themeColorClasses: Record<ThemeColor, { background: string, text: string }> = {
   blue: { 
     background: 'bg-gradient-to-br from-blue-400 to-blue-600', 
-    text: 'text-white'
+    text: 'text-blue-500 dark:text-blue-400'
   },
   gray: { 
     background: 'bg-gradient-to-br from-gray-300 to-gray-500', 
-    text: 'text-white'
+    text: 'text-gray-500 dark:text-gray-400'
   },
   green: { 
     background: 'bg-gradient-to-br from-green-400 to-green-600', 
-    text: 'text-white'
+    text: 'text-green-500 dark:text-green-400'
   },
   red: { 
     background: 'bg-gradient-to-br from-red-400 to-red-600', 
-    text: 'text-white'
+    text: 'text-red-500 dark:text-red-400'
   },
   pink: { 
     background: 'bg-gradient-to-br from-pink-400 to-pink-600', 
-    text: 'text-white'
+    text: 'text-pink-500 dark:text-pink-400'
   },
   orange: { 
     background: 'bg-gradient-to-br from-orange-300 to-orange-500', 
-    text: 'text-white'
+    text: 'text-orange-500 dark:text-orange-400'
   }
 };
 
@@ -125,6 +125,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         `${selectedColor.hue} ${selectedColor.saturation} ${newMode === 'dark' ? '80%' : '70%'}`
       );
       
+      // Set theme color classes for titles and menu items
+      document.documentElement.style.setProperty(
+        '--theme-color',
+        `hsl(${selectedColor.hue}, ${selectedColor.saturation}, ${selectedColor.lightness})`
+      );
+      
       // Set all theme colors with appropriate adjustments for dark mode
       const colors = ['blue', 'gray', 'green', 'red', 'pink', 'orange'];
       colors.forEach(c => {
@@ -148,6 +154,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           `hsl(${color.hue}, ${color.saturation}, ${parseFloat(color.lightness) + (newMode === 'dark' ? 10 : 10)}%)`
         );
       });
+
+      // Add a new CSS class to the html element for the current theme color
+      document.documentElement.classList.remove('theme-blue', 'theme-gray', 'theme-green', 'theme-red', 'theme-pink', 'theme-orange');
+      document.documentElement.classList.add(`theme-${newColor}`);
       
       // Force redraw to refresh UI elements
       const event = new Event('themechange');
@@ -205,4 +215,8 @@ export const useTheme = () => {
 
 export const getThemeColorClass = (colorName: ThemeColor) => {
   return themeColorClasses[colorName];
+};
+
+export const getThemeTextColor = (colorName: ThemeColor) => {
+  return themeColorClasses[colorName].text;
 };
