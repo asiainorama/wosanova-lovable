@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,9 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ThemeMode } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
@@ -22,15 +22,12 @@ interface UserProfile {
   username?: string;
   avatar_url?: string;
   theme_mode?: string;
-  language?: string;
 }
-
-type Language = 'es' | 'en';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { mode, color, setMode } = useTheme();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -50,7 +47,7 @@ const Profile = () => {
         try {
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('username, avatar_url, theme_mode, language')
+            .select('username, avatar_url, theme_mode')
             .eq('id', session.user.id)
             .single();
             
@@ -60,17 +57,11 @@ const Profile = () => {
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             
-            // Set theme and language if available
+            // Set theme if available
             if (profileData.theme_mode) {
               // Safe cast to ThemeMode
               const themeMode = profileData.theme_mode as ThemeMode;
               setMode(themeMode);
-            }
-            
-            if (profileData.language) {
-              // Safe cast to Language
-              const lang = profileData.language as Language;
-              setLanguage(lang);
             }
             
             // Also update localStorage for immediate use
@@ -84,7 +75,7 @@ const Profile = () => {
     };
     
     fetchUserData();
-  }, [setMode, setLanguage]);
+  }, [setMode]);
 
   // Auto-save function with debounce
   const autoSaveChanges = () => {
@@ -143,8 +134,7 @@ const Profile = () => {
             id: userId,
             username,
             avatar_url: avatarUrl,
-            theme_mode: mode,
-            language
+            theme_mode: mode
           }, { 
             onConflict: 'id'
           });
@@ -159,9 +149,8 @@ const Profile = () => {
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
       localStorage.setItem('themeMode', mode);
-      localStorage.setItem('language', language);
       
-      console.log('Profile updated successfully:', { username, avatarUrl, mode, language });
+      console.log('Profile updated successfully:', { username, avatarUrl, mode });
       // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
       toast.error(t('error.profile'));
@@ -178,42 +167,6 @@ const Profile = () => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAvatarUrl(e.target.value);
     autoSaveChanges();
-  };
-
-  // Fixed to prevent automatic toggling and fixed the TypeScript Promise error
-  const handleLanguageChange = (newLanguage: string) => {
-    console.log("Profile language selection:", newLanguage);
-    
-    if (newLanguage === 'es' || newLanguage === 'en') {
-      // Set language in context (don't trigger auto-save here to prevent cycles)
-      setLanguage(newLanguage as 'es' | 'en');
-      
-      // Manual save to persist changes
-      setTimeout(() => {
-        if (userId) {
-          // Fix: Handle Promise properly with only .then() since the Supabase client returns PromiseLike<void>
-          supabase
-            .from('user_profiles')
-            .upsert({ 
-              id: userId,
-              language: newLanguage
-            }, { 
-              onConflict: 'id'
-            })
-            .then(({ error }) => {
-              if (error) {
-                console.error("Error saving language:", error);
-              } else {
-                console.log("Language saved to profile:", newLanguage);
-              }
-            });
-          // Removed .catch() since it's not available on PromiseLike<void>
-        }
-        
-        // Update localStorage
-        localStorage.setItem('language', newLanguage);
-      }, 100);
-    }
   };
 
   return (
@@ -261,55 +214,6 @@ const Profile = () => {
                   />
                 </div>
               </div>
-            </div>
-            
-            <Separator className="my-2" />
-            
-            {/* Language Selection - Improved to prevent toggling issues */}
-            <div className="space-y-1">
-              <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
-              <RadioGroup 
-                value={language} 
-                onValueChange={handleLanguageChange}
-                className="grid grid-cols-2 gap-2"
-              >
-                <div>
-                  <RadioGroupItem 
-                    value="es" 
-                    id="es-lang" 
-                    className="peer sr-only" 
-                  />
-                  <Label 
-                    htmlFor="es-lang"
-                    className={cn(
-                      "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                      language === "es" ? "border-primary" : "border-muted",
-                      "dark:border-gray-700 dark:hover:bg-gray-700"
-                    )}
-                  >
-                    <Languages className="mb-1 h-3 w-3" />
-                    <span className="text-[9px] dark:text-white">{t('profile.spanish')}</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem 
-                    value="en" 
-                    id="en-lang" 
-                    className="peer sr-only" 
-                  />
-                  <Label 
-                    htmlFor="en-lang"
-                    className={cn(
-                      "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                      language === "en" ? "border-primary" : "border-muted",
-                      "dark:border-gray-700 dark:hover:bg-gray-700"
-                    )}
-                  >
-                    <Languages className="mb-1 h-3 w-3" />
-                    <span className="text-[9px] dark:text-white">{t('profile.english')}</span>
-                  </Label>
-                </div>
-              </RadioGroup>
             </div>
             
             <Separator className="my-2" />

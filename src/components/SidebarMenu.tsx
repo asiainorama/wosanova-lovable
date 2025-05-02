@@ -31,16 +31,12 @@ interface UserProfile {
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const location = useLocation();
   const { mode, color } = useTheme();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
   const [userId, setUserId] = useState<string | null>(null);
   
-  // Force re-render on language change
-  const [, updateState] = React.useState<{}>({});
-  const forceUpdate = React.useCallback(() => updateState({}), []);
-  
-  // Menu items using translation keys - will be updated on language change
+  // Menu items using translation keys
   const menuItems = [
     { icon: Home, label: t('header.home'), path: '/' },
     { icon: Grid3X3, label: t('header.catalog'), path: '/catalog' },
@@ -94,19 +90,10 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       }
     });
     
-    // Listen for language changes and force re-render
-    const handleLanguageChange = () => {
-      console.log("SidebarMenu detected language change:", language);
-      forceUpdate();
-    };
-    
-    document.addEventListener('languagechange', handleLanguageChange);
-    
     return () => {
       subscription.unsubscribe();
-      document.removeEventListener('languagechange', handleLanguageChange);
     };
-  }, [language, forceUpdate]);
+  }, []);
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
