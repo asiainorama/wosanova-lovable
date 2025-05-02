@@ -1,7 +1,15 @@
-
 import { AppData } from './apps';
 
 export const additionalApps: AppData[] = [
+  {
+    id: "make-ai",
+    name: "Make AI",
+    icon: "https://make.ai/favicon.ico",
+    url: "https://make.ai/",
+    category: "IA",
+    description: "Plataforma de creación y diseño impulsada por inteligencia artificial",
+    isAI: true
+  },
   {
     id: "hyperwrite",
     name: "HyperWrite",

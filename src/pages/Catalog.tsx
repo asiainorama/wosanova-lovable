@@ -96,7 +96,7 @@ const Catalog = () => {
     setFilteredApps(filtered);
   }, [searchTerm, selectedFilter, sortedApps]);
 
-  // Prefetch logos when the catalog page loads - removed toast notification
+  // Prefetch logos when the catalog page loads
   useEffect(() => {
     const prefetchIcons = async () => {
       if (prefetchStatus !== 'idle' || !allApps.length) return;
@@ -118,7 +118,7 @@ const Catalog = () => {
     };
     
     prefetchIcons();
-  }, [allApps, filteredApps]);
+  }, [allApps, filteredApps, prefetchStatus]);
 
   // Group apps by category for display
   const groupedApps = useMemo(() => {
@@ -145,10 +145,10 @@ const Catalog = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
       
-      {/* Fixed search/filter bar - removed list/grid view toggles */}
+      {/* Fixed search/filter bar - optimized for mobile */}
       <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
         <div className="container mx-auto">
-          <div className="flex gap-3 flex-col sm:flex-row">
+          <div className="flex flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -168,11 +168,11 @@ const Catalog = () => {
               )}
             </div>
             
-            {/* Unified Category Filter */}
-            <div className="w-full sm:w-64">
+            {/* Unified Category Filter - now takes less space */}
+            <div className="w-full max-w-[180px]">
               <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white">
-                  <SelectValue placeholder={t('catalog.filter') || "Filtrar por categoría"} />
+                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white h-10">
+                  <SelectValue placeholder={t('catalog.filter') || "Filtrar"} />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                   <SelectItem value="all" className="dark:text-white">
@@ -207,7 +207,7 @@ const Catalog = () => {
           {selectedFilter !== 'all' && ` > ${selectedFilter}`}
         </h3>
         
-        {/* Display apps grouped by category - always using grid view */}
+        {/* Display apps grouped by category */}
         {Object.keys(groupedApps).length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
