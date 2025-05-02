@@ -41,7 +41,7 @@ const categoryGroups: CategoryGroup[] = [
   },
   {
     name: "Other",
-    categories: ["Otros", "Arte", "Fotografía", "Música"]
+    categories: ["Otros", "Arte", "Fotografía", "Música", "IA"]
   }
 ];
 
@@ -53,6 +53,19 @@ const getCategoryGroup = (category: string): string => {
     }
   }
   return "Other";
+};
+
+// Traducir los nombres de grupos de categorías
+const translateCategoryGroupName = (groupName: string): string => {
+  switch (groupName) {
+    case "Productivity": return "Productividad";
+    case "Entertainment": return "Entretenimiento";
+    case "Utilities": return "Utilidades";
+    case "Lifestyle": return "Estilo de vida";
+    case "Finance": return "Finanzas";
+    case "Other": return "Otros";
+    default: return groupName;
+  }
 };
 
 const Catalog = () => {
@@ -94,12 +107,15 @@ const Catalog = () => {
     }
     
     setFilteredApps(filtered);
+    
+    // Reset prefetch status to idle to trigger a new prefetch when filter changes
+    setPrefetchStatus('idle');
   }, [searchTerm, selectedFilter, sortedApps]);
 
-  // Prefetch logos when the catalog page loads
+  // Prefetch logos when the catalog page loads or when filtered apps change
   useEffect(() => {
     const prefetchIcons = async () => {
-      if (prefetchStatus !== 'idle' || !allApps.length) return;
+      if (prefetchStatus !== 'idle' || !filteredApps.length) return;
       
       setPrefetchStatus('loading');
       
@@ -153,7 +169,7 @@ const Catalog = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder={t('catalog.search') || "Buscar aplicaciones..."}
+                placeholder=""
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 py-2 w-full bg-gray-100 dark:bg-gray-800 border-none"
@@ -179,11 +195,11 @@ const Catalog = () => {
                     {t('catalog.allCategories') || "Todas las categorías"}
                   </SelectItem>
                   
-                  {/* Group categories in the dropdown */}
+                  {/* Group categories in the dropdown - with translated group names */}
                   {categoryGroups.map((group) => (
                     <SelectGroup key={group.name}>
                       <SelectItem value={group.name} className="dark:text-white font-semibold">
-                        {group.name}
+                        {translateCategoryGroupName(group.name)}
                       </SelectItem>
                       {group.categories.map((category) => (
                         <SelectItem key={category} value={category} className="dark:text-white pl-6">
