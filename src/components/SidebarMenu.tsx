@@ -43,12 +43,20 @@ const TimeWidget = () => {
     return () => clearInterval(timer);
   }, []);
   
-  const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' });
-  const formattedDate = date.toLocaleDateString('es-ES', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  }).toLowerCase();
+  // Format day of week with first letter capitalized and the rest lowercase
+  const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' }).charAt(0).toUpperCase() + 
+                   date.toLocaleDateString('es-ES', { weekday: 'long' }).slice(1);
+                   
+  // Format day with leading zero
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  // Format month and year
+  const month = date.toLocaleDateString('es-ES', { month: 'long' });
+  const year = date.getFullYear();
+  
+  // Final formatted date: "Viernes, 02 de mayo del 2025"
+  const formattedDate = `${dayOfWeek}, ${day} de ${month} del ${year}`;
+  
   const formattedTime = date.toLocaleTimeString('es-ES', { 
     hour: '2-digit', 
     minute: '2-digit' 
@@ -60,8 +68,8 @@ const TimeWidget = () => {
         <Clock size={18} className="text-primary" />
         <span className="text-lg font-medium">{formattedTime}</span>
       </div>
-      <div className="text-sm text-muted-foreground capitalize">
-        {dayOfWeek}, {formattedDate}
+      <div className="text-sm text-muted-foreground">
+        {formattedDate}
       </div>
     </div>
   );
@@ -220,20 +228,24 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         className="w-full sm:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-y-auto"
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-bold dark:text-white theme-text">{t('app.name')}</h2>
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center">
+            <h2 className="text-xl font-bold dark:text-white theme-text text-center">{t('app.name')}</h2>
             
-            {/* User profile section at the top of sidebar */}
+            {/* User profile section at the top of sidebar - centered */}
             {userId && (
-              <Link to="/profile" onClick={() => onOpenChange(false)} className="flex items-center mt-4 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md p-2 transition-colors">
-                <Avatar className="h-10 w-10 mr-3">
-                  <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="bg-primary/10">
-                    <User size={20} />
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium dark:text-white truncate theme-text">{username || t('profile.username')}</span>
-              </Link>
+              <div className="flex flex-col items-center mt-4 mb-2">
+                <Link to="/profile" onClick={() => onOpenChange(false)}>
+                  <Avatar className="h-12 w-12 mb-2">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback className="bg-primary/10">
+                      <User size={20} />
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+                <span className="font-medium dark:text-white truncate theme-text">
+                  {username || t('profile.username')}
+                </span>
+              </div>
             )}
           </div>
 
