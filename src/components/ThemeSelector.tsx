@@ -13,6 +13,7 @@ interface ThemeSelectorProps {
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) => {
   const { mode, color, setColor, setMode } = useTheme();
   const { t } = useLanguage();
+  const isDarkMode = mode === 'dark';
 
   const colorOptions = [
     { color: 'blue', icon: CircleDot, label: t('profile.color.blue') },
@@ -29,18 +30,13 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     if (onThemeChange) onThemeChange();
   };
 
-  // Fixed dark mode toggle handler
+  // Dark mode toggle handler
   const handleDarkModeToggle = (checked: boolean) => {
     console.log("Dark mode toggle switch changed to:", checked ? "dark" : "light");
-    setTimeout(() => {
-      const newMode = checked ? 'dark' : 'light';
-      setMode(newMode);
-      if (onThemeChange) onThemeChange();
-    }, 0);
+    const newMode = checked ? 'dark' : 'light';
+    setMode(newMode);
+    if (onThemeChange) onThemeChange();
   };
-
-  // Log current theme state each render for debugging
-  console.log("ThemeSelector rendering with mode:", mode, "isDarkMode:", mode === 'dark');
 
   return (
     <div className="space-y-4">
@@ -52,7 +48,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         </div>
         
         <Switch
-          checked={mode === 'dark'}
+          checked={isDarkMode}
           onCheckedChange={handleDarkModeToggle}
           aria-label="Toggle dark mode"
         />

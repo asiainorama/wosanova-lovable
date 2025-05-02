@@ -44,7 +44,7 @@ const themeColorClasses: Record<ThemeColor, { background: string, text: string }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
-  const [mode, setModeInternal] = useState<ThemeMode>(() => {
+  const [mode, setModeState] = useState<ThemeMode>(() => {
     try {
       const savedMode = localStorage.getItem('themeMode') as ThemeMode;
       console.log("Initial theme mode from localStorage:", savedMode);
@@ -55,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   });
   
-  const [color, setColorInternal] = useState<ThemeColor>(() => {
+  const [color, setColorState] = useState<ThemeColor>(() => {
     try {
       const savedColor = localStorage.getItem('themeColor') as ThemeColor;
       console.log("Initial theme color from localStorage:", savedColor);
@@ -95,7 +95,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.head.appendChild(meta);
       }
       
-      // Apply primary color based on selected color
+      // Apply primary color based on selected color - Updated for both light and dark modes
       const colorMap = {
         blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
         gray: { hue: 220, saturation: "13%", lightness: "50%" },
@@ -122,21 +122,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(mode, color);
   }, [mode, color, applyTheme]);
 
-  // Wrapper functions to update theme state with debounce
+  // Wrapper functions to update theme state
   const setMode = React.useCallback((newMode: ThemeMode) => {
     console.log("Setting mode to:", newMode);
-    setModeInternal(newMode);
+    setModeState(newMode);
   }, []);
 
   const setColor = React.useCallback((newColor: ThemeColor) => {
     console.log("Setting color to:", newColor);
-    setColorInternal(newColor);
+    setColorState(newColor);
   }, []);
 
   const toggleMode = React.useCallback(() => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     console.log("Toggle mode from", mode, "to", newMode);
-    setModeInternal(newMode);
+    setModeState(newMode);
   }, [mode]);
 
   const contextValue = React.useMemo(() => ({
