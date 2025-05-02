@@ -95,7 +95,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.head.appendChild(meta);
       }
       
-      // Apply primary color based on selected color - Updated for both light and dark modes
+      // Color mapping for both light and dark modes - ensuring consistent colors
       const colorMap = {
         blue: { hue: 217, saturation: "91.2%", lightness: "59.8%" },
         gray: { hue: 220, saturation: "13%", lightness: "50%" },
@@ -106,7 +106,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       };
       
       const selectedColor = colorMap[newColor] || colorMap.blue;
+      
+      // Set the primary color CSS variable, with consistent lightness regardless of mode
       document.documentElement.style.setProperty('--primary', `${selectedColor.hue} ${selectedColor.saturation} ${selectedColor.lightness}`);
+      
+      // Update primary-foreground to ensure text is visible against the background
+      // Always use light text on dark backgrounds and dark text on light backgrounds
+      document.documentElement.style.setProperty(
+        '--primary-foreground', 
+        newMode === 'dark' ? '0 0% 100%' : '222.2 47.4% 11.2%'
+      );
+      
+      // Also update border colors for toggle buttons to match the theme color
+      document.documentElement.style.setProperty(
+        '--primary-border', 
+        `${selectedColor.hue} ${selectedColor.saturation} ${newMode === 'dark' ? '40%' : '70%'}`
+      );
       
       // Force redraw on theme change to refresh icons and UI elements
       const event = new Event('themechange');

@@ -59,25 +59,49 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         </div>
       </div>
       
-      {/* Color Selection - Simplified grid */}
+      {/* Color Selection - Grid with improved color visibility */}
       <div className="space-y-1">
         <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('profile.theme.accent')}</h3>
         <div className="grid grid-cols-3 gap-2">
-          {colorOptions.map((option) => (
-            <button
-              key={option.color}
-              type="button"
-              className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                color === option.color ? "border-primary" : "border-muted bg-popover",
-                "dark:border-gray-700 dark:hover:bg-gray-700"
-              )}
-              onClick={() => handleColorChange(option.color)}
-            >
-              <option.icon className="h-3 w-3" />
-              <span className="text-[9px] dark:text-white">{option.label}</span>
-            </button>
-          ))}
+          {colorOptions.map((option) => {
+            const isSelected = color === option.color;
+            const buttonClasses = cn(
+              "flex flex-col items-center justify-between rounded-md p-1 hover:opacity-90 cursor-pointer transition-all",
+              "border-2",
+              // Dynamic border based on selection state
+              isSelected 
+                ? `border-${option.color}-500` 
+                : "border-muted",
+              // Different background for dark/light mode and selection state
+              isSelected
+                ? `bg-${option.color}-500 text-white`
+                : `bg-popover dark:bg-gray-800`
+            );
+            
+            return (
+              <button
+                key={option.color}
+                type="button"
+                className={buttonClasses}
+                onClick={() => handleColorChange(option.color)}
+                style={isSelected ? {
+                  backgroundColor: `var(--${option.color}-500, currentColor)`,
+                  borderColor: `var(--${option.color}-700, currentColor)`
+                } : {}}
+              >
+                <option.icon className={cn(
+                  "h-3 w-3",
+                  isSelected ? "text-white" : `text-${option.color}-500 dark:text-${option.color}-400`
+                )} />
+                <span className={cn(
+                  "text-[9px]",
+                  isSelected ? "text-white" : "dark:text-gray-200"
+                )}>
+                  {option.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

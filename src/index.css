@@ -16,6 +16,7 @@
 
     --primary: 322 100% 50%;
     --primary-foreground: 210 40% 98%;
+    --primary-border: 322 100% 70%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -34,6 +35,30 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --blue-400: 217 91% 60%;
+    --blue-500: 217 91% 50%;
+    --blue-700: 217 91% 40%;
+    
+    --gray-400: 220 13% 60%;
+    --gray-500: 220 13% 50%;
+    --gray-700: 220 13% 40%;
+    
+    --green-400: 142 71% 60%;
+    --green-500: 142 71% 50%;
+    --green-700: 142 71% 40%;
+    
+    --red-400: 0 84% 70%;
+    --red-500: 0 84% 60%;
+    --red-700: 0 84% 50%;
+    
+    --pink-400: 322 100% 60%;
+    --pink-500: 322 100% 50%;
+    --pink-700: 322 100% 40%;
+    
+    --orange-400: 24 95% 63%;
+    --orange-500: 24 95% 53%;
+    --orange-700: 24 95% 43%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -56,7 +81,8 @@
     --popover-foreground: 210 40% 98%;
 
     --primary: 322 100% 50%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
+    --primary-border: 322 100% 40%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -73,6 +99,32 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* Maintain color brightness in dark mode */
+    --blue-400: 217 91% 75%;
+    --blue-500: 217 91% 65%;
+    --blue-700: 217 91% 55%;
+    
+    --gray-400: 220 13% 70%;
+    --gray-500: 220 13% 60%;
+    --gray-700: 220 13% 50%;
+    
+    --green-400: 142 71% 70%;
+    --green-500: 142 71% 60%;
+    --green-700: 142 71% 50%;
+    
+    --red-400: 0 84% 75%;
+    --red-500: 0 84% 65%;
+    --red-700: 0 84% 55%;
+    
+    --pink-400: 322 100% 75%;
+    --pink-500: 322 100% 65%;
+    --pink-700: 322 100% 55%;
+    
+    --orange-400: 24 95% 75%;
+    --orange-500: 24 95% 65%;
+    --orange-700: 24 95% 55%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 322 100% 50%;
