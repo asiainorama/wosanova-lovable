@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -192,7 +191,7 @@ const Profile = () => {
       // Manual save to persist changes
       setTimeout(() => {
         if (userId) {
-          // Fix: Convert Promise to standard Promise and add proper error handling
+          // Fix: Handle Promise properly with only .then() since the Supabase client returns PromiseLike<void>
           supabase
             .from('user_profiles')
             .upsert({ 
@@ -207,10 +206,8 @@ const Profile = () => {
               } else {
                 console.log("Language saved to profile:", newLanguage);
               }
-            })
-            .catch(error => {
-              console.error("Error saving language:", error);
             });
+          // Removed .catch() since it's not available on PromiseLike<void>
         }
         
         // Update localStorage
