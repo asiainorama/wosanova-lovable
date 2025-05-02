@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import InstallPrompt from "./components/InstallPrompt";
 
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
@@ -115,6 +116,7 @@ const App = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              <InstallPrompt />
               <BrowserRouter>
                 <Routes>
                   <Route
