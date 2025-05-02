@@ -106,6 +106,60 @@ const translations = {
     'app.info.size': 'Tamaño',
     'app.info.languages': 'Idiomas',
     'app.info.platforms': 'Plataformas',
+    'app.info.description': 'Descripción',
+    'app.info.features': 'Características',
+    'app.info.reviews': 'Reseñas',
+    'app.info.screenshots': 'Capturas de pantalla',
+    'app.info.relatedApps': 'Aplicaciones relacionadas',
+    
+    // Subcategories - Nuevas traducciones para subcategorías
+    'subcategory.officeSuite': 'Suite de Oficina',
+    'subcategory.documentEditing': 'Edición de Documentos',
+    'subcategory.spreadsheets': 'Hojas de Cálculo',
+    'subcategory.presentations': 'Presentaciones',
+    'subcategory.notesTaking': 'Toma de Notas',
+    'subcategory.taskManager': 'Gestor de Tareas',
+    'subcategory.projectManager': 'Gestor de Proyectos',
+    'subcategory.videoStreaming': 'Streaming de Vídeo',
+    'subcategory.musicStreaming': 'Streaming de Música',
+    'subcategory.podcasts': 'Podcasts',
+    'subcategory.games': 'Juegos',
+    'subcategory.movieDatabase': 'Base de Datos de Películas',
+    'subcategory.fileManager': 'Gestor de Archivos',
+    'subcategory.calculator': 'Calculadora',
+    'subcategory.calendar': 'Calendario',
+    'subcategory.translator': 'Traductor',
+    'subcategory.converter': 'Conversor',
+    'subcategory.scanner': 'Escáner',
+    'subcategory.healthTracking': 'Seguimiento de Salud',
+    'subcategory.fitnessTracker': 'Seguimiento de Ejercicio',
+    'subcategory.meditation': 'Meditación',
+    'subcategory.sleep': 'Sueño',
+    'subcategory.cooking': 'Cocina',
+    'subcategory.budgetingTools': 'Herramientas de Presupuesto',
+    'subcategory.stockTrading': 'Comercio de Acciones',
+    'subcategory.bankingApps': 'Aplicaciones Bancarias',
+    'subcategory.cryptoTracker': 'Seguimiento de Criptomonedas',
+    'subcategory.paymentApps': 'Aplicaciones de Pago',
+    
+    // App Descriptions
+    'description.generalFeatured': 'Destacada por su facilidad de uso y funcionalidades',
+    'description.productivityApp': 'Aumenta tu productividad con esta aplicación intuitiva',
+    'description.entertainmentApp': 'Disfruta del mejor contenido de entretenimiento',
+    'description.socialApp': 'Conecta con amigos y familiares',
+    'description.educationApp': 'Aprende nuevas habilidades a tu ritmo',
+    'description.utilityApp': 'Herramienta esencial para tu día a día',
+    'description.financeApp': 'Gestiona tus finanzas de manera inteligente',
+    'description.gameApp': 'Diviértete con este juego adictivo',
+    'description.healthApp': 'Mejora tu bienestar con seguimiento personalizado',
+    'description.newsApp': 'Mantente informado con noticias actualizadas',
+    'description.photoApp': 'Edita y organiza tus fotos como un profesional',
+    'description.videoApp': 'Visualiza y edita videos con facilidad',
+    'description.musicApp': 'Disfruta de tu música favorita en cualquier momento',
+    'description.travelApp': 'Planifica tus viajes de forma sencilla',
+    'description.foodApp': 'Descubre recetas y consejos culinarios',
+    'description.weatherApp': 'Pronóstico del tiempo preciso y actualizado',
+    'description.shoppingApp': 'Compra online con ofertas exclusivas',
     
     // Auth page
     'auth.welcome': 'Bienvenido a WosaNova',
@@ -220,6 +274,60 @@ const translations = {
     'app.info.size': 'Size',
     'app.info.languages': 'Languages',
     'app.info.platforms': 'Platforms',
+    'app.info.description': 'Description',
+    'app.info.features': 'Features',
+    'app.info.reviews': 'Reviews',
+    'app.info.screenshots': 'Screenshots',
+    'app.info.relatedApps': 'Related Applications',
+    
+    // Subcategories - New translations for subcategories
+    'subcategory.officeSuite': 'Office Suite',
+    'subcategory.documentEditing': 'Document Editing',
+    'subcategory.spreadsheets': 'Spreadsheets',
+    'subcategory.presentations': 'Presentations',
+    'subcategory.notesTaking': 'Notes Taking',
+    'subcategory.taskManager': 'Task Manager',
+    'subcategory.projectManager': 'Project Manager',
+    'subcategory.videoStreaming': 'Video Streaming',
+    'subcategory.musicStreaming': 'Music Streaming',
+    'subcategory.podcasts': 'Podcasts',
+    'subcategory.games': 'Games',
+    'subcategory.movieDatabase': 'Movie Database',
+    'subcategory.fileManager': 'File Manager',
+    'subcategory.calculator': 'Calculator',
+    'subcategory.calendar': 'Calendar',
+    'subcategory.translator': 'Translator',
+    'subcategory.converter': 'Converter',
+    'subcategory.scanner': 'Scanner',
+    'subcategory.healthTracking': 'Health Tracking',
+    'subcategory.fitnessTracker': 'Fitness Tracker',
+    'subcategory.meditation': 'Meditation',
+    'subcategory.sleep': 'Sleep',
+    'subcategory.cooking': 'Cooking',
+    'subcategory.budgetingTools': 'Budgeting Tools',
+    'subcategory.stockTrading': 'Stock Trading',
+    'subcategory.bankingApps': 'Banking Apps',
+    'subcategory.cryptoTracker': 'Crypto Tracker',
+    'subcategory.paymentApps': 'Payment Apps',
+    
+    // App Descriptions
+    'description.generalFeatured': 'Featured for its ease of use and functionality',
+    'description.productivityApp': 'Boost your productivity with this intuitive application',
+    'description.entertainmentApp': 'Enjoy the best entertainment content',
+    'description.socialApp': 'Connect with friends and family',
+    'description.educationApp': 'Learn new skills at your own pace',
+    'description.utilityApp': 'Essential tool for your daily life',
+    'description.financeApp': 'Manage your finances intelligently',
+    'description.gameApp': 'Have fun with this addictive game',
+    'description.healthApp': 'Improve your well-being with personalized tracking',
+    'description.newsApp': 'Stay informed with updated news',
+    'description.photoApp': 'Edit and organize your photos like a professional',
+    'description.videoApp': 'View and edit videos with ease',
+    'description.musicApp': 'Enjoy your favorite music anytime',
+    'description.travelApp': 'Plan your trips easily',
+    'description.foodApp': 'Discover recipes and culinary tips',
+    'description.weatherApp': 'Accurate and updated weather forecast',
+    'description.shoppingApp': 'Shop online with exclusive offers',
     
     // Auth page
     'auth.welcome': 'Welcome to WosaNova',
@@ -255,44 +363,73 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  // Use state initialization with a callback to ensure we only read from localStorage once
+  // Inicialización segura desde localStorage
   const [language, setLanguageState] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('language');
-    return (savedLanguage === 'en' || savedLanguage === 'es') ? savedLanguage : 'es';
+    try {
+      const savedLanguage = localStorage.getItem('language');
+      return (savedLanguage === 'en' || savedLanguage === 'es') ? savedLanguage : 'es';
+    } catch (e) {
+      console.error("Error reading language from localStorage:", e);
+      return 'es';
+    }
   });
 
+  // Función mejorada para establecer el idioma
   const setLanguage = (newLanguage: Language) => {
     console.log("Setting language to:", newLanguage);
+    
+    if (newLanguage === language) {
+      console.log("Language already set to:", newLanguage);
+      return; // Evitar actualizaciones innecesarias
+    }
+    
     if (newLanguage === 'en' || newLanguage === 'es') {
-      localStorage.setItem('language', newLanguage);
+      try {
+        localStorage.setItem('language', newLanguage);
+      } catch (e) {
+        console.error("Error saving language to localStorage:", e);
+      }
+      
       setLanguageState(newLanguage);
       
-      // Force event to notify about language change
-      const event = new CustomEvent('languagechange', { detail: { language: newLanguage } });
+      // Disparar evento para notificar sobre el cambio de idioma
+      const event = new CustomEvent('languagechange', { 
+        detail: { language: newLanguage } 
+      });
       document.dispatchEvent(event);
     } else {
       console.error("Invalid language:", newLanguage);
     }
   };
 
+  // Función de traducción mejorada con manejo de errores
   const t = (key: string): string => {
-    const currentTranslations = translations[language] || translations.es;
-    const result = currentTranslations[key as keyof typeof currentTranslations];
+    if (!key) return '';
     
-    if (!result) {
-      console.debug(`Missing translation for key: ${key} in ${language}`);
+    try {
+      const currentTranslations = translations[language] || translations.es;
+      const result = currentTranslations[key as keyof typeof currentTranslations];
+      
+      if (result === undefined) {
+        console.debug(`Missing translation for key: ${key} in ${language}`);
+        return key;
+      }
+      
+      return result;
+    } catch (e) {
+      console.error("Error in translation function:", e);
+      return key;
     }
-    
-    return result || key;
   };
 
+  // Efectos para sincronizar el idioma
   useEffect(() => {
-    console.log("Language set in localStorage:", language);
+    console.log("Language context initialized with:", language);
     
-    // Update document language
+    // Actualizar el idioma del documento
     document.documentElement.lang = language;
     
-    // Add debugging info for language changes
+    // Añadir información de depuración para cambios de idioma
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'language') {
         console.log("Language changed in storage:", e.newValue);
@@ -304,14 +441,14 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     
     window.addEventListener('storage', handleStorageChange);
     
-    // Listen for custom language change events
+    // Escuchar eventos personalizados de cambio de idioma
     const handleLanguageChange = (e: Event) => {
       const customEvent = e as CustomEvent;
       console.log("Language change event detected:", customEvent.detail?.language);
       
-      // Force rerender of components using translations
+      // Forzar la actualización de componentes que usan traducciones
       document.querySelectorAll('.theme-text').forEach(el => {
-        // This forces a small DOM update which helps refresh translations
+        // Esto fuerza una pequeña actualización del DOM que ayuda a refrescar las traducciones
         el.classList.add('language-updated');
         setTimeout(() => el.classList.remove('language-updated'), 0);
       });

@@ -181,24 +181,36 @@ const Profile = () => {
     autoSaveChanges();
   };
 
+  // Fixed to prevent automatic toggling
   const handleLanguageChange = (newLanguage: string) => {
-    console.log("Profile page language change:", newLanguage);
+    console.log("Profile language selection:", newLanguage);
+    
     if (newLanguage === 'es' || newLanguage === 'en') {
-      // Update language in context and trigger auto-save
+      // Set language in context (don't trigger auto-save here to prevent cycles)
       setLanguage(newLanguage as 'es' | 'en');
       
-      // Force save immediately
+      // Manual save to persist changes
       setTimeout(() => {
-        handleSaveProfile();
+        if (userId) {
+          supabase
+            .from('user_profiles')
+            .upsert({ 
+              id: userId,
+              language: newLanguage
+            }, { 
+              onConflict: 'id'
+            })
+            .then(() => {
+              console.log("Language saved to profile:", newLanguage);
+            })
+            .catch(error => {
+              console.error("Error saving language:", error);
+            });
+        }
+        
+        // Update localStorage
+        localStorage.setItem('language', newLanguage);
       }, 100);
-      
-      // Force a page refresh to ensure all translations are applied
-      setTimeout(() => {
-        const event = new CustomEvent('languagechange', { 
-          detail: { language: newLanguage }
-        });
-        document.dispatchEvent(event);
-      }, 200);
     }
   };
 
@@ -251,7 +263,7 @@ const Profile = () => {
             
             <Separator className="my-2" />
             
-            {/* Language Selection */}
+            {/* Language Selection - Improved to prevent toggling issues */}
             <div className="space-y-1">
               <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
               <RadioGroup 

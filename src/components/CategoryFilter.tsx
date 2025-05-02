@@ -18,7 +18,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   const translateCategory = (category: string) => {
     // Convertir a minúsculas y normalizar el identificador para la traducción
     const key = `category.${category.toLowerCase()}`;
-    return t(key) || category;
+    const translation = t(key);
+    return translation !== key ? translation : category; // Si no hay traducción, usar el original
   };
   
   // Responder a los cambios de idioma

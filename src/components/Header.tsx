@@ -23,27 +23,34 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const { language, setLanguage, t } = useLanguage();
   const [currentLanguage, setCurrentLanguage] = useState(language);
 
-  // Keep component state in sync with context
+  // Mantener estado del componente sincronizado con el contexto
   useEffect(() => {
     setCurrentLanguage(language);
   }, [language]);
 
+  // Función mejorada para cambiar el idioma
   const handleLanguageChange = (newLanguage: 'es' | 'en') => {
     console.log("Header language change:", newLanguage);
     
-    // First update local state to prevent UI flicker
+    // No actualizar si ya es el mismo idioma
+    if (newLanguage === currentLanguage) return;
+    
+    // Actualizar primero el estado local para evitar parpadeos en la UI
     setCurrentLanguage(newLanguage);
     
-    // Then update context
+    // Actualizar el contexto
     setLanguage(newLanguage);
     
-    // Force a page refresh to ensure all translations are applied
+    // Guardar en localStorage directamente
+    localStorage.setItem('language', newLanguage);
+    
+    // Disparar un evento para notificar el cambio de idioma
     setTimeout(() => {
       const event = new CustomEvent('languagechange', { 
         detail: { language: newLanguage }
       });
       document.dispatchEvent(event);
-    }, 200);
+    }, 100);
   };
 
   return (
