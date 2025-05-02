@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -191,6 +192,7 @@ const Profile = () => {
       // Manual save to persist changes
       setTimeout(() => {
         if (userId) {
+          // Fix: Convert Promise to standard Promise and add proper error handling
           supabase
             .from('user_profiles')
             .upsert({ 
@@ -199,8 +201,12 @@ const Profile = () => {
             }, { 
               onConflict: 'id'
             })
-            .then(() => {
-              console.log("Language saved to profile:", newLanguage);
+            .then(({ error }) => {
+              if (error) {
+                console.error("Error saving language:", error);
+              } else {
+                console.log("Language saved to profile:", newLanguage);
+              }
             })
             .catch(error => {
               console.error("Error saving language:", error);
