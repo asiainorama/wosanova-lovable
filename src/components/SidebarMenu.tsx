@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
+import { safeOpenWindow } from '@/utils/windowUtils';
 
 interface SidebarMenuProps {
   isOpen: boolean;
@@ -119,6 +120,10 @@ const WeatherWidget = () => {
     getWeather();
   }, []);
   
+  const handleWeatherClick = () => {
+    safeOpenWindow('https://www.google.com/search?q=weather');
+  };
+  
   if (loading) {
     return (
       <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-center dark:bg-gray-800">
@@ -136,7 +141,8 @@ const WeatherWidget = () => {
   }
   
   return (
-    <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center dark:bg-gray-800">
+    <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center dark:bg-gray-800 cursor-pointer"
+         onClick={handleWeatherClick}>
       <div className="flex items-center gap-2 mb-1">
         <CloudSun size={18} className="text-blue-500" />
         <span className="text-lg font-medium">{weather.temp}°C</span>
@@ -150,14 +156,22 @@ const WeatherWidget = () => {
 const CalendarWidget = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   
+  const handleCalendarClick = () => {
+    safeOpenWindow('https://calendar.google.com/');
+  };
+  
   return (
-    <div className="bg-white rounded-lg shadow-sm dark:bg-gray-800 w-full">
-      <CalendarComponent
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        className="rounded-md border w-full"
-      />
+    <div className="flex justify-center w-full">
+      <div className="bg-white rounded-lg shadow-sm dark:bg-gray-800 w-full max-w-full overflow-hidden">
+        <div onClick={handleCalendarClick} className="cursor-pointer">
+          <CalendarComponent
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            className="rounded-md border w-full pointer-events-none"
+          />
+        </div>
+      </div>
     </div>
   );
 };
