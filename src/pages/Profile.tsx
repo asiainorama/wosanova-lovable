@@ -1,18 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,9 +13,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut, Languages } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut, Languages, ArrowLeft } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ThemeMode } from '@/contexts/ThemeContext';
+import Header from '@/components/Header';
 
 // Define profile type based on the actual database structure
 interface UserProfile {
@@ -36,10 +30,8 @@ type Language = 'es' | 'en';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { mode, color, setMode } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const [isOpen, setIsOpen] = useState(true);
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -189,14 +181,8 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-    // Go back to the previous page, or to catalog if we can't
-    if (location.key === "default") {
-      navigate("/catalog");
-    } else {
-      navigate(-1);
-    }
+  const handleGoBack = () => {
+    navigate(-1);
   };
 
   const handleLanguageChange = (value: string) => {
@@ -206,122 +192,124 @@ const Profile = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2 dark:text-white">
-            <Rocket size={24} /> {t('profile.title')}
-          </DialogTitle>
-          <DialogDescription className="dark:text-gray-300">
-            {t('profile.description')}
-          </DialogDescription>
-        </DialogHeader>
+    <div className="flex flex-col min-h-screen bg-background">
+      <Header />
+      <div className="container max-w-3xl mx-auto px-4 py-8">
+        <button onClick={handleGoBack} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-4">
+          <ArrowLeft size={16} />
+          {t('profile.goBack')}
+        </button>
         
-        <div className="space-y-2 mt-2">
-          {/* Profile Section with aligned username and avatar - more compact */}
-          <div className="flex items-center gap-4">
-            <Avatar className="w-14 h-14">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback className="bg-primary/10">
-                <User size={20} />
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <div>
-                <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
-                <Input 
-                  id="username" 
-                  placeholder={t('profile.username')}
-                  value={username}
-                  onChange={handleUsernameChange}
-                  className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                />
-              </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Rocket size={24} className="text-primary" />
+            <h1 className="text-2xl font-bold dark:text-white">{t('profile.title')}</h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{t('profile.description')}</p>
+
+          <div className="space-y-6">
+            {/* Profile Section with aligned username and avatar */}
+            <div className="flex items-center gap-4">
+              <Avatar className="w-14 h-14">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback className="bg-primary/10">
+                  <User size={20} />
+                </AvatarFallback>
+              </Avatar>
               
-              <div className="mt-1">
-                <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
-                <Input 
-                  id="picture" 
-                  type="url" 
-                  placeholder={t('profile.avatar')}
-                  value={avatarUrl}
-                  onChange={handleAvatarChange}
-                  className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                />
+              <div className="flex-1">
+                <div>
+                  <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
+                  <Input 
+                    id="username" 
+                    placeholder={t('profile.username')}
+                    value={username}
+                    onChange={handleUsernameChange}
+                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  />
+                </div>
+                
+                <div className="mt-1">
+                  <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
+                  <Input 
+                    id="picture" 
+                    type="url" 
+                    placeholder={t('profile.avatar')}
+                    value={avatarUrl}
+                    onChange={handleAvatarChange}
+                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          
-          <Separator className="my-2" />
-          
-          {/* Language Selection - Fixed selection issue */}
-          <div className="space-y-1">
-            <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
-            <RadioGroup 
-              value={language}
-              onValueChange={handleLanguageChange}
-              className="grid grid-cols-2 gap-2"
-            >
-              <div>
-                <RadioGroupItem 
-                  value="es" 
-                  id="es-lang" 
-                  className="peer sr-only" 
-                />
-                <Label 
-                  htmlFor="es-lang"
-                  className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                    language === "es" ? "border-primary" : "border-muted",
-                    "dark:border-gray-700 dark:hover:bg-gray-700"
-                  )}
-                >
-                  <Languages className="mb-1 h-3 w-3" />
-                  <span className="text-[9px] dark:text-white">{t('profile.spanish')}</span>
-                </Label>
-              </div>
-              <div>
-                <RadioGroupItem 
-                  value="en" 
-                  id="en-lang" 
-                  className="peer sr-only" 
-                />
-                <Label 
-                  htmlFor="en-lang"
-                  className={cn(
-                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                    language === "en" ? "border-primary" : "border-muted",
-                    "dark:border-gray-700 dark:hover:bg-gray-700"
-                  )}
-                >
-                  <Languages className="mb-1 h-3 w-3" />
-                  <span className="text-[9px] dark:text-white">{t('profile.english')}</span>
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-          
-          <Separator className="my-2" />
-          
-          {/* Theme Selector Section - More compact */}
-          <div>
-            <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
-            <ThemeSelector onThemeChange={autoSaveChanges} />
-          </div>
-          
-          <Separator className="my-2" />
-          
-          {/* Actions Section - Centered and aligned */}
-          <div className="pt-1">
-            <div className="flex justify-center gap-2">
+            
+            <Separator className="my-2" />
+            
+            {/* Language Selection */}
+            <div className="space-y-1">
+              <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.language')}</h3>
+              <RadioGroup 
+                value={language}
+                onValueChange={handleLanguageChange}
+                className="grid grid-cols-2 gap-2"
+              >
+                <div>
+                  <RadioGroupItem 
+                    value="es" 
+                    id="es-lang" 
+                    className="peer sr-only" 
+                  />
+                  <Label 
+                    htmlFor="es-lang"
+                    className={cn(
+                      "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                      language === "es" ? "border-primary" : "border-muted",
+                      "dark:border-gray-700 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    <Languages className="mb-1 h-3 w-3" />
+                    <span className="text-[9px] dark:text-white">{t('profile.spanish')}</span>
+                  </Label>
+                </div>
+                <div>
+                  <RadioGroupItem 
+                    value="en" 
+                    id="en-lang" 
+                    className="peer sr-only" 
+                  />
+                  <Label 
+                    htmlFor="en-lang"
+                    className={cn(
+                      "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                      language === "en" ? "border-primary" : "border-muted",
+                      "dark:border-gray-700 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    <Languages className="mb-1 h-3 w-3" />
+                    <span className="text-[9px] dark:text-white">{t('profile.english')}</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
+            <Separator className="my-2" />
+            
+            {/* Theme Selector Section */}
+            <div>
+              <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
+              <ThemeSelector onThemeChange={autoSaveChanges} />
+            </div>
+            
+            <Separator className="my-2" />
+            
+            {/* Actions Section */}
+            <div className="pt-1 flex justify-center gap-4">
               <Button 
                 onClick={handleSignOut} 
                 variant="outline" 
-                size="sm"
-                className="h-6 px-2 text-[9px] flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
               >
-                <LogOut size={10} />
+                <LogOut size={14} />
                 {t('profile.logout')}
               </Button>
               
@@ -329,10 +317,9 @@ const Profile = () => {
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="destructive" 
-                    size="sm"
-                    className="h-6 px-2 text-[9px] flex items-center gap-1"
+                    className="h-9 px-4 text-sm flex items-center gap-2"
                   >
-                    <Trash2 size={10} />
+                    <Trash2 size={14} />
                     {t('profile.delete')}
                   </Button>
                 </AlertDialogTrigger>
@@ -357,8 +344,8 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 

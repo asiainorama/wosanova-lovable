@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -37,10 +38,10 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   
   // Original menu items with restored names
   const menuItems = [
-    { icon: User, label: 'Área Personal', path: '/profile' },
     { icon: Home, label: 'Inicio', path: '/' },
     { icon: Grid3X3, label: 'Catálogo', path: '/catalog' },
-    { icon: Settings, label: 'Gestionar Mis Apps', path: '/manage' }
+    { icon: Settings, label: 'Gestionar Mis Apps', path: '/manage' },
+    { icon: User, label: 'Área Personal', path: '/profile' }
   ];
 
   // Get user session and profile data
