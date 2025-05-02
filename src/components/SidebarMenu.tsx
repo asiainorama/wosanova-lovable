@@ -44,8 +44,15 @@ const TimeWidget = () => {
   }, []);
   
   const dayOfWeek = date.toLocaleDateString('es-ES', { weekday: 'long' });
-  const formattedDate = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-  const formattedTime = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const formattedDate = date.toLocaleDateString('es-ES', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  }).toLowerCase();
+  const formattedTime = date.toLocaleTimeString('es-ES', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
   
   return (
     <div className="p-3 bg-primary/10 rounded-lg flex flex-col items-center dark:bg-gray-800">
@@ -76,7 +83,7 @@ const WeatherWidget = () => {
           const { latitude, longitude } = position.coords;
           
           // Llamada a la API de OpenWeatherMap
-          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`);
+          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=es&appid=${API_KEY}`);
           
           if (!response.ok) {
             throw new Error('Error al obtener datos del clima');
@@ -136,12 +143,12 @@ const CalendarWidget = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   
   return (
-    <div className="bg-white rounded-lg shadow-sm dark:bg-gray-800">
+    <div className="bg-white rounded-lg shadow-sm dark:bg-gray-800 w-full">
       <CalendarComponent
         mode="single"
         selected={date}
         onSelect={setDate}
-        className="rounded-md border"
+        className="rounded-md border w-full"
       />
     </div>
   );
@@ -246,7 +253,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           </div>
 
           <div className="p-4 text-xs text-center text-muted-foreground">
-            © {new Date().getFullYear()} AppGarden
+            © {new Date().getFullYear()} WosaNova
           </div>
         </div>
       </SheetContent>
