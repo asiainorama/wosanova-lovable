@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, Rocket } from 'lucide-react';
 import SpaceBackground from '@/components/SpaceBackground';
-
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -23,11 +21,16 @@ const Auth = () => {
         // Special handling for redirects from OAuth providers
         if (hashParams.has('access_token') || queryParams.has('code')) {
           console.log("Detected auth callback parameters");
-          toast.info('Iniciando sesión...', { duration: 2000 });
+          toast.info('Iniciando sesión...', {
+            duration: 2000
+          });
         }
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: {
+            session
+          },
+          error
+        } = await supabase.auth.getSession();
         if (error) {
           console.error("Error checking session:", error.message);
           toast.error(`Error al verificar sesión: ${error.message}`, {
@@ -48,42 +51,40 @@ const Auth = () => {
         setIsAuthenticating(false);
       }
     };
-    
     checkSession();
   }, [navigate]);
-
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get the current URL to use in the redirect
       const origin = window.location.origin;
-      
+
       // Ensure we add trailing slash to the redirect URL to avoid path issues
       let redirectTo = `${origin}/catalog`;
       if (!redirectTo.endsWith('/')) {
         redirectTo = `${redirectTo}/`;
       }
-      
       console.log("Starting OAuth flow with redirect to:", redirectTo);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const {
+        data,
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
           queryParams: {
-            access_type: 'offline', // Request a refresh token
-            prompt: 'select_account', // Force Google to show the account selector
+            access_type: 'offline',
+            // Request a refresh token
+            prompt: 'select_account' // Force Google to show the account selector
           },
           skipBrowserRedirect: false // Ensure browser redirect happens
         }
       });
-      
       if (error) {
         console.error("OAuth error:", error.message);
         throw error;
       }
-      
       console.log("OAuth redirect initiated:", data);
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -94,19 +95,15 @@ const Auth = () => {
 
   // Show loading when checking authentication
   if (isAuthenticating) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+    return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
         <SpaceBackground />
         <div className="z-10 flex flex-col items-center justify-center">
           <Loader2 size={48} className="text-primary animate-spin mb-4" />
           <p className="text-white text-lg">Verificando sesión...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+  return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
       <SpaceBackground />
       <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">
@@ -116,26 +113,14 @@ const Auth = () => {
             </span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-3">WosaNova</h1>
-          <p className="text-xl text-gray-300 mb-1">
-            Bienvenido a la mayor colección de WebApps del mundo
-          </p>
+          <p className="text-xl text-gray-300 mb-1">La mayor colección de WebApps del mundo</p>
         </div>
         
-        <Button
-          onClick={handleGoogleSignIn}
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 h-12 text-base"
-        >
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-          )}
+        <Button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 h-12 text-base">
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />}
           {isLoading ? 'Conectando...' : 'Continuar con Google'}
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
