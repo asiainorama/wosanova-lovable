@@ -1,22 +1,23 @@
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import Header from '@/components/Header';
-import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem
+} from '@/components/ui/carousel';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import AppCard from '@/components/AppCard';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-
-  // Sort favorites alphabetically
-  const sortedFavorites = useMemo(() => {
-    return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
-  }, [favorites]);
 
   // Prefetch logos for favorite apps as soon as home page loads (without toast)
   useEffect(() => {
@@ -31,19 +32,22 @@ const Index = () => {
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-4 py-8 flex-1">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold dark:text-white">{t('home.myApps') || "Mis Aplicaciones"}</h2>
-        </div>
-        
-        {sortedFavorites.length > 0 ? (
-          <div className="py-3">
-            <AppGrid 
-              apps={sortedFavorites} 
-              compact={true} 
-              moreCompact={true}
-              smallerIcons={true}
-            />
-          </div>
+        {favorites.length > 0 ? (
+          <ScrollArea className="w-full">
+            <div className="py-3 px-1">
+              <div className="flex space-x-4 pb-4">
+                {favorites.map((app) => (
+                  <div key={app.id} className="min-w-[120px]">
+                    <AppCard 
+                      key={app.id} 
+                      app={app} 
+                      smallerIcons={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ScrollArea>
         ) : (
           <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">
