@@ -193,7 +193,7 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header />
+      <Header title={t('profile.title')} />
       <div className="container max-w-3xl mx-auto px-4 py-8">
         <button onClick={handleGoBack} className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-4">
           <ArrowLeft size={16} />
