@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +39,7 @@ const Auth = () => {
           });
         } else if (session) {
           console.log("Existing session found in Auth page, redirecting");
-          navigate('/catalog');
+          navigate('/');
         } else {
           console.log("No session found in Auth page");
         }
@@ -61,7 +62,7 @@ const Auth = () => {
       const origin = window.location.origin;
 
       // Ensure we add trailing slash to the redirect URL to avoid path issues
-      let redirectTo = `${origin}/catalog`;
+      let redirectTo = `${origin}/`;
       if (!redirectTo.endsWith('/')) {
         redirectTo = `${redirectTo}/`;
       }
