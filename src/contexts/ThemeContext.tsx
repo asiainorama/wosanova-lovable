@@ -44,24 +44,20 @@ const themeColorClasses: Record<ThemeColor, { background: string, text: string }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
-  const [mode, setMode] = useState<ThemeMode>(() => {
+  const [mode, setModeState] = useState<ThemeMode>(() => {
+    // Get from localStorage or default to 'light'
     const savedMode = localStorage.getItem('themeMode') as ThemeMode;
     return savedMode || 'light';
   });
   
-  const [color, setColor] = useState<ThemeColor>(() => {
+  const [color, setColorState] = useState<ThemeColor>(() => {
+    // Get from localStorage or default to 'blue'
     const savedColor = localStorage.getItem('themeColor') as ThemeColor;
     return savedColor || 'blue';
   });
 
-  // Apply theme when component mounts and when theme changes
-  useEffect(() => {
-    console.log("ThemeProvider effect running - applying theme:", {mode, color});
-    updateTheme(mode, color);
-  }, [mode, color]);
-
-  // Apply theme changes and save to localStorage
-  const updateTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
+  // Ensure theme changes are applied immediately and stored persistently
+  const applyTheme = (newMode: ThemeMode, newColor: ThemeColor) => {
     console.log("Applying theme:", newMode, newColor);
     
     // Save to localStorage
@@ -107,27 +103,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.dispatchEvent(event);
   };
 
-  const handleSetMode = (newMode: ThemeMode) => {
+  // Apply theme changes when component mounts or when theme state changes
+  useEffect(() => {
+    console.log("ThemeContext effect running - applying theme:", {mode, color});
+    applyTheme(mode, color);
+  }, [mode, color]);
+
+  // Wrapper functions to update theme state
+  const setMode = (newMode: ThemeMode) => {
     console.log("Setting mode to:", newMode);
-    setMode(newMode);
+    setModeState(newMode);
   };
 
-  const handleSetColor = (newColor: ThemeColor) => {
-    setColor(newColor);
+  const setColor = (newColor: ThemeColor) => {
+    console.log("Setting color to:", newColor);
+    setColorState(newColor);
   };
 
   const toggleMode = () => {
     const newMode = mode === 'light' ? 'dark' : 'light';
     console.log("Toggle mode from", mode, "to", newMode);
-    setMode(newMode);
+    setModeState(newMode);
   };
 
   return (
     <ThemeContext.Provider value={{ 
       mode, 
       color, 
-      setMode: handleSetMode, 
-      setColor: handleSetColor, 
+      setMode, 
+      setColor, 
       toggleMode 
     }}>
       {children}

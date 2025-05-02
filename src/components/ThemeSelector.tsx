@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Check, Sun, Moon, CircleDot, SquareDot, Flower2, FlameKindling, Heart, Palette } from 'lucide-react';
@@ -39,16 +39,16 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     if (onThemeChange) onThemeChange();
   };
 
-  const handleDarkModeToggle = () => {
-    console.log("Explicit dark mode toggle requested. Current mode:", mode);
-    // We'll directly set the mode instead of toggling to avoid any race conditions
-    const newMode = mode === 'dark' ? 'light' : 'dark';
+  // Simplified handler with direct mode setting
+  const handleDarkModeToggle = (checked: boolean) => {
+    console.log("Dark mode toggle switch changed to:", checked ? "dark" : "light");
+    const newMode = checked ? 'dark' : 'light';
     setMode(newMode);
     if (onThemeChange) onThemeChange();
   };
 
   // Log current theme state each render for debugging
-  console.log("ThemeSelector rendering with mode:", mode);
+  console.log("ThemeSelector rendering with mode:", mode, "isDark:", mode === 'dark');
 
   return (
     <div className="space-y-4">
