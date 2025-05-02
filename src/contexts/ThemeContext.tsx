@@ -114,6 +114,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleSetMode = (newMode: ThemeMode) => {
+    console.log("Setting mode to:", newMode);
     setMode(newMode);
     updateTheme(newMode, color);
   };
@@ -125,6 +126,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const toggleMode = () => {
     const newMode = mode === 'light' ? 'dark' : 'light';
+    console.log("Toggle mode from", mode, "to", newMode);
     setMode(newMode);
     updateTheme(newMode, color);
   };

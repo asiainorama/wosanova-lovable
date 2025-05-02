@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Switch } from "@/components/ui/switch";
 
 interface ThemeSelectorProps {
   onThemeChange?: () => void;
@@ -37,56 +39,36 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     if (onThemeChange) onThemeChange();
   };
 
+  // Simple toggle for light/dark mode
+  const handleDarkModeToggle = () => {
+    const newMode = mode === 'dark' ? 'light' : 'dark';
+    console.log("Toggling dark mode:", newMode);
+    setMode(newMode);
+    if (onThemeChange) onThemeChange();
+  };
+
   return (
-    <div className="space-y-2">
-      {/* Mode Selection - More compact */}
-      <div className="space-y-1">
-        <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('profile.theme.mode')}</h3>
-        <RadioGroup 
-          value={mode}
-          onValueChange={handleModeChange}
-          className="grid grid-cols-2 gap-2"
-        >
-          <div>
-            <RadioGroupItem 
-              value="light" 
-              id="light-mode" 
-              className="peer sr-only" 
-            />
-            <Label 
-              htmlFor="light-mode"
-              className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                mode === "light" ? "border-primary" : "border-muted",
-                "dark:border-gray-700 dark:hover:bg-gray-700"
-              )}
-            >
-              <Sun className="mb-1 h-3 w-3" />
-              <span className="text-[9px] dark:text-white">{t('profile.theme.light')}</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem 
-              value="dark" 
-              id="dark-mode" 
-              className="peer sr-only" 
-            />
-            <Label 
-              htmlFor="dark-mode"
-              className={cn(
-                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                mode === "dark" ? "border-primary" : "border-muted",
-                "dark:border-gray-700 dark:hover:bg-gray-700"
-              )}
-            >
-              <Moon className="mb-1 h-3 w-3" />
-              <span className="text-[9px] dark:text-white">{t('profile.theme.dark')}</span>
-            </Label>
-          </div>
-        </RadioGroup>
+    <div className="space-y-4">
+      {/* Mode Selection - Simplified with a single switch */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Sun className="h-4 w-4" />
+          <span className="text-sm font-medium">{t('profile.theme.light')}</span>
+        </div>
+        
+        <Switch
+          checked={mode === 'dark'}
+          onCheckedChange={handleDarkModeToggle}
+          aria-label="Toggle dark mode"
+        />
+        
+        <div className="flex items-center space-x-2">
+          <Moon className="h-4 w-4" />
+          <span className="text-sm font-medium">{t('profile.theme.dark')}</span>
+        </div>
       </div>
       
-      {/* Color Selection - More compact grid */}
+      {/* Color Selection - Simplified grid */}
       <div className="space-y-1">
         <h3 className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('profile.theme.accent')}</h3>
         <div className="grid grid-cols-3 gap-2">
