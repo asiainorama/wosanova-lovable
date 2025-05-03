@@ -16,7 +16,6 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { toast } from "sonner";
 import InstallPrompt from "./components/InstallPrompt";
 
 // Move AppContextUpdater import here but don't render it at the top level
@@ -39,12 +38,9 @@ const App = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("Authentication initialization started");
-    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("Auth state changed:", event, session ? "session exists" : "no session");
         setSession(session);
         
         // Apply saved theme and language preferences on login/logout
@@ -59,17 +55,6 @@ const App = () => {
           document.documentElement.classList.remove('dark');
           document.body.classList.remove('dark'); 
         }
-        
-        // Show toast for login/logout events
-        if (event === 'SIGNED_IN') {
-          toast.success('Sesión iniciada correctamente', {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast.info('Sesión cerrada', {
-            className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
-          });
-        }
       }
     );
 
@@ -80,9 +65,7 @@ const App = () => {
         
         if (error) {
           console.error("Error getting session:", error.message);
-          toast.error("Error al verificar la sesión");
         } else {
-          console.log("Initial session check:", data.session ? "session exists" : "no session");
           setSession(data.session);
         }
       } catch (error) {
@@ -95,7 +78,6 @@ const App = () => {
     initializeAuth();
 
     return () => {
-      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
