@@ -7,15 +7,17 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ThemeSelector } from '@/components/ThemeSelector';
+import UnsplashBackground from '@/components/UnsplashBackground';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut, ImageIcon } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ThemeMode } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Define profile type based on the actual database structure
 interface UserProfile {
@@ -31,6 +33,7 @@ const Profile = () => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string>('');
   
   // Debounce timer for auto-save
   const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
@@ -70,6 +73,12 @@ const Profile = () => {
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
+        }
+        
+        // Load background from localStorage
+        const savedBackground = localStorage.getItem('backgroundUrl');
+        if (savedBackground) {
+          setBackgroundUrl(savedBackground);
         }
       }
     };
@@ -158,6 +167,12 @@ const Profile = () => {
     }
   };
 
+  // Handle background change
+  const handleBackgroundChange = (url: string) => {
+    setBackgroundUrl(url);
+    localStorage.setItem('backgroundUrl', url);
+  };
+
   // Updated input handlers to trigger auto-save
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -176,97 +191,141 @@ const Profile = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
-            <h1 className="text-2xl font-bold dark:text-white theme-text">{t('profile.title')}</h1>
+            <h1 className="text-2xl font-bold dark:text-white gradient-text">{t('profile.title')}</h1>
           </div>
           <p className="text-gray-600 dark:text-gray-300 mb-6">{t('profile.description')}</p>
 
-          <div className="space-y-6">
-            {/* Profile Section with aligned username and avatar */}
-            <div className="flex items-center gap-4">
-              <Avatar className="w-14 h-14">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="bg-primary/10">
-                  <User size={20} />
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1">
-                <div>
-                  <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
-                  <Input 
-                    id="username" 
-                    placeholder={t('profile.username')}
-                    value={username}
-                    onChange={handleUsernameChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  />
-                </div>
+          <Tabs defaultValue="profile">
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="profile" className="flex-1">Perfil</TabsTrigger>
+              <TabsTrigger value="appearance" className="flex-1">Apariencia</TabsTrigger>
+              <TabsTrigger value="background" className="flex-1">Fondo</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="space-y-6">
+              {/* Profile Section with aligned username and avatar */}
+              <div className="flex items-center gap-4">
+                <Avatar className="w-14 h-14">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="bg-primary/10">
+                    <User size={20} />
+                  </AvatarFallback>
+                </Avatar>
                 
-                <div className="mt-1">
-                  <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
-                  <Input 
-                    id="picture" 
-                    type="url" 
-                    placeholder={t('profile.avatar')}
-                    value={avatarUrl}
-                    onChange={handleAvatarChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  />
+                <div className="flex-1">
+                  <div>
+                    <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
+                    <Input 
+                      id="username" 
+                      placeholder={t('profile.username')}
+                      value={username}
+                      onChange={handleUsernameChange}
+                      className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    />
+                  </div>
+                  
+                  <div className="mt-1">
+                    <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
+                    <Input 
+                      id="picture" 
+                      type="url" 
+                      placeholder={t('profile.avatar')}
+                      value={avatarUrl}
+                      onChange={handleAvatarChange}
+                      className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <Separator className="my-2" />
-            
-            {/* Theme Selector Section */}
-            <div>
-              <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
-              <ThemeSelector onThemeChange={autoSaveChanges} />
-            </div>
-            
-            <Separator className="my-2" />
-            
-            {/* Actions Section */}
-            <div className="pt-1 flex justify-center gap-4">
-              <Button 
-                onClick={handleSignOut} 
-                variant="outline" 
-                className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-              >
-                <LogOut size={14} />
-                {t('profile.logout')}
-              </Button>
               
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    className="h-9 px-4 text-sm flex items-center gap-2"
-                  >
-                    <Trash2 size={14} />
-                    {t('profile.delete')}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                    <AlertDialogDescription className="dark:text-gray-300">
-                      {t('profile.delete.description')}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground"
+              {/* Actions Section */}
+              <div className="pt-1 flex justify-center gap-4">
+                <Button 
+                  onClick={handleSignOut} 
+                  variant="outline" 
+                  className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                >
+                  <LogOut size={14} />
+                  {t('profile.logout')}
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      className="h-9 px-4 text-sm flex items-center gap-2"
                     >
+                      <Trash2 size={14} />
                       {t('profile.delete')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
+                      <AlertDialogDescription className="dark:text-gray-300">
+                        {t('profile.delete.description')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-destructive text-destructive-foreground"
+                      >
+                        {t('profile.delete')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="appearance" className="space-y-6">
+              {/* Theme Selector Section */}
+              <div>
+                <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
+                <ThemeSelector onThemeChange={autoSaveChanges} />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="background" className="space-y-4">
+              <div>
+                <h3 className="text-xs font-medium mb-3 dark:text-white flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Fondo de pantalla
+                </h3>
+                
+                {backgroundUrl && (
+                  <div className="mb-4 relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <img 
+                      src={backgroundUrl} 
+                      alt="Current background" 
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">
+                      <span className="text-xs text-white p-3">
+                        Fondo actual
+                      </span>
+                    </div>
+                    <Button 
+                      className="absolute top-2 right-2 h-8 text-xs"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        setBackgroundUrl('');
+                        localStorage.removeItem('backgroundUrl');
+                        toast.success('Fondo eliminado');
+                      }}
+                    >
+                      Quitar fondo
+                    </Button>
+                  </div>
+                )}
+                
+                <UnsplashBackground onBackgroundChange={handleBackgroundChange} />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
