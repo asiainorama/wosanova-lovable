@@ -49,9 +49,9 @@ const InstallPrompt = () => {
     const choiceResult = await installPrompt.userChoice;
     
     if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
+      console.log('Usuario aceptó la instalación');
     } else {
-      console.log('User dismissed the install prompt');
+      console.log('Usuario rechazó la instalación');
     }
 
     // Reset the prompt variable, since it can't be used again

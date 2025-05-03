@@ -17,6 +17,7 @@ const urlsToCache = [
 
 // Install event - cache assets
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Immediately activate the service worker
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -38,6 +39,9 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  
+  // Immediately claim any clients
+  return self.clients.claim();
 });
 
 // Fetch event - serve cached content when offline
