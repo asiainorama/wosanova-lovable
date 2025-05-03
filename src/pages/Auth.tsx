@@ -128,7 +128,7 @@ const Auth = () => {
               <Rocket size={48} className="text-primary animate-pulse" />
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-3">WosaNova</h1>
+          <h1 className="text-4xl font-bold mb-3 gradient-text">WosaNova</h1>
           <p className="text-xl text-gray-300 mb-1">La mayor colección de WebApps del mundo</p>
         </div>
         
