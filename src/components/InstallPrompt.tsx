@@ -69,7 +69,7 @@ const InstallPrompt = () => {
     <div className="fixed bottom-4 left-4 right-4 bg-background border border-border p-4 rounded-lg shadow-lg z-50 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold dark:text-white">
-          {t('install.title') || 'Instalar WosaNova'}
+          Instalar
         </h3>
         <button 
           onClick={handleDismiss}
@@ -79,14 +79,14 @@ const InstallPrompt = () => {
         </button>
       </div>
       <p className="text-gray-600 dark:text-gray-300 mb-4">
-        {t('install.message') || 'Instala esta aplicación para acceder rápidamente sin abrir el navegador.'}
+        Descárgate ya la App!!
       </p>
       <Button 
         onClick={handleInstall} 
         className="w-full flex items-center justify-center gap-2"
       >
         <Download size={16} />
-        <span>{t('install.button') || 'Instalar aplicación'}</span>
+        <span>VAMOS</span>
       </Button>
     </div>
   );

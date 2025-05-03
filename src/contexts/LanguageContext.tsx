@@ -28,6 +28,11 @@ const translations = {
     'home.addFromCatalog': 'Agrega aplicaciones desde el catálogo para verlas aquí',
     'home.exploreCatalog': 'Explorar Catálogo',
     
+    // Installation Prompt
+    'install.title': 'Instalar',
+    'install.message': 'Descárgate ya la App!!',
+    'install.button': 'VAMOS',
+    
     // Catalog Page
     'catalog.title': 'Catálogo',
     'catalog.applications': 'Aplicaciones',
