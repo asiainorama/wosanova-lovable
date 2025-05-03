@@ -1,3 +1,4 @@
+
 import { AppData } from './types';
 
 // Default Apps
@@ -208,5 +209,11 @@ export const allApps = [
   ...socialMediaApps,
   ...otherPopularApps,
   ...investmentApps,
-  ...newApps  // Added the new apps
+  ...newApps
 ];
+
+// Export AI specific apps
+export const aiApps = allApps.filter(app => app.isAI);
+
+// Re-export the AppData type for convenience
+export type { AppData };

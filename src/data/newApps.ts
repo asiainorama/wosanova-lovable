@@ -1,5 +1,5 @@
 
-import { AppData } from './apps';
+import { AppData } from './types';
 
 export const newApps: AppData[] = [
   {

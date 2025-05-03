@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
-import { aiApps, AppData } from '@/data/apps';
+import { aiApps, AppData, allApps } from '@/data/apps';
 import { 
   entertainmentApps, 
   productivityApps, 
@@ -49,31 +49,20 @@ export const AppContextUpdater = () => {
 
     document.addEventListener('themechange', handleThemeChange);
     
-    // Combine all app data
-    const combinedApps = [
-      ...aiApps,
-      ...additionalApps,
-      ...entertainmentApps,
-      ...productivityApps,
-      ...socialMediaApps,
-      ...otherPopularApps,
-      ...investmentApps
-    ];
-    
-    // First add apps with basic data for immediate display
-    console.log(`Setting initial ${combinedApps.length} apps`);
-    updateAppsList(combinedApps);
+    // Combine all app data - use the exported allApps instead of recreating it
+    console.log(`Setting initial ${allApps.length} apps`);
+    updateAppsList(allApps);
     
     // Preload icons for favorite apps first as they're most important
     const priorityApps = favorites.length > 0 
       ? [...favorites]
-      : combinedApps.slice(0, 10); // If no favorites, preload first 10 apps
+      : allApps.slice(0, 10); // If no favorites, preload first 10 apps
     
     // Start prefetching icons in background
     setTimeout(() => {
       prefetchAppLogos(priorityApps).then(() => {
         // After prioritizing favorites, slowly process the rest
-        const remainingApps = combinedApps.filter(app => 
+        const remainingApps = allApps.filter(app => 
           !priorityApps.some(priorityApp => priorityApp.id === app.id)
         );
         
@@ -85,7 +74,7 @@ export const AppContextUpdater = () => {
             await prefetchAppLogos(chunk);
             
             // Update UI with processed apps
-            updateAppsList([...combinedApps]);
+            updateAppsList([...allApps]);
             
             // Small delay between chunks
             if (i + chunkSize < remainingApps.length) {

@@ -1,4 +1,4 @@
-import { AppData } from './apps';
+import { AppData } from './types';
 
 // Entertainment Apps
 export const entertainmentApps: AppData[] = [
