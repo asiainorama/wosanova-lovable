@@ -128,7 +128,19 @@ const Auth = () => {
               <Rocket size={48} className="text-primary animate-pulse" />
             </span>
           </div>
-          <h1 className="text-4xl font-bold mb-3 gradient-text">WosaNova</h1>
+          <h1 
+            className="text-4xl font-bold mb-3 gradient-text" 
+            style={{
+              backgroundImage: 'linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              display: 'inline-block',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            WosaNova
+          </h1>
           <p className="text-xl text-gray-300 mb-1">La mayor colección de WebApps del mundo</p>
         </div>
         
