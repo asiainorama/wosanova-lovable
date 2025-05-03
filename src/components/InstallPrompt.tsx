@@ -34,29 +34,33 @@ const InstallPrompt = () => {
       setShowPrompt(false);
     }
 
+    // Create a custom event for iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    if (isIOS && !isStandalone) {
+      // In iOS, we need to show a custom prompt since beforeinstallprompt doesn't work
+      setShowPrompt(true);
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstall = async () => {
-    if (!installPrompt) return;
+    if (installPrompt) {
+      // Show the install prompt
+      installPrompt.prompt();
 
-    // Show the install prompt
-    installPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    const choiceResult = await installPrompt.userChoice;
-    
-    if (choiceResult.outcome === 'accepted') {
-      console.log('Usuario aceptó la instalación');
+      // Wait for the user to respond to the prompt
+      await installPrompt.userChoice;
+      
+      // Reset the prompt variable, since it can't be used again
+      setInstallPrompt(null);
+      setShowPrompt(false);
     } else {
-      console.log('Usuario rechazó la instalación');
+      // For iOS, just hide the prompt as the user needs to use "Add to Home Screen"
+      setShowPrompt(false);
     }
-
-    // Reset the prompt variable, since it can't be used again
-    setInstallPrompt(null);
-    setShowPrompt(false);
   };
 
   const handleDismiss = () => {

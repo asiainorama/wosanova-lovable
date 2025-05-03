@@ -5,6 +5,7 @@
   "description": "La mayor colección de WebApps del mundo",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#ff1493",
   "icons": [
@@ -25,5 +26,28 @@
       "sizes": "180x180",
       "type": "image/png"
     }
-  ]
+  ],
+  "capture_links": "existing-client-navigate",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Home",
+      "url": "/"
+    },
+    {
+      "name": "Catalog",
+      "url": "/catalog"
+    },
+    {
+      "name": "Profile",
+      "url": "/profile"
+    }
+  ],
+  "prefer_related_applications": false,
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "fullscreen"
+  ],
+  "lang": "es-ES"
 }
