@@ -47,7 +47,7 @@ const Index = () => {
                 <Store size={48} className="text-primary" />
               </span>
             </div>
-            <h3 className="text-lg font-medium mb-2 dark:text-white">{t('home.noApps') || "No tienes aplicaciones añadidas"}</h3>
+            <h3 className="text-lg font-medium mb-2 gradient-text">{t('home.noApps') || "No tienes aplicaciones añadidas"}</h3>
             <p className="text-gray-500 mb-4 dark:text-gray-400">{t('home.addFromCatalog') || "Agrega aplicaciones desde el catálogo para verlas aquí"}</p>
             <div className="flex justify-center">
               <Link to="/catalog">

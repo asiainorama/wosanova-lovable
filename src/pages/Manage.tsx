@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -145,7 +144,7 @@ const Manage = () => {
       
       <main className="container mx-auto px-4 py-6 flex-1">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
+          <h2 className="text-lg font-semibold mb-4 gradient-text">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
           
           {favorites.length === 0 ? (
             <p className="text-gray-500">{t('home.noApps') || "No hay aplicaciones que mostrar"}</p>
@@ -153,7 +152,7 @@ const Manage = () => {
             <div className="space-y-6">
               {Object.entries(groupedFavorites).map(([groupName, apps]) => (
                 <div key={groupName} className="space-y-2">
-                  <h3 className="font-medium text-sm text-gray-500">{getGroupDisplayName(groupName)}</h3>
+                  <h3 className="font-medium text-sm gradient-text">{getGroupDisplayName(groupName)}</h3>
                   {apps.map((app) => (
                     <AppListItem 
                       key={app.id} 

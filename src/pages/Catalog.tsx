@@ -232,7 +232,7 @@ const Catalog = () => {
           <div className="space-y-8">
             {Object.entries(groupedApps).map(([category, apps]) => (
               <div key={category} className="space-y-3">
-                <h2 className="text-xl font-semibold border-b pb-2 dark:text-white dark:border-gray-700">
+                <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
                   {category}
                 </h2>
                 <AppGrid 
