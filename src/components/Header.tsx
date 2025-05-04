@@ -13,7 +13,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { mode, color } = useTheme();
+  const { mode } = useTheme(); // Removed color reference
   const { t } = useLanguage();
 
   return (

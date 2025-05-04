@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -179,7 +178,7 @@ const CalendarWidget = () => {
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const location = useLocation();
-  const { mode, color } = useTheme();
+  const { mode } = useTheme();
   const { t } = useLanguage();
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
