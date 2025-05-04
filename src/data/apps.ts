@@ -190,6 +190,19 @@ import { additionalApps } from './moreApps';
 import { entertainmentApps, productivityApps, socialMediaApps, otherPopularApps, investmentApps } from './additionalApps';
 import { newApps } from './newApps';
 
+// Update YouDJ URL in the collections
+const updateYouDJUrl = (apps: AppData[]): AppData[] => {
+  return apps.map(app => {
+    if (app.id === "youdj") {
+      return {
+        ...app,
+        url: "https://youdj.online/?web"
+      };
+    }
+    return app;
+  });
+};
+
 // Default categories
 export const categories = [
   "Productividad", "Organización", "Entretenimiento", "Juegos", "Multimedia",
@@ -200,17 +213,19 @@ export const categories = [
   "Noticias", "Criptomonedas", "Comida", "Inmobiliaria", "Inversión"
 ];
 
-// Combine all app sources 
+// Remove duplicate Amazon and update YouDJ URL
 export const allApps = [
   ...initialApps,
-  ...additionalApps,
-  ...entertainmentApps,
-  ...productivityApps,
-  ...socialMediaApps,
-  ...otherPopularApps,
-  ...investmentApps,
-  ...newApps
-];
+  ...updateYouDJUrl(additionalApps),
+  ...updateYouDJUrl(entertainmentApps),
+  ...updateYouDJUrl(productivityApps),
+  ...updateYouDJUrl(socialMediaApps),
+  ...updateYouDJUrl(otherPopularApps),
+  ...updateYouDJUrl(investmentApps),
+  ...updateYouDJUrl(newApps)
+].filter((app, index, self) => 
+  index === self.findIndex((t) => t.id === app.id)
+);
 
 // Export AI specific apps
 export const aiApps = allApps.filter(app => app.isAI);

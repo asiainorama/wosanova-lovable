@@ -181,8 +181,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const location = useLocation();
   const { mode } = useTheme();
   const { t } = useLanguage();
-  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
-  const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('avatarUrl') || '');
+  const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   
   // Get user session and profile data
@@ -228,6 +228,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         setUserId(null);
         setUsername('');
         setAvatarUrl('');
+        localStorage.removeItem('username');
+        localStorage.removeItem('avatarUrl');
       }
     });
     
@@ -244,14 +246,14 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center">
-            <h2 className="text-xl font-bold dark:text-white theme-text text-center">{t('app.name')}</h2>
+            <h2 className="text-xl font-bold dark:text-white bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">{t('app.name')}</h2>
             
             {/* User profile section at the top of sidebar - centered */}
             {userId && (
               <div className="flex flex-col items-center mt-4 mb-2">
                 <Link to="/profile" onClick={() => onOpenChange(false)}>
                   <Avatar className="h-12 w-12 mb-2">
-                    <AvatarImage src={avatarUrl} />
+                    <AvatarImage src={avatarUrl} alt={username} />
                     <AvatarFallback className="bg-primary/10">
                       <User size={20} />
                     </AvatarFallback>

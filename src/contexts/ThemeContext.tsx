@@ -85,6 +85,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Apply theme when document visibility changes (to prevent theme from resetting on resume)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const savedMode = localStorage.getItem('themeMode') as ThemeMode;
+        if (savedMode && savedMode !== mode) {
+          setModeState(savedMode);
+        } else {
+          // Re-apply current mode to ensure consistency
+          applyTheme(mode);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [mode, applyTheme]);
+
   // Apply theme when component mounts or when theme state changes
   useEffect(() => {
     console.log("ThemeContext effect running - applying theme:", {mode});
