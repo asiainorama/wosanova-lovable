@@ -37,9 +37,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (newMode === 'dark') {
         document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
+        
+        // Update theme-color meta tag for dark mode
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', '#1f2937');
+        }
       } else {
         document.documentElement.classList.remove('dark');
         document.body.classList.remove('dark');
+        
+        // Update theme-color meta tag for light mode
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', '#f3f4f6');
+        }
       }
   
       // Apply color scheme meta tag

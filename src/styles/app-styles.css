@@ -198,3 +198,22 @@
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 78%;
 }
+
+/* Ajustes adicionales para colores de página */
+body {
+  background-color: var(--background);
+}
+
+/* Modo claro - fondo blanco grisáceo */
+html:not(.dark) body {
+  background-color: #f3f4f6;
+}
+
+/* Todos los contenedores principales de las páginas deberían tener este fondo */
+.min-h-screen {
+  background-color: #f3f4f6;
+}
+
+.dark .min-h-screen {
+  background-color: #111827;
+}
