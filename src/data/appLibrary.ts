@@ -1,3 +1,4 @@
+
 import { AppData } from './types';
 
 // All apps consolidated in a single file
@@ -833,4 +834,24 @@ export const allApps: AppData[] = [
     name: "Any.do",
     icon: "https://static.any.do/web/v2/images/new_design/favicon.svg",
     url: "https://www.any.do",
-    category:
+    category: "Productividad",
+    description: "Aplicación de gestión de tareas y listas personales",
+    isAI: false
+  }
+];
+
+// Extract AI apps for convenience
+export const aiApps = allApps.filter(app => app.isAI);
+
+// Extract unique categories for filtering
+export const categories = [...new Set(allApps.map(app => app.category))];
+
+// For creating unique IDs based on app names
+export function generateAppId(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-');
+}
+
+// Function to get unique apps (for handling duplicates if they occur)
+export const uniqueApps = allApps.filter(
+  (app, index, self) => index === self.findIndex(a => a.id === app.id)
+);
