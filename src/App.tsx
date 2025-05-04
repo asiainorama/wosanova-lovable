@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -94,7 +95,7 @@ const App = () => {
     <ThemeProvider>
       <LanguageProvider>
         <BackgroundProvider>
-          <AppContextProvider>
+          <AppProvider>
             <Toaster />
             <InstallPrompt />
             <Routes>
@@ -140,7 +141,7 @@ const App = () => {
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </AppContextProvider>
+          </AppProvider>
         </BackgroundProvider>
       </LanguageProvider>
     </ThemeProvider>

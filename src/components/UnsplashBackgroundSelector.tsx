@@ -132,7 +132,7 @@ export const UnsplashBackgroundSelector = () => {
               <span>Refresh</span>
             </Button>
           </div>
-          <ImageGrid images={images} onSelect={selectBackground} isLoading={isLoading} />
+          <ImageGrid images={images} onSelect={selectBackground} isLoading={isLoading} currentTab={activeTab} />
         </TabsContent>
 
         <TabsContent value="search" className="space-y-4">
@@ -153,7 +153,7 @@ export const UnsplashBackgroundSelector = () => {
               <Search size={16} />
             </Button>
           </div>
-          <ImageGrid images={images} onSelect={selectBackground} isLoading={isLoading} />
+          <ImageGrid images={images} onSelect={selectBackground} isLoading={isLoading} currentTab={activeTab} />
         </TabsContent>
       </Tabs>
     </div>
@@ -163,11 +163,13 @@ export const UnsplashBackgroundSelector = () => {
 const ImageGrid = ({ 
   images, 
   onSelect, 
-  isLoading 
+  isLoading,
+  currentTab 
 }: { 
   images: UnsplashImage[]; 
   onSelect: (url: string) => void; 
   isLoading: boolean;
+  currentTab: string;
 }) => {
   if (isLoading) {
     return (
@@ -185,7 +187,7 @@ const ImageGrid = ({
   if (images.length === 0) {
     return (
       <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-        {activeTab === 'search' ? 'Enter a search term to find images' : 'No images found'}
+        {currentTab === 'search' ? 'Enter a search term to find images' : 'No images found'}
       </div>
     );
   }
