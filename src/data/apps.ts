@@ -237,6 +237,13 @@ export const allApps = (() => {
   addAppsWithPriority(updateYouDJUrl(investmentApps));
   addAppsWithPriority(updateYouDJUrl(newApps));
   
+  // Log to verify no duplicates
+  console.log("App IDs check:", 
+    Object.values(uniqueApps)
+      .filter(app => app.name.includes("Amazon"))
+      .map(app => `${app.id}: ${app.name}`)
+  );
+  
   // Convert the object back to an array
   return Object.values(uniqueApps);
 })();

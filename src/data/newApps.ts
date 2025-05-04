@@ -2,15 +2,16 @@
 import { AppData } from './types';
 
 export const newApps: AppData[] = [
-  {
-    id: "amazon-shopping",
-    name: "Amazon",
-    icon: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
-    url: "https://www.amazon.com",
-    category: "Compras",
-    description: "La tienda online más grande del mundo con millones de productos",
-    isAI: false
-  },
+  // Removing the duplicate Amazon entry from here
+  // {
+  //   id: "amazon-shopping",
+  //   name: "Amazon",
+  //   icon: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
+  //   url: "https://www.amazon.com",
+  //   category: "Compras",
+  //   description: "La tienda online más grande del mundo con millones de productos",
+  //   isAI: false
+  // },
   {
     id: "amazon-drive",
     name: "Amazon Drive",
