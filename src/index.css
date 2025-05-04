@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -250,6 +251,11 @@
   
   .dark button[style*="--orange-500"] {
     background-color: hsl(24, 95%, 65%) !important;
+  }
+  
+  /* Gradient text that works in both light and dark mode */
+  .text-gradient {
+    @apply bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent;
   }
 }
 

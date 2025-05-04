@@ -106,6 +106,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
   }, [mode, applyTheme]);
 
+  // Special handler for page transitions
+  useEffect(() => {
+    // This helps ensure theme consistency when navigating between pages
+    const handleNavigation = () => {
+      const savedMode = localStorage.getItem('themeMode') as ThemeMode;
+      if (savedMode) {
+        applyTheme(savedMode);
+      }
+    };
+
+    window.addEventListener('popstate', handleNavigation);
+    
+    return () => {
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, [applyTheme]);
+
   // Apply theme when component mounts or when theme state changes
   useEffect(() => {
     console.log("ThemeContext effect running - applying theme:", {mode});

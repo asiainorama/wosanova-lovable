@@ -1,6 +1,6 @@
 
 // Service Worker for WosaNova PWA
-const CACHE_NAME = 'wosanova-v2';
+const CACHE_NAME = 'wosanova-v3';
 
 // Assets to cache
 const urlsToCache = [
@@ -15,18 +15,36 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
+// Additional assets to cache for iOS devices
+const iosAssetsToCache = [
+  '/icons/apple-touch-icon.png'
+];
+
 // Helper function for iOS
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window.MSStream);
 }
 
+// Helper function for macOS
+function isMacOS() {
+  return /Mac/.test(navigator.userAgent) && !isIOS();
+}
+
 // Install event - cache assets
 self.addEventListener('install', event => {
   self.skipWaiting(); // Immediately activate the service worker
+  
+  let assetsToCache = [...urlsToCache];
+  
+  // Add iOS specific assets when needed
+  if (isIOS() || isMacOS()) {
+    assetsToCache = [...assetsToCache, ...iosAssetsToCache];
+  }
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        return cache.addAll(urlsToCache);
+        return cache.addAll(assetsToCache);
       })
   );
 });
@@ -56,6 +74,44 @@ self.addEventListener('fetch', event => {
     return;
   }
   
+  // Special handling for icon requests - ensure they're always available
+  if (event.request.url.includes('/icons/')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          if (response) {
+            return response;
+          }
+          
+          // If not found in cache, try network
+          return fetch(event.request.clone())
+            .then(response => {
+              if (!response || response.status !== 200) {
+                return response;
+              }
+              
+              // Cache for future use
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+                
+              return response;
+            })
+            .catch(() => {
+              // If network fails, return a default icon
+              if (event.request.url.includes('apple-touch-icon')) {
+                return caches.match('/icons/apple-touch-icon.png');
+              }
+              return caches.match('/icons/icon-192x192.png');
+            });
+        })
+    );
+    return;
+  }
+  
+  // Standard fetch handling for other resources
   event.respondWith(
     caches.match(event.request)
       .then(response => {

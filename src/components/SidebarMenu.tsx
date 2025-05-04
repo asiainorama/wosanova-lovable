@@ -188,32 +188,36 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   // Get user session and profile data
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUserId(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         
-        // Try to get user profile data
-        try {
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .select('username, avatar_url')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (data && !error) {
-            // Type assertion to ensure data is treated as UserProfile
-            const profileData = data as unknown as UserProfile;
-            setUsername(profileData.username || '');
-            setAvatarUrl(profileData.avatar_url || '');
-            
-            // Also update localStorage for immediate use
-            localStorage.setItem('username', profileData.username || '');
-            localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+        if (session?.user) {
+          setUserId(session.user.id);
+          
+          // Try to get user profile data
+          try {
+            const { data, error } = await supabase
+              .from('user_profiles')
+              .select('username, avatar_url')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (data && !error) {
+              // Type assertion to ensure data is treated as UserProfile
+              const profileData = data as unknown as UserProfile;
+              setUsername(profileData.username || '');
+              setAvatarUrl(profileData.avatar_url || '');
+              
+              // Also update localStorage for immediate use
+              localStorage.setItem('username', profileData.username || '');
+              localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
           }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
         }
+      } catch (error) {
+        console.error('Error getting session:', error);
       }
     };
     
@@ -246,7 +250,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       >
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center">
-            <h2 className="text-xl font-bold dark:text-white bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">{t('app.name')}</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">
+              {t('app.name')}
+            </h2>
             
             {/* User profile section at the top of sidebar - centered */}
             {userId && (

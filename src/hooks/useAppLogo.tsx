@@ -16,9 +16,12 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 2;
+  const maxRetries = 3; // Increased retries for iOS/macOS
   const imageRef = useRef<HTMLImageElement>(null);
   const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
+  
+  const isIOSorMacOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent) && 
+                      (!/iPad|iPhone|iPod/.test(navigator.userAgent) || !(window as any).MSStream);
   
   // Store icon URL when successfully loaded
   const storeSuccessfulIcon = () => {
@@ -35,9 +38,22 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   
   // On mount, check if the image is already in cache
   useEffect(() => {
-    // Get logo from cache service
+    // Get logo from cache service or try improved fallbacks for iOS/macOS
     const cachedLogo = getCachedLogo(app);
     setIconUrl(cachedLogo);
+    
+    // Preload icons for iOS/macOS
+    if (isIOSorMacOS) {
+      const img = new Image();
+      img.src = cachedLogo;
+      img.onload = () => {
+        setImageLoading(false);
+        storeSuccessfulIcon();
+      };
+      img.onerror = () => {
+        handleImageError();
+      };
+    }
     
     if (cachedLogo && imageRef.current) {
       const img = imageRef.current;
@@ -74,6 +90,15 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
       // Second retry: try Google Favicon API as a fallback
       const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
       const newUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      setIconUrl(newUrl);
+      if (imageRef.current) {
+        imageRef.current.src = newUrl;
+      }
+    }
+    else if (retryCount === 2 && isIOSorMacOS) {
+      // Third retry specifically for iOS/macOS: try another favicon service
+      const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+      const newUrl = `https://api.faviconkit.com/${domain}/128`;
       setIconUrl(newUrl);
       if (imageRef.current) {
         imageRef.current.src = newUrl;
