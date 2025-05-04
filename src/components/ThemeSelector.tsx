@@ -25,7 +25,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">
-          {t('profile.theme.selector')}
+          Elige tu estilo
         </span>
         
         <div className="flex items-center space-x-2">
