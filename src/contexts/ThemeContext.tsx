@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Update ThemeMode to include 'system' as a valid value
@@ -16,39 +15,51 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
   const [mode, setModeState] = useState<ThemeMode>(() => {
     try {
-      // Check for system preference first if no localStorage value
+      // Get saved preference from localStorage
       const savedMode = localStorage.getItem('themeMode') as ThemeMode;
       console.log("Initial theme mode from localStorage:", savedMode);
       
-      if (savedMode) {
+      // If a valid mode is saved, use it
+      if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
         return savedMode;
       }
       
-      // If no saved preference, check system preference
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        console.log("Using system preference: dark");
-        return 'dark';
-      }
-      
-      // Default to light mode
-      console.log("No preference found, defaulting to light mode");
-      return 'light';
+      // Default to system preference
+      console.log("No valid saved preference, defaulting to system");
+      return 'system';
     } catch (e) {
       console.error("Error reading theme from localStorage:", e);
-      return 'light';
+      return 'system';
     }
   });
 
+  // Function to get the actual theme based on mode and system preference
+  const getEffectiveTheme = React.useCallback((): 'light' | 'dark' => {
+    if (mode === 'system') {
+      // Check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    }
+    // Otherwise use the explicitly selected mode
+    return mode as 'light' | 'dark';
+  }, [mode]);
+
   // Function to actually apply theme changes to DOM
-  const applyTheme = React.useCallback((newMode: ThemeMode) => {
-    console.log("Applying theme:", newMode);
+  const applyTheme = React.useCallback(() => {
+    console.log("Applying theme based on mode:", mode);
     
     try {
-      // Save to localStorage
-      localStorage.setItem('themeMode', newMode);
+      // Save selection to localStorage
+      localStorage.setItem('themeMode', mode);
+      
+      // Determine the effective theme (accounting for system preference)
+      const effectiveTheme = getEffectiveTheme();
+      console.log("Effective theme to apply:", effectiveTheme);
       
       // Apply or remove dark mode class
-      if (newMode === 'dark') {
+      if (effectiveTheme === 'dark') {
         document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
         
@@ -71,24 +82,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // Apply color scheme meta tag
       const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
       if (metaColorScheme) {
-        metaColorScheme.setAttribute('content', newMode);
+        metaColorScheme.setAttribute('content', effectiveTheme);
       } else {
         const meta = document.createElement('meta');
         meta.name = 'color-scheme';
-        meta.content = newMode;
+        meta.content = effectiveTheme;
         document.head.appendChild(meta);
       }
       
       // Set the primary color CSS variable with default blue values
       document.documentElement.style.setProperty(
         '--primary', 
-        newMode === 'dark' ? '217 91% 65%' : '217 91% 50%'
+        effectiveTheme === 'dark' ? '217 91% 65%' : '217 91% 50%'
       );
       
       // Always white text on colored backgrounds in dark mode
       document.documentElement.style.setProperty(
         '--primary-foreground', 
-        newMode === 'dark' ? '0 0% 100%' : '0 0% 7%'
+        effectiveTheme === 'dark' ? '0 0% 100%' : '0 0% 7%'
       );
       
       // Force redraw to refresh UI elements
@@ -97,19 +108,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error("Error applying theme:", e);
     }
-  }, []);
+  }, [mode, getEffectiveTheme]);
 
   // Apply theme when document visibility changes (to prevent theme from resetting on resume)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        const savedMode = localStorage.getItem('themeMode') as ThemeMode;
-        if (savedMode && savedMode !== mode) {
-          setModeState(savedMode);
-        } else {
-          // Re-apply current mode to ensure consistency
-          applyTheme(mode);
-        }
+        applyTheme();
       }
     };
 
@@ -118,40 +123,42 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [mode, applyTheme]);
+  }, [applyTheme]);
 
   // Listen for system preference changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only apply system preference if user hasn't explicitly chosen a theme
-      const savedMode = localStorage.getItem('themeMode');
-      if (!savedMode || savedMode === 'system') {
-        setModeState(e.matches ? 'dark' : 'light');
+    const handleChange = () => {
+      // Only reapply if currently in system mode
+      if (mode === 'system') {
+        applyTheme();
       }
     };
     
-    // Modern browsers
+    // Add event listener
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);
+    } else {
+      // Fallback for older browsers
+      mediaQuery.addListener(handleChange);
     }
     
     return () => {
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        // Fallback for older browsers
+        mediaQuery.removeListener(handleChange);
       }
     };
-  }, []);
+  }, [mode, applyTheme]);
 
   // Special handler for page transitions
   useEffect(() => {
     // This helps ensure theme consistency when navigating between pages
     const handleNavigation = () => {
-      const savedMode = localStorage.getItem('themeMode') as ThemeMode;
-      if (savedMode) {
-        applyTheme(savedMode);
-      }
+      applyTheme();
     };
 
     window.addEventListener('popstate', handleNavigation);
@@ -164,7 +171,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Apply theme when component mounts or when theme state changes
   useEffect(() => {
     console.log("ThemeContext effect running - applying theme:", {mode});
-    applyTheme(mode);
+    applyTheme();
   }, [mode, applyTheme]);
 
   // Wrapper functions to update theme state
@@ -174,10 +181,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleMode = React.useCallback(() => {
-    const newMode = mode === 'light' ? 'dark' : 'light';
-    console.log("Toggle mode from", mode, "to", newMode);
+    const effectiveTheme = getEffectiveTheme();
+    const newMode = effectiveTheme === 'light' ? 'dark' : 'light';
+    console.log("Toggle mode from", effectiveTheme, "to", newMode);
     setModeState(newMode);
-  }, [mode]);
+  }, [getEffectiveTheme]);
 
   const contextValue = React.useMemo(() => ({
     mode,

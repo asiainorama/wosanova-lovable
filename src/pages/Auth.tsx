@@ -14,6 +14,12 @@ const Auth = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const { mode } = useTheme();
+  
+  // Determine if we should use dark mode based on the theme context
+  const isDarkMode = mode === 'dark' || 
+                    (mode === 'system' && 
+                     window.matchMedia && 
+                     window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   // Check for existing session and query params on component mount
   useEffect(() => {
@@ -116,15 +122,19 @@ const Auth = () => {
 
   // Show loading when checking authentication
   if (isAuthenticating) {
-    return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <SpaceBackground />
         <div className="z-10 flex flex-col items-center justify-center">
           <Loader2 size={48} className="text-primary animate-spin mb-4" />
-          <p className="text-white text-lg">Verificando sesión...</p>
+          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>Verificando sesión...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className={`min-h-screen flex flex-col items-center justify-center ${mode === 'dark' ? 'bg-gray-900' : 'bg-gray-800'}`}>
+
+  return (
+    <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <SpaceBackground />
       <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">
@@ -146,15 +156,31 @@ const Auth = () => {
           <p className="text-xl text-gray-300 mb-1">La mejor colección de WebApps del mundo</p>
         </div>
         
-        {authError && <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded-md text-white text-sm">
+        {authError && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded-md text-white text-sm">
             {authError}
-          </div>}
+          </div>
+        )}
         
-        <Button onClick={handleGoogleSignIn} disabled={isLoading} className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 h-12 text-base">
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />}
+        <Button 
+          onClick={handleGoogleSignIn} 
+          disabled={isLoading} 
+          className={`w-full flex items-center justify-center gap-2 
+            ${isDarkMode ? 
+              'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' : 
+              'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50'} 
+            h-12 text-base`}
+        >
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
+          )}
           {isLoading ? 'Conectando...' : 'Continuar con Google'}
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;
