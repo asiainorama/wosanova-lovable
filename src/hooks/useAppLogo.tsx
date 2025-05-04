@@ -1,7 +1,14 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { getCachedLogo, registerSuccessfulLogo } from '@/services/LogoCacheService';
+import { getCachedLogo } from '@/services/LogoCacheService';
 import { AppData } from '@/data/apps';
+import { 
+  isIOSOrMacOS,
+  storeSuccessfulIcon,
+  handleImageLoadError,
+  preloadImageForIOSMacOS,
+  checkImagePreloaded
+} from './iconLoading';
 
 interface UseAppLogoResult {
   iconUrl: string;
@@ -12,6 +19,9 @@ interface UseAppLogoResult {
   handleImageLoad: () => void;
 }
 
+/**
+ * Hook to handle app logo loading, caching, and fallbacks
+ */
 export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -20,102 +30,53 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
   
-  const isIOSorMacOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent) && 
-                      (!/iPad|iPhone|iPod/.test(navigator.userAgent) || !(window as any).MSStream);
-  
-  // Store icon URL when successfully loaded
-  const storeSuccessfulIcon = () => {
-    if (app.url && !imageError && iconUrl && !iconUrl.includes('placeholder')) {
-      try {
-        // Extract domain from the app URL
-        const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
-        registerSuccessfulLogo(app.id, iconUrl, domain);
-      } catch (e) {
-        console.warn('Failed to register successful icon:', e);
-      }
-    }
-  };
-  
   // On mount, check if the image is already in cache
   useEffect(() => {
-    // Get logo from cache service or try improved fallbacks for iOS/macOS
+    // Get logo from cache service
     const cachedLogo = getCachedLogo(app);
     setIconUrl(cachedLogo);
     
     // Preload icons for iOS/macOS
-    if (isIOSorMacOS) {
-      const img = new Image();
-      img.src = cachedLogo;
-      img.onload = () => {
+    preloadImageForIOSMacOS(
+      cachedLogo,
+      () => {
         setImageLoading(false);
-        storeSuccessfulIcon();
-      };
-      img.onerror = () => {
-        handleImageError();
-      };
-    }
+        storeSuccessfulIcon(app, cachedLogo, imageError);
+      },
+      handleImageError
+    );
     
-    if (cachedLogo && imageRef.current) {
-      const img = imageRef.current;
-      if (img.complete) {
-        // Image is already loaded (likely from cache)
-        setImageLoading(false);
-        storeSuccessfulIcon();
-      }
-    }
+    // Check if image is already loaded from cache
+    checkImagePreloaded(imageRef, () => {
+      setImageLoading(false);
+      storeSuccessfulIcon(app, cachedLogo, imageError);
+    });
   }, [app.id]);
   
   // Function to handle image error
   const handleImageError = () => {
-    // If we've already retried too many times, show fallback
-    if (retryCount >= maxRetries) {
-      setImageError(true);
-      setImageLoading(false);
-      return;
-    }
-    
-    setRetryCount(retryCount + 1);
-    
-    // Try different image strategies based on retry count
-    if (retryCount === 0) {
-      // First retry: add a cache buster
-      const timestamp = new Date().getTime();
-      const newUrl = iconUrl.split('?')[0] + '?' + timestamp;
-      setIconUrl(newUrl);
-      if (imageRef.current) {
-        imageRef.current.src = newUrl;
+    handleImageLoadError(
+      app,
+      iconUrl,
+      retryCount,
+      maxRetries,
+      imageRef,
+      (newUrl) => {
+        setRetryCount(retryCount + 1);
+        setIconUrl(newUrl);
+      },
+      () => {
+        setImageError(true);
+        setImageLoading(false);
       }
-    } 
-    else if (retryCount === 1) {
-      // Second retry: try Google Favicon API as a fallback
-      const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-      const newUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-      setIconUrl(newUrl);
-      if (imageRef.current) {
-        imageRef.current.src = newUrl;
-      }
-    }
-    else if (retryCount === 2 && isIOSorMacOS) {
-      // Third retry specifically for iOS/macOS: try another favicon service
-      const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-      const newUrl = `https://api.faviconkit.com/${domain}/128`;
-      setIconUrl(newUrl);
-      if (imageRef.current) {
-        imageRef.current.src = newUrl;
-      }
-    }
-    else {
-      // If all retries failed, show fallback
-      setImageError(true);
-      setImageLoading(false);
-    }
+    );
   };
 
   // Function to handle image load
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
-    storeSuccessfulIcon();
+    storeSuccessfulIcon(app, iconUrl, false);
   };
   
   return {
@@ -127,3 +88,5 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
     handleImageLoad
   };
 };
+
+export default useAppLogo;
