@@ -213,19 +213,33 @@ export const categories = [
   "Noticias", "Criptomonedas", "Comida", "Inmobiliaria", "Inversión"
 ];
 
-// Remove duplicate Amazon and update YouDJ URL
-export const allApps = [
-  ...initialApps,
-  ...updateYouDJUrl(additionalApps),
-  ...updateYouDJUrl(entertainmentApps),
-  ...updateYouDJUrl(productivityApps),
-  ...updateYouDJUrl(socialMediaApps),
-  ...updateYouDJUrl(otherPopularApps),
-  ...updateYouDJUrl(investmentApps),
-  ...updateYouDJUrl(newApps)
-].filter((app, index, self) => 
-  index === self.findIndex((t) => t.id === app.id)
-);
+// Remove duplicate entries by comparing app IDs
+// Modified to properly handle duplicates - we'll prioritize entries from initialApps, then additionalApps, etc.
+export const allApps = (() => {
+  const uniqueApps: Record<string, AppData> = {};
+  
+  // Add apps in order of priority (first source encountered takes precedence)
+  const addAppsWithPriority = (apps: AppData[]) => {
+    apps.forEach(app => {
+      if (!uniqueApps[app.id]) {
+        uniqueApps[app.id] = app;
+      }
+    });
+  };
+  
+  // Add apps in priority order
+  addAppsWithPriority(initialApps);
+  addAppsWithPriority(updateYouDJUrl(additionalApps));
+  addAppsWithPriority(updateYouDJUrl(entertainmentApps));
+  addAppsWithPriority(updateYouDJUrl(productivityApps));
+  addAppsWithPriority(updateYouDJUrl(socialMediaApps));
+  addAppsWithPriority(updateYouDJUrl(otherPopularApps));
+  addAppsWithPriority(updateYouDJUrl(investmentApps));
+  addAppsWithPriority(updateYouDJUrl(newApps));
+  
+  // Convert the object back to an array
+  return Object.values(uniqueApps);
+})();
 
 // Export AI specific apps
 export const aiApps = allApps.filter(app => app.isAI);
