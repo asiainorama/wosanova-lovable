@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -57,12 +56,13 @@ const Profile = () => {
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             
-            // Set theme if available
+            // Set theme if available - but ONLY if the user has explicitly set one
             if (profileData.theme_mode) {
               // Safe cast to ThemeMode
               const themeMode = profileData.theme_mode as ThemeMode;
               setMode(themeMode);
             }
+            // Otherwise, keep the current theme mode from context
             
             // Also update localStorage for immediate use
             localStorage.setItem('username', profileData.username || '');

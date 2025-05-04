@@ -43,18 +43,8 @@ const App = () => {
       (event, session) => {
         setSession(session);
         
-        // Apply saved theme and language preferences on login/logout
-        const themeMode = localStorage.getItem('themeMode');
-        const themeColor = localStorage.getItem('themeColor');
-        const language = localStorage.getItem('language');
-        
-        if (themeMode === 'dark') {
-          document.documentElement.classList.add('dark');
-          document.body.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.body.classList.remove('dark'); 
-        }
+        // Do NOT force apply theme here - let ThemeProvider handle it
+        // This preserves user's selected theme across login/logout events
       }
     );
 
