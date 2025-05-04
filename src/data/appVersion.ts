@@ -12,7 +12,3 @@ export const appVersion = {
     return `${this.major}.${this.minor}.${this.patch}`;
   }
 };
-
-// La fecha de la última actualización
-export const lastUpdateDate = new Date('2024-05-04');
-
