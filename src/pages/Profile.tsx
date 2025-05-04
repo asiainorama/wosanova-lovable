@@ -25,7 +25,7 @@ interface UserProfile {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { mode, setMode } = useTheme();
+  const { mode } = useTheme();
   const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -56,13 +56,8 @@ const Profile = () => {
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             
-            // Set theme if available - but ONLY if the user has explicitly set one
-            if (profileData.theme_mode) {
-              // Safe cast to ThemeMode
-              const themeMode = profileData.theme_mode as ThemeMode;
-              setMode(themeMode);
-            }
-            // Otherwise, keep the current theme mode from context
+            // Only log the user's theme preference, don't force it
+            console.log('User has theme_mode stored:', profileData.theme_mode);
             
             // Also update localStorage for immediate use
             localStorage.setItem('username', profileData.username || '');
@@ -75,7 +70,7 @@ const Profile = () => {
     };
     
     fetchUserData();
-  }, [setMode]);
+  }, []);
 
   // Auto-save function with debounce
   const autoSaveChanges = () => {
@@ -168,6 +163,11 @@ const Profile = () => {
     setAvatarUrl(e.target.value);
     autoSaveChanges();
   };
+
+  // Add useEffect to log whenever mode changes in the profile page
+  useEffect(() => {
+    console.log('Profile page - current theme mode:', mode);
+  }, [mode]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

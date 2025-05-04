@@ -75,6 +75,11 @@ const Auth = () => {
     checkSession();
   }, [navigate]);
 
+  // Effect to update the theme when mode changes
+  useEffect(() => {
+    console.log("Auth page - current theme mode:", mode);
+  }, [mode]);
+
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
