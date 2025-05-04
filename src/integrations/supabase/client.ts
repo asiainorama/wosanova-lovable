@@ -19,6 +19,11 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       detectSessionInUrl: true,
       flowType: 'pkce' // Using PKCE flow for better security and compatibility
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'lovable'
+      }
     }
   }
 );

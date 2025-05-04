@@ -21,6 +21,11 @@ const Auth = () => {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const queryParams = new URLSearchParams(window.location.search);
 
+        // Log full URL for debugging
+        console.log("Current URL:", window.location.href);
+        console.log("Hash params:", Object.fromEntries(hashParams));
+        console.log("Query params:", Object.fromEntries(queryParams));
+
         // Special handling for redirects from OAuth providers
         if (hashParams.has('access_token') || queryParams.has('code')) {
           console.log("Detected auth callback parameters");
@@ -70,7 +75,10 @@ const Auth = () => {
 
       // Get the current URL base to use in the redirect
       const origin = window.location.origin;
-
+      
+      // Log information about the redirect URL
+      console.log("Current origin:", origin);
+      
       // Ensure we add trailing slash to the redirect URL to avoid path issues
       let redirectTo = `${origin}/`;
       if (!redirectTo.endsWith('/')) {
