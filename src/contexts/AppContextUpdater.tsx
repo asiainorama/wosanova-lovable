@@ -1,15 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
-import { aiApps, AppData, allApps } from '@/data/apps';
-import { 
-  entertainmentApps, 
-  productivityApps, 
-  socialMediaApps, 
-  otherPopularApps, 
-  investmentApps 
-} from '@/data/additionalApps';
-import { additionalApps } from '@/data/moreApps';
+import { allApps as apps, AppData } from '@/data/apps';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { toast } from 'sonner';
 
@@ -49,20 +41,20 @@ export const AppContextUpdater = () => {
 
     document.addEventListener('themechange', handleThemeChange);
     
-    // Combine all app data - use the exported allApps instead of recreating it
-    console.log(`Setting initial ${allApps.length} apps`);
-    updateAppsList(allApps);
+    // Use the consolidated apps list from apps.ts
+    console.log(`Setting initial ${apps.length} apps`);
+    updateAppsList(apps);
     
     // Preload icons for favorite apps first as they're most important
     const priorityApps = favorites.length > 0 
       ? [...favorites]
-      : allApps.slice(0, 10); // If no favorites, preload first 10 apps
+      : apps.slice(0, 10); // If no favorites, preload first 10 apps
     
     // Start prefetching icons in background
     setTimeout(() => {
       prefetchAppLogos(priorityApps).then(() => {
         // After prioritizing favorites, slowly process the rest
-        const remainingApps = allApps.filter(app => 
+        const remainingApps = apps.filter(app => 
           !priorityApps.some(priorityApp => priorityApp.id === app.id)
         );
         
@@ -74,7 +66,7 @@ export const AppContextUpdater = () => {
             await prefetchAppLogos(chunk);
             
             // Update UI with processed apps
-            updateAppsList([...allApps]);
+            updateAppsList([...apps]);
             
             // Small delay between chunks
             if (i + chunkSize < remainingApps.length) {
