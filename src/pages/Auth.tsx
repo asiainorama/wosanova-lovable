@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,11 +6,14 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, Rocket } from 'lucide-react';
 import SpaceBackground from '@/components/SpaceBackground';
+import { useTheme } from '@/contexts/ThemeContext';
+
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const { mode } = useTheme();
 
   // Check for existing session and query params on component mount
   useEffect(() => {
@@ -64,6 +68,7 @@ const Auth = () => {
     };
     checkSession();
   }, [navigate]);
+
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
@@ -119,7 +124,7 @@ const Auth = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
+  return <div className={`min-h-screen flex flex-col items-center justify-center ${mode === 'dark' ? 'bg-gray-900' : 'bg-gray-800'}`}>
       <SpaceBackground />
       <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">

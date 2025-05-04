@@ -45,6 +45,7 @@ const App = () => {
         
         // Do NOT force apply theme here - let ThemeProvider handle it
         // This preserves user's selected theme across login/logout events
+        console.log("Auth state changed:", event, session ? "user present" : "no user");
       }
     );
 
@@ -57,6 +58,7 @@ const App = () => {
           console.error("Error getting session:", error.message);
         } else {
           setSession(data.session);
+          console.log("Initial session check:", data.session ? "user present" : "no user");
         }
       } catch (error) {
         console.error("Unexpected error during auth initialization:", error);

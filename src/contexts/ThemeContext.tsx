@@ -16,9 +16,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
   const [mode, setModeState] = useState<ThemeMode>(() => {
     try {
+      // Check for system preference first if no localStorage value
       const savedMode = localStorage.getItem('themeMode') as ThemeMode;
       console.log("Initial theme mode from localStorage:", savedMode);
-      return savedMode || 'light';
+      
+      if (savedMode) {
+        return savedMode;
+      }
+      
+      // If no saved preference, check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        console.log("Using system preference: dark");
+        return 'dark';
+      }
+      
+      // Default to light mode
+      console.log("No preference found, defaulting to light mode");
+      return 'light';
     } catch (e) {
       console.error("Error reading theme from localStorage:", e);
       return 'light';
@@ -105,6 +119,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [mode, applyTheme]);
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only apply system preference if user hasn't explicitly chosen a theme
+      const savedMode = localStorage.getItem('themeMode');
+      if (!savedMode || savedMode === 'system') {
+        setModeState(e.matches ? 'dark' : 'light');
+      }
+    };
+    
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    }
+    
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      }
+    };
+  }, []);
 
   // Special handler for page transitions
   useEffect(() => {
