@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { BackgroundProvider } from './contexts/BackgroundContext';
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import Manage from "./pages/Manage";
@@ -91,64 +91,59 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LanguageProvider>
-          <AppProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <InstallPrompt />
-              <BrowserRouter>
-                <Routes>
-                  <Route
-                    path="/"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Index />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/catalog"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Catalog />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/manage"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Manage />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Profile />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/auth"
-                    element={!session ? <Auth /> : <Navigate to="/" />}
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </AppProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <BackgroundProvider>
+          <AppContextProvider>
+            <Toaster />
+            <InstallPrompt />
+            <Routes>
+              <Route
+                path="/"
+                element={session ? 
+                  <AppWithContextUpdater>
+                    <Index />
+                  </AppWithContextUpdater> : 
+                  <Navigate to="/auth" />
+                }
+              />
+              <Route
+                path="/catalog"
+                element={session ? 
+                  <AppWithContextUpdater>
+                    <Catalog />
+                  </AppWithContextUpdater> : 
+                  <Navigate to="/auth" />
+                }
+              />
+              <Route
+                path="/manage"
+                element={session ? 
+                  <AppWithContextUpdater>
+                    <Manage />
+                  </AppWithContextUpdater> : 
+                  <Navigate to="/auth" />
+                }
+              />
+              <Route
+                path="/profile"
+                element={session ? 
+                  <AppWithContextUpdater>
+                    <Profile />
+                  </AppWithContextUpdater> : 
+                  <Navigate to="/auth" />
+                }
+              />
+              <Route
+                path="/auth"
+                element={!session ? <Auth /> : <Navigate to="/" />}
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppContextProvider>
+        </BackgroundProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 

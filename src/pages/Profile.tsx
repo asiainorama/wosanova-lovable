@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,10 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Rocket, User, Trash2, LogOut } from 'lucide-react';
+import { Rocket, User, Trash2, LogOut, Image } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { ThemeMode } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
+import { UnsplashBackgroundSelector } from '@/components/UnsplashBackgroundSelector';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Define profile type based on the actual database structure
 interface UserProfile {
@@ -31,7 +32,8 @@ const Profile = () => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  
+  const [activeTab, setActiveTab] = useState("general");
+
   // Debounce timer for auto-save
   const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
 
@@ -180,92 +182,104 @@ const Profile = () => {
           </div>
           <p className="text-gray-600 dark:text-gray-300 mb-6">{t('profile.description')}</p>
 
-          <div className="space-y-6">
-            {/* Profile Section with aligned username and avatar */}
-            <div className="flex items-center gap-4">
-              <Avatar className="w-14 h-14">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="bg-primary/10">
-                  <User size={20} />
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1">
-                <div>
-                  <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
-                  <Input 
-                    id="username" 
-                    placeholder={t('profile.username')}
-                    value={username}
-                    onChange={handleUsernameChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  />
-                </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="general" className="space-y-6">
+              {/* Profile Section with aligned username and avatar */}
+              <div className="flex items-center gap-4">
+                <Avatar className="w-14 h-14">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="bg-primary/10">
+                    <User size={20} />
+                  </AvatarFallback>
+                </Avatar>
                 
-                <div className="mt-1">
-                  <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
-                  <Input 
-                    id="picture" 
-                    type="url" 
-                    placeholder={t('profile.avatar')}
-                    value={avatarUrl}
-                    onChange={handleAvatarChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  />
+                <div className="flex-1">
+                  <div>
+                    <Label htmlFor="username" className="dark:text-white text-xs">{t('profile.username')}</Label>
+                    <Input 
+                      id="username" 
+                      placeholder={t('profile.username')}
+                      value={username}
+                      onChange={handleUsernameChange}
+                      className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    />
+                  </div>
+                  
+                  <div className="mt-1">
+                    <Label htmlFor="picture" className="dark:text-white text-xs">{t('profile.avatar')}</Label>
+                    <Input 
+                      id="picture" 
+                      type="url" 
+                      placeholder={t('profile.avatar')}
+                      value={avatarUrl}
+                      onChange={handleAvatarChange}
+                      className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <Separator className="my-2" />
-            
-            {/* Theme Selector Section */}
-            <div>
-              <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
-              <ThemeSelector onThemeChange={autoSaveChanges} />
-            </div>
-            
-            <Separator className="my-2" />
-            
-            {/* Actions Section */}
-            <div className="pt-1 flex justify-center gap-4">
-              <Button 
-                onClick={handleSignOut} 
-                variant="outline" 
-                className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-              >
-                <LogOut size={14} />
-                {t('profile.logout')}
-              </Button>
+            </TabsContent>
+
+            <TabsContent value="appearance" className="space-y-6">
+              {/* Theme Selector Section */}
+              <div>
+                <h3 className="text-sm font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
+                <ThemeSelector onThemeChange={autoSaveChanges} />
+              </div>
               
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    className="h-9 px-4 text-sm flex items-center gap-2"
+              <Separator className="my-2" />
+              
+              {/* Background Selector */}
+              <UnsplashBackgroundSelector />
+            </TabsContent>
+          </Tabs>
+          
+          <Separator className="my-6" />
+          
+          {/* Actions Section */}
+          <div className="pt-1 flex justify-center gap-4">
+            <Button 
+              onClick={handleSignOut} 
+              variant="outline" 
+              className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+            >
+              <LogOut size={14} />
+              {t('profile.logout')}
+            </Button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  className="h-9 px-4 text-sm flex items-center gap-2"
+                >
+                  <Trash2 size={14} />
+                  {t('profile.delete')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
+                  <AlertDialogDescription className="dark:text-gray-300">
+                    {t('profile.delete.description')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    className="bg-destructive text-destructive-foreground"
                   >
-                    <Trash2 size={14} />
                     {t('profile.delete')}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
-                    <AlertDialogDescription className="dark:text-gray-300">
-                      {t('profile.delete.description')}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground"
-                    >
-                      {t('profile.delete')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
