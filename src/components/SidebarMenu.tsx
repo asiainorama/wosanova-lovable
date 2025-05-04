@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -55,21 +56,19 @@ const TimeWidget = () => {
   const year = date.getFullYear();
   
   // Final formatted date: "Viernes, 02 de mayo del 2025"
-  const formattedDate = `${dayOfWeek}, ${day} de ${month} del ${year}`;
+  const formattedDate = `${day} de ${month} del ${year}`;
   
-  const formattedTime = date.toLocaleTimeString('es-ES', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
   
   return (
-    <div className="p-3 bg-primary/10 rounded-lg flex flex-col items-center dark:bg-gray-800">
-      <div className="flex items-center gap-2 mb-1">
-        <Clock size={18} className="text-primary" />
-        <span className="text-lg font-medium">{formattedTime}</span>
+    <div className="p-3 bg-primary/10 rounded-lg flex items-center dark:bg-gray-800 h-20">
+      <div className="flex-1 flex items-center justify-center pr-2 border-r border-primary/20 dark:border-gray-600">
+        <span className="text-3xl font-bold text-primary">{hours}:{minutes}</span>
       </div>
-      <div className="text-sm text-muted-foreground">
-        {formattedDate}
+      <div className="flex-1 flex flex-col items-center justify-center pl-2">
+        <span className="text-sm font-medium">{dayOfWeek}</span>
+        <span className="text-xs text-muted-foreground">{formattedDate}</span>
       </div>
     </div>
   );
@@ -125,7 +124,7 @@ const WeatherWidget = () => {
   
   if (loading) {
     return (
-      <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-center dark:bg-gray-800">
+      <div className="p-3 bg-blue-50/30 rounded-lg flex items-center justify-center h-20 dark:bg-gray-800">
         <span className="text-sm">Cargando clima...</span>
       </div>
     );
@@ -133,20 +132,22 @@ const WeatherWidget = () => {
   
   if (error) {
     return (
-      <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-center dark:bg-gray-800">
+      <div className="p-3 bg-blue-50/30 rounded-lg flex items-center justify-center h-20 dark:bg-gray-800">
         <span className="text-sm text-red-500">{error}</span>
       </div>
     );
   }
   
   return (
-    <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center dark:bg-gray-800 cursor-pointer"
+    <div className="p-3 bg-blue-50/30 rounded-lg flex items-center h-20 dark:bg-gray-800 cursor-pointer"
          onClick={handleWeatherClick}>
-      <div className="flex items-center gap-2 mb-1">
-        <CloudSun size={18} className="text-blue-500" />
-        <span className="text-lg font-medium">{weather.temp}°C</span>
+      <div className="flex-1 flex items-center justify-center pr-2 border-r border-blue-200 dark:border-gray-600">
+        <span className="text-3xl font-bold text-blue-500">{weather.temp}°</span>
       </div>
-      <span className="text-sm text-muted-foreground">{weather.condition}</span>
+      <div className="flex-1 flex flex-col items-center justify-center pl-2">
+        <CloudSun size={24} className="text-blue-500 mb-1" />
+        <span className="text-xs text-muted-foreground line-clamp-1">{weather.condition}</span>
+      </div>
     </div>
   );
 };
