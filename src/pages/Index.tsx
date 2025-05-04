@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
-import { BackgroundImage } from '@/components/BackgroundImage';
 
 const Index = () => {
   const { favorites } = useAppContext();
@@ -28,11 +27,10 @@ const Index = () => {
   }, [favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background/80 dark:bg-gray-900/80 backdrop-blur-sm relative">
-      <BackgroundImage />
+    <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-8 flex-1 relative z-10">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {sortedFavorites.length > 0 ? (
           <div className="py-3">
             <AppGrid 
@@ -43,7 +41,7 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div className="text-center py-10 px-4 bg-background/90 shadow-sm rounded-lg border dark:bg-gray-800/90 dark:border-gray-700 backdrop-blur-sm">
+          <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-center mb-4">
               <span className="inline-block p-4 rounded-full bg-primary/10">
                 <Store size={48} className="text-primary" />
