@@ -1,14 +1,32 @@
-
 import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
 import { allApps as apps, AppData } from '@/data/apps';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { toast } from 'sonner';
+import { appVersion } from '@/data/appVersion';
 
 export const AppContextUpdater = () => {
   const { setAllApps, favorites } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  // Verificar si hay una nueva versión
+  useEffect(() => {
+    // Guardar la versión actual en el localStorage para detectar actualizaciones
+    const storedVersion = localStorage.getItem('app_version');
+    const currentVersion = appVersion.toString();
+    
+    if (storedVersion && storedVersion !== currentVersion) {
+      // Si hay una nueva versión, mostrar un mensaje de actualización
+      toast.success(`¡Aplicación actualizada a la versión ${currentVersion}!`, {
+        duration: 5000,
+        className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+      });
+    }
+    
+    // Guardar la versión actual para futuras comparaciones
+    localStorage.setItem('app_version', currentVersion);
+  }, []);
 
   // Update app list in context
   const updateAppsList = useCallback((apps: AppData[]) => {
