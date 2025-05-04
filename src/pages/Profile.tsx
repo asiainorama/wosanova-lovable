@@ -26,7 +26,7 @@ interface UserProfile {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { mode, color, setMode } = useTheme();
+  const { mode, setMode } = useTheme();
   const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
