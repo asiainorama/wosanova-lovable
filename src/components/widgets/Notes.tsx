@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Save, Trash2 } from 'lucide-react';
+import { X, Plus, Save, Trash2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -32,25 +32,43 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
 
   // Load notes from localStorage on component mount
   useEffect(() => {
-    const savedNotes = localStorage.getItem('userNotes');
-    if (savedNotes) {
-      const parsedNotes = JSON.parse(savedNotes) as NoteItem[];
-      setNotes(parsedNotes);
-      
-      // Select the most recent note if there are any
-      if (parsedNotes.length > 0) {
-        const mostRecent = parsedNotes.sort((a, b) => 
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        )[0];
-        setSelectedNoteId(mostRecent.id);
-        setCurrentNote(mostRecent);
+    try {
+      const savedNotes = localStorage.getItem('userNotes');
+      if (savedNotes) {
+        const parsedNotes = JSON.parse(savedNotes) as NoteItem[];
+        setNotes(parsedNotes);
+        
+        // Select the most recent note if there are any
+        if (parsedNotes.length > 0) {
+          const mostRecent = parsedNotes.sort((a, b) => 
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          )[0];
+          setSelectedNoteId(mostRecent.id);
+          setCurrentNote(mostRecent);
+        }
       }
+    } catch (error) {
+      console.error("Error loading notes:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las notas",
+        variant: "destructive",
+      });
     }
   }, []);
 
   // Save notes to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('userNotes', JSON.stringify(notes));
+    try {
+      localStorage.setItem('userNotes', JSON.stringify(notes));
+    } catch (error) {
+      console.error("Error saving notes:", error);
+      toast({
+        title: "Error",
+        description: "No se pudieron guardar las notas",
+        variant: "destructive",
+      });
+    }
   }, [notes]);
 
   const handleClose = () => {
@@ -146,7 +164,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   };
 
   return (
-    <div className={`bg-background flex flex-col h-full w-full rounded-lg`}>
+    <div className="bg-background flex flex-col h-full w-full rounded-lg">
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Notas</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -156,7 +174,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
       
       <div className="flex flex-1 overflow-hidden">
         {/* Notes list sidebar */}
-        <div className={`${isMobile ? (selectedNoteId ? 'hidden' : 'flex-1') : 'w-1/3'} flex-col border-r border-gray-200 dark:border-gray-800 overflow-y-auto`}>
+        <div className={`${isMobile ? (selectedNoteId ? 'hidden' : 'flex-1') : 'w-1/3'} flex flex-col border-r border-gray-200 dark:border-gray-800 overflow-y-auto`}>
           <div className="p-2 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <span className="font-medium">Mis notas</span>
             <Button variant="ghost" size="icon" onClick={createNewNote}>
@@ -204,32 +222,31 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
           {selectedNoteId ? (
             <>
               <div className="p-2 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                {isMobile && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setSelectedNoteId(null)}
+                    className="mr-1"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                )}
                 <Input
                   value={currentNote.title}
                   onChange={(e) => setCurrentNote({...currentNote, title: e.target.value})}
-                  className="border-none text-lg font-medium focus-visible:ring-0 p-0 h-auto"
+                  className="border-none text-lg font-medium focus-visible:ring-0 p-0 h-auto flex-1"
                   placeholder="Título de la nota"
                 />
-                <div className="flex gap-1">
-                  {isMobile && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => setSelectedNoteId(null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={saveCurrentNote}
-                    className="gap-1"
-                  >
-                    <Save className="h-4 w-4" />
-                    <span>Guardar</span>
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={saveCurrentNote}
+                  className="gap-1 ml-1"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Guardar</span>
+                </Button>
               </div>
               
               <Textarea 
