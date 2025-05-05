@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import InstallPrompt from "./components/InstallPrompt";
+import CalculatorWidget from './pages/widgets/CalculatorWidget';
 
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
@@ -133,6 +133,7 @@ const App = () => {
                     path="/auth"
                     element={!session ? <Auth /> : <Navigate to="/" />}
                   />
+                  <Route path="/widgets/calculator" element={<CalculatorWidget />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

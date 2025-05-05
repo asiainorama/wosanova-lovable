@@ -1,0 +1,266 @@
+
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const Calculator = () => {
+  const [input, setInput] = useState<string>('0');
+  const [prevValue, setPrevValue] = useState<string | null>(null);
+  const [operator, setOperator] = useState<string | null>(null);
+  const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
+  const isMobile = useIsMobile();
+
+  const clearAll = () => {
+    setInput('0');
+    setPrevValue(null);
+    setOperator(null);
+    setWaitingForOperand(false);
+  };
+
+  const handleDigit = (digit: string) => {
+    if (waitingForOperand) {
+      setInput(digit);
+      setWaitingForOperand(false);
+    } else {
+      setInput(input === '0' ? digit : input + digit);
+    }
+  };
+
+  const handleDecimal = () => {
+    if (waitingForOperand) {
+      setInput('0.');
+      setWaitingForOperand(false);
+    } else if (input.indexOf('.') === -1) {
+      setInput(input + '.');
+    }
+  };
+
+  const handleOperator = (nextOperator: string) => {
+    const inputValue = parseFloat(input);
+
+    if (prevValue === null) {
+      setPrevValue(input);
+    } else if (operator) {
+      const result = performCalculation(parseFloat(prevValue), inputValue, operator);
+      setInput(String(result));
+      setPrevValue(String(result));
+    }
+
+    setWaitingForOperand(true);
+    setOperator(nextOperator);
+  };
+
+  const performCalculation = (a: number, b: number, op: string): number => {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b !== 0 ? a / b : 0;
+      default: return b;
+    }
+  };
+
+  const handleEqual = () => {
+    if (!operator || prevValue === null) return;
+
+    const inputValue = parseFloat(input);
+    const result = performCalculation(parseFloat(prevValue), inputValue, operator);
+    
+    setInput(String(result));
+    setPrevValue(null);
+    setOperator(null);
+    setWaitingForOperand(true);
+  };
+
+  const handleDelete = () => {
+    if (input.length === 1) {
+      setInput('0');
+    } else {
+      setInput(input.slice(0, -1));
+    }
+  };
+
+  const handlePercentage = () => {
+    const value = parseFloat(input);
+    setInput(String(value / 100));
+  };
+
+  const handlePlusMinus = () => {
+    const value = parseFloat(input);
+    setInput(String(-value));
+  };
+
+  const handleClose = () => {
+    // Close the calculator window
+    window.history.back();
+  };
+
+  return (
+    <div className={`bg-background flex flex-col ${isMobile ? 'h-screen w-screen' : 'h-[600px] w-[400px] shadow-lg rounded-lg mx-auto my-8 border border-gray-200 dark:border-gray-800'}`}>
+      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
+        <h2 className="text-xl font-bold">Calculadora</h2>
+        <Button variant="ghost" size="icon" onClick={handleClose}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg mb-4 text-right">
+          <div className="text-4xl font-medium truncate">{input}</div>
+          {operator && prevValue && (
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {prevValue} {operator}
+            </div>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-4 gap-2 flex-1">
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            onClick={clearAll}
+          >
+            AC
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            onClick={handlePlusMinus}
+          >
+            +/-
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            onClick={handlePercentage}
+          >
+            %
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            onClick={() => handleOperator('/')}
+          >
+            ÷
+          </Button>
+          
+          {/* Row 2 */}
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('7')}
+          >
+            7
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('8')}
+          >
+            8
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('9')}
+          >
+            9
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            onClick={() => handleOperator('*')}
+          >
+            ×
+          </Button>
+          
+          {/* Row 3 */}
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('4')}
+          >
+            4
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('5')}
+          >
+            5
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('6')}
+          >
+            6
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            onClick={() => handleOperator('-')}
+          >
+            -
+          </Button>
+          
+          {/* Row 4 */}
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('1')}
+          >
+            1
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('2')}
+          >
+            2
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={() => handleDigit('3')}
+          >
+            3
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            onClick={() => handleOperator('+')}
+          >
+            +
+          </Button>
+          
+          {/* Row 5 */}
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg col-span-2"
+            onClick={() => handleDigit('0')}
+          >
+            0
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg"
+            onClick={handleDecimal}
+          >
+            .
+          </Button>
+          <Button 
+            variant="outline" 
+            className="aspect-square text-lg bg-orange-500 hover:bg-orange-600 text-white"
+            onClick={handleEqual}
+          >
+            =
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Calculator;

@@ -26,7 +26,7 @@ const UserProfileSection = ({ username, avatarUrl, userId, onClose, compact = fa
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/profile" onClick={onClose} className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarImage src={avatarUrl} alt={username} />
                   <AvatarFallback className="bg-primary/10">
                     <User size={16} />
@@ -48,7 +48,7 @@ const UserProfileSection = ({ username, avatarUrl, userId, onClose, compact = fa
 
   return (
     <div className="flex flex-col items-center mt-4 mb-2">
-      <Link to="/profile" onClick={onClose}>
+      <Link to="/profile" onClick={onClose} className="flex justify-center">
         <Avatar className="h-12 w-12 mb-2">
           <AvatarImage src={avatarUrl} alt={username} />
           <AvatarFallback className="bg-primary/10">
@@ -56,7 +56,7 @@ const UserProfileSection = ({ username, avatarUrl, userId, onClose, compact = fa
           </AvatarFallback>
         </Avatar>
       </Link>
-      <span className="font-medium dark:text-white truncate theme-text">
+      <span className="font-medium dark:text-white truncate theme-text text-center">
         {username || t('profile.username')}
       </span>
     </div>
