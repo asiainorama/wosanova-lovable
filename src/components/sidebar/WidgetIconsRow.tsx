@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calculator, ArrowUpDown, FileText } from 'lucide-react';
+import { Calculator, ArrowUpDown, FileText, AlarmClock } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { safeOpenWindow } from '@/utils/windowUtils';
 import { Button } from '@/components/ui/button';
@@ -32,23 +32,26 @@ const WidgetButton: React.FC<WidgetProps> = ({ icon, name, url }) => {
 const WidgetIconsRow: React.FC = () => {
   const isMobile = useIsMobile();
   
-  const baseUrl = isMobile ? '/' : '';
-  
   const widgets = [
     { 
       name: 'Calculadora', 
       icon: <Calculator size={24} className="text-primary" />, 
-      url: `${baseUrl}/widgets/calculator`
+      url: '/widgets/calculator'
     },
     { 
       name: 'Conversor', 
       icon: <ArrowUpDown size={24} className="text-primary" />, 
-      url: `${baseUrl}/widgets/converter` 
+      url: '/widgets/converter' 
     },
     { 
       name: 'Notas', 
       icon: <FileText size={24} className="text-primary" />, 
-      url: `${baseUrl}/widgets/notes`
+      url: '/widgets/notes'
+    },
+    { 
+      name: 'Alarmas', 
+      icon: <AlarmClock size={24} className="text-primary" />, 
+      url: '/widgets/alarm'
     }
   ];
 

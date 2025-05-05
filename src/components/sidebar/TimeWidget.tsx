@@ -3,12 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Clock, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { safeOpenWindow } from '@/utils/windowUtils';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 // Widget para mostrar la hora y fecha actual
 const TimeWidget = () => {
   const [date, setDate] = useState(new Date());
-  const isMobile = useIsMobile();
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -36,8 +34,7 @@ const TimeWidget = () => {
   const minutes = date.getMinutes().toString().padStart(2, '0');
 
   const handleOpenAlarmWidget = () => {
-    const baseUrl = isMobile ? '/' : '';
-    safeOpenWindow(`${baseUrl}/widgets/alarm`);
+    safeOpenWindow('/widgets/alarm');
   };
   
   return (
@@ -46,14 +43,15 @@ const TimeWidget = () => {
       className="p-3 bg-primary/10 rounded-lg flex items-center dark:bg-gray-800 h-20 w-full hover:bg-primary/20 dark:hover:bg-gray-700"
       onClick={handleOpenAlarmWidget}
     >
-      <div className="flex-1 flex items-center justify-center pr-2 border-r border-primary/20 dark:border-gray-600">
+      <div className="flex-1 flex items-center justify-center gap-2">
         <span className="text-3xl font-bold text-primary">{hours}:{minutes}</span>
+        <Bell size={18} className="text-primary/60" onClick={handleOpenAlarmWidget} />
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center pl-2">
+      <div className="w-[1px] h-[70%] bg-primary/20 dark:bg-gray-600 mx-2" />
+      <div className="flex-1 flex flex-col items-center justify-center">
         <span className="text-sm font-medium">{dayOfWeek}</span>
         <span className="text-xs text-muted-foreground">{formattedDate}</span>
       </div>
-      <Bell size={18} className="ml-2 text-primary/60" />
     </Button>
   );
 };

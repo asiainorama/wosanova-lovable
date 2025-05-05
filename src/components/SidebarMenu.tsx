@@ -106,7 +106,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           <div className="px-4 py-2">
             <WeatherWidget />
           </div>
-
+          
+          <Separator className="mx-4 my-2" />
+          
           <WidgetIconsRow />
 
           <Separator className="my-2" />
