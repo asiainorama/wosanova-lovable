@@ -15,6 +15,7 @@ const CalculatorWidget = () => {
       }}
     >
       <DialogContent className="p-0 border-0 max-w-[350px] w-full sm:w-[350px]">
+        {/* Remove the default X button from DialogContent */}
         <Calculator onClose={() => navigate('/')} />
       </DialogContent>
     </Dialog>

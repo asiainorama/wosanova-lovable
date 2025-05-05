@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -108,6 +107,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
     <div className={`bg-background flex flex-col h-[550px] w-full rounded-lg`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Calculadora</h2>
+        {/* We keep only this close button, the DialogContent close button will be removed */}
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />
         </Button>
