@@ -4,7 +4,11 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const Calculator = () => {
+interface CalculatorProps {
+  onClose?: () => void;
+}
+
+const Calculator = ({ onClose }: CalculatorProps) => {
   const [input, setInput] = useState<string>('0');
   const [prevValue, setPrevValue] = useState<string | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
@@ -92,12 +96,16 @@ const Calculator = () => {
   };
 
   const handleClose = () => {
-    // Close the calculator window
-    window.history.back();
+    if (onClose) {
+      onClose();
+    } else {
+      // Fallback close method if no onClose provided
+      window.history.back();
+    }
   };
 
   return (
-    <div className={`bg-background flex flex-col ${isMobile ? 'h-screen w-screen' : 'h-[600px] w-[400px] shadow-lg rounded-lg mx-auto my-8 border border-gray-200 dark:border-gray-800'}`}>
+    <div className={`bg-background flex flex-col ${isMobile ? 'h-[calc(100svh-50px)] w-full' : 'h-[600px] w-full shadow-lg rounded-lg border border-gray-200 dark:border-gray-800'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Calculadora</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>

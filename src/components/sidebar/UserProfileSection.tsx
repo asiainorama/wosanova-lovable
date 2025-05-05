@@ -12,12 +12,42 @@ interface UserProfileSectionProps {
   userId: string | null;
   onClose: () => void;
   compact?: boolean;
+  avatarOnly?: boolean;
 }
 
-const UserProfileSection = ({ username, avatarUrl, userId, onClose, compact = false }: UserProfileSectionProps) => {
+const UserProfileSection = ({ 
+  username, 
+  avatarUrl, 
+  userId, 
+  onClose, 
+  compact = false, 
+  avatarOnly = false 
+}: UserProfileSectionProps) => {
   const { t } = useLanguage();
 
   if (!userId) return null;
+
+  if (avatarOnly) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to="/profile" onClick={onClose} className="flex justify-center">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={avatarUrl} alt={username} />
+                <AvatarFallback className="bg-primary/10">
+                  <User size={18} />
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t('profile.view')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   if (compact) {
     return (
