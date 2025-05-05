@@ -17,7 +17,7 @@ const CalculatorWidget = () => {
       }}
     >
       <DialogContent 
-        className={`p-0 border-0 ${isMobile ? 'w-full h-screen max-w-full m-0 rounded-none' : 'max-w-[350px] w-full sm:w-[350px]'}`}
+        className={`p-0 border-0 fast-animation ${isMobile ? 'w-full h-screen max-w-full m-0 rounded-none' : 'max-w-[350px] w-full sm:w-[350px]'}`}
       >
         <Calculator onClose={() => navigate('/')} />
       </DialogContent>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -113,7 +114,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
       </div>
       
       <div className="p-3 flex-1 flex flex-col">
-        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right">
+        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right h-[25%]">
           <div className="text-4xl font-medium truncate">{input}</div>
           {operator && prevValue && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -245,7 +246,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 5 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-2xl col-span-2 p-0 h-auto"
+            className="col-span-2 text-2xl p-0 h-[50%] flex items-center justify-center"
             onClick={() => handleDigit('0')}
           >
             0
