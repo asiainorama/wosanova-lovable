@@ -105,7 +105,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   };
 
   return (
-    <div className={`bg-background flex flex-col ${isMobile ? 'h-[calc(100svh-50px)] w-full' : 'h-[600px] w-full shadow-lg rounded-lg border border-gray-200 dark:border-gray-800'}`}>
+    <div className={`bg-background flex flex-col h-[550px] w-full rounded-lg`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Calculadora</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -113,8 +113,8 @@ const Calculator = ({ onClose }: CalculatorProps) => {
         </Button>
       </div>
       
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg mb-4 text-right">
+      <div className="p-3 flex-1 flex flex-col">
+        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right">
           <div className="text-4xl font-medium truncate">{input}</div>
           {operator && prevValue && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -123,7 +123,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           )}
         </div>
         
-        <div className="grid grid-cols-4 gap-2 flex-1">
+        <div className="grid grid-cols-4 gap-1 flex-1">
           <Button 
             variant="outline" 
             className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"

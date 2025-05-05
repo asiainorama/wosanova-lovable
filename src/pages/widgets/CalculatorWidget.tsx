@@ -14,7 +14,7 @@ const CalculatorWidget = () => {
         if (!open) navigate('/');
       }}
     >
-      <DialogContent className="p-0 border-0 max-w-[450px] w-full sm:w-[450px] sm:max-h-[650px]">
+      <DialogContent className="p-0 border-0 max-w-[350px] w-full sm:w-[350px]">
         <Calculator onClose={() => navigate('/')} />
       </DialogContent>
     </Dialog>
