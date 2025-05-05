@@ -3,9 +3,11 @@ import React from 'react';
 import Calculator from '@/components/widgets/Calculator';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const CalculatorWidget = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   return (
     <Dialog 
@@ -14,8 +16,9 @@ const CalculatorWidget = () => {
         if (!open) navigate('/');
       }}
     >
-      <DialogContent className="p-0 border-0 max-w-[350px] w-full sm:w-[350px]">
-        {/* Remove the default X button from DialogContent */}
+      <DialogContent 
+        className={`p-0 border-0 ${isMobile ? 'w-full h-screen max-w-full m-0 rounded-none' : 'max-w-[350px] w-full sm:w-[350px]'}`}
+      >
         <Calculator onClose={() => navigate('/')} />
       </DialogContent>
     </Dialog>

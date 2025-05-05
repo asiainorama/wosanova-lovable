@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,10 +104,9 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   };
 
   return (
-    <div className={`bg-background flex flex-col h-[550px] w-full rounded-lg`}>
+    <div className={`bg-background flex flex-col h-full w-full rounded-lg`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Calculadora</h2>
-        {/* We keep only this close button, the DialogContent close button will be removed */}
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />
         </Button>
@@ -124,31 +122,31 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           )}
         </div>
         
-        <div className="grid grid-cols-4 gap-0.5 flex-1">
+        <div className="grid grid-cols-4 gap-0 flex-1">
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
             onClick={clearAll}
           >
             AC
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
             onClick={handlePlusMinus}
           >
             +/-
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
             onClick={handlePercentage}
           >
             %
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
             onClick={() => handleOperator('/')}
           >
             ÷
@@ -157,28 +155,28 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 2 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('7')}
           >
             7
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('8')}
           >
             8
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('9')}
           >
             9
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
             onClick={() => handleOperator('*')}
           >
             ×
@@ -187,28 +185,28 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 3 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('4')}
           >
             4
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('5')}
           >
             5
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('6')}
           >
             6
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
             onClick={() => handleOperator('-')}
           >
             -
@@ -217,28 +215,28 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 4 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('1')}
           >
             1
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('2')}
           >
             2
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('3')}
           >
             3
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50"
+            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
             onClick={() => handleOperator('+')}
           >
             +
@@ -247,21 +245,21 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 5 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-xl col-span-2"
+            className="aspect-square text-2xl col-span-2 p-0 h-auto"
             onClick={() => handleDigit('0')}
           >
             0
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={handleDecimal}
           >
             .
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg bg-orange-500 hover:bg-orange-600 text-white"
+            className="aspect-square text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto"
             onClick={handleEqual}
           >
             =
