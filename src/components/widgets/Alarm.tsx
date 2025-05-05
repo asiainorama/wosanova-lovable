@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Plus, Bell, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 interface AlarmProps {
   onClose?: () => void;
@@ -29,6 +30,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const [alarms, setAlarms] = useState<AlarmItem[]>([]);
   const [newAlarmTime, setNewAlarmTime] = useState('08:00');
   const { toast } = useToast();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Load alarms from localStorage on component mount
   useEffect(() => {
@@ -36,6 +38,18 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     if (savedAlarms) {
       setAlarms(JSON.parse(savedAlarms));
     }
+    
+    // Create audio element for alarm sound
+    audioRef.current = new Audio('/alarm-sound.mp3');
+    audioRef.current.loop = true;
+    
+    return () => {
+      // Clean up audio when component unmounts
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
   }, []);
 
   // Save alarms to localStorage whenever they change
@@ -43,43 +57,72 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     localStorage.setItem('userAlarms', JSON.stringify(alarms));
   }, [alarms]);
 
-  // Check for alarms that need to trigger
+  // Check for alarms that need to trigger every minute
   useEffect(() => {
-    const checkAlarms = () => {
-      const now = new Date();
-      const currentHour = now.getHours().toString().padStart(2, '0');
-      const currentMinute = now.getMinutes().toString().padStart(2, '0');
-      const currentTime = `${currentHour}:${currentMinute}`;
-      const currentDay = getDayOfWeek();
-      
-      alarms.forEach(alarm => {
-        if (alarm.enabled && alarm.time === currentTime && alarm.days[currentDay]) {
-          // Trigger alarm notification
-          const audio = new Audio('/alarm-sound.mp3');
-          audio.play().catch(error => console.error('Error playing sound:', error));
-          
-          toast({
-            title: "¡Alarma!",
-            description: `Es hora: ${alarm.time}`,
-            duration: 10000,
-          });
-        }
-      });
-    };
+    // Check once immediately when component mounts
+    checkAlarms();
     
-    // Check every minute
-    const intervalId = setInterval(checkAlarms, 60000);
+    const intervalId = setInterval(checkAlarms, 10000); // Check every 10 seconds for demo purposes
     
     return () => clearInterval(intervalId);
-  }, [alarms, toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alarms]);
 
   const getDayOfWeek = () => {
     const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     const dayIndex = new Date().getDay();
     return days[dayIndex] as keyof AlarmItem['days'];
   };
+  
+  const checkAlarms = () => {
+    const now = new Date();
+    const currentHour = now.getHours().toString().padStart(2, '0');
+    const currentMinute = now.getMinutes().toString().padStart(2, '0');
+    const currentTime = `${currentHour}:${currentMinute}`;
+    const currentDay = getDayOfWeek();
+    
+    console.log(`Checking alarms at ${currentTime} on ${currentDay}`);
+    
+    alarms.forEach(alarm => {
+      if (alarm.enabled && alarm.time === currentTime && alarm.days[currentDay]) {
+        console.log(`Alarm triggered: ${alarm.time}`);
+        // Play alarm sound
+        if (audioRef.current) {
+          audioRef.current.play().catch(error => console.error('Error playing sound:', error));
+        }
+        
+        // Show toast notification
+        toast({
+          title: "¡Alarma!",
+          description: `Es hora: ${alarm.time}`,
+          duration: 10000,
+        });
+        
+        // Also show a sonner toast for redundancy
+        sonnerToast("¡Alarma activada!", {
+          description: `Es hora: ${alarm.time}`,
+          duration: 10000,
+          action: {
+            label: "Detener",
+            onClick: () => {
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+              }
+            }
+          }
+        });
+      }
+    });
+  };
 
   const handleClose = () => {
+    // Stop any playing alarm sound when closing the widget
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
     if (onClose) {
       onClose();
     } else {
@@ -132,6 +175,27 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     ));
   };
 
+  // Demo trigger for testing
+  const testAlarm = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(error => console.error('Error playing sound:', error));
+      
+      toast({
+        title: "¡Prueba de alarma!",
+        description: "Esto es una prueba de alarma",
+        duration: 5000,
+      });
+      
+      // Stop the test alarm after 3 seconds
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+      }, 3000);
+    }
+  };
+
   return (
     <div className="bg-background flex flex-col h-full w-full rounded-lg">
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
@@ -150,6 +214,9 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         />
         <Button onClick={addAlarm} variant="outline" size="icon">
           <Plus className="h-4 w-4" />
+        </Button>
+        <Button onClick={testAlarm} variant="outline" size="sm">
+          Probar
         </Button>
       </div>
       
