@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { safeOpenWindow } from '@/utils/windowUtils';
+import { es } from 'date-fns/locale';
 
 // Widget para el calendario
 const CalendarWidget = () => {
@@ -21,6 +22,8 @@ const CalendarWidget = () => {
           mode="single"
           selected={date}
           onSelect={handleDateSelect}
+          locale={es}
+          weekStartsOn={1}
           className="rounded-md border w-full [&_.rdp-cell]:text-center [&_.rdp-button]:mx-auto [&_.rdp-day]:flex [&_.rdp-day]:justify-center [&_.rdp-table]:w-full [&_.rdp-head_th]:text-center"
         />
       </div>

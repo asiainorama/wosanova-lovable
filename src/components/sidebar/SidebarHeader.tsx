@@ -14,7 +14,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
   const { t } = useLanguage();
 
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col items-center">
+    <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-row items-center justify-between">
       <h2 className="text-xl font-bold gradient-text">
         {t('app.name')}
       </h2>
@@ -24,6 +24,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
         avatarUrl={avatarUrl}
         userId={userId}
         onClose={onClose}
+        compact={true}
       />
     </div>
   );

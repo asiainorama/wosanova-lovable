@@ -4,12 +4,13 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
 
-// Import our newly created components
+// Import our components
 import TimeWidget from './sidebar/TimeWidget';
 import WeatherWidget from './sidebar/WeatherWidget';
 import CalendarWidget from './sidebar/CalendarWidget';
 import SidebarHeader from './sidebar/SidebarHeader';
 import SidebarFooter from './sidebar/SidebarFooter';
+import WidgetIconsRow from './sidebar/WidgetIconsRow';
 
 interface SidebarMenuProps {
   isOpen: boolean;
@@ -105,6 +106,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           <div className="px-4 py-2">
             <WeatherWidget />
           </div>
+
+          <WidgetIconsRow />
 
           <Separator className="my-2" />
           

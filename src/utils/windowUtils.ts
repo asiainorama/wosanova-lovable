@@ -1,20 +1,40 @@
 
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Enhanced window opening function with error handling
 export const safeOpenWindow = (url: string) => {
   try {
-    // Para la página de inicio, abrimos en la misma ventana en lugar de una pestaña nueva
-    if (window.location.pathname === '/') {
+    // For widgets and home page URLs, handle differently based on path
+    if (url.startsWith('/widgets/') || window.location.pathname === '/') {
       window.location.href = url;
       return;
     }
     
-    // Para el resto de páginas, mantenemos el comportamiento anterior
+    // Check if it's a mobile device
+    const isMobile = window.innerWidth < 768;
+    
+    // On mobile, just navigate to the URL in the same window
+    if (isMobile) {
+      window.location.href = url;
+      return;
+    }
+    
+    // On desktop, open in a new window with appropriate dimensions
+    const isWidget = url.includes('/widgets/');
+    let width = 1200;
+    let height = 800;
+    
+    // Adjust window size for widgets
+    if (isWidget) {
+      width = 600;
+      height = 700;
+    }
+    
     const newWindow = window.open(
       url, 
       '_blank', 
-      'noopener,noreferrer,width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes'
+      `noopener,noreferrer,width=${width},height=${height},menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes`
     );
     
     // If the window is null, it might be blocked by popup blockers

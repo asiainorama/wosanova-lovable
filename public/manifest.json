@@ -42,6 +42,22 @@
     {
       "name": "Profile",
       "url": "/profile"
+    },
+    {
+      "name": "Calculadora",
+      "url": "/widgets/calculator"
+    },
+    {
+      "name": "Conversor",
+      "url": "/widgets/converter"
+    },
+    {
+      "name": "Notas",
+      "url": "/widgets/notes"
+    },
+    {
+      "name": "Alarmas",
+      "url": "/widgets/alarm"
     }
   ],
   "prefer_related_applications": false,
