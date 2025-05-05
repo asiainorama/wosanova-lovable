@@ -246,7 +246,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 5 */}
           <Button 
             variant="outline" 
-            className="col-span-2 text-2xl p-0 h-[50%] flex items-center justify-center"
+            className="col-span-2 text-2xl p-0 h-auto aspect-square"
             onClick={() => handleDigit('0')}
           >
             0
