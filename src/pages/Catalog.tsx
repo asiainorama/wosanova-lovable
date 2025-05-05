@@ -4,66 +4,21 @@ import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { categories } from '@/data/apps';
 import { Search, X } from 'lucide-react';
-import { AppData } from '@/data/apps';
-import { Button } from '@/components/ui/button';
+import { AppData, categoryGroups } from '@/data/apps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
-
-// Define category groups
-interface CategoryGroup {
-  name: string;
-  categories: string[];
-}
-
-const categoryGroups: CategoryGroup[] = [
-  {
-    name: "Productivity",
-    categories: ["Productividad", "Organización", "Trabajo", "Educación"]
-  },
-  {
-    name: "Entertainment",
-    categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
-  },
-  {
-    name: "Utilities",
-    categories: ["Utilidades", "Herramientas", "Desarrollo"]
-  },
-  {
-    name: "Lifestyle",
-    categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
-  },
-  {
-    name: "Finance",
-    categories: ["Finanzas", "Negocios", "Compras"]
-  },
-  {
-    name: "Other",
-    categories: ["Otros", "Arte", "Fotografía", "Música", "IA"]
-  }
-];
-
-// Function to get group for a category
-const getCategoryGroup = (category: string): string => {
-  for (const group of categoryGroups) {
-    if (group.categories.includes(category)) {
-      return group.name;
-    }
-  }
-  return "Other";
-};
+import CategoryFilter from '@/components/CategoryFilter';
 
 // Traducir los nombres de grupos de categorías
-const translateCategoryGroupName = (groupName: string): string => {
+const translateCategoryGroupName = (groupName: string, t: (key: string) => string): string => {
   switch (groupName) {
-    case "Productivity": return "Productividad";
-    case "Entertainment": return "Entretenimiento";
-    case "Utilities": return "Utilidades";
-    case "Lifestyle": return "Estilo de vida";
-    case "Finance": return "Finanzas";
-    case "Other": return "Otros";
+    case "Productivity": return t('categoryGroup.productivity') || "Productividad";
+    case "Entertainment": return t('categoryGroup.entertainment') || "Entretenimiento";
+    case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
+    case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
+    case "Finance": return t('categoryGroup.finance') || "Finanzas";
+    case "Other": return t('categoryGroup.other') || "Otros";
     default: return groupName;
   }
 };
@@ -169,7 +124,7 @@ const Catalog = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder=""
+                placeholder={t('catalog.search') || "Buscar..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 py-2 w-full bg-gray-100 dark:bg-gray-800 border-none"
@@ -184,32 +139,12 @@ const Catalog = () => {
               )}
             </div>
             
-            {/* Unified Category Filter - now takes less space */}
-            <div className="w-full max-w-[180px]">
-              <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                <SelectTrigger className="w-full bg-gray-100 dark:bg-gray-800 border-none dark:text-white h-10">
-                  <SelectValue placeholder={t('catalog.filter') || "Filtrar"} />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                  <SelectItem value="all" className="dark:text-white">
-                    {t('catalog.allCategories') || "Todas las categorías"}
-                  </SelectItem>
-                  
-                  {/* Group categories in the dropdown - with translated group names */}
-                  {categoryGroups.map((group) => (
-                    <SelectGroup key={group.name}>
-                      <SelectItem value={group.name} className="dark:text-white font-semibold">
-                        {translateCategoryGroupName(group.name)}
-                      </SelectItem>
-                      {group.categories.map((category) => (
-                        <SelectItem key={category} value={category} className="dark:text-white pl-6">
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Utilizamos el componente CategoryFilter mejorado */}
+            <div className="w-full max-w-[220px]">
+              <CategoryFilter 
+                selectedCategory={selectedFilter}
+                onCategoryChange={setSelectedFilter}
+              />
             </div>
           </div>
         </div>
@@ -220,7 +155,18 @@ const Catalog = () => {
           {searchTerm || selectedFilter !== 'all'
             ? (t('catalog.results') || "Resultados") 
             : ""}
-          {selectedFilter !== 'all' && ` > ${selectedFilter}`}
+          {selectedFilter !== 'all' && (
+            <span>
+              {` > ${
+                categoryGroups.some(group => group.name === selectedFilter)
+                  ? translateCategoryGroupName(selectedFilter, t)
+                  : selectedFilter
+              }`}
+            </span>
+          )}
+          {filteredApps.length > 0 && (
+            <span className="text-sm text-muted-foreground ml-2">({filteredApps.length})</span>
+          )}
         </h3>
         
         {/* Display apps grouped by category */}
@@ -233,7 +179,7 @@ const Catalog = () => {
             {Object.entries(groupedApps).map(([category, apps]) => (
               <div key={category} className="space-y-3">
                 <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
-                  {category}
+                  {category} <span className="text-sm text-muted-foreground">({apps.length})</span>
                 </h2>
                 <AppGrid 
                   apps={apps}

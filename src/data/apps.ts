@@ -1,4 +1,3 @@
-
 import { AppData } from './types';
 
 // Default Apps
@@ -211,6 +210,41 @@ export const categories = [
   "Negocios", "Compras", "Otros", "Arte", "Fotografía", "Música", "IA",
   "Redes Sociales", "Comunicación", "Libros", "Almacenamiento", "Diseño",
   "Noticias", "Criptomonedas", "Comida", "Inmobiliaria", "Inversión"
+];
+
+// Define category groups
+export interface CategoryGroup {
+  name: string;
+  categories: string[];
+}
+
+export const categoryGroups: CategoryGroup[] = [
+  {
+    name: "Productivity",
+    categories: ["Productividad", "Organización", "Trabajo", "Educación"]
+  },
+  {
+    name: "Entertainment",
+    categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
+  },
+  {
+    name: "Utilities",
+    categories: ["Utilidades", "Herramientas", "Desarrollo"]
+  },
+  {
+    name: "Lifestyle",
+    categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
+  },
+  {
+    name: "Finance",
+    categories: ["Finanzas", "Negocios", "Compras", "Inversión", "Criptomonedas"]
+  },
+  {
+    name: "Other",
+    categories: ["Otros", "Arte", "Fotografía", "Música", "IA", "Redes Sociales", 
+                "Comunicación", "Libros", "Almacenamiento", "Diseño", "Noticias", 
+                "Comida", "Inmobiliaria"]
+  }
 ];
 
 // Remove duplicate entries by comparing app IDs
