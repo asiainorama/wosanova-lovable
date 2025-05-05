@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -123,7 +124,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           )}
         </div>
         
-        <div className="grid grid-cols-4 gap-1 flex-1">
+        <div className="grid grid-cols-4 gap-0.5 flex-1">
           <Button 
             variant="outline" 
             className="aspect-square text-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
@@ -156,21 +157,21 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 2 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('7')}
           >
             7
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('8')}
           >
             8
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('9')}
           >
             9
@@ -186,21 +187,21 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 3 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('4')}
           >
             4
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('5')}
           >
             5
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('6')}
           >
             6
@@ -216,21 +217,21 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 4 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('1')}
           >
             1
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('2')}
           >
             2
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={() => handleDigit('3')}
           >
             3
@@ -246,14 +247,14 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           {/* Row 5 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-lg col-span-2"
+            className="aspect-square text-xl col-span-2"
             onClick={() => handleDigit('0')}
           >
             0
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-lg"
+            className="aspect-square text-xl"
             onClick={handleDecimal}
           >
             .
