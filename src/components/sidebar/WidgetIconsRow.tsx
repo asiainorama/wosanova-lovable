@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calculator, ArrowsUpDown, FileText } from 'lucide-react';
+import { Calculator, ArrowUpDown, FileText } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { safeOpenWindow } from '@/utils/windowUtils';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ const WidgetIconsRow: React.FC = () => {
     },
     { 
       name: 'Conversor', 
-      icon: <ArrowsUpDown size={24} className="text-primary" />, 
+      icon: <ArrowUpDown size={24} className="text-primary" />, 
       url: `${baseUrl}/widgets/converter` 
     },
     { 
