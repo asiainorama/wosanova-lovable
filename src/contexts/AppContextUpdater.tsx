@@ -1,32 +1,22 @@
+
 import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
-import { allApps as apps, AppData } from '@/data/apps';
+import { aiApps, AppData, allApps } from '@/data/apps';
+import { 
+  entertainmentApps, 
+  productivityApps, 
+  socialMediaApps, 
+  otherPopularApps, 
+  investmentApps 
+} from '@/data/additionalApps';
+import { additionalApps } from '@/data/moreApps';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { toast } from 'sonner';
-import { appVersion } from '@/data/appVersion';
 
 export const AppContextUpdater = () => {
   const { setAllApps, favorites } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-
-  // Verificar si hay una nueva versión
-  useEffect(() => {
-    // Guardar la versión actual en el localStorage para detectar actualizaciones
-    const storedVersion = localStorage.getItem('app_version');
-    const currentVersion = appVersion.toString();
-    
-    if (storedVersion && storedVersion !== currentVersion) {
-      // Si hay una nueva versión, mostrar un mensaje de actualización
-      toast.success(`¡Aplicación actualizada a la versión ${currentVersion}!`, {
-        duration: 5000,
-        className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-      });
-    }
-    
-    // Guardar la versión actual para futuras comparaciones
-    localStorage.setItem('app_version', currentVersion);
-  }, []);
 
   // Update app list in context
   const updateAppsList = useCallback((apps: AppData[]) => {
@@ -59,20 +49,20 @@ export const AppContextUpdater = () => {
 
     document.addEventListener('themechange', handleThemeChange);
     
-    // Use the consolidated apps list from apps.ts
-    console.log(`Setting initial ${apps.length} apps`);
-    updateAppsList(apps);
+    // Combine all app data - use the exported allApps instead of recreating it
+    console.log(`Setting initial ${allApps.length} apps`);
+    updateAppsList(allApps);
     
     // Preload icons for favorite apps first as they're most important
     const priorityApps = favorites.length > 0 
       ? [...favorites]
-      : apps.slice(0, 10); // If no favorites, preload first 10 apps
+      : allApps.slice(0, 10); // If no favorites, preload first 10 apps
     
     // Start prefetching icons in background
     setTimeout(() => {
       prefetchAppLogos(priorityApps).then(() => {
         // After prioritizing favorites, slowly process the rest
-        const remainingApps = apps.filter(app => 
+        const remainingApps = allApps.filter(app => 
           !priorityApps.some(priorityApp => priorityApp.id === app.id)
         );
         
@@ -84,7 +74,7 @@ export const AppContextUpdater = () => {
             await prefetchAppLogos(chunk);
             
             // Update UI with processed apps
-            updateAppsList([...apps]);
+            updateAppsList([...allApps]);
             
             // Small delay between chunks
             if (i + chunkSize < remainingApps.length) {
