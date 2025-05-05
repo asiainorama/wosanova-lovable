@@ -243,10 +243,10 @@ const Calculator = ({ onClose }: CalculatorProps) => {
             +
           </Button>
           
-          {/* Row 5 */}
+          {/* Row 5 - Reorganized */}
           <Button 
             variant="outline" 
-            className="col-span-2 text-2xl p-0 h-auto aspect-square"
+            className="aspect-square text-2xl p-0 h-auto"
             onClick={() => handleDigit('0')}
           >
             0
@@ -260,7 +260,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto"
+            className="col-span-2 text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto aspect-[2/1]"
             onClick={handleEqual}
           >
             =
