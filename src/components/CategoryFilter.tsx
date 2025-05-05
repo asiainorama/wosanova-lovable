@@ -63,15 +63,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     };
   }, [language, forceUpdate]);
 
-  // Función para traducir nombres de grupos de categorías
-  const translateCategoryGroupName = (groupName: string): string => {
+  // Función para mostrar los nombres correctos de los grupos de categorías
+  const getCategoryGroupName = (groupName: string): string => {
     switch (groupName) {
-      case "Productivity": return t('categoryGroup.productivity') || "Productividad";
-      case "Entertainment": return t('categoryGroup.entertainment') || "Entretenimiento";
-      case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
-      case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
-      case "Finance": return t('categoryGroup.finance') || "Finanzas";
-      case "Other": return t('categoryGroup.other') || "Otros";
+      case "Productivity": return "Productividad";
+      case "Entertainment": return "Entretenimiento";
+      case "Utilities": return "Utilidades";
+      case "Lifestyle": return "Estilo de vida";
+      case "Finance": return "Finanzas";
       default: return groupName;
     }
   };
@@ -94,6 +93,9 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
         
         {/* Mostrar grupos de categorías con subcategorías indentadas */}
         {categoryGroups.map((group) => {
+          // No mostrar el grupo "Other"
+          if (group.name === "Other") return null;
+          
           // Filtrar solo las categorías del grupo que tienen aplicaciones
           const categoriesWithApps = group.categories.filter(cat => 
             usedCategories.includes(cat) && countAppsByCategory(cat) > 0
@@ -113,7 +115,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
                 value={group.name} 
                 className="text-left font-semibold border-b"
               >
-                {translateCategoryGroupName(group.name)} ({groupCount})
+                {getCategoryGroupName(group.name)} ({groupCount})
               </SelectItem>
               
               {/* Categorías dentro del grupo (indentadas) */}

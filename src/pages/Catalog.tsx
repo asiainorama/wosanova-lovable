@@ -18,7 +18,6 @@ const translateCategoryGroupName = (groupName: string, t: (key: string) => strin
     case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
     case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
     case "Finance": return t('categoryGroup.finance') || "Finanzas";
-    case "Other": return t('categoryGroup.other') || "Otros";
     default: return groupName;
   }
 };
@@ -164,9 +163,6 @@ const Catalog = () => {
               }`}
             </span>
           )}
-          {filteredApps.length > 0 && (
-            <span className="text-sm text-muted-foreground ml-2">({filteredApps.length})</span>
-          )}
         </h3>
         
         {/* Display apps grouped by category */}
@@ -179,7 +175,7 @@ const Catalog = () => {
             {Object.entries(groupedApps).map(([category, apps]) => (
               <div key={category} className="space-y-3">
                 <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
-                  {category} <span className="text-sm text-muted-foreground">({apps.length})</span>
+                  {category}
                 </h2>
                 <AppGrid 
                   apps={apps}

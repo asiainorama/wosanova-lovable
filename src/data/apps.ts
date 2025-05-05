@@ -1,3 +1,4 @@
+
 import { AppData } from './types';
 
 // Default Apps
@@ -207,7 +208,7 @@ export const categories = [
   "Productividad", "Organización", "Entretenimiento", "Juegos", "Multimedia",
   "Educación", "Social", "Utilidades", "Herramientas", "Desarrollo",
   "Trabajo", "Estilo de vida", "Salud", "Fitness", "Viajes", "Finanzas",
-  "Negocios", "Compras", "Otros", "Arte", "Fotografía", "Música", "IA",
+  "Negocios", "Compras", "Arte", "Fotografía", "Música", "IA",
   "Redes Sociales", "Comunicación", "Libros", "Almacenamiento", "Diseño",
   "Noticias", "Criptomonedas", "Comida", "Inmobiliaria", "Inversión"
 ];
@@ -221,29 +222,36 @@ export interface CategoryGroup {
 export const categoryGroups: CategoryGroup[] = [
   {
     name: "Productivity",
-    categories: ["Productividad", "Organización", "Trabajo", "Educación"]
+    categories: [
+      "Productividad", "Organización", "Trabajo", "Educación", 
+      "Desarrollo", "Herramientas", "Diseño", "Libros", "Almacenamiento", "Escritura"
+    ]
   },
   {
     name: "Entertainment",
-    categories: ["Entretenimiento", "Juegos", "Multimedia", "Social"]
+    categories: [
+      "Entretenimiento", "Juegos", "Multimedia", "Social", 
+      "Música", "Arte", "Fotografía", "Video", "Audio"
+    ]
   },
   {
     name: "Utilities",
-    categories: ["Utilidades", "Herramientas", "Desarrollo"]
+    categories: [
+      "Utilidades", "Herramientas", "Comunicación", "Noticias", "IA", "Asistentes", "SEO"
+    ]
   },
   {
     name: "Lifestyle",
-    categories: ["Estilo de vida", "Salud", "Fitness", "Viajes"]
+    categories: [
+      "Estilo de vida", "Salud", "Fitness", "Viajes", "Comida", "Inmobiliaria"
+    ]
   },
   {
     name: "Finance",
-    categories: ["Finanzas", "Negocios", "Compras", "Inversión", "Criptomonedas"]
-  },
-  {
-    name: "Other",
-    categories: ["Otros", "Arte", "Fotografía", "Música", "IA", "Redes Sociales", 
-                "Comunicación", "Libros", "Almacenamiento", "Diseño", "Noticias", 
-                "Comida", "Inmobiliaria"]
+    categories: [
+      "Finanzas", "Negocios", "Compras", "Inversión", "Criptomonedas", 
+      "Marketing", "Ventas"
+    ]
   }
 ];
 
