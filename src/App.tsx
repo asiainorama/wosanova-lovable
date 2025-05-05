@@ -19,6 +19,7 @@ import { Session } from "@supabase/supabase-js";
 import InstallPrompt from "./components/InstallPrompt";
 import CalculatorWidget from './pages/widgets/CalculatorWidget';
 import ConverterWidget from './pages/widgets/ConverterWidget';
+import NotesWidget from './pages/widgets/NotesWidget';
 
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
@@ -137,6 +138,7 @@ const App = () => {
                   />
                   <Route path="/widgets/calculator" element={<CalculatorWidget />} />
                   <Route path="/widgets/converter" element={<ConverterWidget />} />
+                  <Route path="/widgets/notes" element={<NotesWidget />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
