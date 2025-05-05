@@ -4,7 +4,13 @@ import { toast } from 'sonner';
 // Enhanced window opening function with error handling
 export const safeOpenWindow = (url: string) => {
   try {
-    // Try to open a new window with full features
+    // Para la página de inicio, abrimos en la misma ventana en lugar de una pestaña nueva
+    if (window.location.pathname === '/') {
+      window.location.href = url;
+      return;
+    }
+    
+    // Para el resto de páginas, mantenemos el comportamiento anterior
     const newWindow = window.open(
       url, 
       '_blank', 

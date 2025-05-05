@@ -44,9 +44,18 @@ const InstallPrompt = () => {
       console.log("App is already installed");
       setShowPrompt(false);
     } else {
-      // For iOS and macOS, we need to show a custom prompt since beforeinstallprompt doesn't work
-      if (isiOSDevice || isMacOSDevice) {
-        // Delay showing the prompt to not interfere with initial load
+      // For desktop browsers, we need to be more aggressive about showing the prompt
+      if (!isiOSDevice && !isMacOSDevice) {
+        // Show the prompt after a short delay on desktop
+        setTimeout(() => {
+          // Only show if we haven't captured the beforeinstallprompt event
+          if (!installPrompt) {
+            console.log("No install prompt event detected, showing manual prompt for desktop");
+            setShowPrompt(true);
+          }
+        }, 3000);
+      } else if (isiOSDevice || isMacOSDevice) {
+        // For iOS and macOS, show a custom prompt
         setTimeout(() => {
           console.log("iOS/macOS detected, showing custom install prompt");
           setShowPrompt(true);
@@ -57,7 +66,7 @@ const InstallPrompt = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [installPrompt]);
 
   const handleInstall = async () => {
     if (installPrompt) {
@@ -82,10 +91,10 @@ const InstallPrompt = () => {
       }
     } else if (isIOS || isMacOS) {
       // Keep the prompt visible with instructions for iOS/macOS users
-      // We'll provide detailed instructions instead of hiding
     } else {
-      // For other platforms without the installPrompt, just hide
-      setShowPrompt(false);
+      // For desktop browsers without installPrompt event, keep showing the prompt
+      // but provide a link to help
+      window.open('https://support.google.com/chrome/answer/9658361', '_blank');
     }
   };
 
@@ -99,7 +108,7 @@ const InstallPrompt = () => {
     <div className="fixed bottom-4 left-4 right-4 bg-background border border-border p-4 rounded-lg shadow-lg z-50 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold dark:text-white">
-          {isIOS || isMacOS ? 'Instalar WosaNova' : 'Instalar'}
+          {isIOS || isMacOS ? 'Instalar WosaNova' : 'Instalar WosaNova'}
         </h3>
         <button 
           onClick={handleDismiss}
@@ -125,7 +134,7 @@ const InstallPrompt = () => {
         </div>
       ) : (
         <p className="text-gray-600 dark:text-gray-300 mb-4">
-          Descárgate ya la App!!
+          Descárgate ya la App para acceder más rápido y sin depender del navegador!
         </p>
       )}
       
@@ -134,7 +143,7 @@ const InstallPrompt = () => {
         className="w-full flex items-center justify-center gap-2"
       >
         <Download size={16} />
-        <span>{isIOS || isMacOS ? 'Entendido' : 'VAMOS'}</span>
+        <span>{isIOS || isMacOS ? 'Entendido' : 'INSTALAR AHORA'}</span>
       </Button>
     </div>
   );

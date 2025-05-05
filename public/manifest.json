@@ -48,7 +48,8 @@
   "display_override": [
     "window-controls-overlay",
     "standalone",
-    "fullscreen"
+    "browser"
   ],
-  "lang": "es-ES"
+  "lang": "es-ES",
+  "categories": ["productivity", "utilities"]
 }

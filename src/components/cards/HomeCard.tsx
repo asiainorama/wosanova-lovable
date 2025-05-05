@@ -34,7 +34,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer transition-transform hover:-translate-y-1"
+      className="flex flex-col items-center gap-1 p-1 cursor-pointer"
       onClick={handleClick}
     >
       {imageLoading && (
