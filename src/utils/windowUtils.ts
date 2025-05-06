@@ -5,14 +5,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 // Enhanced window opening function with error handling
 export const safeOpenWindow = (url: string) => {
   try {
-    // For widgets, we just navigate to them directly
-    if (url.startsWith('/widgets/')) {
-      window.location.href = url;
-      return;
-    }
-    
-    // For home page, just navigate
-    if (window.location.pathname === '/') {
+    // For widgets and home page URLs, handle differently based on path
+    if (url.startsWith('/widgets/') || window.location.pathname === '/') {
       window.location.href = url;
       return;
     }
@@ -33,8 +27,8 @@ export const safeOpenWindow = (url: string) => {
     
     // Adjust window size for widgets
     if (isWidget) {
-      width = 400;
-      height = 600;
+      width = 600;
+      height = 700;
     }
     
     const newWindow = window.open(

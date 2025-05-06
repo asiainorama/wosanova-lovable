@@ -1,8 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Alarm from '@/components/widgets/Alarm';
 import { useNavigate } from 'react-router-dom';
-import { WidgetSheet, WidgetSheetContent } from '@/components/ui/widget-sheet';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
@@ -10,35 +10,23 @@ const AlarmWidget = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Close on Escape key
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        navigate('/');
-      }
-    };
-    
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [navigate]);
-
   return (
-    <WidgetSheet 
+    <Dialog 
       open={true} 
       onOpenChange={(open) => {
         if (!open) navigate('/');
       }}
     >
-      <WidgetSheetContent 
-        className={`p-0 border shadow-xl ${isMobile ? 'rounded-xl' : 'rounded-xl'}`}
-        hideCloseButton
+      <DialogContent 
+        className={`p-0 border-0 fast-animation ${isMobile ? 'w-full h-screen max-w-full m-0 rounded-none' : 'max-w-[350px] w-full sm:w-[350px]'}`}
+        style={{ animationDuration: '0.15s' }}
       >
         <VisuallyHidden>
-          <span>Alarmas</span>
+          <DialogTitle>Alarmas</DialogTitle>
         </VisuallyHidden>
         <Alarm onClose={() => navigate('/')} />
-      </WidgetSheetContent>
-    </WidgetSheet>
+      </DialogContent>
+    </Dialog>
   );
 };
 
