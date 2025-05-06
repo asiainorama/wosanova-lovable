@@ -5,8 +5,7 @@
   "description": "La mayor colección de WebApps del mundo",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#1f2937",
+  "background_color": "#f3f4f6",
   "theme_color": "#1f2937",
   "icons": [
     {
@@ -28,44 +27,21 @@
       "purpose": "any"
     }
   ],
-  "capture_links": "existing-client-navigate",
-  "scope": "/",
+  "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Home",
-      "url": "/"
+      "name": "Catálogo",
+      "short_name": "Catálogo",
+      "description": "Ver el catálogo de aplicaciones",
+      "url": "/catalog",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Catalog",
-      "url": "/catalog"
-    },
-    {
-      "name": "Profile",
-      "url": "/profile"
-    },
-    {
-      "name": "Calculadora",
-      "url": "/widgets/calculator"
-    },
-    {
-      "name": "Conversor",
-      "url": "/widgets/converter"
-    },
-    {
-      "name": "Notas",
-      "url": "/widgets/notes"
-    },
-    {
-      "name": "Alarmas",
-      "url": "/widgets/alarm"
+      "name": "Favoritos",
+      "short_name": "Favoritos",
+      "description": "Ver tus aplicaciones favoritas",
+      "url": "/",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
-  ],
-  "prefer_related_applications": false,
-  "display_override": [
-    "window-controls-overlay",
-    "standalone",
-    "browser"
-  ],
-  "lang": "es-ES",
-  "categories": ["productivity", "utilities"]
+  ]
 }

@@ -27,147 +27,90 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3; // Increased retries for iOS/macOS
+  const maxRetries = 3; // Reduced retries to avoid too many attempts
   const imageRef = useRef<HTMLImageElement>(null);
   const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
+  const [fetchedFromSupabase, setFetchedFromSupabase] = useState(false);
   
-  // Check for logo in Supabase database first, then fallback to local cache
+  // First check Supabase for icon, then fallback to cache
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchIconFromSupabase = async () => {
       try {
+        if (!isMounted) return;
+        
+        // Add a cache-busting timestamp parameter
+        const timestamp = Date.now();
+        
         // Check if we have this icon in the database
         const { data: iconData, error: iconError } = await supabase
           .from('app_icons')
           .select('icon_url, storage_path')
           .eq('app_id', app.id)
-          .single();
+          .maybeSingle();
+
+        if (!isMounted) return;
 
         if (iconData && iconData.icon_url) {
-          // We found the icon in the database, use it
-          setIconUrl(iconData.icon_url);
+          // We found the icon in the database, use it with cache busting
+          let url = iconData.icon_url;
+          if (!url.includes('?')) {
+            url = `${url}?t=${timestamp}`;
+          }
+          
+          setIconUrl(url);
           setImageLoading(false);
-          storeSuccessfulIcon(app, iconData.icon_url, false);
+          storeSuccessfulIcon(app, url, false);
+          setFetchedFromSupabase(true);
           return;
         }
 
-        // No icon in database yet, try to fetch and store it
-        if (!iconError || iconError.code === 'PGRST116') {
-          // If not found or other error, use the cached image first
-          const cachedLogo = getCachedLogo(app);
-          setIconUrl(cachedLogo);
-          
-          // Then try to fetch and store the remote icon
-          if (app.icon && !app.icon.includes('placeholder')) {
-            // Try to download and store this icon for future use
-            storeIconInSupabase(app, app.icon);
-          }
-        }
+        // No icon in database yet, continue with the cached image
+        setFetchedFromSupabase(false);
+        
       } catch (err) {
         console.error('Error fetching app icon from Supabase:', err);
-        // Fallback to cache
-        const cachedLogo = getCachedLogo(app);
-        setIconUrl(cachedLogo);
+        // Continue with normal flow
+        setFetchedFromSupabase(false);
       }
     };
 
     fetchIconFromSupabase();
     
     // Preload icons for iOS/macOS
-    preloadImageForIOSMacOS(
-      iconUrl,
-      () => {
-        setImageLoading(false);
-        storeSuccessfulIcon(app, iconUrl, imageError);
-      },
-      handleImageError
-    );
+    if (!fetchedFromSupabase) {
+      preloadImageForIOSMacOS(
+        iconUrl,
+        () => {
+          if (isMounted) {
+            setImageLoading(false);
+            storeSuccessfulIcon(app, iconUrl, imageError);
+          }
+        },
+        () => {
+          if (isMounted) {
+            handleImageError();
+          }
+        }
+      );
+    }
     
     // Check if image is already loaded from cache
-    checkImagePreloaded(imageRef, () => {
+    if (imageRef.current && imageRef.current.complete) {
       setImageLoading(false);
       storeSuccessfulIcon(app, iconUrl, imageError);
-    });
+    }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [app.id]);
 
-  // Function to store icon in Supabase
-  const storeIconInSupabase = async (app: AppData, iconUrl: string) => {
-    try {
-      // Skip for placeholder images or already processed icons
-      if (iconUrl.includes('placeholder') || iconUrl.includes('app-logos')) {
-        return;
-      }
-
-      // Check if we already have this icon stored
-      const { data: existingIcon } = await supabase
-        .from('app_icons')
-        .select('id')
-        .eq('app_id', app.id)
-        .single();
-      
-      if (existingIcon) {
-        return; // Icon already stored
-      }
-
-      // Download the image
-      const response = await fetch(iconUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      // Get the blob
-      const blob = await response.blob();
-      
-      // File extension based on content type
-      const contentType = response.headers.get('content-type') || 'image/png';
-      const extension = contentType.split('/')[1] || 'png';
-      
-      // Generate a unique filename
-      const filename = `${app.id}-${Date.now()}.${extension}`;
-      const filePath = `${app.id}/${filename}`;
-      
-      // Upload to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('app-logos')
-        .upload(filePath, blob, {
-          contentType,
-          cacheControl: '3600',
-        });
-      
-      if (uploadError) {
-        throw uploadError;
-      }
-      
-      // Get the public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('app-logos')
-        .getPublicUrl(filePath);
-      
-      if (publicUrlData) {
-        const publicUrl = publicUrlData.publicUrl;
-        
-        // Store the reference in our app_icons table
-        const { error: insertError } = await supabase
-          .from('app_icons')
-          .insert({
-            app_id: app.id,
-            icon_url: publicUrl,
-            storage_path: filePath,
-          });
-        
-        if (!insertError) {
-          console.log(`Stored icon for ${app.name} in Supabase`);
-          // Update our view with the new URL
-          setIconUrl(publicUrl);
-        }
-      }
-    } catch (error) {
-      console.error('Error storing icon in Supabase:', error);
-      // Silently fail - we'll use the cached icon
-    }
-  };
-  
   // Function to handle image error
   const handleImageError = () => {
+    console.log(`Error loading icon for ${app.name}, retry ${retryCount + 1} of ${maxRetries}`);
+    
     handleImageLoadError(
       app,
       iconUrl,
@@ -190,11 +133,6 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
     setImageLoading(false);
     setImageError(false);
     storeSuccessfulIcon(app, iconUrl, false);
-
-    // If this is not a Supabase URL, store it
-    if (iconUrl && !iconUrl.includes('app-logos') && !iconUrl.includes('placeholder')) {
-      storeIconInSupabase(app, iconUrl);
-    }
   };
   
   return {

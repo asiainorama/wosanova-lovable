@@ -24,21 +24,29 @@ const Index = () => {
   useEffect(() => {
     if (favorites.length > 0) {
       // Use silent mode to avoid notifications
-      prefetchAppLogos(favorites);
+      prefetchAppLogos(favorites, true);
     }
     
     // Get icon count from Supabase
     const checkStoredIcons = async () => {
-      const { count, error } = await supabase
-        .from('app_icons')
-        .select('*', { count: 'exact', head: true });
-      
-      if (!error && count !== null) {
-        setIconCount(count);
+      try {
+        const { count, error } = await supabase
+          .from('app_icons')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error && count !== null) {
+          setIconCount(count);
+        }
+      } catch (err) {
+        console.error("Error checking icon count:", err);
       }
     };
     
+    // Check initially and refresh every minute
     checkStoredIcons();
+    const interval = setInterval(checkStoredIcons, 60000);
+    
+    return () => clearInterval(interval);
   }, [favorites]);
 
   return (
