@@ -90,33 +90,16 @@ const InstallPrompt = () => {
         console.error('Error showing install prompt:', e);
       }
     } else if (isIOS || isMacOS) {
-      // For Safari on iOS or macOS, we can't programmatically install
-      // Show detailed instructions with visual cues
-      
-      // Keep showing instructions but can add more visual cues here
+      // Keep the prompt visible with instructions for iOS/macOS users
     } else {
-      // For browsers where we couldn't capture the beforeinstallprompt event
-      // Try alternative installation methods
-      
-      // For PWA-capable browsers without the beforeinstallprompt event
-      if (navigator.userAgent.includes('Firefox')) {
-        // Firefox-specific instructions
-        alert('En Firefox: Haz clic en los tres puntos en la barra de direcciones y selecciona "Instalar sitio como aplicación"');
-      } else if (navigator.userAgent.includes('Safari') && !isIOS && !isMacOS) {
-        // Safari on Windows (rare)
-        alert('En Safari: Selecciona "Archivo" > "Añadir a Dock"');
-      } else {
-        // Generic fallback - try to use the browser's install menu
-        alert('Pulsa el menú de tu navegador y busca "Instalar" o "Añadir a pantalla de inicio"');
-      }
+      // For desktop browsers without installPrompt event, keep showing the prompt
+      // but provide a link to help
+      window.open('https://support.google.com/chrome/answer/9658361', '_blank');
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    
-    // Store preference in localStorage to avoid showing again too soon
-    localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
   };
 
   if (!showPrompt) return null;
