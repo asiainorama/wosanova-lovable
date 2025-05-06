@@ -2,14 +2,16 @@
 import { AppData } from '@/data/apps';
 import { fixAppIcons, isValidImage } from '@/utils/iconUtils';
 import { toast } from 'sonner';
-import { isIOSOrMacOS } from '@/hooks/iconLoading';
+import { isIOSOrMacOS, isSafariBrowser } from '@/hooks/iconLoading';
 
 const LOGO_CACHE_KEY = 'logo_cache_v3';
-const SESSION_LOGOS_KEY = 'session_logos_v2';
+const SESSION_LOGOS_KEY = 'session_logos_v3'; // Incrementing version to force refresh
+const SAFARI_LOGOS_KEY = 'safari_logos_v1'; // Safari-specific cache
 const LOGO_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours cache expiry
 
 // Memory cache for fast access
 let sessionLogos: Record<string, { url: string, domain: string }> = {};
+let safariLogos: Record<string, { url: string, domain: string, timestamp: number }> = {};
 
 /**
  * Initialize the logo cache service
@@ -26,9 +28,34 @@ export const initLogoCacheService = (): void => {
     } else {
       sessionLogos = {};
     }
+    
+    // Safari-specific: load Safari logos from localStorage for better persistence
+    if (isSafariBrowser()) {
+      const safariData = localStorage.getItem(SAFARI_LOGOS_KEY);
+      if (safariData) {
+        safariLogos = JSON.parse(safariData);
+        console.log(`Loaded ${Object.keys(safariLogos).length} Safari-specific logos`);
+        
+        // Add valid Safari logos to the session cache
+        Object.entries(safariLogos).forEach(([appId, entry]) => {
+          if (entry.url && entry.domain && (Date.now() - entry.timestamp < LOGO_CACHE_EXPIRY)) {
+            sessionLogos[appId] = {
+              url: entry.url,
+              domain: entry.domain
+            };
+          }
+        });
+        
+        // Update session storage with combined data
+        sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
+      } else {
+        safariLogos = {};
+      }
+    }
   } catch (e) {
     console.error('Error loading session logos:', e);
     sessionLogos = {};
+    safariLogos = {};
   }
   
   // Load additional logos from localStorage for resilience
@@ -70,13 +97,18 @@ initLogoCacheService();
 /**
  * Get a cached logo URL for an app
  */
-export const getCachedLogo = (app: AppData): string => {
-  // Use the app's icon if it exists
+export const getCachedLogo = (app: AppData, isSafari = false): string => {
+  // Use the app's icon if it exists and isn't a placeholder
   if (app.icon && !app.icon.includes('placeholder')) {
     return app.icon;
   }
   
-  // Check session cache first (memory and sessionStorage)
+  // For Safari browsers, check Safari-specific cache first
+  if (isSafari && safariLogos[app.id]?.url) {
+    return safariLogos[app.id].url;
+  }
+  
+  // Check session cache next (memory and sessionStorage)
   if (sessionLogos[app.id]?.url) {
     return sessionLogos[app.id].url;
   }
@@ -107,9 +139,10 @@ export const getCachedLogo = (app: AppData): string => {
   }
   
   // Use domain-based fallbacks for Safari
-  if (isIOSOrMacOS()) {
+  if (isSafari || isIOSOrMacOS()) {
     try {
       const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
+      // Use Google's favicon service which is more reliable for Safari
       return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
     } catch (e) {
       console.warn('Error generating fallback icon:', e);
@@ -140,6 +173,21 @@ export const registerSuccessfulLogo = (
     sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
   } catch (e) {
     console.warn('Error saving to session storage:', e);
+  }
+  
+  // Add to Safari-specific cache if on Safari
+  if (isSafariBrowser()) {
+    safariLogos[appId] = {
+      url,
+      domain,
+      timestamp: Date.now()
+    };
+    
+    try {
+      localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
+    } catch (e) {
+      console.warn('Error saving Safari logo cache:', e);
+    }
   }
   
   // Add to persistent cache
@@ -187,7 +235,11 @@ export const prefetchAppLogos = async (
   safariSpecific: boolean = false
 ): Promise<void> => {
   // Special path for Safari
-  if (safariSpecific && isIOSOrMacOS()) {
+  const isSafari = isSafariBrowser();
+  
+  if ((safariSpecific && isIOSOrMacOS()) || isSafari) {
+    console.log("Prefetching icons specifically for Safari/iOS/macOS");
+    
     for (const app of apps) {
       try {
         const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
@@ -198,20 +250,46 @@ export const prefetchAppLogos = async (
           `https://icon.horse/icon/${domain}?size=large`,
           `https://icons.duckduckgo.com/ip3/${domain}.ico`,
           `https://api.faviconkit.com/${domain}/128`,
+          `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${app.url}&size=128`,
           `https://logo.clearbit.com/${domain}`
         ];
         
+        let foundValid = false;
+        
+        // Try each source in sequence
         for (const source of sources) {
-          const isValid = await isValidImage(source);
-          if (isValid) {
-            registerSuccessfulLogo(app.id, source, domain);
-            break;
+          if (foundValid) break;
+          
+          try {
+            const isValid = await isValidImage(source);
+            if (isValid) {
+              registerSuccessfulLogo(app.id, source, domain);
+              // Add to Safari cache
+              safariLogos[app.id] = {
+                url: source,
+                domain,
+                timestamp: Date.now()
+              };
+              foundValid = true;
+            }
+          } catch (err) {
+            continue; // Try next source
           }
+        }
+        
+        // Persist Safari cache after processing each batch
+        if (Object.keys(safariLogos).length > 0) {
+          localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
         }
       } catch (e) {
         console.warn(`Error prefetching Safari icon for ${app.name}:`, e);
       }
     }
+    
+    if (!silent) {
+      toast.success('Iconos precargados correctamente para Safari');
+    }
+    
     return;
   }
 
@@ -261,6 +339,12 @@ export const persistAllLogos = (): void => {
     
     localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify(logoCache));
     console.log(`Updated ${updateCount} entries in local storage cache`);
+    
+    // Also persist Safari logos if relevant
+    if (isSafariBrowser() && Object.keys(safariLogos).length > 0) {
+      localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
+      console.log(`Persisted ${Object.keys(safariLogos).length} Safari-specific logos`);
+    }
   } catch (e) {
     console.error('Error persisting logo cache:', e);
   }

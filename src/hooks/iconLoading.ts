@@ -18,6 +18,15 @@ export const isIOSOrMacOS = (): boolean => {
 };
 
 /**
+ * Specifically checks if the browser is Safari
+ */
+export const isSafariBrowser = (): boolean => {
+  const userAgent = navigator.userAgent;
+  // More accurate Safari detection
+  return /^((?!chrome|android).)*safari/i.test(userAgent);
+};
+
+/**
  * Store icon URL when successfully loaded
  */
 export const storeSuccessfulIcon = (app: AppData, iconUrl: string, hasError: boolean): void => {
@@ -83,7 +92,7 @@ export const handleImageLoadError = (
       break;
       
     case 3:
-      // Fourth retry specifically for iOS/macOS: try another favicon service
+      // Fourth retry: try another favicon service
       const faviconKitUrl = `https://api.faviconkit.com/${domain}/128`;
       onRetry(faviconKitUrl);
       if (imageRef.current) {
@@ -97,6 +106,24 @@ export const handleImageLoadError = (
       onRetry(clearbitUrl);
       if (imageRef.current) {
         imageRef.current.src = clearbitUrl;
+      }
+      break;
+    
+    case 5:
+      // Sixth retry: try Google's t3 favicon service
+      const googleT3Url = `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${app.url}&size=128`;
+      onRetry(googleT3Url);
+      if (imageRef.current) {
+        imageRef.current.src = googleT3Url;
+      }
+      break;
+      
+    case 6:
+      // Seventh retry: try Icon Horse (good for Safari)
+      const iconHorseUrl = `https://icon.horse/icon/${domain}?size=large`;
+      onRetry(iconHorseUrl);
+      if (imageRef.current) {
+        imageRef.current.src = iconHorseUrl;
       }
       break;
       
@@ -115,7 +142,13 @@ export const preloadImageForIOSMacOS = (
   onSuccess: () => void, 
   onError: () => void
 ): void => {
-  if (!isIOSOrMacOS()) return;
+  if (!url) {
+    onError();
+    return;
+  }
+  
+  // For Safari we always preload, not just for iOS/macOS
+  if (!isIOSOrMacOS() && !isSafariBrowser()) return;
   
   const img = new Image();
   
@@ -123,11 +156,16 @@ export const preloadImageForIOSMacOS = (
   const timeout = setTimeout(() => {
     img.src = '';
     onError();
-  }, 5000);
+  }, 3000); // Reduced timeout for better UX
   
   img.onload = () => {
     clearTimeout(timeout);
-    onSuccess();
+    // Verify image has actual dimensions before marking as success
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      onSuccess();
+    } else {
+      onError();
+    }
   };
   
   img.onerror = () => {
@@ -135,6 +173,8 @@ export const preloadImageForIOSMacOS = (
     onError();
   };
   
+  // Set crossOrigin to allow CORS for some favicon sources
+  img.crossOrigin = "anonymous";
   img.src = url;
 };
 

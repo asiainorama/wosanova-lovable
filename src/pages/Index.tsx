@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
-import { isIOSOrMacOS } from '@/hooks/iconLoading';
+import { isIOSOrMacOS, isSafariBrowser } from '@/hooks/iconLoading';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+  const isSafari = isSafariBrowser();
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
@@ -28,14 +29,22 @@ const Index = () => {
     }
   }, [favorites]);
 
+  // Immediate Safari prefetch for first render
+  useEffect(() => {
+    if (isSafari && favorites.length > 0) {
+      console.log("Immediate Safari icon prefetch on mount");
+      prefetchAppLogos(favorites, true, true); // Silent + Safari specific
+    }
+  }, []);
+
   // Additional prefetch for iOS/macOS specifically
   useEffect(() => {
-    if (isIOSOrMacOS() && favorites.length > 0) {
+    if ((isIOSOrMacOS() || isSafari) && favorites.length > 0) {
       // Set a slight delay for Safari to initialize properly
       const timer = setTimeout(() => {
-        console.log("Running iOS/macOS specific logo prefetch");
+        console.log("Running iOS/macOS/Safari specific logo prefetch");
         prefetchAppLogos(favorites, true, true); // Silent + Safari specific
-      }, 500);
+      }, 300);
       
       return () => clearTimeout(timer);
     }
