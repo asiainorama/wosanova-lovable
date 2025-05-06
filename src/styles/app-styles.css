@@ -176,6 +176,29 @@
   font-weight: 500;
 }
 
+/* Widget sheet animations */
+@keyframes slide-in-from-center {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -48%) scale(0.96); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slide-out-to-center {
+  from { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to { 
+    opacity: 0; 
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
 /* Theme styles for dark mode */
 .dark {
   --background: 222.2 84% 4.9%;

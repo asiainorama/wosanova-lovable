@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,6 +14,21 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
   const isMobile = useIsMobile();
+  const [isPortrait, setIsPortrait] = useState<boolean>(true);
+
+  // Detect orientation
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+    };
+  }, []);
 
   const clearAll = () => {
     setInput('0');
@@ -114,7 +129,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
       </div>
       
       <div className="p-3 flex-1 flex flex-col">
-        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right h-[25%]">
+        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right">
           <div className="text-4xl font-medium truncate">{input}</div>
           {operator && prevValue && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -123,7 +138,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           )}
         </div>
         
-        <div className="grid grid-cols-4 gap-0 flex-1">
+        <div className={`grid ${isPortrait ? 'grid-cols-4' : 'grid-cols-6'} gap-0 flex-1`}>
           <Button 
             variant="outline" 
             className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
@@ -243,10 +258,10 @@ const Calculator = ({ onClose }: CalculatorProps) => {
             +
           </Button>
           
-          {/* Row 5 - Reorganized */}
+          {/* Row 5 */}
           <Button 
             variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
+            className={`aspect-square text-2xl p-0 h-auto ${isPortrait ? 'col-span-1' : 'col-span-2'}`}
             onClick={() => handleDigit('0')}
           >
             0
@@ -260,7 +275,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
           </Button>
           <Button 
             variant="outline" 
-            className="col-span-2 text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto aspect-[2/1]"
+            className={`text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto ${isPortrait ? 'col-span-2' : 'col-span-1'}`}
             onClick={handleEqual}
           >
             =
