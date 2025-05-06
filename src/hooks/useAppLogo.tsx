@@ -26,7 +26,7 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3; // Increased retries for iOS/macOS
+  const maxRetries = isIOSOrMacOS() ? 5 : 3; // Increased retries for iOS/macOS
   const imageRef = useRef<HTMLImageElement>(null);
   const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
   
@@ -37,14 +37,30 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
     setIconUrl(cachedLogo);
     
     // Preload icons for iOS/macOS
-    preloadImageForIOSMacOS(
-      cachedLogo,
-      () => {
-        setImageLoading(false);
-        storeSuccessfulIcon(app, cachedLogo, imageError);
-      },
-      handleImageError
-    );
+    if (isIOSOrMacOS()) {
+      preloadImageForIOSMacOS(
+        cachedLogo,
+        () => {
+          setImageLoading(false);
+          storeSuccessfulIcon(app, cachedLogo, imageError);
+        },
+        () => {
+          // Try Google Favicon as a first fallback for Safari
+          const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
+          const fallbackUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+          
+          setIconUrl(fallbackUrl);
+          preloadImageForIOSMacOS(
+            fallbackUrl,
+            () => {
+              setImageLoading(false);
+              storeSuccessfulIcon(app, fallbackUrl, false);
+            },
+            handleImageError
+          );
+        }
+      );
+    }
     
     // Check if image is already loaded from cache
     checkImagePreloaded(imageRef, () => {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
+import { isIOSOrMacOS } from '@/hooks/iconLoading';
 
 const Index = () => {
   const { favorites } = useAppContext();
@@ -22,7 +23,21 @@ const Index = () => {
   useEffect(() => {
     if (favorites.length > 0) {
       // Use silent mode to avoid notifications
-      prefetchAppLogos(favorites);
+      const silentMode = true;
+      prefetchAppLogos(favorites, silentMode);
+    }
+  }, [favorites]);
+
+  // Additional prefetch for iOS/macOS specifically
+  useEffect(() => {
+    if (isIOSOrMacOS() && favorites.length > 0) {
+      // Set a slight delay for Safari to initialize properly
+      const timer = setTimeout(() => {
+        console.log("Running iOS/macOS specific logo prefetch");
+        prefetchAppLogos(favorites, true, true); // Silent + Safari specific
+      }, 500);
+      
+      return () => clearTimeout(timer);
     }
   }, [favorites]);
 

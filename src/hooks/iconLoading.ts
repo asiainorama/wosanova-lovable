@@ -4,11 +4,17 @@ import { AppData } from '@/data/apps';
 import { getCachedLogo, registerSuccessfulLogo } from '@/services/LogoCacheService';
 
 /**
- * Determines if the current device is iOS or macOS
+ * Determines if the current device is iOS or macOS with improved detection
  */
 export const isIOSOrMacOS = (): boolean => {
-  return /iPad|iPhone|iPod|Mac/.test(navigator.userAgent) && 
-         (!/iPad|iPhone|iPod/.test(navigator.userAgent) || !(window as any).MSStream);
+  const userAgent = navigator.userAgent;
+  
+  // More comprehensive check for iOS and macOS
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+  const isMacOS = /Mac OS X/.test(userAgent) && !(/iPad|iPhone|iPod/.test(userAgent));
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+  
+  return isIOS || isMacOS || isSafari;
 };
 
 /**
@@ -44,42 +50,65 @@ export const handleImageLoadError = (
     return;
   }
 
+  const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
+  
   // Try different image strategies based on retry count
-  if (retryCount === 0) {
-    // First retry: add a cache buster
-    const timestamp = new Date().getTime();
-    const newUrl = iconUrl.split('?')[0] + '?' + timestamp;
-    onRetry(newUrl);
-    if (imageRef.current) {
-      imageRef.current.src = newUrl;
-    }
-  } 
-  else if (retryCount === 1) {
-    // Second retry: try Google Favicon API as a fallback
-    const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-    const newUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-    onRetry(newUrl);
-    if (imageRef.current) {
-      imageRef.current.src = newUrl;
-    }
-  }
-  else if (retryCount === 2 && isIOSOrMacOS()) {
-    // Third retry specifically for iOS/macOS: try another favicon service
-    const domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-    const newUrl = `https://api.faviconkit.com/${domain}/128`;
-    onRetry(newUrl);
-    if (imageRef.current) {
-      imageRef.current.src = newUrl;
-    }
-  }
-  else {
-    // If all retries failed, show fallback
-    onError();
+  switch (retryCount) {
+    case 0:
+      // First retry: add a cache buster
+      const timestamp = new Date().getTime();
+      const newUrl = iconUrl.split('?')[0] + '?' + timestamp;
+      onRetry(newUrl);
+      if (imageRef.current) {
+        imageRef.current.src = newUrl;
+      }
+      break;
+      
+    case 1:
+      // Second retry: try Google Favicon API as a fallback
+      const googleUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      onRetry(googleUrl);
+      if (imageRef.current) {
+        imageRef.current.src = googleUrl;
+      }
+      break;
+      
+    case 2:
+      // Third retry: try DuckDuckGo favicon service (often works well with Safari)
+      const ddgUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+      onRetry(ddgUrl);
+      if (imageRef.current) {
+        imageRef.current.src = ddgUrl;
+      }
+      break;
+      
+    case 3:
+      // Fourth retry specifically for iOS/macOS: try another favicon service
+      const faviconKitUrl = `https://api.faviconkit.com/${domain}/128`;
+      onRetry(faviconKitUrl);
+      if (imageRef.current) {
+        imageRef.current.src = faviconKitUrl;
+      }
+      break;
+      
+    case 4:
+      // Fifth retry: try Clearbit API (often has high quality logos)
+      const clearbitUrl = `https://logo.clearbit.com/${domain}`;
+      onRetry(clearbitUrl);
+      if (imageRef.current) {
+        imageRef.current.src = clearbitUrl;
+      }
+      break;
+      
+    default:
+      // If all retries failed, show fallback
+      onError();
+      break;
   }
 };
 
 /**
- * Preload an image for iOS/macOS devices
+ * Preload an image for iOS/macOS devices with improved handling
  */
 export const preloadImageForIOSMacOS = (
   url: string, 
@@ -89,9 +118,24 @@ export const preloadImageForIOSMacOS = (
   if (!isIOSOrMacOS()) return;
   
   const img = new Image();
+  
+  // Set a timeout to avoid hanging if the image load takes too long
+  const timeout = setTimeout(() => {
+    img.src = '';
+    onError();
+  }, 5000);
+  
+  img.onload = () => {
+    clearTimeout(timeout);
+    onSuccess();
+  };
+  
+  img.onerror = () => {
+    clearTimeout(timeout);
+    onError();
+  };
+  
   img.src = url;
-  img.onload = onSuccess;
-  img.onerror = onError;
 };
 
 /**
@@ -101,7 +145,7 @@ export const checkImagePreloaded = (
   imageRef: RefObject<HTMLImageElement>,
   onLoaded: () => void
 ): void => {
-  if (imageRef.current?.complete) {
+  if (imageRef.current?.complete && imageRef.current?.naturalWidth > 0) {
     onLoaded();
   }
 };
