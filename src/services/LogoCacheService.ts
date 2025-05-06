@@ -1,356 +1,447 @@
 
+/**
+ * Logo Cache Service
+ * 
+ * A multi-layered caching system for app logos that ensures 
+ * persistence and fast retrieval across sessions.
+ */
 import { AppData } from '@/data/apps';
-import { fixAppIcons, isValidImage } from '@/utils/iconUtils';
-import { toast } from 'sonner';
-import { isIOSOrMacOS, isSafariBrowser } from '@/hooks/iconLoading';
 
-const LOGO_CACHE_KEY = 'logo_cache_v3';
-const SESSION_LOGOS_KEY = 'session_logos_v3'; // Incrementing version to force refresh
-const SAFARI_LOGOS_KEY = 'safari_logos_v1'; // Safari-specific cache
-const LOGO_CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours cache expiry
+// Cache version - increment when making breaking changes to cache structure
+const CACHE_VERSION = 'logo-cache-v2';
 
-// Memory cache for fast access
-let sessionLogos: Record<string, { url: string, domain: string }> = {};
-let safariLogos: Record<string, { url: string, domain: string, timestamp: number }> = {};
+// Storage keys
+const LOCAL_STORAGE_KEY = `${CACHE_VERSION}-persistent`;
+const SESSION_STORAGE_KEY = `${CACHE_VERSION}-session`;
+const METADATA_KEY = `${CACHE_VERSION}-metadata`;
+
+// Cache entry expiry (30 days in ms)
+const CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000;
+
+// Default placeholder when no image is found
+const DEFAULT_ICON = "/placeholder.svg";
+
+// Cache entry with validation and metadata
+interface LogoCacheEntry {
+  appId: string;        // App ID for reference
+  url: string;          // The actual logo URL
+  timestamp: number;    // When this cache entry was created
+  validated: boolean;   // Whether this URL was validated as working
+  domain: string;       // Domain associated with the app
+  source: string;       // Source of the logo (api, fallback, etc)
+}
+
+// In-memory cache (fastest access)
+const memoryCache: Map<string, LogoCacheEntry> = new Map();
 
 /**
- * Initialize the logo cache service
+ * Extract domain from URL
  */
-export const initLogoCacheService = (): void => {
+const extractDomain = (url: string): string => {
+  try {
+    return url.replace(/^https?:\/\//, '')
+              .replace(/^www\./, '')
+              .split('/')[0];
+  } catch (error) {
+    console.error('Error extracting domain:', error);
+    return '';
+  }
+};
+
+/**
+ * Save metadata about the cache
+ */
+const saveMetadata = () => {
+  try {
+    const metadata = {
+      version: CACHE_VERSION,
+      lastUpdated: Date.now(),
+      entryCount: {
+        memory: memoryCache.size,
+        session: countSessionEntries(),
+        local: countLocalEntries()
+      }
+    };
+    localStorage.setItem(METADATA_KEY, JSON.stringify(metadata));
+  } catch (e) {
+    console.warn('Failed to save cache metadata:', e);
+  }
+};
+
+/**
+ * Count entries in session storage
+ */
+const countSessionEntries = (): number => {
+  try {
+    const sessionData = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!sessionData) return 0;
+    return Object.keys(JSON.parse(sessionData)).length;
+  } catch (e) {
+    return 0;
+  }
+};
+
+/**
+ * Count entries in local storage
+ */
+const countLocalEntries = (): number => {
+  try {
+    const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!localData) return 0;
+    return Object.keys(JSON.parse(localData)).length;
+  } catch (e) {
+    return 0;
+  }
+};
+
+/**
+ * Load cached logos from persistent storage into memory
+ * Called on service initialization
+ */
+const initializeCaches = (): void => {
   console.log('Initializing logo cache service...');
   
-  // Load session logos
+  // Load from session storage first (current session's validated icons)
   try {
-    const sessionData = sessionStorage.getItem(SESSION_LOGOS_KEY);
+    const sessionData = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (sessionData) {
-      sessionLogos = JSON.parse(sessionData);
-      console.log(`Loaded ${Object.keys(sessionLogos).length} validated logos from session storage`);
-    } else {
-      sessionLogos = {};
-    }
-    
-    // Safari-specific: load Safari logos from localStorage for better persistence
-    if (isSafariBrowser()) {
-      const safariData = localStorage.getItem(SAFARI_LOGOS_KEY);
-      if (safariData) {
-        safariLogos = JSON.parse(safariData);
-        console.log(`Loaded ${Object.keys(safariLogos).length} Safari-specific logos`);
-        
-        // Add valid Safari logos to the session cache
-        Object.entries(safariLogos).forEach(([appId, entry]) => {
-          if (entry.url && entry.domain && (Date.now() - entry.timestamp < LOGO_CACHE_EXPIRY)) {
-            sessionLogos[appId] = {
-              url: entry.url,
-              domain: entry.domain
-            };
-          }
-        });
-        
-        // Update session storage with combined data
-        sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
-      } else {
-        safariLogos = {};
-      }
+      const sessionEntries: Record<string, LogoCacheEntry> = JSON.parse(sessionData);
+      Object.values(sessionEntries).forEach(entry => {
+        if (entry && entry.url && entry.validated) {
+          memoryCache.set(entry.appId, entry);
+        }
+      });
+      console.log(`Loaded ${memoryCache.size} validated logos from session storage`);
     }
   } catch (e) {
-    console.error('Error loading session logos:', e);
-    sessionLogos = {};
-    safariLogos = {};
+    console.warn('Error loading session cache:', e);
   }
   
-  // Load additional logos from localStorage for resilience
+  // Then supplement with localStorage for any missing entries
   try {
-    const cacheData = localStorage.getItem(LOGO_CACHE_KEY);
-    if (cacheData) {
-      const logoCache = JSON.parse(cacheData);
-      let count = 0;
+    const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (localData) {
+      const localEntries: Record<string, LogoCacheEntry> = JSON.parse(localData);
       
-      // Add valid entries to session cache
-      Object.keys(logoCache).forEach(appId => {
-        const entry = logoCache[appId];
-        if (entry && entry.url && entry.timestamp && !sessionLogos[appId]) {
-          // Skip expired entries
-          if (Date.now() - entry.timestamp < LOGO_CACHE_EXPIRY) {
-            sessionLogos[appId] = {
-              url: entry.url,
-              domain: entry.domain || ''
-            };
-            count++;
-          }
+      let loadedCount = 0;
+      Object.values(localEntries).forEach(entry => {
+        // Only load entries not already in memory and that aren't expired
+        if (
+          entry && 
+          entry.url && 
+          !memoryCache.has(entry.appId) && 
+          Date.now() - entry.timestamp < CACHE_EXPIRY
+        ) {
+          memoryCache.set(entry.appId, entry);
+          loadedCount++;
         }
       });
       
-      // Save to session storage for faster access
-      if (count > 0) {
-        sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
-        console.log(`Loaded ${count} additional logos from local storage`);
-      }
+      console.log(`Loaded ${loadedCount} additional logos from local storage`);
     }
   } catch (e) {
-    console.error('Error loading logo cache:', e);
-  }
-};
-
-// Auto-initialize
-initLogoCacheService();
-
-/**
- * Get a cached logo URL for an app
- */
-export const getCachedLogo = (app: AppData, isSafari = false): string => {
-  // Use the app's icon if it exists and isn't a placeholder
-  if (app.icon && !app.icon.includes('placeholder')) {
-    return app.icon;
+    console.warn('Error loading local cache:', e);
   }
   
-  // For Safari browsers, check Safari-specific cache first
-  if (isSafari && safariLogos[app.id]?.url) {
-    return safariLogos[app.id].url;
-  }
+  // Persist current memory state to session storage
+  persistMemoryToSession();
   
-  // Check session cache next (memory and sessionStorage)
-  if (sessionLogos[app.id]?.url) {
-    return sessionLogos[app.id].url;
-  }
-  
-  // Check persistent cache
-  try {
-    const cacheData = localStorage.getItem(LOGO_CACHE_KEY);
-    if (cacheData) {
-      const logoCache = JSON.parse(cacheData);
-      const entry = logoCache[app.id];
-      
-      if (entry && entry.url && entry.timestamp) {
-        // Check if cache is still valid
-        if (Date.now() - entry.timestamp < LOGO_CACHE_EXPIRY) {
-          // Add to session cache for faster access next time
-          sessionLogos[app.id] = {
-            url: entry.url,
-            domain: entry.domain || ''
-          };
-          sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
-          
-          return entry.url;
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Error accessing logo cache:', e);
-  }
-  
-  // Use domain-based fallbacks for Safari
-  if (isSafari || isIOSOrMacOS()) {
-    try {
-      const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
-      // Use Google's favicon service which is more reliable for Safari
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-    } catch (e) {
-      console.warn('Error generating fallback icon:', e);
-    }
-  }
-  
-  // Return app icon as fallback
-  return app.icon || '/placeholder.svg';
+  // Update metadata
+  saveMetadata();
 };
 
 /**
- * Register a successful logo
+ * Validate if an image URL is working by attempting to load it
  */
-export const registerSuccessfulLogo = (
-  appId: string,
-  url: string,
-  domain: string
-): void => {
-  if (!url || url.includes('placeholder')) return;
-  
-  // Add to session cache
-  sessionLogos[appId] = {
-    url,
-    domain: domain || ''
-  };
-  
-  try {
-    sessionStorage.setItem(SESSION_LOGOS_KEY, JSON.stringify(sessionLogos));
-  } catch (e) {
-    console.warn('Error saving to session storage:', e);
-  }
-  
-  // Add to Safari-specific cache if on Safari
-  if (isSafariBrowser()) {
-    safariLogos[appId] = {
-      url,
-      domain,
-      timestamp: Date.now()
+const validateImageUrl = async (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!url || url.includes('placeholder')) {
+      resolve(false);
+      return;
+    }
+    
+    const img = new Image();
+    const timeoutId = setTimeout(() => {
+      img.src = '';
+      resolve(false);
+    }, 3000);
+    
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      resolve(img.naturalWidth > 1 && img.naturalHeight > 1);
     };
     
-    try {
-      localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
-    } catch (e) {
-      console.warn('Error saving Safari logo cache:', e);
-    }
-  }
-  
-  // Add to persistent cache
-  try {
-    const cacheData = localStorage.getItem(LOGO_CACHE_KEY);
-    const logoCache = cacheData ? JSON.parse(cacheData) : {};
-    
-    logoCache[appId] = {
-      url,
-      domain,
-      timestamp: Date.now()
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      resolve(false);
     };
     
-    // Save occasionally to reduce writes
-    const shouldSave = Math.random() < 0.25; // 25% chance to save
-    if (shouldSave) {
-      localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify(logoCache));
-      console.log('Persisting logo cache to storage...');
-      
-      // Clean up old entries before saving
-      let updatedCount = 0;
-      Object.keys(logoCache).forEach(key => {
-        const entry = logoCache[key];
-        if (entry && entry.timestamp && Date.now() - entry.timestamp > LOGO_CACHE_EXPIRY) {
-          delete logoCache[key];
-          updatedCount++;
-        }
-      });
-      
-      if (updatedCount > 0) {
-        console.log(`Updated ${updatedCount} entries in local storage cache`);
-      }
-    }
+    img.src = url;
+  });
+};
+
+/**
+ * Save memory cache to session storage
+ */
+const persistMemoryToSession = (): void => {
+  try {
+    const entries: Record<string, LogoCacheEntry> = {};
+    memoryCache.forEach((entry, key) => {
+      entries[key] = entry;
+    });
+    
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(entries));
   } catch (e) {
-    console.warn('Error saving to logo cache:', e);
+    console.warn('Failed to persist memory cache to session:', e);
   }
 };
 
 /**
- * Prefetch app logos
+ * Batch save important logos to local storage for persistence
  */
-export const prefetchAppLogos = async (
-  apps: AppData[],
-  silent: boolean = false,
-  safariSpecific: boolean = false
-): Promise<void> => {
-  // Special path for Safari
-  const isSafari = isSafariBrowser();
-  
-  if ((safariSpecific && isIOSOrMacOS()) || isSafari) {
-    console.log("Prefetching icons specifically for Safari/iOS/macOS");
+const persistToLocalStorage = (): void => {
+  try {
+    const currentEntries: Record<string, LogoCacheEntry> = {};
     
-    for (const app of apps) {
-      try {
-        const domain = app.url.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
-        
-        // Try different services that work well with Safari
-        const sources = [
-          `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
-          `https://icon.horse/icon/${domain}?size=large`,
-          `https://icons.duckduckgo.com/ip3/${domain}.ico`,
-          `https://api.faviconkit.com/${domain}/128`,
-          `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${app.url}&size=128`,
-          `https://logo.clearbit.com/${domain}`
-        ];
-        
-        let foundValid = false;
-        
-        // Try each source in sequence
-        for (const source of sources) {
-          if (foundValid) break;
-          
-          try {
-            const isValid = await isValidImage(source);
-            if (isValid) {
-              registerSuccessfulLogo(app.id, source, domain);
-              // Add to Safari cache
-              safariLogos[app.id] = {
-                url: source,
-                domain,
-                timestamp: Date.now()
-              };
-              foundValid = true;
-            }
-          } catch (err) {
-            continue; // Try next source
-          }
-        }
-        
-        // Persist Safari cache after processing each batch
-        if (Object.keys(safariLogos).length > 0) {
-          localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
-        }
-      } catch (e) {
-        console.warn(`Error prefetching Safari icon for ${app.name}:`, e);
+    // First try to load existing entries
+    try {
+      const existingData = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (existingData) {
+        Object.assign(currentEntries, JSON.parse(existingData));
       }
+    } catch (e) {
+      console.warn('Error loading existing local cache during persist:', e);
     }
     
-    if (!silent) {
-      toast.success('Iconos precargados correctamente para Safari');
-    }
-    
-    return;
-  }
-
-  // Standard path for icon prefetching
-  if (!silent) {
-    toast.loading('Precargando iconos...');
-  }
-  
-  try {
-    await fixAppIcons(apps);
-    
-    if (!silent) {
-      toast.success('Iconos precargados correctamente');
-    }
-  } catch (e) {
-    console.error('Error prefetching icons:', e);
-    
-    if (!silent) {
-      toast.error('Error al precargar los iconos');
-    }
-  }
-};
-
-/**
- * Explicitly save all cached logos to localStorage
- */
-export const persistAllLogos = (): void => {
-  try {
-    console.log('Persisting all logo cache to storage...');
-    
-    const cacheData = localStorage.getItem(LOGO_CACHE_KEY);
-    const logoCache = cacheData ? JSON.parse(cacheData) : {};
-    
-    // Add all session logos to the persistent cache
-    let updateCount = 0;
-    Object.keys(sessionLogos).forEach(appId => {
-      const sessionLogo = sessionLogos[appId];
-      if (sessionLogo && sessionLogo.url) {
-        logoCache[appId] = {
-          url: sessionLogo.url,
-          domain: sessionLogo.domain || '',
-          timestamp: Date.now()
-        };
-        updateCount++;
+    // Get only validated entries from memory to persist
+    let updatedCount = 0;
+    memoryCache.forEach((entry, key) => {
+      if (entry.validated) {
+        currentEntries[key] = entry;
+        updatedCount++;
       }
     });
     
-    localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify(logoCache));
-    console.log(`Updated ${updateCount} entries in local storage cache`);
-    
-    // Also persist Safari logos if relevant
-    if (isSafariBrowser() && Object.keys(safariLogos).length > 0) {
-      localStorage.setItem(SAFARI_LOGOS_KEY, JSON.stringify(safariLogos));
-      console.log(`Persisted ${Object.keys(safariLogos).length} Safari-specific logos`);
+    // Limit cache size if too large
+    const entries = Object.entries(currentEntries);
+    if (entries.length > 500) {
+      // Keep most recent entries
+      const sorted = entries.sort(([, a], [, b]) => b.timestamp - a.timestamp);
+      const trimmed = sorted.slice(0, 500);
+      const trimmedEntries = Object.fromEntries(trimmed);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(trimmedEntries));
+      console.log(`Trimmed local storage cache from ${entries.length} to 500 entries`);
+    } else {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentEntries));
+      console.log(`Updated ${updatedCount} entries in local storage cache`);
     }
+    
+    saveMetadata();
   } catch (e) {
-    console.error('Error persisting logo cache:', e);
+    console.error('Failed to persist to local storage:', e);
   }
 };
 
-// Save all logos to localStorage when window is unloaded
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', persistAllLogos);
-}
+/**
+ * Find better quality alternative icon URLs for common domains
+ */
+const getBetterQualityIconUrl = (app: AppData): string | null => {
+  const domain = extractDomain(app.url);
+  
+  // Map of known high-quality icon URLs for common domains
+  const highQualityIcons: Record<string, string> = {
+    // Productivity
+    'notion.so': 'https://www.notion.so/images/favicon.ico',
+    'slack.com': 'https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png',
+    'trello.com': 'https://trello.com/favicon.ico',
+    'airtable.com': 'https://airtable.com/favicon.ico',
+    'monday.com': 'https://monday.com/favicon.ico',
+    'clickup.com': 'https://clickup.com/landing/images/logo-clickup.svg',
+    
+    // Creative
+    'canva.com': 'https://static.canva.com/static/images/favicon-1.ico',
+    'figma.com': 'https://static.figma.com/app/icon/1/favicon.svg',
+    'leonardo.ai': 'https://leonardo.ai/favicon-32x32.png',
+    
+    // AI tools
+    'openai.com': 'https://openai.com/favicon.ico',
+    'jasper.ai': 'https://assets-global.website-files.com/60e5f2de011b86acebc30db7/60e5f2de011b86c429c30e1e_Favicon%2032.png',
+    'anthropic.com': 'https://www.anthropic.com/images/favicon.ico',
+    'gemini.google.com': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_192px.png',
+    
+    // Social  
+    'linkedin.com': 'https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca',
+    'twitter.com': 'https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc727a.png',
+    'instagram.com': 'https://static.cdninstagram.com/rsrc.php/v3/yb/r/lswP1OF1o6P.png',
+    
+    // Video  
+    'youtube.com': 'https://www.youtube.com/s/desktop/3cbce0d4/img/favicon_144x144.png',
+    'vimeo.com': 'https://i.vimeocdn.com/favicon/main-touch_180',
+    'loom.com': 'https://cdn.loom.com/assets/favicons/favicon-192.png',
+  };
+  
+  if (domain && highQualityIcons[domain]) {
+    return highQualityIcons[domain];
+  }
+  
+  return null;
+};
+
+/**
+ * Get cached logo URL for an app
+ * @param app The app to get a logo for
+ * @returns The cached logo URL or default icon
+ */
+export const getCachedLogo = (app: AppData): string => {
+  // Check in-memory cache first (fastest)
+  if (memoryCache.has(app.id)) {
+    const cached = memoryCache.get(app.id);
+    if (cached && cached.url) {
+      return cached.url;
+    }
+  }
+  
+  // Try to find better quality icon from our mapping
+  const highQualityIcon = getBetterQualityIconUrl(app);
+  if (highQualityIcon) {
+    const domain = extractDomain(app.url);
+    memoryCache.set(app.id, {
+      appId: app.id,
+      url: highQualityIcon,
+      timestamp: Date.now(),
+      validated: false,
+      domain,
+      source: 'high-quality-map'
+    });
+    
+    return highQualityIcon;
+  }
+  
+  // If app already has a valid icon that's not a placeholder, use it
+  if (app.icon && !app.icon.includes('placeholder')) {
+    // Store this in our cache for future reference
+    const domain = extractDomain(app.url);
+    memoryCache.set(app.id, {
+      appId: app.id,
+      url: app.icon,
+      timestamp: Date.now(),
+      validated: false,  // Will be validated on use
+      domain,
+      source: 'app-data'
+    });
+    
+    return app.icon;
+  }
+  
+  // Return default if nothing found
+  return DEFAULT_ICON;
+};
+
+/**
+ * Register a successfully loaded logo
+ * This confirms the logo works and should be cached permanently
+ */
+export const registerSuccessfulLogo = (
+  appId: string, 
+  logoUrl: string, 
+  domain: string,
+  source = 'validated'
+): void => {
+  if (!appId || !logoUrl || logoUrl.includes('placeholder')) return;
+
+  // Update memory cache
+  memoryCache.set(appId, {
+    appId,
+    url: logoUrl,
+    timestamp: Date.now(),
+    validated: true,
+    domain,
+    source
+  });
+  
+  // Immediately persist to session storage
+  persistMemoryToSession();
+  
+  // Periodically save to local storage (throttled)
+  if (Math.random() < 0.1) { // 10% chance on each registration
+    persistToLocalStorage();
+  }
+};
+
+/**
+ * Prefetch important app logos
+ * @param apps List of apps to prefetch logos for
+ */
+export const prefetchAppLogos = async (apps: AppData[]): Promise<void> => {
+  console.log(`Prefetching logos for ${apps.length} apps...`);
+  
+  // Process in small batches to avoid blocking the UI
+  const batchSize = 10;
+  let validatedCount = 0;
+
+  for (let i = 0; i < apps.length; i += batchSize) {
+    const batch = apps.slice(i, i + batchSize);
+    
+    await Promise.all(batch.map(async (app) => {
+      try {
+        // Start with what we already have
+        let logoUrl = getCachedLogo(app);
+        
+        // If it's a placeholder, try the app's icon
+        if (logoUrl === DEFAULT_ICON && app.icon) {
+          logoUrl = app.icon;
+        }
+        
+        // Validate the URL
+        const isValid = await validateImageUrl(logoUrl);
+        
+        if (isValid) {
+          const domain = extractDomain(app.url);
+          registerSuccessfulLogo(app.id, logoUrl, domain, 'prefetch');
+          validatedCount++;
+        }
+      } catch (e) {
+        console.warn(`Error prefetching logo for ${app.name}:`, e);
+      }
+    }));
+    
+    // Small delay between batches to avoid blocking UI
+    if (i + batchSize < apps.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  
+  console.log(`Prefetch complete: ${validatedCount} logos validated`);
+  
+  // Save to persistent storage
+  persistToLocalStorage();
+};
+
+/**
+ * Force persist all current logo cache to local storage
+ * Called when user navigates away or closes the app
+ */
+export const persistAllLogos = (): void => {
+  console.log('Persisting all logo cache to storage...');
+  persistToLocalStorage();
+};
+
+/**
+ * Clear all caches (for testing or troubleshooting)
+ */
+export const clearLogoCache = (): void => {
+  memoryCache.clear();
+  try {
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(METADATA_KEY);
+  } catch (e) {
+    console.error('Error clearing caches:', e);
+  }
+};
+
+// Initialize caches on service load
+initializeCaches();
+
+// Set up persistence when user leaves the page
+window.addEventListener('beforeunload', persistAllLogos);
