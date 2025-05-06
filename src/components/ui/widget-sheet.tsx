@@ -12,7 +12,7 @@ const WidgetSheetTrigger = SheetPrimitive.Trigger
 
 const WidgetSheetClose = SheetPrimitive.Close
 
-// Custom overlay that doesn't darken the background
+// Fully transparent overlay that doesn't darken the background
 const WidgetSheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -29,11 +29,11 @@ const WidgetSheetOverlay = React.forwardRef<
 WidgetSheetOverlay.displayName = "WidgetSheetOverlay"
 
 const widgetSheetVariants = cva(
-  "fixed z-50 bg-background shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-150 data-[state=open]:duration-150",
+  "fixed z-50 bg-background shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-100 data-[state=open]:duration-100",
   {
     variants: {
       position: {
-        center: "left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 rounded-lg data-[state=closed]:slide-out-to-center data-[state=open]:slide-in-from-center",
+        center: "left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 rounded-lg data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         bottom: "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
@@ -57,7 +57,7 @@ const WidgetSheetContent = React.forwardRef<
   WidgetSheetContentProps
 >(({ position = "center", className, children, hideCloseButton = false, ...props }, ref) => {
   const isMobile = useIsMobile();
-  const mobilePosition = isMobile ? "bottom" : position;
+  const mobilePosition = isMobile ? "center" : position;
   
   return (
     <SheetPrimitive.Portal>
@@ -67,8 +67,8 @@ const WidgetSheetContent = React.forwardRef<
         className={cn(
           widgetSheetVariants({ position: mobilePosition }),
           className,
-          isMobile && position === "center" ? "w-full max-h-[90vh] overflow-auto" : "",
-          !isMobile && position === "center" ? "max-w-[400px] max-h-[85vh] overflow-auto" : ""
+          isMobile ? "max-w-[95%] max-h-[90vh] overflow-auto" : "",
+          !isMobile ? "max-w-[400px] max-h-[85vh] overflow-auto" : ""
         )}
         {...props}
       >
@@ -93,13 +93,13 @@ const injectKeyframes = () => {
       const style = document.createElement("style");
       style.id = styleId;
       style.innerHTML = `
-        @keyframes slide-in-from-center {
-          from { opacity: 0; transform: translate(-50%, -45%); }
-          to { opacity: 1; transform: translate(-50%, -50%); }
+        @keyframes zoom-in-95 {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        @keyframes slide-out-to-center {
-          from { opacity: 1; transform: translate(-50%, -50%); }
-          to { opacity: 0; transform: translate(-50%, -45%); }
+        @keyframes zoom-out-95 {
+          from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
         }
       `;
       document.head.appendChild(style);

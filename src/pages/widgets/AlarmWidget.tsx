@@ -30,7 +30,7 @@ const AlarmWidget = () => {
       }}
     >
       <WidgetSheetContent 
-        className={`p-0 border shadow-xl ${isMobile ? 'w-full rounded-t-xl' : 'rounded-xl'}`}
+        className={`p-0 border shadow-xl ${isMobile ? 'rounded-xl' : 'rounded-xl'}`}
         hideCloseButton
       >
         <VisuallyHidden>
