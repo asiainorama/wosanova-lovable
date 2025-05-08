@@ -6,103 +6,124 @@ import './index.css';
 import './styles/app-styles.css';
 import { toast } from "sonner";
 
-// Register service worker for PWA support with better logging
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      console.log('Registering service worker...');
-      
-      // Unregister any existing service workers first to ensure clean installation
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (let registration of registrations) {
-        await registration.unregister();
-        console.log('Unregistered old service worker');
-      }
-      
-      // Register new service worker
-      const registration = await navigator.serviceWorker.register('/service-worker.js', {
-        scope: '/',
-        updateViaCache: 'none' // Bypass cache for service worker updates
-      });
-      
-      console.log('Service worker registered successfully:', registration.scope);
-      
-      // Directamente comprobar si la aplicación ya está instalada
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('La aplicación ya está instalada');
-        if (registration.active) {
-          registration.active.postMessage({
-            type: 'APP_INSTALLED'
-          });
-        }
-      }
-      
-      // Listen for service worker updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        console.log('New service worker installing:', newWorker?.state);
-        
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            console.log('Service worker state changed to:', newWorker.state);
-            
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('New service worker installed, ready to activate');
-              // Notificar al usuario sobre la actualización
-              toast.info("Nueva actualización disponible. Recarga para aplicarla.", {
-                action: {
-                  label: "Actualizar",
-                  onClick: () => window.location.reload()
-                },
-                duration: 10000
-              });
-            }
-            
-            if (newWorker.state === 'activated') {
-              console.log('Service worker activated');
-              // Intentar instalar la app automáticamente si no está instalada
-              if (!window.matchMedia('(display-mode: standalone)').matches) {
-                newWorker.postMessage({
-                  type: 'INSTALL_APP'
-                });
-              }
-            }
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Service worker registration failed:', error);
+// Función para registrar el service worker con mejor manejo de errores
+const registerServiceWorker = async () => {
+  try {
+    console.log('Registrando service worker...');
+    
+    // Forzar la actualización del service worker primero
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (let registration of registrations) {
+      await registration.unregister();
+      console.log('Service worker anterior desregistrado');
     }
     
-    // Listen for service worker controller changes
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('Service worker controller changed - page will reload');
+    // Registrar nuevo service worker con opciones mejoradas
+    const registration = await navigator.serviceWorker.register('/service-worker.js', {
+      scope: '/',
+      updateViaCache: 'none', // No usar caché para actualizaciones
+      type: 'module' // Usar como módulo ES para mejor compatibilidad
     });
     
-    // Listen for service worker messages
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      console.log('Message from service worker:', event.data);
+    console.log('Service worker registrado correctamente:', registration.scope);
+    
+    // Comprobar si la app ya está instalada
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        (window.navigator as any).standalone === true) {
+      console.log('Aplicación ya instalada');
+      if (registration.active) {
+        registration.active.postMessage({
+          type: 'APP_INSTALLED'
+        });
+      }
+    }
+    
+    // Escuchar actualizaciones del service worker
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+      console.log('Nuevo service worker instalándose:', newWorker?.state);
       
-      // Handle specific messages
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          console.log('Estado del service worker cambiado a:', newWorker.state);
+          
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('Nuevo service worker instalado, listo para activar');
+            // Notificar al usuario sobre la actualización
+            toast.info("Nueva actualización disponible", {
+              action: {
+                label: "Actualizar",
+                onClick: () => {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  window.location.reload();
+                }
+              },
+              duration: 10000
+            });
+          }
+          
+          if (newWorker.state === 'activated') {
+            console.log('Service worker activado');
+            // Intentar instalar la app automáticamente si no está instalada
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                (window.navigator as any).standalone === true;
+            if (!isStandalone) {
+              newWorker.postMessage({
+                type: 'INSTALL_APP'
+              });
+            }
+          }
+        });
+      }
+    });
+    
+    // Escuchar cambios en el controlador del service worker
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('Service worker controller cambiado - la página se recargará');
+    });
+    
+    // Escuchar mensajes del service worker
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      console.log('Mensaje del service worker:', event.data);
+      
+      // Manejar mensajes específicos
       if (event.data && event.data.type === 'APP_INSTALLED') {
         toast.success("¡Aplicación instalada correctamente!");
       }
       
       if (event.data && event.data.type === 'INSTALLATION_STARTED') {
-        toast.info("Instalación en proceso...");
+        toast.loading("Instalación en proceso...", {
+          duration: 3000
+        });
+      }
+      
+      if (event.data && event.data.type === 'SERVICE_WORKER_ACTIVE') {
+        console.log('Service Worker activo y listo para usar');
       }
     });
     
-    // Add special handler for 'appinstalled' event
+    return registration;
+  } catch (error) {
+    console.error('Error al registrar el service worker:', error);
+    return null;
+  }
+};
+
+// Registrar service worker para soporte PWA con mejor manejo
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    registerServiceWorker();
+    
+    // Añadir detector para evento 'appinstalled'
     window.addEventListener('appinstalled', (event) => {
-      console.log('App was installed', event);
+      console.log('App instalada', event);
       toast.success("¡Aplicación instalada correctamente!");
     });
     
-    // Add beforeinstallprompt listener at the window level
+    // Añadir listener para beforeinstallprompt a nivel de ventana
     window.addEventListener('beforeinstallprompt', (event) => {
-      console.log('Before install prompt fired at window level');
-      // No prevenir el comportamiento predeterminado
+      console.log('Before install prompt ejecutado a nivel de ventana');
+      // No prevenir comportamiento predeterminado para permitir la instalación
     });
   });
 }
