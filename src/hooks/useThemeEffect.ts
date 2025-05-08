@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { ThemeMode } from "@/contexts/ThemeContext";
-import { getEffectiveTheme, applyThemeToDocument } from '@/utils/themeUtils';
 
 /**
  * Hook to handle various theme-related side effects
@@ -9,6 +8,7 @@ import { getEffectiveTheme, applyThemeToDocument } from '@/utils/themeUtils';
 export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
   // Apply theme when document visibility changes (to prevent theme from resetting on resume)
   useEffect(() => {
+    // Guard for SSR or non-browser environments
     if (typeof document === 'undefined') return;
     
     const handleVisibilityChange = () => {
@@ -26,37 +26,43 @@ export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
 
   // Listen for system preference changes
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Guard for SSR or non-browser environments
+    if (typeof window === 'undefined' || !window.matchMedia) return;
     
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleChange = () => {
-      // Only reapply if currently in system mode
-      if (mode === 'system') {
-        applyTheme();
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      const handleChange = () => {
+        // Only reapply if currently in system mode
+        if (mode === 'system') {
+          applyTheme();
+        }
+      };
+      
+      // Add event listener with proper feature detection
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange);
+        return () => {
+          mediaQuery.removeEventListener('change', handleChange);
+        };
+      } else if (mediaQuery.addListener) {
+        // Fallback for older browsers
+        mediaQuery.addListener(handleChange);
+        return () => {
+          mediaQuery.removeListener(handleChange);
+        };
       }
-    };
-    
-    // Add event listener
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else {
-      // Fallback for older browsers
-      mediaQuery.addListener(handleChange);
+    } catch (e) {
+      console.error("Error setting up media query listener:", e);
     }
     
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        // Fallback for older browsers
-        mediaQuery.removeListener(handleChange);
-      }
-    };
+    // Return empty cleanup function if we couldn't set up listeners
+    return () => {};
   }, [mode, applyTheme]);
 
   // Special handler for page transitions
   useEffect(() => {
+    // Guard for SSR or non-browser environments
     if (typeof window === 'undefined') return;
     
     // This helps ensure theme consistency when navigating between pages

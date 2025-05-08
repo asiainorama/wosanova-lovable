@@ -12,19 +12,26 @@ interface ThemeContextType {
   toggleMode: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+// Create a default context value to prevent null context issues
+const defaultContextValue: ThemeContextType = {
+  mode: 'system',
+  setMode: () => {},
+  toggleMode: () => {}
+};
+
+const ThemeContext = createContext<ThemeContextType>(defaultContextValue);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
   const [mode, setModeState] = useState<ThemeMode>(() => {
-    if (typeof window === 'undefined') {
-      return 'system'; // Default for SSR
+    // Guard for SSR or non-browser environments
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return 'system';
     }
     
     try {
       // Get saved preference from localStorage
       const savedMode = localStorage.getItem('themeMode') as ThemeMode;
-      console.log("Initial theme mode from localStorage:", savedMode);
       
       // If a valid mode is saved, use it
       if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
@@ -32,7 +39,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Default to system preference
-      console.log("No valid saved preference, defaulting to system");
       return 'system';
     } catch (e) {
       console.error("Error reading theme from localStorage:", e);
@@ -42,17 +48,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Function to actually apply theme changes to DOM
   const applyTheme = useCallback(() => {
-    if (typeof window === 'undefined') return; // Guard for SSR
-    
-    console.log("Applying theme based on mode:", mode);
+    // Guard for SSR or non-browser environments
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
     try {
       // Save selection to localStorage
-      localStorage.setItem('themeMode', mode);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('themeMode', mode);
+      }
       
       // Determine the effective theme (accounting for system preference)
       const effectiveTheme = getEffectiveTheme(mode);
-      console.log("Effective theme to apply:", effectiveTheme);
       
       // Apply theme to document elements
       applyThemeToDocument(effectiveTheme);
@@ -66,22 +72,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Apply theme when component mounts or when theme state changes
   useEffect(() => {
-    if (typeof window === 'undefined') return; // Guard for SSR
+    // Guard for SSR or non-browser environments
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
-    console.log("ThemeContext effect running - applying theme:", {mode});
     applyTheme();
   }, [mode, applyTheme]);
 
   // Wrapper functions to update theme state
   const setMode = useCallback((newMode: ThemeMode) => {
-    console.log("Setting mode to:", newMode);
     setModeState(newMode);
   }, []);
 
   const toggleMode = useCallback(() => {
     const effectiveTheme = getEffectiveTheme(mode);
     const newMode = effectiveTheme === 'light' ? 'dark' : 'light';
-    console.log("Toggle mode from", effectiveTheme, "to", newMode);
     setModeState(newMode);
   }, [mode]);
 
@@ -99,9 +103,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 };

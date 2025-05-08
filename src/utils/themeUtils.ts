@@ -9,14 +9,19 @@ import { ThemeMode } from "@/contexts/ThemeContext";
  * Get the effective theme (light or dark) based on mode and system preference
  */
 export const getEffectiveTheme = (mode: ThemeMode): 'light' | 'dark' => {
-  if (typeof window === 'undefined') {
+  // Guard for SSR or non-browser environments
+  if (typeof window === 'undefined' || !window.matchMedia) {
     return 'light'; // Default for SSR
   }
   
   if (mode === 'system') {
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+    try {
+      // Check system preference
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+    } catch (e) {
+      console.error("Error checking system preference:", e);
     }
     return 'light';
   }
@@ -28,7 +33,8 @@ export const getEffectiveTheme = (mode: ThemeMode): 'light' | 'dark' => {
  * Apply theme to document by adding/removing classes and setting CSS variables
  */
 export const applyThemeToDocument = (effectiveTheme: 'light' | 'dark'): void => {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  // Guard for SSR or non-browser environments
+  if (typeof document === 'undefined') {
     return; // Don't try to access document in SSR
   }
   
