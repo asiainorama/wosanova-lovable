@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,6 +16,16 @@ const InstallPrompt = () => {
   const [isAndroid, setIsAndroid] = useState(false);
 
   useEffect(() => {
+    // Check if the app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        (window.navigator as any).standalone === true;
+    
+    if (isStandalone) {
+      console.log("App is already installed");
+      setShowPrompt(false);
+      return;
+    }
+
     // Check platform
     const isiOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     const isMacOSDevice = /Mac/.test(navigator.userAgent) && !isiOSDevice;
@@ -38,45 +48,22 @@ const InstallPrompt = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Check if the app is already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                        (window.navigator as any).standalone === true;
-    
-    if (isStandalone) {
-      console.log("App is already installed");
-      setShowPrompt(false);
-    } else {
-      // For desktop browsers, we need to be more aggressive about showing the prompt
-      if (!isiOSDevice && !isMacOSDevice) {
-        // Show the prompt after a short delay on desktop
-        setTimeout(() => {
-          // Only show if we haven't captured the beforeinstallprompt event
-          if (!installPrompt) {
-            console.log("No install prompt event detected, showing manual prompt for desktop");
-            setShowPrompt(true);
-          }
-        }, 3000);
-      } else if (isiOSDevice || isMacOSDevice) {
-        // For iOS and macOS, show a custom prompt
-        setTimeout(() => {
-          console.log("iOS/macOS detected, showing custom install prompt");
+    // Show prompt based on platform if not already shown by beforeinstallprompt
+    if (sessionStorage.getItem('installPromptDismissed') !== 'true') {
+      // If we haven't shown the prompt yet
+      setTimeout(() => {
+        // Only show if we haven't captured the beforeinstallprompt event
+        if (!showPrompt) {
+          console.log(`${isiOSDevice ? 'iOS' : isMacOSDevice ? 'macOS' : isAndroidDevice ? 'Android' : 'Desktop'} detected, showing custom install prompt`);
           setShowPrompt(true);
-        }, 3000);
-      }
-    }
-
-    // For Safari PWA detection
-    if (isiOSDevice || isMacOSDevice) {
-      // Check if the app is running in standalone mode (PWA)
-      if ((window.navigator as any).standalone === true) {
-        setShowPrompt(false);
-      }
+        }
+      }, 2000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [installPrompt]);
+  }, [showPrompt]);
 
   const handleInstall = async () => {
     if (installPrompt) {
@@ -89,10 +76,12 @@ const InstallPrompt = () => {
         
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
+          toast.success("¡Instalación iniciada!");
           // Hide the prompt
           setShowPrompt(false);
         } else {
           console.log('User dismissed the install prompt');
+          toast.error("Instalación cancelada");
           // Only hide for the current session
           setShowPrompt(false);
         }
@@ -101,19 +90,25 @@ const InstallPrompt = () => {
         setInstallPrompt(null);
       } catch (e) {
         console.error('Error showing install prompt:', e);
+        toast.error("Error al instalar la app");
       }
     } else if (isIOS || isMacOS) {
-      // For iOS/macOS, we just acknowledge the instructions since there's no API to trigger installation
-      setShowPrompt(false);
+      // For iOS/macOS, we just provide instructions
+      toast.info("Sigue las instrucciones para añadir esta app a tu pantalla de inicio");
+      // Keep the prompt open so they can follow the instructions
+    } else if (isAndroid) {
+      // Try to use the manifest directly for Android
+      toast.info("Sigue las instrucciones para instalar la app");
     } else {
-      // For other browsers, try opening the manifest directly
+      // For other browsers without beforeinstallprompt support
       try {
+        // Try to open the manifest
         const manifestUrl = `${window.location.origin}/manifest.json`;
-        const a = document.createElement('a');
-        a.href = manifestUrl;
-        a.click();
+        window.open(manifestUrl, '_blank');
+        toast.info("Añade esta app a tu pantalla de inicio desde el menú del navegador");
       } catch (e) {
         console.error('Error opening manifest:', e);
+        toast.error("Tu navegador no soporta la instalación directa");
       }
     }
   };

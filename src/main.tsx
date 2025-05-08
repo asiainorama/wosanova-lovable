@@ -4,11 +4,20 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './styles/app-styles.css';
+import { toast } from "sonner";
 
 // Register service worker for PWA support with better logging
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
+      // Unregister any existing service workers first to ensure clean installation
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+        console.log('Unregistered old service worker');
+      }
+      
+      // Register new service worker
       const registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/',
         updateViaCache: 'none' // Bypass cache for service worker updates
@@ -31,7 +40,13 @@ if ('serviceWorker' in navigator) {
             
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               console.log('New service worker installed, ready to activate');
-              // Notify the user about the update if needed
+              // Notify the user about the update
+              toast.info("Nueva actualización disponible. Recarga para aplicarla.", {
+                action: {
+                  label: "Actualizar",
+                  onClick: () => window.location.reload()
+                }
+              });
             }
           });
         }

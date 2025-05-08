@@ -1,10 +1,11 @@
+
 import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Store, Database } from 'lucide-react';
+import { Store, Database, Download } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +14,7 @@ const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
   const [iconCount, setIconCount] = useState<number>(0);
+  const [showInstallBanner, setShowInstallBanner] = useState<boolean>(false);
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
@@ -40,6 +42,11 @@ const Index = () => {
         console.error("Error checking icon count:", err);
       }
     };
+    
+    // Check if app is installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    setShowInstallBanner(!isStandalone);
     
     // Check initially and refresh every minute
     checkStoredIcons();

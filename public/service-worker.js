@@ -1,7 +1,7 @@
 
 // Service Worker for WosaNova PWA
 
-const CACHE_NAME = 'wosanova-cache-v2';
+const CACHE_NAME = 'wosanova-cache-v3'; // Versión actualizada del caché
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -52,55 +52,60 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache or network with improved strategy
 self.addEventListener('fetch', (event) => {
-  // Handle app logo requests with network-first, cache fallback strategy
-  if (event.request.url.includes('/app-logos/') || 
-      event.request.destination === 'image' || 
-      event.request.url.includes('supabase.co')) {
+  // Skip cross-origin requests to increase performance
+  if (event.request.url.startsWith(self.location.origin) || 
+      event.request.url.includes('new.wosanova.com')) {
     
-    event.respondWith(
-      fetch(event.request.clone())
-        .then(response => {
-          // Cache successful responses
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try from cache
-          return caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || Promise.reject('Failed to fetch and no cache available');
-          });
-        })
-    );
-  } else {
-    // For other assets use cache-first strategy
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        if (response) {
-          return response; // Cache hit
-        }
-        
-        // Cache miss, fetch from network
-        return fetch(event.request.clone())
+    // Handle app logo requests with network-first, cache fallback strategy
+    if (event.request.url.includes('/app-logos/') || 
+        event.request.destination === 'image' || 
+        event.request.url.includes('supabase.co')) {
+      
+      event.respondWith(
+        fetch(event.request.clone())
           .then(response => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+            // Cache successful responses
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+              });
             }
-
-            // Cache the response for future
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-
             return response;
-          });
-      })
-    );
+          })
+          .catch(() => {
+            // If network fails, try from cache
+            return caches.match(event.request).then(cachedResponse => {
+              return cachedResponse || Promise.reject('Failed to fetch and no cache available');
+            });
+          })
+      );
+    } else {
+      // For other assets use cache-first strategy
+      event.respondWith(
+        caches.match(event.request).then(response => {
+          if (response) {
+            return response; // Cache hit
+          }
+          
+          // Cache miss, fetch from network
+          return fetch(event.request.clone())
+            .then(response => {
+              if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+              }
+
+              // Cache the response for future
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+              return response;
+            });
+        })
+      );
+    }
   }
 });
 
