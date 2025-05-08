@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -41,7 +42,7 @@ const InstallPrompt = () => {
       e.preventDefault();
       // Stash the event so it can be triggered later
       setInstallPrompt(e as BeforeInstallPromptEvent);
-      console.log("Install prompt captured");
+      console.log("Install prompt captured", e);
       // Show the prompt to the user
       setShowPrompt(true);
     };
@@ -49,25 +50,38 @@ const InstallPrompt = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Show prompt based on platform if not already shown by beforeinstallprompt
-    if (sessionStorage.getItem('installPromptDismissed') !== 'true') {
+    const checkInstallStatus = () => {
+      if (installPrompt) {
+        console.log("Install prompt already captured");
+        setShowPrompt(true);
+        return;
+      }
+
       // If we haven't shown the prompt yet
-      setTimeout(() => {
-        // Only show if we haven't captured the beforeinstallprompt event
-        if (!showPrompt) {
-          console.log(`${isiOSDevice ? 'iOS' : isMacOSDevice ? 'macOS' : isAndroidDevice ? 'Android' : 'Desktop'} detected, showing custom install prompt`);
-          setShowPrompt(true);
-        }
-      }, 2000);
-    }
+      if (!showPrompt && sessionStorage.getItem('installPromptDismissed') !== 'true') {
+        console.log(`${isiOSDevice ? 'iOS' : isMacOSDevice ? 'macOS' : isAndroidDevice ? 'Android' : 'Desktop'} detected, showing install prompt`);
+        setShowPrompt(true);
+      }
+    };
+
+    // Wait a bit for the beforeinstallprompt event to fire first
+    setTimeout(checkInstallStatus, 2000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [showPrompt]);
+  }, [installPrompt, showPrompt]);
 
   const handleInstall = async () => {
+    console.log("Install button clicked", { 
+      hasInstallPrompt: !!installPrompt, 
+      isIOS, 
+      isMacOS, 
+      isAndroid 
+    });
+
     if (installPrompt) {
-      // Show the install prompt
+      // This is the standard way for Chrome/Edge and other browsers that support the beforeinstallprompt
       try {
         await installPrompt.prompt();
         
@@ -77,6 +91,18 @@ const InstallPrompt = () => {
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
           toast.success("¡Instalación iniciada!");
+          
+          // Trigger manifest installation directly
+          const manifestUrl = `${window.location.origin}/manifest.json`;
+          try {
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = manifestUrl;
+            document.head.appendChild(manifestLink);
+          } catch (e) {
+            console.error('Error adding manifest link:', e);
+          }
+          
           // Hide the prompt
           setShowPrompt(false);
         } else {
@@ -93,21 +119,82 @@ const InstallPrompt = () => {
         toast.error("Error al instalar la app");
       }
     } else if (isIOS || isMacOS) {
-      // For iOS/macOS, we just provide instructions
-      toast.info("Sigue las instrucciones para añadir esta app a tu pantalla de inicio");
-      // Keep the prompt open so they can follow the instructions
+      // For iOS/macOS, direct users to installation and make it obvious
+      toast.success("Añade esta app a tu pantalla de inicio", {
+        description: "Sigue las instrucciones para instalar",
+        action: {
+          label: "Entendido",
+          onClick: () => console.log("iOS/macOS instruction acknowledged")
+        },
+        duration: 10000
+      });
+      
+      // Force manifest installation for iOS
+      try {
+        const manifestUrl = `${window.location.origin}/manifest.json`;
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestUrl;
+        document.head.appendChild(manifestLink);
+        
+        // Add Apple meta tags dynamically if not already present
+        if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+          const appleCapable = document.createElement('meta');
+          appleCapable.name = 'apple-mobile-web-app-capable';
+          appleCapable.content = 'yes';
+          document.head.appendChild(appleCapable);
+        }
+      } catch (e) {
+        console.error('Error adding manifest link for iOS:', e);
+      }
     } else if (isAndroid) {
-      // Try to use the manifest directly for Android
-      toast.info("Sigue las instrucciones para instalar la app");
+      // Force installation on Android
+      try {
+        // Try to trigger installation
+        const manifestUrl = `${window.location.origin}/manifest.json`;
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestUrl;
+        document.head.appendChild(manifestLink);
+        
+        toast.success("Instalando la aplicación", {
+          description: "Espera mientras procesamos la instalación",
+          duration: 5000
+        });
+        
+        // Reload page to trigger manifest detection
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (e) {
+        console.error('Error triggering installation on Android:', e);
+        toast.error("No se pudo iniciar la instalación");
+      }
     } else {
       // For other browsers without beforeinstallprompt support
       try {
-        // Try to open the manifest
+        // Try to force installation via manifest
         const manifestUrl = `${window.location.origin}/manifest.json`;
-        window.open(manifestUrl, '_blank');
-        toast.info("Añade esta app a tu pantalla de inicio desde el menú del navegador");
+        
+        // Add manifest link if not present
+        if (!document.querySelector('link[rel="manifest"]')) {
+          const manifestLink = document.createElement('link');
+          manifestLink.rel = 'manifest';
+          manifestLink.href = manifestUrl;
+          document.head.appendChild(manifestLink);
+        }
+        
+        toast.success("Instalando aplicación", {
+          description: "La instalación iniciará en breve",
+          duration: 5000
+        });
+        
+        // Refresh to trigger manifest detection
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } catch (e) {
-        console.error('Error opening manifest:', e);
+        console.error('Error forcing installation:', e);
         toast.error("Tu navegador no soporta la instalación directa");
       }
     }
@@ -176,7 +263,7 @@ const InstallPrompt = () => {
       
       <Button 
         onClick={handleInstall} 
-        className="w-full flex items-center justify-center gap-2"
+        className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
       >
         <Download size={16} />
         <span>INSTALAR</span>

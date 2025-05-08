@@ -10,6 +10,8 @@ import { toast } from "sonner";
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
+      console.log('Registering service worker...');
+      
       // Unregister any existing service workers first to ensure clean installation
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (let registration of registrations) {
@@ -25,9 +27,16 @@ if ('serviceWorker' in navigator) {
       
       console.log('Service worker registered successfully:', registration.scope);
       
+      // Send a message to the service worker to check installation status
+      if (registration.active) {
+        registration.active.postMessage({
+          type: 'CHECK_INSTALL_STATUS'
+        });
+      }
+      
       // Check for updates immediately and periodically
       registration.update();
-      setInterval(() => registration.update(), 60 * 60 * 1000); // Check for updates every hour
+      setInterval(() => registration.update(), 30 * 60 * 1000); // Check for updates every 30 minutes
       
       // Listen for service worker updates
       registration.addEventListener('updatefound', () => {
@@ -45,7 +54,8 @@ if ('serviceWorker' in navigator) {
                 action: {
                   label: "Actualizar",
                   onClick: () => window.location.reload()
-                }
+                },
+                duration: 10000
               });
             }
           });
@@ -64,6 +74,26 @@ if ('serviceWorker' in navigator) {
     // Listen for service worker messages
     navigator.serviceWorker.addEventListener('message', (event) => {
       console.log('Message from service worker:', event.data);
+      
+      // Handle specific messages
+      if (event.data && event.data.type === 'APP_INSTALLED') {
+        toast.success("¡Aplicación instalada correctamente!");
+      }
+      
+      if (event.data && event.data.type === 'INSTALLATION_STARTED') {
+        toast.info("Instalación en proceso...");
+      }
+    });
+    
+    // Add special handler for 'appinstalled' event
+    window.addEventListener('appinstalled', (event) => {
+      console.log('App was installed', event);
+      toast.success("¡Aplicación instalada correctamente!");
+    });
+    
+    // Add beforeinstallprompt listener at the window level
+    window.addEventListener('beforeinstallprompt', (event) => {
+      console.log('Before install prompt fired at window level');
     });
   });
 }

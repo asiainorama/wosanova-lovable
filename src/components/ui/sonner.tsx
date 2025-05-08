@@ -5,16 +5,24 @@ import { useTheme } from "@/contexts/ThemeContext";
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { mode } = useTheme();
-  
-  // Convert our theme mode to what sonner expects
-  const sonnerTheme = mode === 'dark' ? 'dark' : 
-                      mode === 'light' ? 'light' : 'system';
+  // Use try/catch to handle potential context errors
+  let theme: string = 'system';
+  try {
+    const { mode } = useTheme();
+    // Convert our theme mode to what sonner expects
+    theme = mode === 'dark' ? 'dark' : 
+            mode === 'light' ? 'light' : 'system';
+  } catch (error) {
+    console.error("Error getting theme mode:", error);
+    // Default to system if context fails
+  }
 
   return (
     <Sonner
-      theme={sonnerTheme as ToasterProps["theme"]}
+      theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      richColors
+      closeButton
       toastOptions={{
         classNames: {
           toast:

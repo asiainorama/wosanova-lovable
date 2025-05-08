@@ -1,7 +1,7 @@
 
 // Service Worker for WosaNova PWA
 
-const CACHE_NAME = 'wosanova-cache-v3'; // Versión actualizada del caché
+const CACHE_NAME = 'wosanova-cache-v4'; // Updated cache version
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -22,14 +22,13 @@ self.addEventListener('install', (event) => {
         console.log('[Service Worker] Caching App Shell');
         return cache.addAll(APP_SHELL);
       })
-      // Force install even if caching fails for some items
       .catch(error => {
         console.error('[Service Worker] Cache installation failed:', error);
         // Continue installing even with errors
         return;
       })
   );
-  // Skip waiting to install immediately
+  // Force skip waiting to install immediately
   self.skipWaiting();
 });
 
@@ -102,6 +101,17 @@ self.addEventListener('fetch', (event) => {
               });
 
               return response;
+            })
+            .catch((error) => {
+              console.error('[Service Worker] Fetch failed:', error);
+              // Return offline page or cached version
+              if (event.request.mode === 'navigate') {
+                return caches.match('/');
+              }
+              return new Response('Network error happened', {
+                status: 408,
+                headers: { 'Content-Type': 'text/plain' },
+              });
             });
         })
       );
@@ -114,6 +124,18 @@ self.addEventListener('message', (event) => {
   console.log('[Service Worker] Received message:', event.data);
   if (event.data === 'skipWaiting') {
     self.skipWaiting();
+  }
+  
+  // Special handling for installation request
+  if (event.data && event.data.type === 'INSTALL_APP') {
+    console.log('[Service Worker] Install app request received');
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'INSTALLATION_STARTED'
+        });
+      });
+    });
   }
 });
 
@@ -141,4 +163,16 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.openWindow('/')
   );
+});
+
+// Add appinstalled event listener
+self.addEventListener('appinstalled', (event) => {
+  console.log('[Service Worker] App was installed', event);
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'APP_INSTALLED'
+      });
+    });
+  });
 });
