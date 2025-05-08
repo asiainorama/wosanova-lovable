@@ -51,13 +51,6 @@ const InstallPrompt = () => {
 
     // Show prompt based on platform if not already shown by beforeinstallprompt
     const checkInstallStatus = () => {
-      if (installPrompt) {
-        console.log("Install prompt already captured");
-        setShowPrompt(true);
-        return;
-      }
-
-      // If we haven't shown the prompt yet
       if (!showPrompt && sessionStorage.getItem('installPromptDismissed') !== 'true') {
         console.log(`${isiOSDevice ? 'iOS' : isMacOSDevice ? 'macOS' : isAndroidDevice ? 'Android' : 'Desktop'} detected, showing install prompt`);
         setShowPrompt(true);
@@ -67,10 +60,27 @@ const InstallPrompt = () => {
     // Wait a bit for the beforeinstallprompt event to fire first
     setTimeout(checkInstallStatus, 2000);
 
+    // Also try to capture appinstalled event
+    window.addEventListener('appinstalled', (event) => {
+      console.log('App installed event captured', event);
+      setShowPrompt(false);
+      toast.success("¡Aplicación instalada correctamente!");
+      
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'APP_INSTALLED'
+          });
+        }
+      } catch (e) {
+        console.error('Error sending message to service worker:', e);
+      }
+    });
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [installPrompt, showPrompt]);
+  }, [showPrompt]);
 
   const handleInstall = async () => {
     console.log("Install button clicked", { 
@@ -80,130 +90,96 @@ const InstallPrompt = () => {
       isAndroid 
     });
 
-    if (installPrompt) {
-      // This is the standard way for Chrome/Edge and other browsers that support the beforeinstallprompt
-      try {
+    // Forzar la instalación directamente
+    try {
+      // Asegurarse que el manifest esté siempre cargado
+      if (!document.querySelector('link[rel="manifest"]')) {
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = '/manifest.json';
+        document.head.appendChild(manifestLink);
+      }
+
+      // Para navegadores con soporte a beforeinstallprompt
+      if (installPrompt) {
         await installPrompt.prompt();
         
-        // Wait for the user to respond to the prompt
         const choiceResult = await installPrompt.userChoice;
         
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
           toast.success("¡Instalación iniciada!");
           
-          // Trigger manifest installation directly
-          const manifestUrl = `${window.location.origin}/manifest.json`;
-          try {
-            const manifestLink = document.createElement('link');
-            manifestLink.rel = 'manifest';
-            manifestLink.href = manifestUrl;
-            document.head.appendChild(manifestLink);
-          } catch (e) {
-            console.error('Error adding manifest link:', e);
+          // Enviar mensaje al service worker para confirmar instalación
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'INSTALL_APP'
+            });
           }
           
-          // Hide the prompt
+          // Ocultar el prompt
           setShowPrompt(false);
         } else {
           console.log('User dismissed the install prompt');
           toast.error("Instalación cancelada");
-          // Only hide for the current session
           setShowPrompt(false);
         }
         
-        // Reset the prompt variable, since it can't be used again
         setInstallPrompt(null);
-      } catch (e) {
-        console.error('Error showing install prompt:', e);
-        toast.error("Error al instalar la app");
-      }
-    } else if (isIOS || isMacOS) {
-      // For iOS/macOS, direct users to installation and make it obvious
-      toast.success("Añade esta app a tu pantalla de inicio", {
-        description: "Sigue las instrucciones para instalar",
-        action: {
-          label: "Entendido",
-          onClick: () => console.log("iOS/macOS instruction acknowledged")
-        },
-        duration: 10000
-      });
-      
-      // Force manifest installation for iOS
-      try {
-        const manifestUrl = `${window.location.origin}/manifest.json`;
-        const manifestLink = document.createElement('link');
-        manifestLink.rel = 'manifest';
-        manifestLink.href = manifestUrl;
-        document.head.appendChild(manifestLink);
-        
-        // Add Apple meta tags dynamically if not already present
+      } else {
+        // Para dispositivos sin soporte a beforeinstallprompt
+        // 1. Asegurarse que los meta tags para PWA están presentes
         if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
           const appleCapable = document.createElement('meta');
           appleCapable.name = 'apple-mobile-web-app-capable';
           appleCapable.content = 'yes';
           document.head.appendChild(appleCapable);
         }
-      } catch (e) {
-        console.error('Error adding manifest link for iOS:', e);
-      }
-    } else if (isAndroid) {
-      // Force installation on Android
-      try {
-        // Try to trigger installation
-        const manifestUrl = `${window.location.origin}/manifest.json`;
-        const manifestLink = document.createElement('link');
-        manifestLink.rel = 'manifest';
-        manifestLink.href = manifestUrl;
-        document.head.appendChild(manifestLink);
         
-        toast.success("Instalando la aplicación", {
-          description: "Espera mientras procesamos la instalación",
-          duration: 5000
-        });
-        
-        // Reload page to trigger manifest detection
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } catch (e) {
-        console.error('Error triggering installation on Android:', e);
-        toast.error("No se pudo iniciar la instalación");
-      }
-    } else {
-      // For other browsers without beforeinstallprompt support
-      try {
-        // Try to force installation via manifest
-        const manifestUrl = `${window.location.origin}/manifest.json`;
-        
-        // Add manifest link if not present
-        if (!document.querySelector('link[rel="manifest"]')) {
-          const manifestLink = document.createElement('link');
-          manifestLink.rel = 'manifest';
-          manifestLink.href = manifestUrl;
-          document.head.appendChild(manifestLink);
+        // 2. Forzar mensaje al service worker para iniciar instalación
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'INSTALL_APP'
+          });
         }
         
-        toast.success("Instalando aplicación", {
-          description: "La instalación iniciará en breve",
-          duration: 5000
-        });
-        
-        // Refresh to trigger manifest detection
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } catch (e) {
-        console.error('Error forcing installation:', e);
-        toast.error("Tu navegador no soporta la instalación directa");
+        // 3. Mostrar mensaje de instalación según plataforma
+        if (isIOS || isMacOS) {
+          toast.success("Añade esta app a tu pantalla de inicio", {
+            description: "Sigue las instrucciones para instalar",
+            action: {
+              label: "OK",
+              onClick: () => window.location.href = "https://support.apple.com/es-es/guide/iphone/iph42ab2f3a7/ios"
+            },
+            duration: 10000
+          });
+        } else {
+          toast.success("Instalando la aplicación", {
+            description: "Por favor espera mientras se completa la instalación"
+          });
+          
+          // 4. Forzar refresco después de un momento
+          setTimeout(() => {
+            // Actualizar el service worker
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                  registration.update();
+                }
+              });
+            }
+          }, 1000);
+        }
       }
+    } catch (e) {
+      console.error('Error durante la instalación:', e);
+      toast.error("Error al instalar. Inténtalo de nuevo.");
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
     
-    // Set a session storage flag to avoid showing again in this session
     try {
       sessionStorage.setItem('installPromptDismissed', 'true');
     } catch (e) {
@@ -230,36 +206,6 @@ const InstallPrompt = () => {
       <p className="text-gray-600 dark:text-gray-300 mb-4">
         Instálate la App para disfrutar de todo su potencial.
       </p>
-      
-      {(isIOS) && (
-        <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <ol className="list-decimal pl-5 space-y-1 text-sm">
-            <li>Toca el botón de compartir <span className="inline-block width-4 height-4">􀈂</span> abajo en Safari</li>
-            <li>Desplázate y selecciona "Añadir a pantalla de inicio"</li>
-            <li>Confirma pulsando "Añadir"</li>
-          </ol>
-        </div>
-      )}
-      
-      {(isMacOS) && (
-        <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <ol className="list-decimal pl-5 space-y-1 text-sm">
-            <li>Haz clic en "Archivo" en la barra de menú de Safari</li>
-            <li>Selecciona "Añadir a Dock"</li>
-            <li>Confirma la instalación</li>
-          </ol>
-        </div>
-      )}
-      
-      {(isAndroid) && (
-        <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <ol className="list-decimal pl-5 space-y-1 text-sm">
-            <li>Toca los tres puntos ⋮ en Chrome</li>
-            <li>Selecciona "Instalar aplicación" o "Añadir a pantalla de inicio"</li>
-            <li>Confirma la instalación</li>
-          </ol>
-        </div>
-      )}
       
       <Button 
         onClick={handleInstall} 

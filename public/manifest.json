@@ -4,7 +4,7 @@
   "short_name": "WosaNova",
   "description": "La mayor colección de WebApps del mundo",
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#1f2937",
   "icons": [
@@ -63,5 +63,12 @@
   "categories": ["productivity", "utilities", "tools"],
   "orientation": "any",
   "lang": "es",
-  "id": "new.wosanova.com"
+  "id": "new.wosanova.com",
+  "capture_links": "existing-client-navigate",
+  "launch_handler": {
+    "client_mode": "auto"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

@@ -1,7 +1,7 @@
 
 // Service Worker for WosaNova PWA
 
-const CACHE_NAME = 'wosanova-cache-v4'; // Updated cache version
+const CACHE_NAME = 'wosanova-cache-v5'; // Updated cache version
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -13,7 +13,7 @@ const APP_SHELL = [
   '/icons/apple-touch-icon.png'
 ];
 
-// Install event - cache app shell
+// Install event - cache app shell y registrar activamente
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing Service Worker...', event);
   event.waitUntil(
@@ -22,17 +22,26 @@ self.addEventListener('install', (event) => {
         console.log('[Service Worker] Caching App Shell');
         return cache.addAll(APP_SHELL);
       })
+      .then(() => {
+        console.log('[Service Worker] App Shell Cached Successfully');
+        // Notificar a los clientes
+        return self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'INSTALLATION_STARTED'
+            });
+          });
+        });
+      })
       .catch(error => {
         console.error('[Service Worker] Cache installation failed:', error);
-        // Continue installing even with errors
-        return;
       })
   );
   // Force skip waiting to install immediately
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating Service Worker...', event);
   event.waitUntil(
@@ -44,9 +53,12 @@ self.addEventListener('activate', (event) => {
         }
       }));
     })
+    .then(() => {
+      console.log('[Service Worker] Service Worker Activated');
+      // Claim clients to ensure control
+      return self.clients.claim();
+    })
   );
-  // Claim all clients immediately
-  return self.clients.claim();
 });
 
 // Fetch event - serve from cache or network with improved strategy
@@ -55,36 +67,12 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.startsWith(self.location.origin) || 
       event.request.url.includes('new.wosanova.com')) {
     
-    // Handle app logo requests with network-first, cache fallback strategy
-    if (event.request.url.includes('/app-logos/') || 
-        event.request.destination === 'image' || 
-        event.request.url.includes('supabase.co')) {
-      
-      event.respondWith(
-        fetch(event.request.clone())
-          .then(response => {
-            // Cache successful responses
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            // If network fails, try from cache
-            return caches.match(event.request).then(cachedResponse => {
-              return cachedResponse || Promise.reject('Failed to fetch and no cache available');
-            });
-          })
-      );
-    } else {
-      // For other assets use cache-first strategy
-      event.respondWith(
-        caches.match(event.request).then(response => {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
           if (response) {
-            return response; // Cache hit
+            // Cache hit - return the cached response
+            return response;
           }
           
           // Cache miss, fetch from network
@@ -114,25 +102,47 @@ self.addEventListener('fetch', (event) => {
               });
             });
         })
-      );
-    }
+    );
   }
 });
 
-// Listen for messages from the main app
+// Escuchar mensajes de la aplicación principal
 self.addEventListener('message', (event) => {
   console.log('[Service Worker] Received message:', event.data);
-  if (event.data === 'skipWaiting') {
+  
+  // Gestionar distintos tipos de mensajes
+  if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
   
-  // Special handling for installation request
   if (event.data && event.data.type === 'INSTALL_APP') {
     console.log('[Service Worker] Install app request received');
+    
+    // Notificar a todos los clientes
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
         client.postMessage({
           type: 'INSTALLATION_STARTED'
+        });
+      });
+    });
+    
+    // Intentar forzar la instalación
+    self.registration.showNotification('WosaNova', {
+      body: 'Instalando aplicación...',
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png'
+    }).catch(err => console.log('No permission for notification', err));
+  }
+  
+  if (event.data && event.data.type === 'APP_INSTALLED') {
+    console.log('[Service Worker] App installation confirmed');
+    
+    // Notificar a todos los clientes
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'APP_INSTALLED_CONFIRMED'
         });
       });
     });

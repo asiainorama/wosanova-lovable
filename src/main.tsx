@@ -27,16 +27,15 @@ if ('serviceWorker' in navigator) {
       
       console.log('Service worker registered successfully:', registration.scope);
       
-      // Send a message to the service worker to check installation status
-      if (registration.active) {
-        registration.active.postMessage({
-          type: 'CHECK_INSTALL_STATUS'
-        });
+      // Directamente comprobar si la aplicación ya está instalada
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('La aplicación ya está instalada');
+        if (registration.active) {
+          registration.active.postMessage({
+            type: 'APP_INSTALLED'
+          });
+        }
       }
-      
-      // Check for updates immediately and periodically
-      registration.update();
-      setInterval(() => registration.update(), 30 * 60 * 1000); // Check for updates every 30 minutes
       
       // Listen for service worker updates
       registration.addEventListener('updatefound', () => {
@@ -49,7 +48,7 @@ if ('serviceWorker' in navigator) {
             
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               console.log('New service worker installed, ready to activate');
-              // Notify the user about the update
+              // Notificar al usuario sobre la actualización
               toast.info("Nueva actualización disponible. Recarga para aplicarla.", {
                 action: {
                   label: "Actualizar",
@@ -57,6 +56,16 @@ if ('serviceWorker' in navigator) {
                 },
                 duration: 10000
               });
+            }
+            
+            if (newWorker.state === 'activated') {
+              console.log('Service worker activated');
+              // Intentar instalar la app automáticamente si no está instalada
+              if (!window.matchMedia('(display-mode: standalone)').matches) {
+                newWorker.postMessage({
+                  type: 'INSTALL_APP'
+                });
+              }
             }
           });
         }
@@ -68,7 +77,6 @@ if ('serviceWorker' in navigator) {
     // Listen for service worker controller changes
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       console.log('Service worker controller changed - page will reload');
-      window.location.reload();
     });
     
     // Listen for service worker messages
@@ -94,6 +102,7 @@ if ('serviceWorker' in navigator) {
     // Add beforeinstallprompt listener at the window level
     window.addEventListener('beforeinstallprompt', (event) => {
       console.log('Before install prompt fired at window level');
+      // No prevenir el comportamiento predeterminado
     });
   });
 }
