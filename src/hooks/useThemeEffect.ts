@@ -9,6 +9,8 @@ import { getEffectiveTheme, applyThemeToDocument } from '@/utils/themeUtils';
 export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
   // Apply theme when document visibility changes (to prevent theme from resetting on resume)
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         applyTheme();
@@ -24,6 +26,8 @@ export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
 
   // Listen for system preference changes
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const handleChange = () => {
@@ -53,6 +57,8 @@ export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
 
   // Special handler for page transitions
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // This helps ensure theme consistency when navigating between pages
     const handleNavigation = () => {
       applyTheme();

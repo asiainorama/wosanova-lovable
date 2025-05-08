@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for theme management
  */
@@ -8,6 +9,10 @@ import { ThemeMode } from "@/contexts/ThemeContext";
  * Get the effective theme (light or dark) based on mode and system preference
  */
 export const getEffectiveTheme = (mode: ThemeMode): 'light' | 'dark' => {
+  if (typeof window === 'undefined') {
+    return 'light'; // Default for SSR
+  }
+  
   if (mode === 'system') {
     // Check system preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -23,6 +28,10 @@ export const getEffectiveTheme = (mode: ThemeMode): 'light' | 'dark' => {
  * Apply theme to document by adding/removing classes and setting CSS variables
  */
 export const applyThemeToDocument = (effectiveTheme: 'light' | 'dark'): void => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return; // Don't try to access document in SSR
+  }
+  
   try {
     // Apply or remove dark mode class
     if (effectiveTheme === 'dark') {

@@ -17,6 +17,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
   const [mode, setModeState] = useState<ThemeMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'system'; // Default for SSR
+    }
+    
     try {
       // Get saved preference from localStorage
       const savedMode = localStorage.getItem('themeMode') as ThemeMode;
@@ -38,6 +42,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Function to actually apply theme changes to DOM
   const applyTheme = useCallback(() => {
+    if (typeof window === 'undefined') return; // Guard for SSR
+    
     console.log("Applying theme based on mode:", mode);
     
     try {
@@ -60,6 +66,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Apply theme when component mounts or when theme state changes
   useEffect(() => {
+    if (typeof window === 'undefined') return; // Guard for SSR
+    
     console.log("ThemeContext effect running - applying theme:", {mode});
     applyTheme();
   }, [mode, applyTheme]);
