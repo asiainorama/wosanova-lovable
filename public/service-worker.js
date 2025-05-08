@@ -1,6 +1,7 @@
+
 // Service Worker for WosaNova PWA
 
-const CACHE_NAME = 'wosanova-cache-v1';
+const CACHE_NAME = 'wosanova-cache-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -8,6 +9,7 @@ const APP_SHELL = [
   '/favicon.ico',
   '/placeholder.svg',
   '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
   '/icons/apple-touch-icon.png'
 ];
 
@@ -20,7 +22,15 @@ self.addEventListener('install', (event) => {
         console.log('[Service Worker] Caching App Shell');
         return cache.addAll(APP_SHELL);
       })
+      // Force install even if caching fails for some items
+      .catch(error => {
+        console.error('[Service Worker] Cache installation failed:', error);
+        // Continue installing even with errors
+        return;
+      })
   );
+  // Skip waiting to install immediately
+  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
@@ -36,45 +46,59 @@ self.addEventListener('activate', (event) => {
       }));
     })
   );
+  // Claim all clients immediately
   return self.clients.claim();
 });
 
-// Fetch event - serve from cache or network
+// Fetch event - serve from cache or network with improved strategy
 self.addEventListener('fetch', (event) => {
-  // Image-specific strategy
-  if (event.request.url.includes('/app-logos/') || event.request.destination === 'image') {
+  // Handle app logo requests with network-first, cache fallback strategy
+  if (event.request.url.includes('/app-logos/') || 
+      event.request.destination === 'image' || 
+      event.request.url.includes('supabase.co')) {
+    
     event.respondWith(
-      caches.match(event.request).then(response => {
-        // Return from cache if available
-        if (response) {
-          return response;
-        }
-
-        // Otherwise fetch from network
-        return fetch(event.request.clone()).then(response => {
-          // Only cache valid responses
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+      fetch(event.request.clone())
+        .then(response => {
+          // Cache successful responses
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
           }
-
-          // Clone and cache the response
-          let responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-            console.log('[Service Worker] Caching new image:', event.request.url);
-          });
-
           return response;
-        }).catch(error => {
-          console.error('[Service Worker] Fetch failed:', error);
-        });
-      })
+        })
+        .catch(() => {
+          // If network fails, try from cache
+          return caches.match(event.request).then(cachedResponse => {
+            return cachedResponse || Promise.reject('Failed to fetch and no cache available');
+          });
+        })
     );
   } else {
-    // Standard cache-first strategy for other resources
+    // For other assets use cache-first strategy
     event.respondWith(
       caches.match(event.request).then(response => {
-        return response || fetch(event.request);
+        if (response) {
+          return response; // Cache hit
+        }
+        
+        // Cache miss, fetch from network
+        return fetch(event.request.clone())
+          .then(response => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Cache the response for future
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+
+            return response;
+          });
       })
     );
   }
@@ -94,7 +118,7 @@ self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   
   const options = {
-    body: data.body || 'Nueva actualización',
+    body: data.body || 'Nueva actualización disponible',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-192x192.png'
   };

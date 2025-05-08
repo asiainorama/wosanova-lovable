@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,7 +14,6 @@ const InstallPrompt = () => {
   const [isIOS, setIsIOS] = useState(false);
   const [isMacOS, setIsMacOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
-  const { t } = useLanguage();
 
   useEffect(() => {
     // Check platform
@@ -122,6 +120,13 @@ const InstallPrompt = () => {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    
+    // Set a session storage flag to avoid showing again in this session
+    try {
+      sessionStorage.setItem('installPromptDismissed', 'true');
+    } catch (e) {
+      console.error('Error setting session storage:', e);
+    }
   };
 
   if (!showPrompt) return null;
@@ -130,7 +135,7 @@ const InstallPrompt = () => {
     <div className="fixed bottom-4 left-4 right-4 bg-background border border-border p-4 rounded-lg shadow-lg z-50 dark:bg-gray-800 dark:border-gray-700">
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold dark:text-white">
-          {isIOS || isMacOS ? 'Instalar WosaNova' : 'Instalar WosaNova'}
+          Instálate la App!
         </h3>
         <button 
           onClick={handleDismiss}
@@ -140,9 +145,12 @@ const InstallPrompt = () => {
         </button>
       </div>
       
+      <p className="text-gray-600 dark:text-gray-300 mb-4">
+        Instálate la App para disfrutar de todo su potencial.
+      </p>
+      
       {(isIOS) && (
         <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <p className="mb-2">Para instalar esta app en tu iPhone/iPad:</p>
           <ol className="list-decimal pl-5 space-y-1 text-sm">
             <li>Toca el botón de compartir <span className="inline-block width-4 height-4">􀈂</span> abajo en Safari</li>
             <li>Desplázate y selecciona "Añadir a pantalla de inicio"</li>
@@ -153,7 +161,6 @@ const InstallPrompt = () => {
       
       {(isMacOS) && (
         <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <p className="mb-2">Para instalar esta app en tu Mac:</p>
           <ol className="list-decimal pl-5 space-y-1 text-sm">
             <li>Haz clic en "Archivo" en la barra de menú de Safari</li>
             <li>Selecciona "Añadir a Dock"</li>
@@ -164,7 +171,6 @@ const InstallPrompt = () => {
       
       {(isAndroid) && (
         <div className="text-gray-600 dark:text-gray-300 mb-4">
-          <p className="mb-2">Para instalar esta app en tu dispositivo Android:</p>
           <ol className="list-decimal pl-5 space-y-1 text-sm">
             <li>Toca los tres puntos ⋮ en Chrome</li>
             <li>Selecciona "Instalar aplicación" o "Añadir a pantalla de inicio"</li>
@@ -173,18 +179,12 @@ const InstallPrompt = () => {
         </div>
       )}
       
-      {(!isIOS && !isMacOS && !isAndroid) && (
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
-          Descárgate ya la App para acceder más rápido y sin depender del navegador!
-        </p>
-      )}
-      
       <Button 
         onClick={handleInstall} 
         className="w-full flex items-center justify-center gap-2"
       >
         <Download size={16} />
-        <span>{(isIOS || isMacOS) ? 'Entendido' : 'INSTALAR AHORA'}</span>
+        <span>INSTALAR</span>
       </Button>
     </div>
   );

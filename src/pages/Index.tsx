@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -24,7 +23,7 @@ const Index = () => {
   useEffect(() => {
     if (favorites.length > 0) {
       // Use silent mode to avoid notifications
-      prefetchAppLogos(favorites, true);
+      prefetchAppLogos(favorites);
     }
     
     // Get icon count from Supabase

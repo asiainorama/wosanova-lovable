@@ -4,7 +4,7 @@
   "short_name": "WosaNova",
   "description": "La mayor colección de WebApps del mundo",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#f3f4f6",
   "theme_color": "#1f2937",
   "icons": [
@@ -43,5 +43,24 @@
       "url": "/",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pantalla de inicio de WosaNova"
+    },
+    {
+      "src": "/icons/screenshot2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Catálogo de apps de WosaNova"
+    }
+  ],
+  "categories": ["productivity", "utilities", "tools"],
+  "orientation": "any",
+  "lang": "es"
 }
