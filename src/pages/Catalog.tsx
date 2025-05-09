@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
-import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
 import { Search, X, FileDown } from 'lucide-react';
 import { AppData, categoryGroups } from '@/data/apps';
@@ -11,6 +10,8 @@ import { prefetchAppLogos } from '@/services/LogoCacheService';
 import CategoryFilter from '@/components/CategoryFilter';
 import { exportAppsToExcel } from '@/services/ExportService';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Traducir los nombres de grupos de categorías
 const translateCategoryGroupName = (groupName: string, t: (key: string) => string): string => {
@@ -25,12 +26,49 @@ const translateCategoryGroupName = (groupName: string, t: (key: string) => strin
 };
 
 const Catalog = () => {
-  const { allApps } = useAppContext();
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [filteredApps, setFilteredApps] = useState<AppData[]>([]);
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
+  const [allApps, setAllApps] = useState<AppData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch apps from Supabase
+  useEffect(() => {
+    const fetchApps = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('apps')
+          .select('*');
+
+        if (error) throw error;
+        
+        // Map Supabase data to AppData format
+        const fetchedApps: AppData[] = data.map(app => ({
+          id: app.id,
+          name: app.name,
+          description: app.description,
+          url: app.url,
+          icon: app.icon,
+          category: app.category,
+          isAI: app.is_ai,
+          created_at: app.created_at,
+          updated_at: app.updated_at
+        }));
+        
+        setAllApps(fetchedApps);
+      } catch (error) {
+        console.error('Error fetching apps from Supabase:', error);
+        toast.error('Error al cargar las aplicaciones');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchApps();
+  }, []);
 
   // Sort apps by name alphabetically
   const sortedApps = useMemo(() => {
@@ -167,40 +205,48 @@ const Catalog = () => {
       </div>
       
       <main className="container mx-auto px-4 py-4 flex-1">
-        <h3 className="text-lg font-medium mb-4 dark:text-white">
-          {searchTerm || selectedFilter !== 'all'
-            ? (t('catalog.results') || "Resultados") 
-            : ""}
-          {selectedFilter !== 'all' && (
-            <span>
-              {` > ${
-                categoryGroups.some(group => group.name === selectedFilter)
-                  ? translateCategoryGroupName(selectedFilter, t)
-                  : selectedFilter
-              }`}
-            </span>
-          )}
-        </h3>
-        
-        {/* Display apps grouped by category */}
-        {Object.keys(groupedApps).length === 0 ? (
+        {isLoading ? (
           <div className="text-center py-10">
-            <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
+            <p className="text-gray-500 dark:text-gray-400">Cargando aplicaciones...</p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {Object.entries(groupedApps).map(([category, apps]) => (
-              <div key={category} className="space-y-3">
-                <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
-                  {category}
-                </h2>
-                <AppGrid 
-                  apps={apps}
-                  showManage={false}
-                />
+          <>
+            <h3 className="text-lg font-medium mb-4 dark:text-white">
+              {searchTerm || selectedFilter !== 'all'
+                ? (t('catalog.results') || "Resultados") 
+                : ""}
+              {selectedFilter !== 'all' && (
+                <span>
+                  {` > ${
+                    categoryGroups.some(group => group.name === selectedFilter)
+                      ? translateCategoryGroupName(selectedFilter, t)
+                      : selectedFilter
+                  }`}
+                </span>
+              )}
+            </h3>
+            
+            {/* Display apps grouped by category */}
+            {Object.keys(groupedApps).length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="space-y-8">
+                {Object.entries(groupedApps).map(([category, apps]) => (
+                  <div key={category} className="space-y-3">
+                    <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
+                      {category}
+                    </h2>
+                    <AppGrid 
+                      apps={apps}
+                      showManage={false}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
