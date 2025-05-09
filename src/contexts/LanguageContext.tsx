@@ -1,5 +1,3 @@
-
-// Make sure React is imported correctly at the top
 import * as React from 'react';
 import { createContext, useContext, useState, ReactNode } from 'react';
 
