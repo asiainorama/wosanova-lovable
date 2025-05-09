@@ -5,11 +5,15 @@ import { AppData } from '@/data/types';
 // Configurar la tabla para cambios en tiempo real
 const configureRealtimeChanges = async () => {
   try {
-    await supabase.rpc('supabase_realtime', {
-      table: 'apps',
-      action: 'add',
-      schema: 'public'
-    });
+    // Enable realtime for the apps table using the correct method
+    const { data, error } = await supabase
+      .from('apps')
+      .on('*', () => {
+        console.log('Real-time update received for apps table');
+      })
+      .subscribe();
+    
+    if (error) throw error;
     console.log('Configuración de tiempo real para apps activada');
   } catch (error) {
     console.error('Error configurando tiempo real:', error);
