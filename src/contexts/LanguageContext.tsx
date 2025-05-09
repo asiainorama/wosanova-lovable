@@ -1,6 +1,4 @@
-
-import React from 'react';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface LanguageContextType {
   language: 'es';
@@ -197,7 +195,6 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  // Usar useState importado directamente, en lugar de React.useState
   const [language, setLanguageState] = useState<'es'>('es');
 
   // Función para mantener compatibilidad con el resto del código
