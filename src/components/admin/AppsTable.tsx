@@ -73,7 +73,12 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
             ) : (
               paginatedApps.map((app) => (
                 <TableRow key={app.id}>
-                  <TableCell className="font-medium">{app.name}</TableCell>
+                  <TableCell 
+                    className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => onEdit(app)}
+                  >
+                    {app.name}
+                  </TableCell>
                   <TableCell className="max-w-xs truncate">{app.description}</TableCell>
                   <TableCell>{app.category}</TableCell>
                   <TableCell className="max-w-xs truncate">
@@ -96,13 +101,6 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   <TableCell>{app.isAI ? "Sí" : "No"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(app)}
-                      >
-                        Editar
-                      </Button>
                       <Button
                         variant="destructive"
                         size="sm"

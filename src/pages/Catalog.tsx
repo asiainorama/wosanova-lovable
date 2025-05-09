@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -65,6 +66,28 @@ const Catalog = () => {
     };
     
     fetchApps();
+
+    // Suscribirse a cambios en tiempo real
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', 
+        {
+          event: '*', // Escuchar INSERT, UPDATE y DELETE
+          schema: 'public',
+          table: 'apps'
+        }, 
+        (payload) => {
+          console.log('Cambio detectado en apps:', payload);
+          // Recargar las aplicaciones cuando haya cambios
+          fetchApps();
+        }
+      )
+      .subscribe();
+    
+    // Limpiar suscripción al desmontar
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Sort apps by name alphabetically

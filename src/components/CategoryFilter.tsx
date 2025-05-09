@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { categories } from '@/data/apps';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAppContext } from '@/contexts/AppContext';
 import { categoryGroups } from '@/data/apps';
+import { supabase } from '@/integrations/supabase/client';
+import { AppData } from '@/data/types';
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -13,7 +14,7 @@ interface CategoryFilterProps {
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange }) => {
   const { t, language } = useLanguage();
-  const { allApps } = useAppContext();
+  const [allApps, setAllApps] = useState<AppData[]>([]);
   const [, updateState] = useState<{}>({});
   const forceUpdate = React.useCallback(() => updateState({}), []);
 
@@ -24,6 +25,54 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     const translation = t(key);
     return translation !== key ? translation : category; // Si no hay traducción, usar el original
   };
+  
+  // Obtener todas las apps para calcular los conteos
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const { data, error } = await supabase.from('apps').select('*');
+        if (error) throw error;
+        
+        // Mapear los datos de Supabase al formato AppData
+        const fetchedApps: AppData[] = data.map(app => ({
+          id: app.id,
+          name: app.name,
+          description: app.description,
+          url: app.url,
+          icon: app.icon,
+          category: app.category,
+          isAI: app.is_ai,
+          created_at: app.created_at,
+          updated_at: app.updated_at
+        }));
+        
+        setAllApps(fetchedApps);
+      } catch (error) {
+        console.error('Error fetching apps for category filter:', error);
+      }
+    };
+
+    fetchApps();
+    
+    // Suscribirse a cambios en tiempo real para actualizar los conteos
+    const channel = supabase
+      .channel('category-filter-changes')
+      .on('postgres_changes', 
+        {
+          event: '*', // Escuchar INSERT, UPDATE y DELETE
+          schema: 'public',
+          table: 'apps'
+        }, 
+        () => {
+          fetchApps();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   
   // Función para contar apps por categoría
   const countAppsByCategory = (category: string) => {
@@ -66,11 +115,11 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   // Función para mostrar los nombres correctos de los grupos de categorías
   const getCategoryGroupName = (groupName: string): string => {
     switch (groupName) {
-      case "Productivity": return "Productividad";
-      case "Entertainment": return "Entretenimiento";
-      case "Utilities": return "Utilidades";
-      case "Lifestyle": return "Estilo de vida";
-      case "Finance": return "Finanzas";
+      case "Productivity": return t('categoryGroup.productivity') || "Productividad";
+      case "Entertainment": return t('categoryGroup.entertainment') || "Entretenimiento";
+      case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
+      case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
+      case "Finance": return t('categoryGroup.finance') || "Finanzas";
       default: return groupName;
     }
   };

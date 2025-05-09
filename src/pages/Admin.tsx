@@ -3,14 +3,14 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/sonner";
-import AdminLayout from "@/components/admin/AdminLayout";
+import { toast } from "sonner";
+import Header from "@/components/Header";
 import AppsTable from "@/components/admin/AppsTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
 import { saveAppToSupabase, deleteAppFromSupabase, fetchAppsFromSupabase } from "@/services/AppsService";
 import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
-import { FileDown, FileUp } from "lucide-react";
+import { FileDown, FileUp, Plus } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -173,44 +173,48 @@ const Admin = () => {
   }
 
   return (
-    <AdminLayout>
-      {showForm ? (
-        <AppForm 
-          app={editingApp} 
-          onSave={handleSaveApp} 
-          onCancel={handleCancelForm}
-        />
-      ) : (
-        <>
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Administración de Aplicaciones</h1>
-            <div className="flex gap-2">
-              <input 
-                type="file" 
-                accept=".xlsx,.xls" 
-                onChange={handleImportChange} 
-                className="hidden"
-                ref={fileInputRef}
-              />
-              <Button variant="outline" onClick={handleImportClick} className="flex items-center gap-2">
-                <FileUp className="h-4 w-4" />
-                Importar Excel
-              </Button>
-              <Button variant="outline" onClick={handleExport} className="flex items-center gap-2">
-                <FileDown className="h-4 w-4" />
-                Exportar Excel
-              </Button>
-              <Button onClick={handleAddApp}>Añadir Nueva Aplicación</Button>
-            </div>
-          </div>
-          <AppsTable 
-            apps={apps} 
-            onEdit={handleEditApp} 
-            onDelete={handleDeleteApp} 
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <Header title="Administración" />
+      
+      <main className="container mx-auto px-4 py-6 flex-1">
+        {showForm ? (
+          <AppForm 
+            app={editingApp} 
+            onSave={handleSaveApp} 
+            onCancel={handleCancelForm}
           />
-        </>
-      )}
-    </AdminLayout>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Aplicaciones</h1>
+              <div className="flex gap-2">
+                <input 
+                  type="file" 
+                  accept=".xlsx,.xls" 
+                  onChange={handleImportChange} 
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+                <Button variant="outline" onClick={handleImportClick} className="flex items-center gap-2" size="icon" title="Importar Excel">
+                  <FileUp className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={handleExport} className="flex items-center gap-2" size="icon" title="Exportar Excel">
+                  <FileDown className="h-4 w-4" />
+                </Button>
+                <Button onClick={handleAddApp} size="icon" title="Añadir Nueva Aplicación">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <AppsTable 
+              apps={apps} 
+              onEdit={handleEditApp} 
+              onDelete={handleDeleteApp} 
+            />
+          </>
+        )}
+      </main>
+    </div>
   );
 };
 

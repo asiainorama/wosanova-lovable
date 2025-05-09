@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SidebarMenu from './SidebarMenu';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HeaderProps {
@@ -32,22 +31,22 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         
         <div className="flex items-center gap-2">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Inicio">
               <Home className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/catalog">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Catálogo">
               <Search className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/manage">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Gestionar">
               <Trash2 className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/admin">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Administración">
               <Settings className="h-5 w-5" />
             </Button>
           </Link>
