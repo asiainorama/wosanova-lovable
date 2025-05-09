@@ -1,0 +1,35 @@
+
+import { allApps } from '@/data/apps';
+import { saveAppToSupabase } from '@/services/AppsService';
+
+/**
+ * Función para sincronizar todas las aplicaciones estáticas con Supabase.
+ * Esta función puede ejecutarse manualmente desde la consola del navegador.
+ */
+export const syncAllAppsToSupabase = async () => {
+  console.log(`Iniciando sincronización de ${allApps.length} aplicaciones con Supabase...`);
+  
+  const results = {
+    success: 0,
+    errors: 0
+  };
+  
+  for (const app of allApps) {
+    try {
+      await saveAppToSupabase(app);
+      console.log(`✓ App sincronizada: ${app.name}`);
+      results.success++;
+    } catch (error) {
+      console.error(`✗ Error sincronizando app ${app.name}:`, error);
+      results.errors++;
+    }
+  }
+  
+  console.log(`Sincronización completa: ${results.success} exitosas, ${results.errors} errores`);
+  return results;
+};
+
+// Exportar la función para que esté disponible en la consola del navegador
+if (typeof window !== 'undefined') {
+  (window as any).syncAllAppsToSupabase = syncAllAppsToSupabase;
+}

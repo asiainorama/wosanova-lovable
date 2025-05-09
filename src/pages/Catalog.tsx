@@ -27,7 +27,7 @@ const Catalog = () => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [filteredApps, setFilteredApps] = useState(allApps);
+  const [filteredApps, setFilteredApps] = useState<AppData[]>([]);
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
 
   // Sort apps by name alphabetically

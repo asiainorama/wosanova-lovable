@@ -36,6 +36,42 @@ export type Database = {
         }
         Relationships: []
       }
+      apps: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          is_ai: boolean | null
+          name: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          icon: string
+          id: string
+          is_ai?: boolean | null
+          name: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          is_ai?: boolean | null
+          name?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       user_favorites: {
         Row: {
           app_data: Json

@@ -2,15 +2,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AppsTable from "@/components/admin/AppsTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
-import { allApps } from "@/data/apps";
+import { saveAppToSupabase, deleteAppFromSupabase, fetchAppsFromSupabase } from "@/services/AppsService";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -53,9 +51,17 @@ const Admin = () => {
     loadApps();
   }, [navigate]);
 
-  const loadApps = () => {
-    // Load apps from data file - in a real app this would come from Supabase
-    setApps(allApps);
+  const loadApps = async () => {
+    try {
+      setLoading(true);
+      const appsData = await fetchAppsFromSupabase();
+      setApps(appsData);
+    } catch (error) {
+      console.error("Error loading apps:", error);
+      toast.error("Error al cargar aplicaciones");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddApp = () => {
@@ -68,25 +74,44 @@ const Admin = () => {
     setShowForm(true);
   };
 
-  const handleDeleteApp = (appId: string) => {
-    // In a real app this would delete from Supabase
-    const updatedApps = apps.filter(app => app.id !== appId);
-    setApps(updatedApps);
-    toast.success(`Aplicación "${appId}" eliminada`);
+  const handleDeleteApp = async (appId: string) => {
+    try {
+      // Delete from Supabase
+      await deleteAppFromSupabase(appId);
+      
+      // Update local state
+      const updatedApps = apps.filter(app => app.id !== appId);
+      setApps(updatedApps);
+      
+      toast.success(`Aplicación eliminada correctamente`);
+    } catch (error) {
+      console.error("Error deleting app:", error);
+      toast.error("Error al eliminar la aplicación");
+    }
   };
 
-  const handleSaveApp = (app: AppData) => {
-    if (editingApp) {
-      // Update existing app
-      const updatedApps = apps.map(a => a.id === app.id ? app : a);
-      setApps(updatedApps);
-      toast.success(`Aplicación "${app.name}" actualizada`);
-    } else {
-      // Add new app
-      setApps([...apps, app]);
-      toast.success(`Aplicación "${app.name}" añadida`);
+  const handleSaveApp = async (app: AppData) => {
+    try {
+      // Save to Supabase
+      await saveAppToSupabase(app);
+      
+      // Update local state
+      if (editingApp) {
+        // Update existing app
+        const updatedApps = apps.map(a => a.id === app.id ? app : a);
+        setApps(updatedApps);
+        toast.success(`Aplicación "${app.name}" actualizada`);
+      } else {
+        // Add new app
+        setApps([...apps, app]);
+        toast.success(`Aplicación "${app.name}" añadida`);
+      }
+      
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error saving app:", error);
+      toast.error("Error al guardar la aplicación");
     }
-    setShowForm(false);
   };
 
   const handleCancelForm = () => {

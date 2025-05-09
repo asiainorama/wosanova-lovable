@@ -1,9 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AppData, aiApps } from '@/data/apps';
+import { AppData, allApps } from '@/data/apps';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
+import { fetchAppsFromSupabase } from '@/services/AppsService';
 
 interface AppContextType {
   favorites: AppData[];
@@ -65,6 +66,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+  
+  // Cargar aplicaciones desde Supabase al inicio
+  useEffect(() => {
+    const loadAppsFromSupabase = async () => {
+      try {
+        // Primero intentamos cargar desde Supabase
+        const appsFromSupabase = await fetchAppsFromSupabase();
+        
+        if (appsFromSupabase.length > 0) {
+          console.log('Loaded apps from Supabase:', appsFromSupabase.length);
+          setAllApps(appsFromSupabase);
+        } else {
+          // Si no hay datos en Supabase, usamos las apps estáticas como respaldo
+          console.log('No apps found in Supabase, using static data');
+          setAllApps(allApps);
+        }
+      } catch (error) {
+        console.error('Error loading apps from Supabase:', error);
+        // En caso de error, también usamos los datos estáticos
+        setAllApps(allApps);
+      }
+    };
+    
+    loadAppsFromSupabase();
+    
+    // Suscribirse a cambios en tiempo real en la tabla de apps
+    const appsChannel = supabase
+      .channel('public:apps')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'apps' },
+        (payload) => {
+          console.log('Realtime update received:', payload);
+          loadAppsFromSupabase(); // Recargar todas las apps cuando ocurra cualquier cambio
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      // Limpiar la suscripción cuando se desmonte el componente
+      supabase.removeChannel(appsChannel);
     };
   }, []);
   
