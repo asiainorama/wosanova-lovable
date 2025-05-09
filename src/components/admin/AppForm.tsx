@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { categories } from "@/data/apps";
+import { autofillFromUrl, autofillFromName, generateIdFromName } from "@/services/AppInfoService";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface AppFormProps {
   app: AppData | null;
@@ -26,6 +29,8 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAutofilling, setIsAutofilling] = useState(false);
   const isEditing = !!app;
 
   useEffect(() => {
@@ -34,14 +39,62 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
     }
   }, [app]);
 
-  const handleChange = (
+  const handleChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Update form data with the new value
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
     // Clear error for this field if exists
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    
+    // Auto-generate ID from name
+    if (name === 'name' && !isEditing && value && !formData.id) {
+      const generatedId = generateIdFromName(value);
+      setFormData(prev => ({ ...prev, id: generatedId }));
+    }
+    
+    // Try to autofill fields based on URL or name
+    if ((name === 'url' || name === 'name') && !isAutofilling && value.length > 3) {
+      setIsAutofilling(true);
+      
+      try {
+        if (name === 'url') {
+          const result = await autofillFromUrl(value);
+          if (Object.keys(result).length > 0) {
+            const updates: Partial<AppData> = {};
+            
+            // Only autofill empty fields
+            if (result.name && !formData.name) updates.name = result.name;
+            if (result.icon && !formData.icon) updates.icon = result.icon;
+            if (result.category && formData.category === "Utilidades") updates.category = result.category;
+            
+            // If we got a name and no ID yet, generate it
+            if (result.name && !formData.id && !isEditing) {
+              updates.id = generateIdFromName(result.name);
+            }
+            
+            if (Object.keys(updates).length > 0) {
+              setFormData(prev => ({ ...prev, ...updates }));
+              toast.success("Algunos campos se han autocompletado");
+            }
+          }
+        } else if (name === 'name' && !formData.icon) {
+          const result = await autofillFromName(value);
+          if (result.icon) {
+            setFormData(prev => ({ ...prev, icon: result.icon }));
+            toast.success("Se ha encontrado un posible icono");
+          }
+        }
+      } catch (error) {
+        console.error("Error autofilling:", error);
+      } finally {
+        setIsAutofilling(false);
+      }
     }
   };
 
@@ -86,11 +139,16 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
-      onSave(formData);
+      setIsLoading(true);
+      try {
+        await onSave(formData);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -135,14 +193,25 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="url">URL</Label>
-          <Input
-            id="url"
-            name="url"
-            value={formData.url}
-            onChange={handleChange}
-            placeholder="https://ejemplo.com"
-          />
+          <div className="relative">
+            <Input
+              id="url"
+              name="url"
+              value={formData.url}
+              onChange={handleChange}
+              placeholder="https://ejemplo.com"
+              className={isAutofilling ? "pr-10" : ""}
+            />
+            {isAutofilling && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
+          </div>
           {errors.url && <p className="text-sm text-red-500">{errors.url}</p>}
+          <p className="text-xs text-muted-foreground">
+            Al introducir una URL, se intentarán autocompletar los demás campos.
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -155,6 +224,17 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
             placeholder="https://ejemplo.com/icon.png"
           />
           {errors.icon && <p className="text-sm text-red-500">{errors.icon}</p>}
+          {formData.icon && (
+            <div className="mt-2 flex items-center space-x-2">
+              <img 
+                src={formData.icon} 
+                alt="Icono de vista previa" 
+                className="w-8 h-8 object-contain rounded border"
+                onError={(e) => (e.currentTarget.src = "/placeholder.svg")} 
+              />
+              <span className="text-xs text-muted-foreground">Vista previa</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -202,10 +282,19 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button type="submit">Guardar</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Guardando...
+            </>
+          ) : (
+            "Guardar"
+          )}
+        </Button>
       </div>
     </form>
   );

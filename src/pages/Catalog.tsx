@@ -1,15 +1,12 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { Input } from '@/components/ui/input';
-import { Search, X, FileDown } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { AppData, categoryGroups } from '@/data/apps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import CategoryFilter from '@/components/CategoryFilter';
-import { exportAppsToExcel } from '@/services/ExportService';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -151,11 +148,6 @@ const Catalog = () => {
       }, {} as Record<string, AppData[]>);
   }, [filteredApps]);
 
-  // Función para manejar la exportación
-  const handleExport = () => {
-    exportAppsToExcel(allApps, 'catalogo-aplicaciones');
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
@@ -190,16 +182,6 @@ const Catalog = () => {
                 onCategoryChange={setSelectedFilter}
               />
             </div>
-
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-1" 
-              onClick={handleExport}
-            >
-              <FileDown className="h-4 w-4" />
-              <span className="hidden md:inline">Exportar</span>
-            </Button>
           </div>
         </div>
       </div>
