@@ -1,12 +1,10 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import Manage from "./pages/Manage";
@@ -16,7 +14,6 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import InstallPrompt from "./components/InstallPrompt";
 import CalculatorWidget from './pages/widgets/CalculatorWidget';
 import ConverterWidget from './pages/widgets/ConverterWidget';
 import NotesWidget from './pages/widgets/NotesWidget';
@@ -96,9 +93,6 @@ const App = () => {
         <LanguageProvider>
           <AppProvider>
             <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <InstallPrompt />
               <BrowserRouter>
                 <Routes>
                   <Route
