@@ -23,6 +23,9 @@ import NotesWidget from './pages/widgets/NotesWidget';
 import AlarmWidget from './pages/widgets/AlarmWidget';
 import Admin from './pages/Admin';
 
+// Importar el script de sincronización para que esté disponible globalmente
+import "./scripts/syncAppsToSupabase";
+
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
 

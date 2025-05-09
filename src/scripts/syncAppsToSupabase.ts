@@ -30,6 +30,7 @@ export const syncAllAppsToSupabase = async () => {
 };
 
 // Exportar la función para que esté disponible en la consola del navegador
+// SIEMPRE disponible, incluso antes de la carga del componente Admin
 if (typeof window !== 'undefined') {
   (window as any).syncAllAppsToSupabase = syncAllAppsToSupabase;
   console.log('====================================');
