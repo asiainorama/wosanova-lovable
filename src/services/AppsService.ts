@@ -5,23 +5,39 @@ import { AppData } from '@/data/types';
 // Configurar la tabla para cambios en tiempo real
 const configureRealtimeChanges = async () => {
   try {
-    // Enable realtime for the apps table using the correct method
-    const { data, error } = await supabase
-      .from('apps')
-      .on('*', () => {
-        console.log('Real-time update received for apps table');
-      })
+    // Create a channel to listen for Postgres changes
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on('postgres_changes', 
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'apps'
+        }, 
+        (payload) => {
+          console.log('Real-time update received for apps table:', payload);
+        }
+      )
       .subscribe();
     
-    if (error) throw error;
     console.log('Configuración de tiempo real para apps activada');
+    
+    // Return the channel for potential cleanup
+    return channel;
   } catch (error) {
     console.error('Error configurando tiempo real:', error);
   }
 };
 
-// Intentar configurar las actualizaciones en tiempo real al cargar el módulo
-configureRealtimeChanges();
+// Attempt to configure real-time updates when the module loads
+const realtimeChannel = configureRealtimeChanges();
+
+// Function to clean up real-time connection if needed
+export const cleanupRealtimeConnection = async () => {
+  if (realtimeChannel) {
+    await supabase.removeChannel(await realtimeChannel);
+  }
+};
 
 // Función para obtener todas las aplicaciones de Supabase
 export const fetchAppsFromSupabase = async (): Promise<AppData[]> => {
