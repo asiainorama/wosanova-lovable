@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,8 @@ import AppsTable from "@/components/admin/AppsTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
 import { saveAppToSupabase, deleteAppFromSupabase, fetchAppsFromSupabase } from "@/services/AppsService";
+import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
+import { FileDown, FileUp } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const Admin = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingApp, setEditingApp] = useState<AppData | null>(null);
   const [apps, setApps] = useState<AppData[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -119,6 +122,44 @@ const Admin = () => {
     setEditingApp(null);
   };
 
+  const handleExport = () => {
+    exportAppsToExcel(apps, 'admin-apps-export');
+  };
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleImportChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const importedApps = await importAppsFromExcel(file);
+      
+      // Guardar cada app importada en Supabase
+      for (const app of importedApps) {
+        await saveAppToSupabase(app);
+      }
+      
+      // Recargar apps
+      await loadApps();
+      toast.success(`${importedApps.length} aplicaciones importadas correctamente`);
+    } catch (error) {
+      console.error("Error importing apps:", error);
+      toast.error(`Error al importar aplicaciones: ${error}`);
+    } finally {
+      setLoading(false);
+      // Limpiar el input file
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -143,7 +184,24 @@ const Admin = () => {
         <>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Administración de Aplicaciones</h1>
-            <Button onClick={handleAddApp}>Añadir Nueva Aplicación</Button>
+            <div className="flex gap-2">
+              <input 
+                type="file" 
+                accept=".xlsx,.xls" 
+                onChange={handleImportChange} 
+                className="hidden"
+                ref={fileInputRef}
+              />
+              <Button variant="outline" onClick={handleImportClick} className="flex items-center gap-2">
+                <FileUp className="h-4 w-4" />
+                Importar Excel
+              </Button>
+              <Button variant="outline" onClick={handleExport} className="flex items-center gap-2">
+                <FileDown className="h-4 w-4" />
+                Exportar Excel
+              </Button>
+              <Button onClick={handleAddApp}>Añadir Nueva Aplicación</Button>
+            </div>
           </div>
           <AppsTable 
             apps={apps} 

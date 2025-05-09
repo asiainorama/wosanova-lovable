@@ -4,11 +4,13 @@ import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import { Input } from '@/components/ui/input';
-import { Search, X } from 'lucide-react';
+import { Search, X, FileDown } from 'lucide-react';
 import { AppData, categoryGroups } from '@/data/apps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import CategoryFilter from '@/components/CategoryFilter';
+import { exportAppsToExcel } from '@/services/ExportService';
+import { Button } from '@/components/ui/button';
 
 // Traducir los nombres de grupos de categorías
 const translateCategoryGroupName = (groupName: string, t: (key: string) => string): string => {
@@ -111,6 +113,11 @@ const Catalog = () => {
       }, {} as Record<string, AppData[]>);
   }, [filteredApps]);
 
+  // Función para manejar la exportación
+  const handleExport = () => {
+    exportAppsToExcel(allApps, 'catalogo-aplicaciones');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
@@ -145,6 +152,16 @@ const Catalog = () => {
                 onCategoryChange={setSelectedFilter}
               />
             </div>
+
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1" 
+              onClick={handleExport}
+            >
+              <FileDown className="h-4 w-4" />
+              <span className="hidden md:inline">Exportar</span>
+            </Button>
           </div>
         </div>
       </div>

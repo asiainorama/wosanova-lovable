@@ -5,16 +5,13 @@ import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Store, Database, Download } from 'lucide-react';
+import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
-import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-  const [iconCount, setIconCount] = useState<number>(0);
-  const [showInstallBanner, setShowInstallBanner] = useState<boolean>(false);
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
@@ -27,32 +24,6 @@ const Index = () => {
       // Use silent mode to avoid notifications
       prefetchAppLogos(favorites);
     }
-    
-    // Get icon count from Supabase
-    const checkStoredIcons = async () => {
-      try {
-        const { count, error } = await supabase
-          .from('app_icons')
-          .select('*', { count: 'exact', head: true });
-        
-        if (!error && count !== null) {
-          setIconCount(count);
-        }
-      } catch (err) {
-        console.error("Error checking icon count:", err);
-      }
-    };
-    
-    // Check if app is installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
-    setShowInstallBanner(!isStandalone);
-    
-    // Check initially and refresh every minute
-    checkStoredIcons();
-    const interval = setInterval(checkStoredIcons, 60000);
-    
-    return () => clearInterval(interval);
   }, [favorites]);
 
   return (
@@ -68,12 +39,6 @@ const Index = () => {
               moreCompact={true}
               smallerIcons={true}
             />
-            
-            {/* Show database stats */}
-            <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center">
-              <Database className="h-3 w-3 mr-1" /> 
-              <span>{iconCount} {iconCount === 1 ? 'icono almacenado' : 'iconos almacenados'} en la base de datos</span>
-            </div>
           </div>
         ) : (
           <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">

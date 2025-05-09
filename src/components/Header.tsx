@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Home, Search, Trash2 } from 'lucide-react';
+import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SidebarMenu from './SidebarMenu';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -13,7 +13,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { mode } = useTheme(); // Removed color reference
   const { t } = useLanguage();
 
   return (
@@ -45,6 +44,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           <Link to="/manage">
             <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
               <Trash2 className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/admin">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800">
+              <Settings className="h-5 w-5" />
             </Button>
           </Link>
         </div>
