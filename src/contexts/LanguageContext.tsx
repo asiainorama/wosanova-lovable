@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import * as React from 'react';
 
 interface LanguageContextType {
   language: 'es';
@@ -71,7 +72,7 @@ const translations = {
     'profile.color.pink': 'Rosa',
     'profile.color.orange': 'Naranja',
     'profile.deleted': 'Cuenta eliminada correctamente',
-
+    
     // Category Groups
     'category.productivity': 'Productividad',
     'category.entertainment': 'Entretenimiento',
@@ -172,7 +173,7 @@ const translations = {
     'auth.forgotPassword': '¿Olvidaste tu contraseña?',
     'auth.noAccount': '¿No tienes una cuenta?',
     'auth.haveAccount': '¿Ya tienes una cuenta?',
-
+    
     // Error messages
     'error.signout': 'Error al cerrar sesión',
     'error.delete': 'Error al eliminar la cuenta',
@@ -180,10 +181,10 @@ const translations = {
   }
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined);
 
 export const useLanguage = () => {
-  const context = useContext(LanguageContext);
+  const context = React.useContext(LanguageContext);
   if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
@@ -191,11 +192,11 @@ export const useLanguage = () => {
 };
 
 interface LanguageProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguageState] = useState<'es'>('es');
+  const [language, setLanguageState] = React.useState<'es'>('es');
 
   // Función para mantener compatibilidad con el resto del código
   const setLanguage = () => {
