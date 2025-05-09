@@ -32,4 +32,10 @@ export const syncAllAppsToSupabase = async () => {
 // Exportar la función para que esté disponible en la consola del navegador
 if (typeof window !== 'undefined') {
   (window as any).syncAllAppsToSupabase = syncAllAppsToSupabase;
+  console.log('====================================');
+  console.log('Para sincronizar todas las aplicaciones con Supabase:');
+  console.log('1. Asegúrate de estar autenticado como administrador');
+  console.log('2. Abre la consola del navegador (F12 o Ctrl+Shift+I)');
+  console.log('3. Ejecuta: syncAllAppsToSupabase()');
+  console.log('====================================');
 }
