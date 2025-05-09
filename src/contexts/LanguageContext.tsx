@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+// Make sure React is imported correctly at the top
+import * as React from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface LanguageContextType {
   language: 'es';
@@ -195,8 +198,8 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  // Siempre usamos español
-  const [language] = useState<'es'>('es');
+  // Fix: Use React.useState explicitly rather than destructured useState
+  const [language] = React.useState<'es'>('es');
 
   // Función para mantener compatibilidad con el resto del código
   const setLanguage = () => {
