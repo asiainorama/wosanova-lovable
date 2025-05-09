@@ -21,6 +21,7 @@ import CalculatorWidget from './pages/widgets/CalculatorWidget';
 import ConverterWidget from './pages/widgets/ConverterWidget';
 import NotesWidget from './pages/widgets/NotesWidget';
 import AlarmWidget from './pages/widgets/AlarmWidget';
+import Admin from './pages/Admin';
 
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
@@ -132,6 +133,10 @@ const App = () => {
                       </AppWithContextUpdater> : 
                       <Navigate to="/auth" />
                     }
+                  />
+                  <Route
+                    path="/admin"
+                    element={session ? <Admin /> : <Navigate to="/auth" />}
                   />
                   <Route
                     path="/auth"
