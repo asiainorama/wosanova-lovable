@@ -13,6 +13,15 @@ import {
 } from "@/components/ui/table";
 import { Search, FileDown, FileUp, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface AppsTableProps {
   apps: AppData[];
@@ -146,29 +155,53 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Mostrando {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredApps.length)} de {filteredApps.length} aplicaciones
+            {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredApps.length)} de ${filteredApps.length} apps`}
           </div>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-            >
-              Anterior
-            </Button>
-            <div className="flex items-center px-2">
-              {currentPage} / {totalPages}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) setCurrentPage(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: Math.min(3, totalPages) }).map((_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(pageNum);
+                      }}
+                      isActive={currentPage === pageNum}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              {totalPages > 3 && <PaginationEllipsis />}
+              
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                  }}
+                  disabled={currentPage === totalPages}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>
