@@ -18,6 +18,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => 
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         className="pl-10 pr-8 py-2 w-full bg-gray-100 border-none"
+        aria-label="Buscar aplicaciones"
       />
       {searchTerm && (
         <button

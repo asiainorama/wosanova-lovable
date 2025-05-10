@@ -21,6 +21,7 @@ const Admin = () => {
   const [editingApp, setEditingApp] = useState<AppData | null>(null);
   const [apps, setApps] = useState<AppData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -111,6 +112,7 @@ const Admin = () => {
       }
       
       setShowForm(false);
+      // We don't reset the current page when saving, so user stays on the same page
     } catch (error) {
       console.error("Error saving app:", error);
       toast.error("Error al guardar la aplicación");
@@ -120,6 +122,7 @@ const Admin = () => {
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingApp(null);
+    // Don't reset the current page when cancelling
   };
 
   const handleExport = () => {
@@ -140,12 +143,12 @@ const Admin = () => {
       setLoading(true);
       const importedApps = await importAppsFromExcel(file);
       
-      // Guardar cada app importada en Supabase
+      // Save each imported app to Supabase
       for (const app of importedApps) {
         await saveAppToSupabase(app);
       }
       
-      // Recargar apps
+      // Reload apps
       await loadApps();
       toast.success(`${importedApps.length} aplicaciones importadas correctamente`);
     } catch (error) {
@@ -153,7 +156,7 @@ const Admin = () => {
       toast.error(`Error al importar aplicaciones: ${error}`);
     } finally {
       setLoading(false);
-      // Limpiar el input file
+      // Clear the input file
       if (event.target) {
         event.target.value = '';
       }

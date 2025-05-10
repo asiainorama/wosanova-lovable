@@ -27,7 +27,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
 
-  // Detectar orientación horizontal en dispositivos móviles
+  // Detect landscape orientation on mobile devices
   useEffect(() => {
     const checkOrientation = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
@@ -54,7 +54,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
 
-  // Determinar qué columnas mostrar basado en el dispositivo y orientación
+  // Determine which columns to show based on device and orientation
   const showDescription = !isMobile || (isMobile && isLandscape);
 
   return (
@@ -95,11 +95,13 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
             ) : (
               paginatedApps.map((app) => (
                 <TableRow key={app.id}>
-                  <TableCell 
-                    className="font-medium cursor-pointer hover:text-blue-600 text-blue-500 underline transition-colors"
-                    onClick={() => onEdit(app)}
-                  >
-                    {app.name}
+                  <TableCell>
+                    <span
+                      className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
+                      onClick={() => onEdit(app)}
+                    >
+                      {app.name}
+                    </span>
                   </TableCell>
                   {showDescription && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
                   {!isMobile && <TableCell>{app.category}</TableCell>}

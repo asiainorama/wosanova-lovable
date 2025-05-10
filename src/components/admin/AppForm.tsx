@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AppData } from "@/data/types";
 import { Input } from "@/components/ui/input";
@@ -160,7 +161,7 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Ocultamos el campo ID ya que se rellena automáticamente */}
+        {/* Hidden ID field since it's auto-generated */}
         <input
           type="hidden"
           name="id"
