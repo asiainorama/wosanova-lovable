@@ -21,7 +21,8 @@ export const generateIdFromName = (name: string): string => {
  */
 export const extractDomain = (url: string): string => {
   try {
-    if (!url.startsWith(('http://', 'https://'))) {
+    // Fix the comma operator issue by using proper conditional logic
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
       return url.split('/')[0].toLowerCase();
     }
     
