@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppsTableProps {
   apps: AppData[];
@@ -23,6 +24,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const isMobile = useIsMobile();
 
   const filteredApps = apps.filter(
     (app) =>
@@ -50,23 +52,23 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>URL</TableHead>
+              {!isMobile && <TableHead>Descripción</TableHead>}
+              {!isMobile && <TableHead>Categoría</TableHead>}
+              {!isMobile && <TableHead>URL</TableHead>}
               <TableHead>Logo</TableHead>
-              <TableHead className="w-[100px]">IA</TableHead>
+              {!isMobile && <TableHead className="w-[100px]">IA</TableHead>}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 3 : 7} className="h-24 text-center">
                   No se encontraron aplicaciones.
                 </TableCell>
               </TableRow>
@@ -74,23 +76,25 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
               paginatedApps.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell 
-                    className="font-medium cursor-pointer hover:text-blue-600 transition-colors"
+                    className="font-medium cursor-pointer hover:text-blue-600 text-blue-500 underline transition-colors"
                     onClick={() => onEdit(app)}
                   >
                     {app.name}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">{app.description}</TableCell>
-                  <TableCell>{app.category}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    <a
-                      href={app.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      {app.url}
-                    </a>
-                  </TableCell>
+                  {!isMobile && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
+                  {!isMobile && <TableCell>{app.category}</TableCell>}
+                  {!isMobile && (
+                    <TableCell className="max-w-xs truncate">
+                      <a
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        {app.url}
+                      </a>
+                    </TableCell>
+                  )}
                   <TableCell>
                     <img
                       src={app.icon}
@@ -98,7 +102,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       className="h-8 w-8 rounded"
                     />
                   </TableCell>
-                  <TableCell>{app.isAI ? "Sí" : "No"}</TableCell>
+                  {!isMobile && <TableCell>{app.isAI ? "Sí" : "No"}</TableCell>}
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button

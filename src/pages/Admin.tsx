@@ -174,7 +174,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header title="Administración" />
+      <Header title="Admin" />
       
       <main className="container mx-auto px-4 py-6 flex-1">
         {showForm ? (
@@ -195,13 +195,30 @@ const Admin = () => {
                   className="hidden"
                   ref={fileInputRef}
                 />
-                <Button variant="outline" onClick={handleImportClick} className="flex items-center gap-2" size="icon" title="Importar Excel">
+                <Button 
+                  variant="outline" 
+                  onClick={handleImportClick} 
+                  className="flex items-center justify-center" 
+                  size="icon" 
+                  title="Importar Excel"
+                >
                   <FileUp className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" onClick={handleExport} className="flex items-center gap-2" size="icon" title="Exportar Excel">
+                <Button 
+                  variant="outline" 
+                  onClick={handleExport} 
+                  className="flex items-center justify-center" 
+                  size="icon" 
+                  title="Exportar Excel"
+                >
                   <FileDown className="h-4 w-4" />
                 </Button>
-                <Button onClick={handleAddApp} size="icon" title="Añadir Nueva Aplicación">
+                <Button 
+                  onClick={handleAddApp} 
+                  size="icon" 
+                  className="flex items-center justify-center"
+                  title="Añadir Nueva Aplicación"
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>

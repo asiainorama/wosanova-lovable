@@ -115,11 +115,11 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   // Función para mostrar los nombres correctos de los grupos de categorías
   const getCategoryGroupName = (groupName: string): string => {
     switch (groupName) {
-      case "Productivity": return t('categoryGroup.productivity') || "Productividad";
-      case "Entertainment": return t('categoryGroup.entertainment') || "Entretenimiento";
-      case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
-      case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
-      case "Finance": return t('categoryGroup.finance') || "Finanzas";
+      case "Productivity": return "Productividad";
+      case "Entertainment": return "Entretenimiento";
+      case "Utilities": return "Utilidades";
+      case "Lifestyle": return "Estilo de vida";
+      case "Finance": return "Finanzas";
       default: return groupName;
     }
   };
