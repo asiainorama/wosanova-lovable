@@ -17,6 +17,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+// Interface for Safari's navigator extension with standalone property
+interface SafariNavigator extends Navigator {
+  standalone?: boolean;
+}
+
 const InstallPWA: React.FC = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState<boolean>(false);
@@ -31,8 +36,7 @@ const InstallPWA: React.FC = () => {
     }
     // Comprobar si es iOS con PWA ya añadida a pantalla
     if (
-      window.navigator.standalone === true ||
-      (window as any).navigator.standalone === true
+      (window.navigator as SafariNavigator).standalone === true
     ) {
       return true;
     }
