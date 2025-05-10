@@ -166,7 +166,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     e.preventDefault();
                     if (currentPage > 1) setCurrentPage(currentPage - 1);
                   }}
-                  disabled={currentPage === 1}
+                  isDisabled={currentPage === 1}
                 />
               </PaginationItem>
               
@@ -197,7 +197,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     e.preventDefault();
                     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
                   }}
-                  disabled={currentPage === totalPages}
+                  isDisabled={currentPage === totalPages}
                 />
               </PaginationItem>
             </PaginationContent>
