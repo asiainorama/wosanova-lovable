@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
-import { Input } from '@/components/ui/input';
-import { Search, X } from 'lucide-react';
+import SearchBar from '@/components/SearchBar';
 import { AppData, categoryGroups } from '@/data/apps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
@@ -12,13 +10,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 // Traducir los nombres de grupos de categorías
-const translateCategoryGroupName = (groupName: string, t: (key: string) => string): string => {
+const translateCategoryGroupName = (groupName: string): string => {
   switch (groupName) {
-    case "Productivity": return t('categoryGroup.productivity') || "Productividad";
-    case "Entertainment": return t('categoryGroup.entertainment') || "Entretenimiento";
-    case "Utilities": return t('categoryGroup.utilities') || "Utilidades";
-    case "Lifestyle": return t('categoryGroup.lifestyle') || "Estilo de vida";
-    case "Finance": return t('categoryGroup.finance') || "Finanzas";
+    case "Productivity": return "Productividad";
+    case "Entertainment": return "Entretenimiento";
+    case "Utilities": return "Utilidades";
+    case "Lifestyle": return "Estilo de vida";
+    case "Finance": return "Finanzas";
     default: return groupName;
   }
 };
@@ -178,28 +176,15 @@ const Catalog = () => {
       {/* Fixed search/filter bar - optimized for mobile */}
       <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
         <div className="container mx-auto">
-          <div className="flex flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder={t('catalog.search') || "Buscar..."}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 py-2 w-full bg-gray-100 dark:bg-gray-800 border-none"
+              <SearchBar 
+                searchTerm={searchTerm} 
+                onSearchChange={setSearchTerm} 
               />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
             </div>
             
-            {/* Utilizamos el componente CategoryFilter mejorado */}
-            <div className="w-full max-w-[220px]">
+            <div className="w-full md:max-w-[220px]">
               <CategoryFilter 
                 selectedCategory={selectedFilter}
                 onCategoryChange={setSelectedFilter}
@@ -224,7 +209,7 @@ const Catalog = () => {
                 <span>
                   {` > ${
                     categoryGroups.some(group => group.name === selectedFilter)
-                      ? translateCategoryGroupName(selectedFilter, t)
+                      ? translateCategoryGroupName(selectedFilter)
                       : selectedFilter
                   }`}
                 </span>

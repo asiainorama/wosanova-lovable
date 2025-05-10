@@ -198,7 +198,7 @@ const Admin = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleImportClick} 
-                  className="flex items-center justify-center" 
+                  className="flex items-center justify-center rounded-xl" 
                   size="icon" 
                   title="Importar Excel"
                 >
@@ -207,7 +207,7 @@ const Admin = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleExport} 
-                  className="flex items-center justify-center" 
+                  className="flex items-center justify-center rounded-xl" 
                   size="icon" 
                   title="Exportar Excel"
                 >
@@ -216,7 +216,7 @@ const Admin = () => {
                 <Button 
                   onClick={handleAddApp} 
                   size="icon" 
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-center rounded-xl"
                   title="Añadir Nueva Aplicación"
                 >
                   <Plus className="h-4 w-4" />

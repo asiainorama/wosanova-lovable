@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AppData } from "@/data/types";
 import { Input } from "@/components/ui/input";
@@ -161,23 +160,12 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="id">ID</Label>
-          <Input
-            id="id"
-            name="id"
-            value={formData.id}
-            onChange={handleChange}
-            placeholder="app-id"
-            disabled={isEditing}
-          />
-          {errors.id && <p className="text-sm text-red-500">{errors.id}</p>}
-          {isEditing && (
-            <p className="text-sm text-muted-foreground">
-              El ID no se puede modificar una vez creado.
-            </p>
-          )}
-        </div>
+        {/* Ocultamos el campo ID ya que se rellena automáticamente */}
+        <input
+          type="hidden"
+          name="id"
+          value={formData.id}
+        />
 
         <div className="space-y-2">
           <Label htmlFor="name">Nombre</Label>

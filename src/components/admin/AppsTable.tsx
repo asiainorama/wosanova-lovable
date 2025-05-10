@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppData } from "@/data/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Search, FileDown, FileUp, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppsTableProps {
@@ -23,8 +23,25 @@ interface AppsTableProps {
 const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLandscape, setIsLandscape] = useState(false);
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
+
+  // Detectar orientación horizontal en dispositivos móviles
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    checkOrientation();
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", checkOrientation);
+
+    return () => {
+      window.removeEventListener("resize", checkOrientation);
+      window.removeEventListener("orientationchange", checkOrientation);
+    };
+  }, []);
 
   const filteredApps = apps.filter(
     (app) =>
@@ -36,6 +53,9 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
+
+  // Determinar qué columnas mostrar basado en el dispositivo y orientación
+  const showDescription = !isMobile || (isMobile && isLandscape);
 
   return (
     <div className="space-y-4">
@@ -57,7 +77,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              {!isMobile && <TableHead>Descripción</TableHead>}
+              {showDescription && <TableHead>Descripción</TableHead>}
               {!isMobile && <TableHead>Categoría</TableHead>}
               {!isMobile && <TableHead>URL</TableHead>}
               <TableHead>Logo</TableHead>
@@ -68,7 +88,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <TableBody>
             {paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 3 : 7} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? (showDescription ? 3 : 2) : 7} className="h-24 text-center">
                   No se encontraron aplicaciones.
                 </TableCell>
               </TableRow>
@@ -81,7 +101,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   >
                     {app.name}
                   </TableCell>
-                  {!isMobile && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
+                  {showDescription && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
                   {!isMobile && <TableCell>{app.category}</TableCell>}
                   {!isMobile && (
                     <TableCell className="max-w-xs truncate">
