@@ -3,7 +3,7 @@
   "name": "WosaNova",
   "short_name": "WosaNova",
   "description": "La mayor colección de WebApps del mundo",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#1f2937",
@@ -25,21 +25,6 @@
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/icon-167x167.png",
-      "sizes": "167x167",
-      "type": "image/png"
     }
   ],
   "prefer_related_applications": false,
@@ -56,13 +41,6 @@
       "short_name": "Favoritos",
       "description": "Ver tus aplicaciones favoritas",
       "url": "/",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Perfil",
-      "short_name": "Perfil",
-      "description": "Ver tu perfil",
-      "url": "/profile",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],

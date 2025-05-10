@@ -43,28 +43,17 @@
     <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-750x1334.png" />
     <!-- iPhone 8 Plus, 7 Plus, 6s Plus, 6 Plus (1242px x 2208px) -->
     <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2208.png" />
-    <!-- iPhone 11, XR -->
-    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-828x1792.png" />
-    <!-- iPhone 11 Pro, XS -->
-    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1125x2436.png" />
-    <!-- iPhone 11 Pro Max, XS Max -->
-    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2688.png" />
-    <!-- iPhone 12, 13 -->
-    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1170x2532.png" />
-    <!-- iPhone 12 Pro Max, 13 Pro Max -->
-    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1284x2778.png" />
-    <!-- iPad Pro 12.9" -->
-    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-2048x2732.png" />
     
     <!-- iOS PWA Standalone Mode Detection -->
     <script type="text/javascript">
       if (("standalone" in window.navigator) && window.navigator.standalone) {
-        // Si está en modo standalone, previene el comportamiento predeterminado de links
+        // If in standalone mode, prevent default behavior of links
         document.addEventListener('click', function(e) {
+          // Only run this script in standalone mode
           var curNode = e.target;
           var isLink = false;
           
-          // Recorrer hacia arriba para buscar si el clic es dentro de un enlace
+          // Traverse up from the clicked element to find if it's within an anchor tag
           while (curNode && !isLink) {
             if (curNode.nodeName.toUpperCase() === 'A' && curNode.getAttribute('href')) {
               e.preventDefault();
@@ -93,56 +82,11 @@
       #root {
         height: 100%;
       }
-      
-      /* Estilos de pantalla de carga para la PWA */
-      .splash-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background-color: #f3f4f6;
-        z-index: 9999;
-        transition: opacity 0.5s ease;
-      }
-      
-      @media (prefers-color-scheme: dark) {
-        .splash-screen {
-          background-color: #1f2937;
-        }
-      }
     </style>
   </head>
 
   <body>
-    <!-- Splash screen inicial -->
-    <div id="splash" class="splash-screen">
-      <img src="/icons/icon-512x512.png" alt="WosaNova" style="width: 120px; height: 120px; margin-bottom: 24px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-      <h1 style="margin: 10px 0; color: #3b82f6; font-size: 24px; font-family: system-ui, -apple-system, sans-serif;">WosaNova</h1>
-      <p style="margin: 5px 0; color: #6b7280; font-family: system-ui, -apple-system, sans-serif;">Cargando...</p>
-    </div>
-    
     <div id="root"></div>
-
-    <script>
-      // Ocultar splash inicial cuando la aplicación esté cargada
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          var splash = document.getElementById('splash');
-          if (splash) {
-            splash.style.opacity = '0';
-            setTimeout(function() {
-              splash.style.display = 'none';
-            }, 500);
-          }
-        }, 1000); // Mostrar por al menos 1 segundo
-      });
-    </script>
-    
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
