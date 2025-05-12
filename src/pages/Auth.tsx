@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, Rocket } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import SpaceBackground from '@/components/SpaceBackground';
 import { useTheme } from '@/contexts/ThemeContext';
+
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +78,7 @@ const Auth = () => {
   useEffect(() => {
     console.log("Auth page - current theme mode:", mode);
   }, [mode]);
+  
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
@@ -136,9 +139,11 @@ const Auth = () => {
       <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
-            <span className="inline-block p-3 rounded-full bg-primary/10 text-primary dark:bg-primary/20">
-              <Rocket size={48} className="text-primary animate-pulse" />
-            </span>
+            <img 
+              src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
+              alt="WosaNova Logo" 
+              className="w-24 h-24"
+            />
           </div>
           <h1 className="text-4xl font-bold mb-3 gradient-text" style={{
           backgroundImage: 'linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%)',

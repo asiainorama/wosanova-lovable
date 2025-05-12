@@ -9,19 +9,19 @@
   "theme_color": "#1f2937",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/apple-touch-icon.png",
+      "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
@@ -34,14 +34,14 @@
       "short_name": "Catálogo",
       "description": "Ver el catálogo de aplicaciones",
       "url": "/catalog",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png", "sizes": "192x192" }]
     },
     {
       "name": "Favoritos",
       "short_name": "Favoritos",
       "description": "Ver tus aplicaciones favoritas",
       "url": "/",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [
