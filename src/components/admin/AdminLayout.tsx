@@ -3,12 +3,15 @@ import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AdminLayoutProps {
   children: ReactNode;
+  activeTab?: string;
+  onTabChange?: (value: string) => void;
 }
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminLayout = ({ children, activeTab = "apps", onTabChange }: AdminLayoutProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -42,6 +45,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          {/* Admin Navigation Tabs */}
+          <Tabs value={activeTab} onValueChange={onTabChange} className="mb-6">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="apps">Aplicaciones</TabsTrigger>
+              <TabsTrigger value="users">Usuarios</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
           {children}
         </div>
       </main>

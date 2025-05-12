@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import AppsTable from "@/components/admin/AppsTable";
+import UsersTable from "@/components/admin/UsersTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
 import { 
@@ -16,6 +17,8 @@ import {
 } from "@/services/AppsService";
 import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
 import { FileDown, FileUp, Plus, Trash2 } from "lucide-react";
+import { TabsContent } from "@/components/ui/tabs";
+import AdminLayout from "@/components/admin/AdminLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +41,7 @@ const Admin = () => {
   const [apps, setApps] = useState<AppData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<string>("apps");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -142,7 +146,6 @@ const Admin = () => {
       }
       
       setShowForm(false);
-      // No reseteamos la página actual al guardar
     } catch (error) {
       console.error("Error saving app:", error);
       toast.error("Error al guardar la aplicación");
@@ -152,7 +155,6 @@ const Admin = () => {
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingApp(null);
-    // No reseteamos la página actual al cancelar
   };
 
   const handleExport = () => {
@@ -193,7 +195,11 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  if (loading && !showForm) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -210,87 +216,98 @@ const Admin = () => {
       <Header title="Admin" />
       
       <main className="container mx-auto px-4 py-6 flex-1">
-        {showForm ? (
-          <AppForm 
-            app={editingApp} 
-            onSave={handleSaveApp} 
-            onCancel={handleCancelForm}
-          />
-        ) : (
-          <>
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">Aplicaciones</h1>
-              <div className="flex gap-2">
-                <input 
-                  type="file" 
-                  accept=".xlsx,.xls" 
-                  onChange={handleImportChange} 
-                  className="hidden"
-                  ref={fileInputRef}
-                />
-                
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+        <AdminLayout activeTab={activeTab} onTabChange={handleTabChange}>
+          {showForm ? (
+            <AppForm 
+              app={editingApp} 
+              onSave={handleSaveApp} 
+              onCancel={handleCancelForm}
+            />
+          ) : (
+            <>
+              <TabsContent value="apps">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold">Aplicaciones</h1>
+                  <div className="flex gap-2">
+                    <input 
+                      type="file" 
+                      accept=".xlsx,.xls" 
+                      onChange={handleImportChange} 
+                      className="hidden"
+                      ref={fileInputRef}
+                    />
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          className="flex items-center justify-center rounded-xl" 
+                          size="icon" 
+                          title="Eliminar todo el catálogo"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Eliminar todas las aplicaciones?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará todas las aplicaciones del catálogo. Esta acción no se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteAllApps}>
+                            Eliminar todo
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    
                     <Button 
-                      variant="destructive" 
+                      variant="outline" 
+                      onClick={handleImportClick} 
                       className="flex items-center justify-center rounded-xl" 
                       size="icon" 
-                      title="Eliminar todo el catálogo"
+                      title="Importar Excel"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <FileUp className="h-4 w-4" />
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar todas las aplicaciones?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción eliminará todas las aplicaciones del catálogo. Esta acción no se puede deshacer.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteAllApps}>
-                        Eliminar todo
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={handleImportClick} 
-                  className="flex items-center justify-center rounded-xl" 
-                  size="icon" 
-                  title="Importar Excel"
-                >
-                  <FileUp className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleExport} 
-                  className="flex items-center justify-center rounded-xl" 
-                  size="icon" 
-                  title="Exportar Excel"
-                >
-                  <FileDown className="h-4 w-4" />
-                </Button>
-                <Button 
-                  onClick={handleAddApp} 
-                  size="icon" 
-                  className="flex items-center justify-center rounded-xl"
-                  title="Añadir Nueva Aplicación"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <AppsTable 
-              apps={apps} 
-              onEdit={handleEditApp} 
-              onDelete={handleDeleteApp} 
-            />
-          </>
-        )}
+                    <Button 
+                      variant="outline" 
+                      onClick={handleExport} 
+                      className="flex items-center justify-center rounded-xl" 
+                      size="icon" 
+                      title="Exportar Excel"
+                    >
+                      <FileDown className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      onClick={handleAddApp} 
+                      size="icon" 
+                      className="flex items-center justify-center rounded-xl"
+                      title="Añadir Nueva Aplicación"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <AppsTable 
+                  apps={apps} 
+                  onEdit={handleEditApp} 
+                  onDelete={handleDeleteApp} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="users">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold">Usuarios</h1>
+                </div>
+                <UsersTable />
+              </TabsContent>
+            </>
+          )}
+        </AdminLayout>
       </main>
     </div>
   );
