@@ -250,7 +250,7 @@ const Catalog = () => {
                 </span>
               )}
               {selectedSubcategory !== 'all' && (
-                <span> > {selectedSubcategory}</span>
+                <span>{' > '}{selectedSubcategory}</span>
               )}
             </h3>
             
