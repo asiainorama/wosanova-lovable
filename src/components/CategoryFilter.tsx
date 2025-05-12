@@ -41,7 +41,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           url: app.url,
           icon: app.icon,
           category: app.category,
-          subcategory: app.subcategory, // Add support for subcategory
+          subcategory: app.subcategory,
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
@@ -74,24 +74,6 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
       supabase.removeChannel(channel);
     };
   }, []);
-  
-  // Función para contar apps por categoría
-  const countAppsByCategory = (category: string) => {
-    if (category === 'all') {
-      return allApps.length;
-    }
-    
-    // Si es un grupo, contar todas las apps en las categorías del grupo
-    const isGroup = categoryGroups.some(group => group.name === category);
-    
-    if (isGroup) {
-      const categoriesInGroup = categoryGroups.find(group => group.name === category)?.categories || [];
-      return allApps.filter(app => categoriesInGroup.includes(app.category)).length;
-    }
-    
-    // Si es una categoría individual
-    return allApps.filter(app => app.category === category).length;
-  };
   
   // Obtener categorías que tienen aplicaciones
   const usedCategories = React.useMemo(() => {
@@ -129,7 +111,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     <Select value={selectedCategory} onValueChange={onCategoryChange}>
       <SelectTrigger className="w-full bg-gray-100 border-none">
         <SelectValue 
-          placeholder={`${t('catalog.allCategories')} (${countAppsByCategory('all')})`} 
+          placeholder={t('catalog.allCategories')}
         />
       </SelectTrigger>
       <SelectContent className="max-h-80">
@@ -138,7 +120,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           value="all"
           className="text-left font-normal"
         >
-          {t('catalog.allCategories')} ({countAppsByCategory('all')})
+          {t('catalog.allCategories')}
         </SelectItem>
         
         {/* Mostrar grupos de categorías con subcategorías indentadas */}
@@ -148,24 +130,20 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           
           // Filtrar solo las categorías del grupo que tienen aplicaciones
           const categoriesWithApps = group.categories.filter(cat => 
-            usedCategories.includes(cat) && countAppsByCategory(cat) > 0
+            usedCategories.includes(cat)
           );
           
           // Solo mostrar grupos que tienen al menos una categoría con aplicaciones
           if (categoriesWithApps.length === 0) return null;
           
-          const groupCount = allApps.filter(app => 
-            group.categories.includes(app.category)
-          ).length;
-          
           return (
             <React.Fragment key={group.name}>
-              {/* Nombre del grupo con conteo */}
+              {/* Nombre del grupo */}
               <SelectItem 
                 value={group.name} 
                 className="text-left font-semibold border-b"
               >
-                {getCategoryGroupName(group.name)} ({groupCount})
+                {getCategoryGroupName(group.name)}
               </SelectItem>
               
               {/* Categorías dentro del grupo (indentadas) */}
@@ -175,7 +153,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
                   value={category}
                   className="text-left pl-6 font-normal"
                 >
-                  {translateCategory(category)} ({countAppsByCategory(category)})
+                  {translateCategory(category)}
                 </SelectItem>
               ))}
             </React.Fragment>

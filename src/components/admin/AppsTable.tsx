@@ -62,9 +62,47 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
+  
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
-  // Determine which columns to show based on device and orientation
-  const showDescription = !isMobile || (isMobile && isLandscape);
+  // Check if we should show additional columns based on device/orientation
+  const isTabletPortrait = !isMobile && window.innerWidth < 1024 && !isLandscape;
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // If we have less pages than our maximum, show all of them
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // We have more pages than we can show at once
+      if (currentPage <= 3) {
+        // If we're near the start, show first 5 pages
+        for (let i = 1; i <= 5; i++) {
+          pageNumbers.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        // If we're near the end, show last 5 pages
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        // We're somewhere in the middle, show current page and 2 on each side
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pageNumbers.push(i);
+        }
+      }
+    }
+    
+    return pageNumbers;
+  };
 
   return (
     <div className="space-y-4">
@@ -85,26 +123,26 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              {showDescription && <TableHead>Descripción</TableHead>}
-              {!isMobile && <TableHead>Categoría</TableHead>}
-              {!isMobile && <TableHead>URL</TableHead>}
-              <TableHead>Logo</TableHead>
-              {!isMobile && <TableHead className="w-[100px]">IA</TableHead>}
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="w-[180px]">Nombre</TableHead>
+              <TableHead className="w-[300px]">Descripción</TableHead>
+              {!isTabletPortrait && !isMobile && <TableHead className="w-[120px]">Categoría</TableHead>}
+              {!isTabletPortrait && !isMobile && <TableHead className="w-[200px]">URL</TableHead>}
+              <TableHead className="w-[80px] text-center">Logo</TableHead>
+              {!isTabletPortrait && !isMobile && <TableHead className="w-[60px] text-center">IA</TableHead>}
+              <TableHead className="w-[100px] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? (showDescription ? 3 : 2) : 7} className="h-24 text-center">
+                <TableCell colSpan={isTabletPortrait || isMobile ? 4 : 7} className="h-24 text-center">
                   No se encontraron aplicaciones.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedApps.map((app) => (
                 <TableRow key={app.id}>
-                  <TableCell>
+                  <TableCell className="font-medium">
                     <span
                       className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
                       onClick={() => onEdit(app)}
@@ -112,9 +150,9 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       {app.name}
                     </span>
                   </TableCell>
-                  {showDescription && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
-                  {!isMobile && <TableCell>{app.category}</TableCell>}
-                  {!isMobile && (
+                  <TableCell className="max-w-xs truncate">{app.description}</TableCell>
+                  {!isTabletPortrait && !isMobile && <TableCell>{app.category}</TableCell>}
+                  {!isTabletPortrait && !isMobile && (
                     <TableCell className="max-w-xs truncate">
                       <a
                         href={app.url}
@@ -126,14 +164,14 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       </a>
                     </TableCell>
                   )}
-                  <TableCell>
+                  <TableCell className="text-center">
                     <img
                       src={app.icon}
                       alt={`${app.name} icon`}
-                      className="h-8 w-8 rounded"
+                      className="h-8 w-8 rounded mx-auto"
                     />
                   </TableCell>
-                  {!isMobile && <TableCell>{app.isAI ? "Sí" : "No"}</TableCell>}
+                  {!isTabletPortrait && !isMobile && <TableCell className="text-center">{app.isAI ? "Sí" : "No"}</TableCell>}
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button
@@ -155,7 +193,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredApps.length)} de ${filteredApps.length} apps`}
+            {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredApps.length)} de ${filteredApps.length}`}
           </div>
           <Pagination>
             <PaginationContent>
@@ -167,28 +205,30 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     if (currentPage > 1) setCurrentPage(currentPage - 1);
                   }}
                   isDisabled={currentPage === 1}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
               
-              {Array.from({ length: Math.min(3, totalPages) }).map((_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentPage(pageNum);
-                      }}
-                      isActive={currentPage === pageNum}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
+              {getPageNumbers().map((pageNumber) => (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(pageNumber);
+                    }}
+                    isActive={currentPage === pageNumber}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
               
-              {totalPages > 3 && <PaginationEllipsis />}
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
               
               <PaginationItem>
                 <PaginationNext
@@ -198,6 +238,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
                   }}
                   isDisabled={currentPage === totalPages}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
             </PaginationContent>

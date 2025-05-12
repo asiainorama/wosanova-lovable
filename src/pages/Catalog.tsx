@@ -9,6 +9,7 @@ import { prefetchAppLogos } from '@/services/LogoCacheService';
 import CategoryFilter from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Traducir los nombres de grupos de categorías
 const translateCategoryGroupName = (groupName: string): string => {
@@ -32,6 +33,7 @@ const Catalog = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
+  const [loadingIcons, setLoadingIcons] = useState(true);
 
   // Fetch apps from Supabase
   useEffect(() => {
@@ -70,6 +72,7 @@ const Catalog = () => {
         setAllApps(fetchedApps);
         
         // Start prefetching icons for better performance
+        setLoadingIcons(true);
         prefetchIconsInBatches(fetchedApps);
         
       } catch (error) {
@@ -86,14 +89,28 @@ const Catalog = () => {
       
       // First prefetch prioritized icons (first visible batch)
       const priorityApps = apps.slice(0, batchSize);
-      await prefetchAppLogos(priorityApps);
-      
-      // Then process the rest in the background in small batches
-      for (let i = batchSize; i < apps.length; i += batchSize) {
-        const batch = apps.slice(i, Math.min(i + batchSize, apps.length));
-        setTimeout(() => {
-          prefetchAppLogos(batch).catch(console.error);
-        }, (i - batchSize) * 50); // Stagger the requests to avoid overwhelming the network
+      try {
+        await prefetchAppLogos(priorityApps);
+        
+        // Then process the rest in the background in small batches
+        let loadedCount = batchSize;
+        
+        for (let i = batchSize; i < apps.length; i += batchSize) {
+          const batch = apps.slice(i, Math.min(i + batchSize, apps.length));
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          await prefetchAppLogos(batch).catch(console.error);
+          
+          loadedCount += batch.length;
+          
+          // Update loading progress
+          if (i + batchSize >= apps.length) {
+            setLoadingIcons(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error prefetching app logos:', error);
+        setLoadingIcons(false);
       }
     };
     
@@ -186,6 +203,19 @@ const Catalog = () => {
       }, {} as Record<string, AppData[]>);
   }, [filteredApps]);
 
+  // Loading skeleton for apps
+  const AppsSkeleton = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {Array(10).fill(0).map((_, i) => (
+        <div key={i} className="flex flex-col items-center p-2 space-y-2 animate-pulse">
+          <Skeleton className="h-12 w-12 rounded-lg mb-2" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-32" />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
@@ -231,8 +261,11 @@ const Catalog = () => {
       
       <main className="container mx-auto px-4 py-4 flex-1">
         {isLoading ? (
-          <div className="text-center py-10">
-            <p className="text-gray-500 dark:text-gray-400">Cargando aplicaciones...</p>
+          <div className="animate-fade-in">
+            <div className="flex justify-center mb-8">
+              <div className="h-8 w-8 rounded-full border-4 border-primary border-r-transparent animate-spin"></div>
+            </div>
+            <AppsSkeleton />
           </div>
         ) : (
           <>
@@ -254,6 +287,14 @@ const Catalog = () => {
               )}
             </h3>
             
+            {/* Display loading animation while icons are being loaded */}
+            {loadingIcons && (
+              <div className="mb-4 flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-r-transparent animate-spin"></div>
+                <span className="text-sm text-gray-500">Cargando imágenes...</span>
+              </div>
+            )}
+            
             {/* Display apps grouped by category */}
             {Object.keys(groupedApps).length === 0 ? (
               <div className="text-center py-10">
@@ -262,7 +303,7 @@ const Catalog = () => {
             ) : (
               <div className="space-y-8">
                 {Object.entries(groupedApps).map(([category, apps]) => (
-                  <div key={category} className="space-y-3">
+                  <div key={category} className="space-y-3 animate-fade-in">
                     <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
                       {category}
                     </h2>
