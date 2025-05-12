@@ -8,7 +8,6 @@ interface SearchBarProps {
   onSearchChange: (term: string) => void;
 }
 
-// Este componente ya no se usará directamente, pero lo mantenemos para compatibilidad
 const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => {
   return (
     <div className="relative w-full">

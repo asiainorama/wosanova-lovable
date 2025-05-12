@@ -48,15 +48,15 @@ export const fetchAppsFromSupabase = async (): Promise<AppData[]> => {
     
     if (error) throw error;
     
-    // Mapear los datos de Supabase al formato AppData, usar subcategoría como categoría principal
+    // Mapear los datos de Supabase al formato AppData
     const apps: AppData[] = data.map(app => ({
       id: app.id,
       name: app.name,
       description: app.description,
       url: app.url,
       icon: app.icon,
-      category: app.subcategory || app.category, // Usar subcategoría como categoría principal
-      subcategory: "", // Ya no usamos subcategorías
+      category: app.category,
+      subcategory: app.subcategory || undefined, // Properly handle subcategory from database
       isAI: app.is_ai,
       created_at: app.created_at,
       updated_at: app.updated_at
@@ -81,7 +81,7 @@ export const saveAppToSupabase = async (app: AppData): Promise<void> => {
         url: app.url,
         icon: app.icon,
         category: app.category,
-        subcategory: app.subcategory || null, 
+        subcategory: app.subcategory || null, // Handle optional subcategory
         is_ai: app.isAI
       });
     
