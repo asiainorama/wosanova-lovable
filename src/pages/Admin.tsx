@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
 } from "@/services/AppsService";
 import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
 import { FileDown, FileUp, Plus, Trash2 } from "lucide-react";
-import { TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
   AlertDialog,
@@ -223,8 +224,8 @@ const Admin = () => {
               onCancel={handleCancelForm}
             />
           ) : (
-            <>
-              <TabsContent value="apps">
+            <Tabs value={activeTab} className="w-full">
+              <TabsContent value="apps" className="mt-0">
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-2xl font-bold">Aplicaciones</h1>
                   <div className="flex gap-2">
@@ -298,13 +299,13 @@ const Admin = () => {
                 />
               </TabsContent>
               
-              <TabsContent value="users">
+              <TabsContent value="users" className="mt-0">
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-2xl font-bold">Usuarios</h1>
                 </div>
                 <UsersTable />
               </TabsContent>
-            </>
+            </Tabs>
           )}
         </AdminLayout>
       </main>
