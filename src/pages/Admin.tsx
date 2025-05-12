@@ -195,6 +195,7 @@ const Admin = () => {
   };
 
   const handleTabChange = (value: string) => {
+    console.log("Tab changed to:", value);
     setActiveTab(value);
   };
 
