@@ -56,7 +56,7 @@ export const fetchAppsFromSupabase = async (): Promise<AppData[]> => {
       url: app.url,
       icon: app.icon,
       category: app.category,
-      subcategory: app.subcategory || '', // Add support for subcategory
+      subcategory: app.subcategory || '', // Handle potentially missing subcategory
       isAI: app.is_ai,
       created_at: app.created_at,
       updated_at: app.updated_at
@@ -81,7 +81,7 @@ export const saveAppToSupabase = async (app: AppData): Promise<void> => {
         url: app.url,
         icon: app.icon,
         category: app.category,
-        subcategory: app.subcategory || '', // Add support for subcategory
+        subcategory: app.subcategory || '', // Handle potentially missing subcategory
         is_ai: app.isAI
       });
     
