@@ -23,6 +23,12 @@ const AdminLayout = ({ children, activeTab = "apps", onTabChange }: AdminLayoutP
     navigate("/");
   };
 
+  const handleTabChange = (value: string) => {
+    if (onTabChange) {
+      onTabChange(value);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Admin Header */}
@@ -46,7 +52,7 @@ const AdminLayout = ({ children, activeTab = "apps", onTabChange }: AdminLayoutP
       <main className="container mx-auto px-4 py-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           {/* Admin Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={onTabChange} className="mb-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="apps">Aplicaciones</TabsTrigger>
               <TabsTrigger value="users">Usuarios</TabsTrigger>

@@ -40,7 +40,6 @@ const Admin = () => {
   const [editingApp, setEditingApp] = useState<AppData | null>(null);
   const [apps, setApps] = useState<AppData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<string>("apps");
 
   useEffect(() => {
