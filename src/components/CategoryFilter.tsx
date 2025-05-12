@@ -1,11 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
-import { categories } from '@/data/apps';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { categoryGroups } from '@/data/apps';
 import { supabase } from '@/integrations/supabase/client';
 import { AppData } from '@/data/types';
+import { 
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown, Search } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -15,19 +28,18 @@ interface CategoryFilterProps {
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange }) => {
   const { t, language } = useLanguage();
   const [allApps, setAllApps] = useState<AppData[]>([]);
-  const [, updateState] = useState<{}>({});
-  const forceUpdate = React.useCallback(() => updateState({}), []);
-  const [categorySubcategories, setCategorySubcategories] = useState<Record<string, string[]>>({});
+  const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Función para traducir categorías
   const translateCategory = (category: string) => {
-    // Convertir a minúsculas y normalizar el identificador para la traducción
     const key = `category.${category.toLowerCase()}`;
     const translation = t(key);
-    return translation !== key ? translation : category; // Si no hay traducción, usar el original
+    return translation !== key ? translation : category;
   };
   
-  // Obtener todas las apps para calcular los conteos y subcategorías
+  // Obtener todas las apps y extraer categorías únicas
   useEffect(() => {
     const fetchApps = async () => {
       try {
@@ -41,8 +53,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           description: app.description,
           url: app.url,
           icon: app.icon,
-          category: app.category,
-          subcategory: app.subcategory || "",
+          category: app.subcategory || app.category, // Usar subcategoría como categoría principal
+          subcategory: "",
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
@@ -50,24 +62,12 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
         
         setAllApps(fetchedApps);
         
-        // Organizar subcategorías por categoría
-        const subcategoriesByCategory: Record<string, Set<string>> = {};
-        fetchedApps.forEach(app => {
-          if (app.subcategory && app.subcategory.trim() !== '') {
-            if (!subcategoriesByCategory[app.category]) {
-              subcategoriesByCategory[app.category] = new Set();
-            }
-            subcategoriesByCategory[app.category].add(app.subcategory);
-          }
-        });
+        // Extraer categorías únicas, priorizando subcategorías
+        const uniqueCategories = Array.from(
+          new Set(fetchedApps.map(app => app.category))
+        ).filter(Boolean).sort();
         
-        // Convertir sets a arrays ordenados
-        const formattedSubcategories: Record<string, string[]> = {};
-        Object.keys(subcategoriesByCategory).forEach(category => {
-          formattedSubcategories[category] = Array.from(subcategoriesByCategory[category]).sort();
-        });
-        
-        setCategorySubcategories(formattedSubcategories);
+        setCategories(uniqueCategories);
       } catch (error) {
         console.error('Error fetching apps for category filter:', error);
       }
@@ -75,12 +75,12 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
 
     fetchApps();
     
-    // Suscribirse a cambios en tiempo real para actualizar los conteos
+    // Suscribirse a cambios en tiempo real
     const channel = supabase
       .channel('category-filter-changes')
       .on('postgres_changes', 
         {
-          event: '*', // Escuchar INSERT, UPDATE y DELETE
+          event: '*',
           schema: 'public',
           table: 'apps'
         }, 
@@ -95,17 +95,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     };
   }, []);
   
-  // Obtener categorías que tienen aplicaciones
-  const usedCategories = React.useMemo(() => {
-    const usedCats = new Set(allApps.map(app => app.category));
-    return categories.filter(cat => usedCats.has(cat));
-  }, [allApps]);
-  
   // Responder a los cambios de idioma
   useEffect(() => {
     const handleLanguageChange = () => {
       console.log("CategoryFilter detected language change:", language);
-      forceUpdate();
     };
     
     document.addEventListener('languagechange', handleLanguageChange);
@@ -113,86 +106,83 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     return () => {
       document.removeEventListener('languagechange', handleLanguageChange);
     };
-  }, [language, forceUpdate]);
+  }, [language]);
 
-  // Función para mostrar los nombres correctos de los grupos de categorías
-  const getCategoryGroupName = (groupName: string): string => {
-    switch (groupName) {
-      case "Productivity": return "Productividad";
-      case "Entertainment": return "Entretenimiento";
-      case "Utilities": return "Utilidades";
-      case "Lifestyle": return "Estilo de vida";
-      case "Finance": return "Finanzas";
-      default: return groupName;
-    }
-  };
+  // Filtrar categorías por término de búsqueda
+  const filteredCategories = searchTerm 
+    ? categories.filter(cat => 
+        cat.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        translateCategory(cat).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : categories;
 
   return (
-    <Select value={selectedCategory} onValueChange={onCategoryChange}>
-      <SelectTrigger className="w-full bg-gray-100 border-none">
-        <SelectValue 
-          placeholder={t('catalog.allCategories')}
-        />
-      </SelectTrigger>
-      <SelectContent className="max-h-80">
-        <SelectItem 
-          key="all" 
-          value="all"
-          className="text-left font-normal"
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between bg-gray-100 border-none"
         >
-          {t('catalog.allCategories')}
-        </SelectItem>
-        
-        {/* Mostrar grupos de categorías con subcategorías indentadas */}
-        {categoryGroups.map((group) => {
-          // No mostrar el grupo "Other"
-          if (group.name === "Other") return null;
-          
-          // Filtrar solo las categorías del grupo que tienen aplicaciones
-          const categoriesWithApps = group.categories.filter(cat => 
-            usedCategories.includes(cat)
-          );
-          
-          // Solo mostrar grupos que tienen al menos una categoría con aplicaciones
-          if (categoriesWithApps.length === 0) return null;
-          
-          return (
-            <React.Fragment key={group.name}>
-              {/* Nombre del grupo */}
-              <SelectItem 
-                value={group.name} 
-                className="text-left font-semibold border-b"
+          <div className="flex items-center">
+            <Search className="mr-2 h-4 w-4 text-gray-400" />
+            {selectedCategory === "all" 
+              ? t('catalog.allCategories') 
+              : translateCategory(selectedCategory)}
+          </div>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Command>
+          <CommandInput 
+            placeholder={t('catalog.searchCategories')} 
+            onValueChange={setSearchTerm}
+          />
+          <CommandList>
+            <CommandEmpty>{t('catalog.noCategoriesFound')}</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                key="all"
+                value="all"
+                onSelect={() => {
+                  onCategoryChange("all");
+                  setOpen(false);
+                }}
               >
-                {getCategoryGroupName(group.name)}
-              </SelectItem>
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selectedCategory === "all" ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {t('catalog.allCategories')}
+              </CommandItem>
               
-              {/* Categorías dentro del grupo (indentadas) */}
-              {categoriesWithApps.map((category) => (
-                <React.Fragment key={category}>
-                  <SelectItem 
-                    value={category}
-                    className="text-left pl-6 font-normal"
-                  >
-                    {translateCategory(category)}
-                  </SelectItem>
-                  
-                  {/* Subcategorías dentro de cada categoría (doble indentación) */}
-                  {categorySubcategories[category]?.map((subcategory) => (
-                    <SelectItem 
-                      key={`${category}-${subcategory}`} 
-                      value={`${category}:${subcategory}`}
-                      className="text-left pl-10 font-normal text-sm"
-                    >
-                      {subcategory}
-                    </SelectItem>
-                  ))}
-                </React.Fragment>
+              {filteredCategories.map((category) => (
+                <CommandItem
+                  key={category}
+                  value={category}
+                  onSelect={() => {
+                    onCategoryChange(category);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedCategory === category ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {translateCategory(category)}
+                </CommandItem>
               ))}
-            </React.Fragment>
-          );
-        })}
-      </SelectContent>
-    </Select>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

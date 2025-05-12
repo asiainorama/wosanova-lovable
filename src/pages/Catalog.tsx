@@ -2,26 +2,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
-import SearchBar from '@/components/SearchBar';
-import { AppData, categoryGroups } from '@/data/apps';
+import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import CategoryFilter from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-
-// Traducir los nombres de grupos de categorías
-const translateCategoryGroupName = (groupName: string): string => {
-  switch (groupName) {
-    case "Productivity": return "Productividad";
-    case "Entertainment": return "Entretenimiento";
-    case "Utilities": return "Utilidades";
-    case "Lifestyle": return "Estilo de vida";
-    case "Finance": return "Finanzas";
-    default: return groupName;
-  }
-};
 
 const Catalog = () => {
   const { t } = useLanguage();
@@ -43,15 +30,15 @@ const Catalog = () => {
 
         if (error) throw error;
         
-        // Map Supabase data to AppData format
+        // Map Supabase data to AppData format, usando subcategoría como categoría principal
         const fetchedApps: AppData[] = data.map(app => ({
           id: app.id,
           name: app.name,
           description: app.description,
           url: app.url,
           icon: app.icon,
-          category: app.category,
-          subcategory: app.subcategory || "", // This should now work with our database changes
+          category: app.subcategory || app.category, // Usar subcategoría como categoría principal
+          subcategory: "",
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
@@ -125,52 +112,53 @@ const Catalog = () => {
     return [...allApps].sort((a, b) => a.name.localeCompare(b.name));
   }, [allApps]);
 
-  // Handle special category:subcategory format for filtering
+  // Manejar la búsqueda y filtrado de apps
   useEffect(() => {
     let filtered = [...sortedApps];
     
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(app => 
-        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+    // Extraemos términos de búsqueda y categoría seleccionada
+    // Ahora la búsqueda se maneja desde el nuevo componente unificado
     
-    // Filter by category/group or subcategory
+    // Filtrar por categoría seleccionada
     if (selectedFilter !== 'all') {
-      // Check if the filter contains a subcategory (format: "category:subcategory")
-      if (selectedFilter.includes(':')) {
-        const [category, subcategory] = selectedFilter.split(':');
-        filtered = filtered.filter(app => 
-          app.category === category && app.subcategory === subcategory
-        );
-      } else {
-        // Check if selected filter is a group or a category
-        const isGroup = categoryGroups.some(group => group.name === selectedFilter);
-        
-        if (isGroup) {
-          // Filter by group
-          const categoriesInGroup = categoryGroups.find(group => group.name === selectedFilter)?.categories || [];
-          filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
-        } else {
-          // Filter by specific category
-          filtered = filtered.filter(app => app.category === selectedFilter);
-        }
-      }
+      filtered = filtered.filter(app => app.category === selectedFilter);
     }
     
     setFilteredApps(filtered);
-    
-    // Reset prefetch status to idle to trigger a new prefetch when filter changes
     setPrefetchStatus('idle');
-  }, [searchTerm, selectedFilter, sortedApps]);
+  }, [selectedFilter, sortedApps]);
+
+  // Manejar búsqueda por nombre o descripción
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    
+    let filtered = [...sortedApps];
+    
+    // Filtrar por término de búsqueda
+    if (term) {
+      filtered = filtered.filter(app => 
+        app.name.toLowerCase().includes(term.toLowerCase()) ||
+        app.description.toLowerCase().includes(term.toLowerCase())
+      );
+    }
+    
+    // Mantener el filtro de categoría si está activo
+    if (selectedFilter !== 'all') {
+      filtered = filtered.filter(app => app.category === selectedFilter);
+    }
+    
+    setFilteredApps(filtered);
+  };
 
   // Group apps by category for display
   const groupedApps = useMemo(() => {
     const grouped: Record<string, AppData[]> = {};
     
-    filteredApps.forEach(app => {
+    // Si hay un término de búsqueda, usar las apps filtradas
+    const appsToGroup = searchTerm ? filteredApps : 
+                        selectedFilter !== 'all' ? filteredApps : sortedApps;
+    
+    appsToGroup.forEach(app => {
       if (!grouped[app.category]) {
         grouped[app.category] = [];
       }
@@ -185,42 +173,24 @@ const Catalog = () => {
         result[category] = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
         return result;
       }, {} as Record<string, AppData[]>);
-  }, [filteredApps]);
-
-  // Loading skeleton for apps
-  const AppsSkeleton = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {Array(10).fill(0).map((_, i) => (
-        <div key={i} className="flex flex-col items-center p-2 space-y-2 animate-pulse">
-          <Skeleton className="h-12 w-12 rounded-lg mb-2" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-32" />
-        </div>
-      ))}
-    </div>
-  );
+  }, [filteredApps, searchTerm, selectedFilter, sortedApps]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title={t('catalog.title') || "Catálogo"} />
       
-      {/* Fixed search/filter bar - optimized for mobile */}
+      {/* Unified search and filter bar */}
       <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <SearchBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm} 
-              />
-            </div>
-            
-            <div className="w-full md:max-w-[220px]">
-              <CategoryFilter 
-                selectedCategory={selectedFilter}
-                onCategoryChange={setSelectedFilter}
-              />
-            </div>
+          <div className="w-full">
+            <CategoryFilter 
+              selectedCategory={selectedFilter}
+              onCategoryChange={(category) => {
+                setSelectedFilter(category);
+                // Resetear término de búsqueda al cambiar categoría
+                setSearchTerm('');
+              }}
+            />
           </div>
         </div>
       </div>
@@ -237,17 +207,8 @@ const Catalog = () => {
               {searchTerm || selectedFilter !== 'all'
                 ? (t('catalog.results') || "Resultados") 
                 : ""}
-              {selectedFilter !== 'all' && !selectedFilter.includes(':') && (
-                <span>
-                  {` > ${
-                    categoryGroups.some(group => group.name === selectedFilter)
-                      ? translateCategoryGroupName(selectedFilter)
-                      : selectedFilter
-                  }`}
-                </span>
-              )}
-              {selectedFilter.includes(':') && (
-                <span>{` > ${selectedFilter.split(':')[0]} > ${selectedFilter.split(':')[1]}`}</span>
+              {selectedFilter !== 'all' && (
+                <span>{` > ${selectedFilter}`}</span>
               )}
             </h3>
             
