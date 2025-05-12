@@ -27,7 +27,7 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 3; // Reduced retries to avoid too many attempts
+  const maxRetries = 2; // Reduced retries for faster loading
   const imageRef = useRef<HTMLImageElement>(null);
   const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
   const [fetchedFromSupabase, setFetchedFromSupabase] = useState(false);
@@ -40,7 +40,19 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
       try {
         if (!isMounted) return;
         
-        // Add a cache-busting timestamp parameter
+        // Check if we have this icon already in browser cache via sessionStorage
+        const cachedIconKey = `icon_${app.id}`;
+        const cachedIcon = sessionStorage.getItem(cachedIconKey);
+        
+        if (cachedIcon) {
+          setIconUrl(cachedIcon);
+          setImageLoading(false);
+          setFetchedFromSupabase(true);
+          console.log(`Using cached icon for ${app.name} from session storage`);
+          return;
+        }
+        
+        // Add a cache-busting timestamp parameter for the database query
         const timestamp = Date.now();
         
         // Check if we have this icon in the database
@@ -63,6 +75,10 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
           setImageLoading(false);
           storeSuccessfulIcon(app, url, false);
           setFetchedFromSupabase(true);
+          
+          // Store in session storage for faster subsequent loads
+          sessionStorage.setItem(cachedIconKey, url);
+          
           return;
         }
 
@@ -76,7 +92,19 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
       }
     };
 
-    fetchIconFromSupabase();
+    // Use Promise.race to set a timeout for icon fetching
+    const fetchWithTimeout = async () => {
+      const timeoutPromise = new Promise<void>(resolve => {
+        setTimeout(() => {
+          resolve();
+          console.log(`Fetch timeout for ${app.name} icon`);
+        }, 500); // 500ms timeout for faster perceived loading
+      });
+      
+      await Promise.race([fetchIconFromSupabase(), timeoutPromise]);
+    };
+
+    fetchWithTimeout();
     
     // Preload icons for iOS/macOS
     if (!fetchedFromSupabase) {
@@ -109,6 +137,12 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
 
   // Function to handle image error
   const handleImageError = () => {
+    if (retryCount >= maxRetries) {
+      setImageError(true);
+      setImageLoading(false);
+      return;
+    }
+    
     console.log(`Error loading icon for ${app.name}, retry ${retryCount + 1} of ${maxRetries}`);
     
     handleImageLoadError(
@@ -132,6 +166,11 @@ export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
+    
+    // Store in session storage for faster subsequent loads
+    const cachedIconKey = `icon_${app.id}`;
+    sessionStorage.setItem(cachedIconKey, iconUrl);
+    
     storeSuccessfulIcon(app, iconUrl, false);
   };
   

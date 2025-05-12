@@ -8,9 +8,25 @@ import Header from "@/components/Header";
 import AppsTable from "@/components/admin/AppsTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
-import { saveAppToSupabase, deleteAppFromSupabase, fetchAppsFromSupabase } from "@/services/AppsService";
+import { 
+  saveAppToSupabase, 
+  deleteAppFromSupabase, 
+  fetchAppsFromSupabase, 
+  deleteAllAppsFromSupabase 
+} from "@/services/AppsService";
 import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
-import { FileDown, FileUp, Plus } from "lucide-react";
+import { FileDown, FileUp, Plus, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -91,6 +107,20 @@ const Admin = () => {
     } catch (error) {
       console.error("Error deleting app:", error);
       toast.error("Error al eliminar la aplicación");
+    }
+  };
+
+  const handleDeleteAllApps = async () => {
+    try {
+      setLoading(true);
+      await deleteAllAppsFromSupabase();
+      setApps([]);
+      toast.success("Todas las aplicaciones han sido eliminadas");
+    } catch (error) {
+      console.error("Error deleting all apps:", error);
+      toast.error("Error al eliminar todas las aplicaciones");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,6 +228,34 @@ const Admin = () => {
                   className="hidden"
                   ref={fileInputRef}
                 />
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      className="flex items-center justify-center rounded-xl" 
+                      size="icon" 
+                      title="Eliminar todo el catálogo"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar todas las aplicaciones?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción eliminará todas las aplicaciones del catálogo. Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAllApps}>
+                        Eliminar todo
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                
                 <Button 
                   variant="outline" 
                   onClick={handleImportClick} 

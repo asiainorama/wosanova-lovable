@@ -38,11 +38,20 @@ export const storeLogoInSupabase = async (app: AppData, iconUrl: string): Promis
       return false;
     }
 
-    // Try to download the image
+    // Check if the icon URL is in session storage
+    const cachedIconKey = `icon_${app.id}`;
+    const cachedIconUrl = sessionStorage.getItem(cachedIconKey);
+    
+    if (cachedIconUrl === iconUrl) {
+      console.log(`Using cached icon URL for ${app.name}`);
+      return true;
+    }
+
+    // Try to download the image with cache control
     const response = await fetch(iconUrl, { 
       mode: 'cors',
       cache: 'no-cache',
-      headers: { 'Pragma': 'no-cache' }
+      headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
     });
     
     if (!response.ok) {
@@ -93,6 +102,10 @@ export const storeLogoInSupabase = async (app: AppData, iconUrl: string): Promis
       
       if (!insertError) {
         console.log(`Stored icon for ${app.name} in Supabase`);
+        
+        // Save to session storage
+        sessionStorage.setItem(cachedIconKey, publicUrl);
+        
         return true;
       }
     }
@@ -113,6 +126,10 @@ export const storeSuccessfulIcon = (app: AppData, iconUrl: string, hasError: boo
       // Extract domain from the app URL
       const domain = new URL(app.url).hostname.replace('www.', '');
       registerSuccessfulLogo(app.id, iconUrl, domain);
+      
+      // Cache in session storage
+      const cachedIconKey = `icon_${app.id}`;
+      sessionStorage.setItem(cachedIconKey, iconUrl);
       
       // Try to store in Supabase asynchronously
       if (!iconUrl.includes('app-logos')) {
@@ -165,6 +182,18 @@ export const handleImageLoadError = (
       }
     } 
     else if (retryCount === 1) {
+      // Check if we have a cached version in sessionStorage
+      const cachedIconKey = `icon_${app.id}`;
+      const cachedIconUrl = sessionStorage.getItem(cachedIconKey);
+      
+      if (cachedIconUrl && cachedIconUrl !== iconUrl) {
+        onRetry(cachedIconUrl);
+        if (imageRef.current) {
+          imageRef.current.src = cachedIconUrl;
+        }
+        return;
+      }
+      
       // Second retry: try Google Favicon API as a fallback
       let domain;
       try {
@@ -173,20 +202,6 @@ export const handleImageLoadError = (
         domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
       }
       const newUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-      onRetry(newUrl);
-      if (imageRef.current) {
-        imageRef.current.src = newUrl;
-      }
-    }
-    else if (retryCount === 2) {
-      // Third retry: try another favicon service
-      let domain;
-      try {
-        domain = new URL(app.url).hostname;
-      } catch {
-        domain = app.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-      }
-      const newUrl = `https://api.faviconkit.com/${domain}/128`;
       onRetry(newUrl);
       if (imageRef.current) {
         imageRef.current.src = newUrl;
@@ -212,9 +227,19 @@ export const preloadImageForIOSMacOS = (
 ): void => {
   if (!isIOSOrMacOS()) return;
   
+  // Check sessionStorage first
+  const cachedImageKey = `preloaded_${url}`;
+  if (sessionStorage.getItem(cachedImageKey) === 'loaded') {
+    onSuccess();
+    return;
+  }
+  
   const img = new Image();
   img.src = url;
-  img.onload = onSuccess;
+  img.onload = () => {
+    sessionStorage.setItem(cachedImageKey, 'loaded');
+    onSuccess();
+  };
   img.onerror = onError;
 };
 

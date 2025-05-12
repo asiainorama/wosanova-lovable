@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -29,6 +30,8 @@ const Catalog = () => {
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
 
   // Fetch apps from Supabase
   useEffect(() => {
@@ -49,12 +52,26 @@ const Catalog = () => {
           url: app.url,
           icon: app.icon,
           category: app.category,
+          subcategory: app.subcategory || '', // Include subcategory
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
         }));
         
+        // Extract all unique subcategories
+        const uniqueSubcategories: Set<string> = new Set();
+        fetchedApps.forEach(app => {
+          if (app.subcategory && app.subcategory.trim() !== '') {
+            uniqueSubcategories.add(app.subcategory);
+          }
+        });
+        
+        setSubcategories(Array.from(uniqueSubcategories).sort());
         setAllApps(fetchedApps);
+        
+        // Start prefetching icons for better performance
+        prefetchIconsInBatches(fetchedApps);
+        
       } catch (error) {
         console.error('Error fetching apps from Supabase:', error);
         toast.error('Error al cargar las aplicaciones');
@@ -63,26 +80,43 @@ const Catalog = () => {
       }
     };
     
+    // Prefetch icons in batches for better performance
+    const prefetchIconsInBatches = async (apps: AppData[]) => {
+      const batchSize = 10; // Process 10 icons at a time
+      
+      // First prefetch prioritized icons (first visible batch)
+      const priorityApps = apps.slice(0, batchSize);
+      await prefetchAppLogos(priorityApps);
+      
+      // Then process the rest in the background in small batches
+      for (let i = batchSize; i < apps.length; i += batchSize) {
+        const batch = apps.slice(i, Math.min(i + batchSize, apps.length));
+        setTimeout(() => {
+          prefetchAppLogos(batch).catch(console.error);
+        }, (i - batchSize) * 50); // Stagger the requests to avoid overwhelming the network
+      }
+    };
+    
     fetchApps();
 
-    // Suscribirse a cambios en tiempo real
+    // Subscribe to real-time changes
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', 
         {
-          event: '*', // Escuchar INSERT, UPDATE y DELETE
+          event: '*', // Listen to INSERT, UPDATE, DELETE
           schema: 'public',
           table: 'apps'
         }, 
         (payload) => {
-          console.log('Cambio detectado en apps:', payload);
-          // Recargar las aplicaciones cuando haya cambios
+          console.log('Change detected in apps:', payload);
+          // Reload apps when there are changes
           fetchApps();
         }
       )
       .subscribe();
     
-    // Limpiar suscripción al desmontar
+    // Clean up subscription on unmount
     return () => {
       supabase.removeChannel(channel);
     };
@@ -93,10 +127,11 @@ const Catalog = () => {
     return [...allApps].sort((a, b) => a.name.localeCompare(b.name));
   }, [allApps]);
 
-  // Filter apps based on search term and selected filter
+  // Filter apps based on search term, selected category and subcategory
   useEffect(() => {
     let filtered = [...sortedApps];
     
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(app => 
         app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,6 +139,7 @@ const Catalog = () => {
       );
     }
     
+    // Filter by category/group
     if (selectedFilter !== 'all') {
       // Check if selected filter is a group or a category
       const isGroup = categoryGroups.some(group => group.name === selectedFilter);
@@ -118,35 +154,16 @@ const Catalog = () => {
       }
     }
     
+    // Filter by subcategory if selected
+    if (selectedSubcategory !== 'all') {
+      filtered = filtered.filter(app => app.subcategory === selectedSubcategory);
+    }
+    
     setFilteredApps(filtered);
     
     // Reset prefetch status to idle to trigger a new prefetch when filter changes
     setPrefetchStatus('idle');
-  }, [searchTerm, selectedFilter, sortedApps]);
-
-  // Prefetch logos when the catalog page loads or when filtered apps change
-  useEffect(() => {
-    const prefetchIcons = async () => {
-      if (prefetchStatus !== 'idle' || !filteredApps.length) return;
-      
-      setPrefetchStatus('loading');
-      
-      // Start with visible apps (first 20 or so)
-      const visibleApps = filteredApps.slice(0, 20);
-      await prefetchAppLogos(visibleApps);
-      
-      // Then process the rest in the background
-      setTimeout(async () => {
-        const remainingApps = allApps.filter(app => 
-          !visibleApps.some(visibleApp => visibleApp.id === app.id)
-        );
-        await prefetchAppLogos(remainingApps);
-        setPrefetchStatus('complete');
-      }, 2000);
-    };
-    
-    prefetchIcons();
-  }, [allApps, filteredApps, prefetchStatus]);
+  }, [searchTerm, selectedFilter, sortedApps, selectedSubcategory]);
 
   // Group apps by category for display
   const groupedApps = useMemo(() => {
@@ -191,6 +208,24 @@ const Catalog = () => {
               />
             </div>
           </div>
+          
+          {/* Add subcategory filter when subcategories are available */}
+          {subcategories.length > 0 && (
+            <div className="mt-3">
+              <select 
+                className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 bg-background"
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+              >
+                <option value="all">Todas las subcategorías</option>
+                {subcategories.map(subcategory => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
       
@@ -202,7 +237,7 @@ const Catalog = () => {
         ) : (
           <>
             <h3 className="text-lg font-medium mb-4 dark:text-white">
-              {searchTerm || selectedFilter !== 'all'
+              {searchTerm || selectedFilter !== 'all' || selectedSubcategory !== 'all'
                 ? (t('catalog.results') || "Resultados") 
                 : ""}
               {selectedFilter !== 'all' && (
@@ -213,6 +248,9 @@ const Catalog = () => {
                       : selectedFilter
                   }`}
                 </span>
+              )}
+              {selectedSubcategory !== 'all' && (
+                <span> > {selectedSubcategory}</span>
               )}
             </h3>
             
