@@ -37,41 +37,47 @@ const HomeCard: React.FC<HomeCardProps> = ({
       className="flex flex-col items-center gap-1 p-1 cursor-pointer"
       onClick={handleClick}
     >
-      {imageLoading && (
-        <Skeleton className={`${iconSize} rounded-lg`} />
-      )}
-      
-      {!imageError ? (
-        <img 
-          ref={imageRef}
-          src={iconUrl} 
-          alt={`${app.name} icon`}
-          className={`${iconSize} object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-          loading="lazy"
-        />
-      ) : (
-        <AppAvatarFallback
-          appName={app.name}
-          className={`${iconSize} rounded-lg`}
-        />
-      )}
+      <div className="relative">
+        {imageLoading && (
+          <Skeleton className={`${iconSize} rounded-full`} />
+        )}
+        
+        {!imageError ? (
+          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600`}>
+            <img 
+              ref={imageRef}
+              src={iconUrl} 
+              alt={`${app.name} icon`}
+              className={`w-full h-full object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'} p-1`}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div className={`${iconSize} rounded-full overflow-hidden`}>
+            <AppAvatarFallback
+              appName={app.name}
+              className={`${iconSize} rounded-full`}
+            />
+          </div>
+        )}
+        
+        {(showManage || onShowDetails) && (
+          <Button 
+            size="sm"
+            variant="outline"
+            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90`}
+            onClick={handleAction}
+          >
+            <Heart 
+              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+            />
+          </Button>
+        )}
+      </div>
       
       <h3 className="text-xs font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
-      
-      {(showManage || onShowDetails) && (
-        <Button 
-          size="sm"
-          variant="outline"
-          className={`${buttonSize} rounded-full p-0 absolute top-0 right-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90`}
-          onClick={handleAction}
-        >
-          <Heart 
-            className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
-          />
-        </Button>
-      )}
     </div>
   );
 };

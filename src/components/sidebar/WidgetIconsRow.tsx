@@ -21,7 +21,7 @@ const WidgetButton: React.FC<WidgetProps> = ({ icon, name, url }) => {
       onClick={handleClick}
       variant="ghost" 
       size="icon"
-      className="rounded-full h-12 w-12 flex flex-col items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700"
+      className="rounded-full h-12 w-12 flex items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700"
     >
       {icon}
       <span className="sr-only">{name}</span>
