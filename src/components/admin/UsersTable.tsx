@@ -80,6 +80,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         }
 
         if (data) {
+          console.log("Fetched users:", data.length);
           setUsers(data as UserData[]);
         }
       } catch (error) {
