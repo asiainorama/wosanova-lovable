@@ -71,6 +71,18 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   // Check if we should show additional columns based on device/orientation
   const isTabletPortrait = !isMobile && window.innerWidth < 1024 && !isLandscape;
 
+  // Function to go to first page
+  const goToFirstPage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+  };
+  
+  // Function to go to last page
+  const goToLastPage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentPage(totalPages);
+  };
+
   // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -82,22 +94,34 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
         pageNumbers.push(i);
       }
     } else {
+      // Always show first page
+      pageNumbers.push(1);
+      
       // We have more pages than we can show at once
       if (currentPage <= 3) {
-        // If we're near the start, show first 5 pages
-        for (let i = 1; i <= 5; i++) {
+        // If we're near the start, show first 3 pages and then ellipsis
+        for (let i = 2; i <= 3; i++) {
           pageNumbers.push(i);
         }
+        pageNumbers.push('ellipsis-end');
       } else if (currentPage >= totalPages - 2) {
-        // If we're near the end, show last 5 pages
-        for (let i = totalPages - 4; i <= totalPages; i++) {
+        // If we're near the end, show ellipsis and then last 3 pages
+        pageNumbers.push('ellipsis-start');
+        for (let i = totalPages - 2; i <= totalPages - 1; i++) {
           pageNumbers.push(i);
         }
       } else {
-        // We're somewhere in the middle, show current page and 2 on each side
-        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-          pageNumbers.push(i);
-        }
+        // We're somewhere in the middle, show ellipsis, current page and neighbors
+        pageNumbers.push('ellipsis-start');
+        pageNumbers.push(currentPage - 1);
+        pageNumbers.push(currentPage);
+        pageNumbers.push(currentPage + 1);
+        pageNumbers.push('ellipsis-end');
+      }
+      
+      // Always show last page if not already included
+      if (!pageNumbers.includes(totalPages)) {
+        pageNumbers.push(totalPages);
       }
     }
     
@@ -198,6 +222,16 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  onClick={goToFirstPage}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                >
+                  Primera
+                </PaginationLink>
+              </PaginationItem>
+              
+              <PaginationItem>
                 <PaginationPrevious
                   href="#"
                   onClick={(e) => {
@@ -209,26 +243,30 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                 />
               </PaginationItem>
               
-              {getPageNumbers().map((pageNumber) => (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(pageNumber);
-                    }}
-                    isActive={currentPage === pageNumber}
-                  >
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              {totalPages > 5 && currentPage < totalPages - 2 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
+              {getPageNumbers().map((pageNumber, index) => {
+                if (pageNumber === 'ellipsis-start' || pageNumber === 'ellipsis-end') {
+                  return (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(pageNumber as number);
+                      }}
+                      isActive={currentPage === pageNumber}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
               
               <PaginationItem>
                 <PaginationNext
@@ -240,6 +278,16 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   isDisabled={currentPage === totalPages}
                   className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                 />
+              </PaginationItem>
+              
+              <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  onClick={goToLastPage}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                >
+                  Última
+                </PaginationLink>
               </PaginationItem>
             </PaginationContent>
           </Pagination>

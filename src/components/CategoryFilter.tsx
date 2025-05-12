@@ -17,6 +17,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [, updateState] = useState<{}>({});
   const forceUpdate = React.useCallback(() => updateState({}), []);
+  const [categorySubcategories, setCategorySubcategories] = useState<Record<string, string[]>>({});
 
   // Función para traducir categorías
   const translateCategory = (category: string) => {
@@ -26,7 +27,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     return translation !== key ? translation : category; // Si no hay traducción, usar el original
   };
   
-  // Obtener todas las apps para calcular los conteos
+  // Obtener todas las apps para calcular los conteos y subcategorías
   useEffect(() => {
     const fetchApps = async () => {
       try {
@@ -41,13 +42,32 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           url: app.url,
           icon: app.icon,
           category: app.category,
-          subcategory: app.subcategory,
+          subcategory: app.subcategory || "",
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
         }));
         
         setAllApps(fetchedApps);
+        
+        // Organizar subcategorías por categoría
+        const subcategoriesByCategory: Record<string, Set<string>> = {};
+        fetchedApps.forEach(app => {
+          if (app.subcategory && app.subcategory.trim() !== '') {
+            if (!subcategoriesByCategory[app.category]) {
+              subcategoriesByCategory[app.category] = new Set();
+            }
+            subcategoriesByCategory[app.category].add(app.subcategory);
+          }
+        });
+        
+        // Convertir sets a arrays ordenados
+        const formattedSubcategories: Record<string, string[]> = {};
+        Object.keys(subcategoriesByCategory).forEach(category => {
+          formattedSubcategories[category] = Array.from(subcategoriesByCategory[category]).sort();
+        });
+        
+        setCategorySubcategories(formattedSubcategories);
       } catch (error) {
         console.error('Error fetching apps for category filter:', error);
       }
@@ -148,13 +168,25 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
               
               {/* Categorías dentro del grupo (indentadas) */}
               {categoriesWithApps.map((category) => (
-                <SelectItem 
-                  key={category} 
-                  value={category}
-                  className="text-left pl-6 font-normal"
-                >
-                  {translateCategory(category)}
-                </SelectItem>
+                <React.Fragment key={category}>
+                  <SelectItem 
+                    value={category}
+                    className="text-left pl-6 font-normal"
+                  >
+                    {translateCategory(category)}
+                  </SelectItem>
+                  
+                  {/* Subcategorías dentro de cada categoría (doble indentación) */}
+                  {categorySubcategories[category]?.map((subcategory) => (
+                    <SelectItem 
+                      key={`${category}-${subcategory}`} 
+                      value={`${category}:${subcategory}`}
+                      className="text-left pl-10 font-normal text-sm"
+                    >
+                      {subcategory}
+                    </SelectItem>
+                  ))}
+                </React.Fragment>
               ))}
             </React.Fragment>
           );

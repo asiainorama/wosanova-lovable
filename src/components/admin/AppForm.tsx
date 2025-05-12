@@ -24,6 +24,7 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
     icon: "",
     url: "",
     category: "Utilidades",
+    subcategory: "",
     description: "",
     isAI: false,
   });
@@ -241,6 +242,17 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="subcategory">Subcategoría</Label>
+          <Input
+            id="subcategory"
+            name="subcategory"
+            value={formData.subcategory || ""}
+            onChange={handleChange}
+            placeholder="Subcategoría (opcional)"
+          />
         </div>
 
         <div className="space-y-2">

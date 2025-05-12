@@ -142,7 +142,7 @@ const Admin = () => {
       }
       
       setShowForm(false);
-      // We don't reset the current page when saving, so user stays on the same page
+      // No reseteamos la página actual al guardar
     } catch (error) {
       console.error("Error saving app:", error);
       toast.error("Error al guardar la aplicación");
@@ -152,7 +152,7 @@ const Admin = () => {
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingApp(null);
-    // Don't reset the current page when cancelling
+    // No reseteamos la página actual al cancelar
   };
 
   const handleExport = () => {

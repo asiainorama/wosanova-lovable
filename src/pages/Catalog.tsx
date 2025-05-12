@@ -31,9 +31,6 @@ const Catalog = () => {
   const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [subcategories, setSubcategories] = useState<string[]>([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
-  const [loadingIcons, setLoadingIcons] = useState(true);
 
   // Fetch apps from Supabase
   useEffect(() => {
@@ -54,25 +51,15 @@ const Catalog = () => {
           url: app.url,
           icon: app.icon,
           category: app.category,
-          subcategory: app.subcategory, // This should now work with our database changes
+          subcategory: app.subcategory || "", // This should now work with our database changes
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at
         }));
         
-        // Extract all unique subcategories
-        const uniqueSubcategories: Set<string> = new Set();
-        fetchedApps.forEach(app => {
-          if (app.subcategory && app.subcategory.trim() !== '') {
-            uniqueSubcategories.add(app.subcategory);
-          }
-        });
-        
-        setSubcategories(Array.from(uniqueSubcategories).sort());
         setAllApps(fetchedApps);
         
         // Start prefetching icons for better performance
-        setLoadingIcons(true);
         prefetchIconsInBatches(fetchedApps);
         
       } catch (error) {
@@ -102,15 +89,9 @@ const Catalog = () => {
           await prefetchAppLogos(batch).catch(console.error);
           
           loadedCount += batch.length;
-          
-          // Update loading progress
-          if (i + batchSize >= apps.length) {
-            setLoadingIcons(false);
-          }
         }
       } catch (error) {
         console.error('Error prefetching app logos:', error);
-        setLoadingIcons(false);
       }
     };
     
@@ -144,7 +125,7 @@ const Catalog = () => {
     return [...allApps].sort((a, b) => a.name.localeCompare(b.name));
   }, [allApps]);
 
-  // Filter apps based on search term, selected category and subcategory
+  // Handle special category:subcategory format for filtering
   useEffect(() => {
     let filtered = [...sortedApps];
     
@@ -156,31 +137,34 @@ const Catalog = () => {
       );
     }
     
-    // Filter by category/group
+    // Filter by category/group or subcategory
     if (selectedFilter !== 'all') {
-      // Check if selected filter is a group or a category
-      const isGroup = categoryGroups.some(group => group.name === selectedFilter);
-      
-      if (isGroup) {
-        // Filter by group
-        const categoriesInGroup = categoryGroups.find(group => group.name === selectedFilter)?.categories || [];
-        filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
+      // Check if the filter contains a subcategory (format: "category:subcategory")
+      if (selectedFilter.includes(':')) {
+        const [category, subcategory] = selectedFilter.split(':');
+        filtered = filtered.filter(app => 
+          app.category === category && app.subcategory === subcategory
+        );
       } else {
-        // Filter by specific category
-        filtered = filtered.filter(app => app.category === selectedFilter);
+        // Check if selected filter is a group or a category
+        const isGroup = categoryGroups.some(group => group.name === selectedFilter);
+        
+        if (isGroup) {
+          // Filter by group
+          const categoriesInGroup = categoryGroups.find(group => group.name === selectedFilter)?.categories || [];
+          filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
+        } else {
+          // Filter by specific category
+          filtered = filtered.filter(app => app.category === selectedFilter);
+        }
       }
-    }
-    
-    // Filter by subcategory if selected
-    if (selectedSubcategory !== 'all') {
-      filtered = filtered.filter(app => app.subcategory === selectedSubcategory);
     }
     
     setFilteredApps(filtered);
     
     // Reset prefetch status to idle to trigger a new prefetch when filter changes
     setPrefetchStatus('idle');
-  }, [searchTerm, selectedFilter, sortedApps, selectedSubcategory]);
+  }, [searchTerm, selectedFilter, sortedApps]);
 
   // Group apps by category for display
   const groupedApps = useMemo(() => {
@@ -238,42 +222,22 @@ const Catalog = () => {
               />
             </div>
           </div>
-          
-          {/* Add subcategory filter when subcategories are available */}
-          {subcategories.length > 0 && (
-            <div className="mt-3">
-              <select 
-                className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 bg-background"
-                value={selectedSubcategory}
-                onChange={(e) => setSelectedSubcategory(e.target.value)}
-              >
-                <option value="all">Todas las subcategorías</option>
-                {subcategories.map(subcategory => (
-                  <option key={subcategory} value={subcategory}>
-                    {subcategory}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
       </div>
       
       <main className="container mx-auto px-4 py-4 flex-1">
         {isLoading ? (
-          <div className="animate-fade-in">
-            <div className="flex justify-center mb-8">
-              <div className="h-8 w-8 rounded-full border-4 border-primary border-r-transparent animate-spin"></div>
-            </div>
-            <AppsSkeleton />
+          <div className="flex flex-col items-center justify-center h-[70vh]">
+            <div className="h-12 w-12 rounded-full border-4 border-primary border-r-transparent animate-spin mb-4"></div>
+            <p className="text-gray-500">Cargando aplicaciones...</p>
           </div>
         ) : (
           <>
             <h3 className="text-lg font-medium mb-4 dark:text-white">
-              {searchTerm || selectedFilter !== 'all' || selectedSubcategory !== 'all'
+              {searchTerm || selectedFilter !== 'all'
                 ? (t('catalog.results') || "Resultados") 
                 : ""}
-              {selectedFilter !== 'all' && (
+              {selectedFilter !== 'all' && !selectedFilter.includes(':') && (
                 <span>
                   {` > ${
                     categoryGroups.some(group => group.name === selectedFilter)
@@ -282,18 +246,10 @@ const Catalog = () => {
                   }`}
                 </span>
               )}
-              {selectedSubcategory !== 'all' && (
-                <span>{' > '}{selectedSubcategory}</span>
+              {selectedFilter.includes(':') && (
+                <span>{` > ${selectedFilter.split(':')[0]} > ${selectedFilter.split(':')[1]}`}</span>
               )}
             </h3>
-            
-            {/* Display loading animation while icons are being loaded */}
-            {loadingIcons && (
-              <div className="mb-4 flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full border-2 border-primary border-r-transparent animate-spin"></div>
-                <span className="text-sm text-gray-500">Cargando imágenes...</span>
-              </div>
-            )}
             
             {/* Display apps grouped by category */}
             {Object.keys(groupedApps).length === 0 ? (
