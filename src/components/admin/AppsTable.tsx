@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, FileDown, FileUp, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Pagination,
@@ -148,7 +148,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[180px]">Nombre</TableHead>
-              <TableHead className="w-[300px]">Descripción</TableHead>
+              {!isTabletPortrait && !isMobile && <TableHead className="w-[300px]">Descripción</TableHead>}
               {!isTabletPortrait && !isMobile && <TableHead className="w-[120px]">Categoría</TableHead>}
               {!isTabletPortrait && !isMobile && <TableHead className="w-[200px]">URL</TableHead>}
               <TableHead className="w-[80px] text-center">Logo</TableHead>
@@ -159,7 +159,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <TableBody>
             {paginatedApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isTabletPortrait || isMobile ? 4 : 7} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 3 : (isTabletPortrait ? 4 : 7)} className="h-24 text-center">
                   No se encontraron aplicaciones.
                 </TableCell>
               </TableRow>
@@ -174,7 +174,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       {app.name}
                     </span>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">{app.description}</TableCell>
+                  {!isTabletPortrait && !isMobile && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
                   {!isTabletPortrait && !isMobile && <TableCell>{app.category}</TableCell>}
                   {!isTabletPortrait && !isMobile && (
                     <TableCell className="max-w-xs truncate">

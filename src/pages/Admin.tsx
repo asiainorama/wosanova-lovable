@@ -227,7 +227,7 @@ const Admin = () => {
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="apps" className="mt-0">
                 <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-2xl font-bold">Aplicaciones</h1>
+                  <h1 className="text-2xl font-bold">Apps</h1>
                   <div className="flex gap-2">
                     <input 
                       type="file" 

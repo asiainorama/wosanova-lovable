@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { Search, RefreshCw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Pagination,
@@ -45,6 +45,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const [isLandscape, setIsLandscape] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
 
@@ -65,34 +66,63 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   }, []);
 
   // Fetch users from user_profiles table
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('*');
-        
-        if (error) {
-          toast.error(`Error al cargar usuarios: ${error.message}`);
-          console.error("Error fetching users:", error);
-          return;
-        }
-
-        if (data) {
-          console.log("Fetched users:", data.length);
-          setUsers(data as UserData[]);
-        }
-      } catch (error) {
+  const fetchUsers = async () => {
+    try {
+      setRefreshing(true);
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        toast.error(`Error al cargar usuarios: ${error.message}`);
         console.error("Error fetching users:", error);
-        toast.error("Error al cargar usuarios");
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
+      if (data) {
+        console.log("Fetched users:", data.length);
+        setUsers(data as UserData[]);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Error al cargar usuarios");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
     fetchUsers();
+    
+    // Set up a real-time subscription
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public',
+          table: 'user_profiles' 
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          fetchUsers(); // Reload users when changes happen
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  const handleRefresh = () => {
+    fetchUsers();
+    toast.info("Actualizando lista de usuarios...");
+  };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -182,13 +212,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="relative"
+          title="Actualizar lista de usuarios"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">ID de Usuario</TableHead>
+              {!isMobile && <TableHead className="w-[200px]">ID de Usuario</TableHead>}
               <TableHead className="w-[150px]">Nombre de Usuario</TableHead>
               {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Fecha de creación</TableHead>}
               {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Último acceso</TableHead>}
@@ -198,7 +238,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isTabletPortrait || isMobile ? 3 : 5} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 2 : (isTabletPortrait ? 3 : 5)} className="h-24 text-center">
                   <div className="flex justify-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                   </div>
@@ -206,21 +246,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
               </TableRow>
             ) : paginatedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isTabletPortrait || isMobile ? 3 : 5} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 2 : (isTabletPortrait ? 3 : 5)} className="h-24 text-center">
                   No se encontraron usuarios.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    <span
-                      className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
-                      onClick={() => onEdit && onEdit(user)}
-                    >
-                      {user.id}
-                    </span>
-                  </TableCell>
+                  {!isMobile && (
+                    <TableCell className="font-medium">
+                      <span
+                        className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
+                        onClick={() => onEdit && onEdit(user)}
+                      >
+                        {user.id}
+                      </span>
+                    </TableCell>
+                  )}
                   <TableCell>{user.username || "—"}</TableCell>
                   {!isTabletPortrait && !isMobile && (
                     <TableCell>
