@@ -27,13 +27,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 interface UserData {
   id: string;
-  email: string;
+  username?: string;
   created_at: string;
-  last_sign_in_at: string | null;
-  user_metadata?: {
-    name?: string;
-    avatar_url?: string;
-  };
+  updated_at: string | null;
+  avatar_url?: string;
+  theme_mode?: string;
+  language?: string;
 }
 
 interface UsersTableProps {
@@ -65,20 +64,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     };
   }, []);
 
-  // Fetch users
+  // Fetch users from user_profiles table
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase.auth.admin.listUsers();
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*');
         
         if (error) {
           toast.error(`Error al cargar usuarios: ${error.message}`);
+          console.error("Error fetching users:", error);
           return;
         }
 
-        if (data && data.users) {
-          setUsers(data.users as UserData[]);
+        if (data) {
+          setUsers(data as UserData[]);
         }
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -93,8 +95,8 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.user_metadata?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -185,8 +187,8 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">Email</TableHead>
-              <TableHead className="w-[150px]">Nombre</TableHead>
+              <TableHead className="w-[200px]">ID de Usuario</TableHead>
+              <TableHead className="w-[150px]">Nombre de Usuario</TableHead>
               {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Fecha de creación</TableHead>}
               {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Último acceso</TableHead>}
               <TableHead className="w-[100px] text-right">Acciones</TableHead>
@@ -215,10 +217,10 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                       className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
                       onClick={() => onEdit && onEdit(user)}
                     >
-                      {user.email}
+                      {user.id}
                     </span>
                   </TableCell>
-                  <TableCell>{user.user_metadata?.name || "—"}</TableCell>
+                  <TableCell>{user.username || "—"}</TableCell>
                   {!isTabletPortrait && !isMobile && (
                     <TableCell>
                       {new Date(user.created_at).toLocaleDateString('es-ES')}
@@ -226,8 +228,8 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                   )}
                   {!isTabletPortrait && !isMobile && (
                     <TableCell>
-                      {user.last_sign_in_at 
-                        ? new Date(user.last_sign_in_at).toLocaleDateString('es-ES') 
+                      {user.updated_at 
+                        ? new Date(user.updated_at).toLocaleDateString('es-ES') 
                         : "Nunca"}
                     </TableCell>
                   )}
@@ -254,7 +256,11 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                             <AlertDialogAction
                               onClick={async () => {
                                 try {
-                                  const { error } = await supabase.auth.admin.deleteUser(user.id);
+                                  // Delete from user_profiles table
+                                  const { error } = await supabase
+                                    .from('user_profiles')
+                                    .delete()
+                                    .eq('id', user.id);
                                   
                                   if (error) {
                                     toast.error(`Error al eliminar usuario: ${error.message}`);
