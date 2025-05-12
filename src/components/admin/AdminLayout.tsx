@@ -52,7 +52,7 @@ const AdminLayout = ({ children, activeTab = "apps", onTabChange }: AdminLayoutP
       <main className="container mx-auto px-4 py-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           {/* Admin Navigation Tabs */}
-          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={handleTabChange} className="mb-6">
+          <Tabs defaultValue={activeTab} onValueChange={handleTabChange} className="mb-6">
             <TabsList className="grid w-full grid-cols-2 max-w-md">
               <TabsTrigger value="apps">Aplicaciones</TabsTrigger>
               <TabsTrigger value="users">Usuarios</TabsTrigger>
