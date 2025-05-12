@@ -41,6 +41,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           url: app.url,
           icon: app.icon,
           category: app.category,
+          subcategory: app.subcategory, // Add support for subcategory
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at

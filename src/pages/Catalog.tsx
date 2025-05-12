@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -51,7 +52,7 @@ const Catalog = () => {
           url: app.url,
           icon: app.icon,
           category: app.category,
-          subcategory: app.subcategory || '', // Safely handle potentially missing subcategory 
+          subcategory: app.subcategory, // This should now work with our database changes
           isAI: app.is_ai,
           created_at: app.created_at,
           updated_at: app.updated_at

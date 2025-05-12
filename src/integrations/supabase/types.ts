@@ -45,6 +45,7 @@ export type Database = {
           id: string
           is_ai: boolean | null
           name: string
+          subcategory: string | null
           updated_at: string | null
           url: string
         }
@@ -56,6 +57,7 @@ export type Database = {
           id: string
           is_ai?: boolean | null
           name: string
+          subcategory?: string | null
           updated_at?: string | null
           url: string
         }
@@ -67,6 +69,7 @@ export type Database = {
           id?: string
           is_ai?: boolean | null
           name?: string
+          subcategory?: string | null
           updated_at?: string | null
           url?: string
         }
