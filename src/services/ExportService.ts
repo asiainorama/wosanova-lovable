@@ -5,17 +5,15 @@ import { AppData } from '@/data/types';
 // Función para exportar aplicaciones a Excel
 export const exportAppsToExcel = (apps: AppData[], filename: string = 'apps-export') => {
   try {
-    // Preparar los datos para la exportación
+    // Preparar los datos para la exportación - sin id, created_at, updated_at
     const exportData = apps.map(app => ({
-      id: app.id,
       name: app.name,
       description: app.description,
       url: app.url,
       icon_url: app.icon,
       category: app.category,
-      is_ai: app.isAI ? 'Sí' : 'No',
-      created_at: app.created_at || new Date().toISOString(),
-      updated_at: app.updated_at || new Date().toISOString(),
+      subcategory: app.subcategory || '', // Incluimos subcategoría, con valor vacío si no existe
+      is_ai: app.isAI ? 'Sí' : 'No'
     }));
 
     // Crear un libro de trabajo
@@ -51,15 +49,16 @@ export const importAppsFromExcel = async (file: File): Promise<AppData[]> => {
 
         // Convertir los datos importados al formato AppData
         const importedApps: AppData[] = jsonData.map((row: any) => ({
-          id: row.id || crypto.randomUUID().toString(),
+          id: crypto.randomUUID().toString(), // Generamos un nuevo ID
           name: row.name || 'Sin nombre',
           description: row.description || 'Sin descripción',
           url: row.url || '#',
           icon: row.icon_url || row.icon || 'https://via.placeholder.com/128',
           category: row.category || 'General',
+          subcategory: row.subcategory || '', // Añadimos soporte para subcategoría
           isAI: row.is_ai === 'Sí' || row.is_ai === true,
-          created_at: row.created_at || new Date().toISOString(),
-          updated_at: row.updated_at || new Date().toISOString()
+          created_at: new Date().toISOString(), // Fecha actual para nuevos registros
+          updated_at: new Date().toISOString()
         }));
 
         resolve(importedApps);
