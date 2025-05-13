@@ -69,7 +69,10 @@ const UsersTable = () => {
       
       // Get auth data with a direct function call to the admin API
       // Fix: Use proper typing for the RPC call to avoid the TS2345 error
-      const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
+      const { data: authData, error: authError } = await supabase.rpc('get_auth_users') as { 
+        data: AuthUser[] | null; 
+        error: any; 
+      };
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -78,7 +81,7 @@ const UsersTable = () => {
       
       if (authData) {
         // Fix: Assert that authData is an array of AuthUser objects
-        const authArray = authData as unknown as AuthUser[];
+        const authArray = authData as AuthUser[];
         console.log('Auth data loaded:', authArray.length);
       } else {
         console.warn('No auth data returned from get_auth_users');
@@ -89,7 +92,7 @@ const UsersTable = () => {
       const loginCountMap: Record<string, number> = {};
       
       // Fix: Type assertion for authData to ensure TypeScript understands it as AuthUser[]
-      const authArray = authData as unknown as AuthUser[];
+      const authArray = authData as AuthUser[];
       if (authArray && Array.isArray(authArray)) {
         authArray.forEach((user: AuthUser) => {
           const id = user.id;
