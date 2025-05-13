@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAppContext } from './AppContext';
-import { aiApps, AppData, allApps } from '@/data/apps';
+import { AppData } from '@/data/types';
 import { 
   entertainmentApps, 
   productivityApps, 
@@ -13,16 +13,19 @@ import { additionalApps } from '@/data/moreApps';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAppsFromSupabase } from '@/services/AppsService';
 
 export const AppContextUpdater = () => {
   const { setAllApps, favorites } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [iconStorageQueue, setIconStorageQueue] = useState<AppData[]>([]);
+  const [allApps, setLocalApps] = useState<AppData[]>([]);
 
   // Update app list in context
   const updateAppsList = useCallback((apps: AppData[]) => {
     setAllApps(apps);
+    setLocalApps(apps);
     console.log(`Updated app list with ${apps.length} apps`);
   }, [setAllApps]);
   
@@ -199,8 +202,11 @@ export const AppContextUpdater = () => {
   // Check if all app icons are stored in database
   const checkAllAppIcons = useCallback(async () => {
     try {
+      // Fetch apps from Supabase first to get the current list
+      const appsFromSupabase = await fetchAppsFromSupabase();
+      
       // Count how many apps we have
-      const totalApps = allApps.length;
+      const totalApps = appsFromSupabase.length;
       
       // Count how many icons are stored in the database
       const { count, error } = await supabase
@@ -224,7 +230,7 @@ export const AppContextUpdater = () => {
         if (!storedIcons) return false;
         
         const storedAppIds = new Set(storedIcons.map(icon => icon.app_id));
-        const appsWithoutIcons = allApps.filter(app => !storedAppIds.has(app.id));
+        const appsWithoutIcons = appsFromSupabase.filter(app => !storedAppIds.has(app.id));
         
         console.log(`Found ${appsWithoutIcons.length} apps without stored icons, queuing for storage`);
         setIconStorageQueue(appsWithoutIcons);
@@ -263,65 +269,75 @@ export const AppContextUpdater = () => {
 
     document.addEventListener('themechange', handleThemeChange);
     
-    // Combine all app data - use the exported allApps instead of recreating it
-    console.log(`Setting initial ${allApps.length} apps`);
-    updateAppsList(allApps);
-    
-    // Check if we need to store more app icons
-    checkAllAppIcons();
-    
-    // Preload icons for favorite apps first as they're most important
-    const priorityApps = favorites.length > 0 
-      ? [...favorites]
-      : allApps.slice(0, 10); // If no favorites, preload first 10 apps
-    
-    // Start prefetching icons in background
-    setTimeout(() => {
-      prefetchAppLogos(priorityApps).then(() => {
-        // After prioritizing favorites, process the rest
-        const remainingApps = allApps.filter(app => 
-          !priorityApps.some(priorityApp => priorityApp.id === app.id)
-        );
+    // Fetch apps from Supabase
+    const loadAppsFromSupabase = async () => {
+      try {
+        const appsData = await fetchAppsFromSupabase();
+        console.log(`Setting initial ${appsData.length} apps from Supabase`);
+        updateAppsList(appsData);
         
-        // Process remaining apps in chunks
-        const processRemainingInChunks = async () => {
-          const chunkSize = 30;
-          for (let i = 0; i < remainingApps.length; i += chunkSize) {
-            const chunk = remainingApps.slice(i, i + chunkSize);
-            await prefetchAppLogos(chunk);
-            
-            // Update UI with processed apps
-            updateAppsList([...allApps]);
-            
-            // Small delay between chunks
-            if (i + chunkSize < remainingApps.length) {
-              await new Promise(r => setTimeout(r, 200));
-            }
-          }
-          
-          setLoading(false);
-          
-          // Only show toast on first load, not on background refreshes
-          if (isFirstLoad) {
-            toast.success('Aplicación cargada correctamente', {
-              className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
-            });
-          }
-          
-          // Start storing icons in Supabase in the background
-          prefetchAndStoreIcons(allApps.slice(0, 50), true);
-        };
+        // Check if we need to store more app icons
+        checkAllAppIcons();
         
-        processRemainingInChunks();
-      });
-    }, 1000);
+        // Preload icons for favorite apps first as they're most important
+        const priorityApps = favorites.length > 0 
+          ? [...favorites]
+          : appsData.slice(0, 10); // If no favorites, preload first 10 apps
+        
+        // Start prefetching icons in background
+        setTimeout(() => {
+          prefetchAppLogos(priorityApps).then(() => {
+            // After prioritizing favorites, process the rest
+            const remainingApps = appsData.filter(app => 
+              !priorityApps.some(priorityApp => priorityApp.id === app.id)
+            );
+            
+            // Process remaining apps in chunks
+            const processRemainingInChunks = async () => {
+              const chunkSize = 30;
+              for (let i = 0; i < remainingApps.length; i += chunkSize) {
+                const chunk = remainingApps.slice(i, i + chunkSize);
+                await prefetchAppLogos(chunk);
+                
+                // Update UI with processed apps
+                updateAppsList([...appsData]);
+                
+                // Small delay between chunks
+                if (i + chunkSize < remainingApps.length) {
+                  await new Promise(r => setTimeout(r, 200));
+                }
+              }
+              
+              setLoading(false);
+              
+              // Only show toast on first load, not on background refreshes
+              if (isFirstLoad) {
+                toast.success('Aplicación cargada correctamente', {
+                  className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+                });
+              }
+              
+              // Start storing icons in Supabase in the background
+              prefetchAndStoreIcons(appsData.slice(0, 50), true);
+            };
+            
+            processRemainingInChunks();
+          });
+        }, 1000);
+      } catch (error) {
+        console.error('Error loading apps from Supabase:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadAppsFromSupabase();
     
     // Cleanup function
     return () => {
       document.removeEventListener('themechange', handleThemeChange);
       console.log('AppContextUpdater cleanup');
     };
-  }, [setAllApps, updateAppsList, favorites, isFirstLoad, checkAllAppIcons]);
+  }, [updateAppsList, favorites, isFirstLoad, checkAllAppIcons]);
 
   // Process queued icons storage in batches
   useEffect(() => {

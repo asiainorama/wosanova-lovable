@@ -1,32 +1,43 @@
 
-import { allApps } from '@/data/apps';
-import { saveAppToSupabase } from '@/services/AppsService';
+import { fetchAppsFromSupabase, saveAppToSupabase } from '@/services/AppsService';
 
 /**
  * Función para sincronizar todas las aplicaciones estáticas con Supabase.
  * Esta función puede ejecutarse manualmente desde la consola del navegador.
  */
 export const syncAllAppsToSupabase = async () => {
-  console.log(`Iniciando sincronización de ${allApps.length} aplicaciones con Supabase...`);
+  // First, fetch the current apps from Supabase
+  console.log(`Iniciando sincronización de aplicaciones con Supabase...`);
   
-  const results = {
-    success: 0,
-    errors: 0
-  };
-  
-  for (const app of allApps) {
-    try {
-      await saveAppToSupabase(app);
-      console.log(`✓ App sincronizada: ${app.name}`);
-      results.success++;
-    } catch (error) {
-      console.error(`✗ Error sincronizando app ${app.name}:`, error);
-      results.errors++;
+  try {
+    const allApps = await fetchAppsFromSupabase();
+    console.log(`Obtenidas ${allApps.length} aplicaciones desde Supabase.`);
+    
+    const results = {
+      success: 0,
+      errors: 0
+    };
+    
+    for (const app of allApps) {
+      try {
+        await saveAppToSupabase(app);
+        console.log(`✓ App sincronizada: ${app.name}`);
+        results.success++;
+      } catch (error) {
+        console.error(`✗ Error sincronizando app ${app.name}:`, error);
+        results.errors++;
+      }
     }
+    
+    console.log(`Sincronización completa: ${results.success} exitosas, ${results.errors} errores`);
+    return results;
+  } catch (error) {
+    console.error("Error fetching apps from Supabase:", error);
+    return {
+      success: 0,
+      errors: 1
+    };
   }
-  
-  console.log(`Sincronización completa: ${results.success} exitosas, ${results.errors} errores`);
-  return results;
 };
 
 // Exportar la función para que esté disponible en la consola del navegador
