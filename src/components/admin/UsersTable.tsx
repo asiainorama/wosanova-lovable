@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +94,8 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>('get_auth_users');
+      // Fix: Add proper generic type parameters for the RPC call
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], unknown>('get_auth_users');
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -110,8 +112,9 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       
       // Create a map of user IDs to login counts
       const loginCountMap = new Map<string, number>();
+      // Fix: Explicitly type and check if authData is an array before using forEach
       if (authData && Array.isArray(authData)) {
-        authData.forEach((user: AuthUser) => {
+        (authData as AuthUser[]).forEach((user: AuthUser) => {
           const id = user.id;
           const count = user.login_count || 0;
           loginCountMap.set(id, count);
