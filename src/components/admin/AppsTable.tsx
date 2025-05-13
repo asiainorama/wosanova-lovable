@@ -11,17 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Pencil, Trash2, Search } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 interface AppsTableProps {
   apps: AppData[];
@@ -32,20 +25,20 @@ interface AppsTableProps {
 const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLandscape, setIsLandscape] = useState(false);
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
+  const [isLandscape, setIsLandscape] = useState(false);
 
-  // Detect landscape orientation on mobile devices
+  // Effect to detect landscape orientation
   useEffect(() => {
     const checkOrientation = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
     };
-
+    
     checkOrientation();
     window.addEventListener("resize", checkOrientation);
     window.addEventListener("orientationchange", checkOrientation);
-
+    
     return () => {
       window.removeEventListener("resize", checkOrientation);
       window.removeEventListener("orientationchange", checkOrientation);
@@ -59,152 +52,131 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       app.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const indexOfLastApp = currentPage * itemsPerPage;
+  const indexOfFirstApp = indexOfLastApp - itemsPerPage;
+  const currentApps = filteredApps.slice(indexOfFirstApp, indexOfLastApp);
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
-  
+
   // Reset to first page when search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Check if we should show additional columns based on device/orientation
-  const isTabletPortrait = !isMobile && window.innerWidth < 1024 && !isLandscape;
-
-  // Function to go to first page
-  const goToFirstPage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-  
-  // Function to go to last page
-  const goToLastPage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrentPage(totalPages);
-  };
-
-  // Generate page numbers for pagination
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      // If we have less pages than our maximum, show all of them
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      // Always show first page
-      pageNumbers.push(1);
-      
-      // We have more pages than we can show at once
-      if (currentPage <= 3) {
-        // If we're near the start, show first 3 pages and then ellipsis
-        for (let i = 2; i <= 3; i++) {
-          pageNumbers.push(i);
-        }
-        pageNumbers.push('ellipsis-end');
-      } else if (currentPage >= totalPages - 2) {
-        // If we're near the end, show ellipsis and then last 3 pages
-        pageNumbers.push('ellipsis-start');
-        for (let i = totalPages - 2; i <= totalPages - 1; i++) {
-          pageNumbers.push(i);
-        }
-      } else {
-        // We're somewhere in the middle, show ellipsis, current page and neighbors
-        pageNumbers.push('ellipsis-start');
-        pageNumbers.push(currentPage - 1);
-        pageNumbers.push(currentPage);
-        pageNumbers.push(currentPage + 1);
-        pageNumbers.push('ellipsis-end');
-      }
-      
-      // Always show last page if not already included
-      if (!pageNumbers.includes(totalPages)) {
-        pageNumbers.push(totalPages);
-      }
-    }
-    
-    return pageNumbers;
-  };
+  // Display condition for columns - mobile in portrait mode shows minimal columns
+  const showDetails = !isMobile || isLandscape;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Buscar aplicaciones..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Buscar aplicaciones..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-8"
+        />
       </div>
 
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[60px]">Logo</TableHead>
               <TableHead className="w-[180px]">Nombre</TableHead>
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[300px]">Descripción</TableHead>}
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[120px]">Categoría</TableHead>}
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[200px]">URL</TableHead>}
-              <TableHead className="w-[80px] text-center">Logo</TableHead>
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[60px] text-center">IA</TableHead>}
+              {showDetails && (
+                <>
+                  <TableHead className="w-[300px]">Descripción</TableHead>
+                  <TableHead className="w-[120px]">Categoría</TableHead>
+                  <TableHead className="w-[150px]">URL</TableHead>
+                </>
+              )}
               <TableHead className="w-[100px] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedApps.length === 0 ? (
+            {currentApps.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 3 : (isTabletPortrait ? 4 : 7)} className="h-24 text-center">
+                <TableCell colSpan={showDetails ? 6 : 3} className="h-24 text-center">
                   No se encontraron aplicaciones.
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedApps.map((app) => (
+              currentApps.map((app) => (
                 <TableRow key={app.id}>
-                  <TableCell className="font-medium">
-                    <span
-                      className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
-                      onClick={() => onEdit(app)}
-                    >
-                      {app.name}
-                    </span>
+                  <TableCell>
+                    <div className="w-10 h-10 overflow-hidden rounded-md">
+                      <AspectRatio ratio={1 / 1}>
+                        <img
+                          src={app.icon}
+                          alt={`${app.name} logo`}
+                          className="object-cover w-full h-full"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/placeholder.svg";
+                          }}
+                        />
+                      </AspectRatio>
+                    </div>
                   </TableCell>
-                  {!isTabletPortrait && !isMobile && <TableCell className="max-w-xs truncate">{app.description}</TableCell>}
-                  {!isTabletPortrait && !isMobile && <TableCell>{app.category}</TableCell>}
-                  {!isTabletPortrait && !isMobile && (
-                    <TableCell className="max-w-xs truncate">
-                      <a
-                        href={app.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
-                      >
-                        {app.url}
-                      </a>
-                    </TableCell>
+                  <TableCell className="font-medium">{app.name}</TableCell>
+                  
+                  {showDetails && (
+                    <>
+                      <TableCell className="max-w-[300px] truncate">
+                        {app.description}
+                      </TableCell>
+                      <TableCell>{app.category}</TableCell>
+                      <TableCell className="max-w-[150px] truncate">
+                        <a
+                          href={app.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          {app.url}
+                        </a>
+                      </TableCell>
+                    </>
                   )}
-                  <TableCell className="text-center">
-                    <img
-                      src={app.icon}
-                      alt={`${app.name} icon`}
-                      className="h-8 w-8 rounded mx-auto"
-                    />
-                  </TableCell>
-                  {!isTabletPortrait && !isMobile && <TableCell className="text-center">{app.isAI ? "Sí" : "No"}</TableCell>}
+                  
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => onDelete(app.id)}
-                      >
-                        Eliminar
-                      </Button>
+                    <div className="flex space-x-2 justify-end">
+                      {showDetails && (
+                        <Button
+                          onClick={() => onEdit(app)}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar {app.name}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción no se puede deshacer. La aplicación se eliminará permanentemente del catálogo.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete(app.id)}>
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -215,82 +187,28 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between items-center">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredApps.length)} de ${filteredApps.length}`}
+            Página {currentPage} de {totalPages}
           </div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={goToFirstPage}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                >
-                  Primera
-                </PaginationLink>
-              </PaginationItem>
-              
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage > 1) setCurrentPage(currentPage - 1);
-                  }}
-                  isDisabled={currentPage === 1}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-              
-              {getPageNumbers().map((pageNumber, index) => {
-                if (pageNumber === 'ellipsis-start' || pageNumber === 'ellipsis-end') {
-                  return (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  );
-                }
-                
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentPage(pageNumber as number);
-                      }}
-                      isActive={currentPage === pageNumber}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                  }}
-                  isDisabled={currentPage === totalPages}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-              
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={goToLastPage}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                >
-                  Última
-                </PaginationLink>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente
+            </Button>
+          </div>
         </div>
       )}
     </div>

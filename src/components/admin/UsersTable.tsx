@@ -33,6 +33,7 @@ interface UserData {
   avatar_url?: string;
   theme_mode?: string;
   language?: string;
+  login_count?: number;
 }
 
 interface UsersTableProps {
@@ -69,6 +70,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
+      
+      // Get auth users to get login count data
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error("Error fetching auth users:", authError);
+      }
+      
+      // Map of user ID to login count
+      const userLoginCounts = new Map();
+      if (authUsers) {
+        authUsers.users.forEach(user => {
+          userLoginCounts.set(user.id, user.app_metadata.login_count || 0);
+        });
+      }
+      
+      // Get user profiles
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -82,7 +100,14 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
 
       if (data) {
         console.log("Fetched users:", data.length);
-        setUsers(data as UserData[]);
+        
+        // Combine data with login counts
+        const usersWithLoginCount = data.map((user: UserData) => ({
+          ...user,
+          login_count: userLoginCounts.get(user.id) || 0
+        }));
+        
+        setUsers(usersWithLoginCount);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -157,7 +182,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pageNumbers = [];
-    const maxVisiblePages = 5;
+    const maxVisiblePages = isMobile ? 3 : 5;
     
     if (totalPages <= maxVisiblePages) {
       // If we have less pages than our maximum, show all of them
@@ -169,24 +194,32 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       pageNumbers.push(1);
       
       // We have more pages than we can show at once
-      if (currentPage <= 3) {
-        // If we're near the start, show first 3 pages and then ellipsis
-        for (let i = 2; i <= 3; i++) {
+      if (currentPage <= 2) {
+        // If we're near the start, show first 2-3 pages and then ellipsis
+        for (let i = 2; i <= Math.min(3, maxVisiblePages-1); i++) {
           pageNumbers.push(i);
         }
         pageNumbers.push('ellipsis-end');
-      } else if (currentPage >= totalPages - 2) {
-        // If we're near the end, show ellipsis and then last 3 pages
+      } else if (currentPage >= totalPages - 1) {
+        // If we're near the end, show ellipsis and then last 2-3 pages
         pageNumbers.push('ellipsis-start');
-        for (let i = totalPages - 2; i <= totalPages - 1; i++) {
+        for (let i = Math.max(totalPages - 2, 2); i <= totalPages - 1; i++) {
           pageNumbers.push(i);
         }
       } else {
         // We're somewhere in the middle, show ellipsis, current page and neighbors
         pageNumbers.push('ellipsis-start');
-        pageNumbers.push(currentPage - 1);
+        
+        if (maxVisiblePages >= 5) {
+          pageNumbers.push(currentPage - 1);
+        }
+        
         pageNumbers.push(currentPage);
-        pageNumbers.push(currentPage + 1);
+        
+        if (maxVisiblePages >= 5) {
+          pageNumbers.push(currentPage + 1);
+        }
+        
         pageNumbers.push('ellipsis-end');
       }
       
@@ -228,17 +261,17 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              {!isMobile && <TableHead className="w-[200px]">ID de Usuario</TableHead>}
               <TableHead className="w-[150px]">Nombre de Usuario</TableHead>
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Fecha de creación</TableHead>}
-              {!isTabletPortrait && !isMobile && <TableHead className="w-[180px]">Último acceso</TableHead>}
+              {!isMobile && <TableHead className="w-[180px]">Fecha de creación</TableHead>}
+              <TableHead className="w-[100px]">Accesos</TableHead>
+              <TableHead className="w-[180px]">Último acceso</TableHead>
               <TableHead className="w-[100px] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 2 : (isTabletPortrait ? 3 : 5)} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 3 : 5} className="h-24 text-center">
                   <div className="flex justify-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                   </div>
@@ -246,36 +279,27 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
               </TableRow>
             ) : paginatedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 2 : (isTabletPortrait ? 3 : 5)} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 3 : 5} className="h-24 text-center">
                   No se encontraron usuarios.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell>{user.username || "Usuario sin nombre"}</TableCell>
                   {!isMobile && (
-                    <TableCell className="font-medium">
-                      <span
-                        className="font-medium cursor-pointer text-blue-600 underline transition-colors hover:text-blue-800"
-                        onClick={() => onEdit && onEdit(user)}
-                      >
-                        {user.id}
-                      </span>
-                    </TableCell>
-                  )}
-                  <TableCell>{user.username || "—"}</TableCell>
-                  {!isTabletPortrait && !isMobile && (
                     <TableCell>
                       {new Date(user.created_at).toLocaleDateString('es-ES')}
                     </TableCell>
                   )}
-                  {!isTabletPortrait && !isMobile && (
-                    <TableCell>
-                      {user.updated_at 
-                        ? new Date(user.updated_at).toLocaleDateString('es-ES') 
-                        : "Nunca"}
-                    </TableCell>
-                  )}
+                  <TableCell className="text-center">
+                    {user.login_count || 0}
+                  </TableCell>
+                  <TableCell>
+                    {user.updated_at 
+                      ? new Date(user.updated_at).toLocaleDateString('es-ES') 
+                      : "Nunca"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <AlertDialog>
@@ -334,21 +358,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-between items-center mt-4">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 w-full sm:w-auto text-center sm:text-left">
             {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} de ${filteredUsers.length}`}
           </div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={goToFirstPage}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                >
-                  Primera
-                </PaginationLink>
-              </PaginationItem>
+          <Pagination className="w-full sm:w-auto">
+            <PaginationContent className="flex-wrap justify-center">
+              {!isMobile && (
+                <PaginationItem>
+                  <PaginationLink
+                    href="#"
+                    onClick={goToFirstPage}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  >
+                    Primera
+                  </PaginationLink>
+                </PaginationItem>
+              )}
               
               <PaginationItem>
                 <PaginationPrevious
@@ -365,7 +391,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
               {getPageNumbers().map((pageNumber, index) => {
                 if (pageNumber === 'ellipsis-start' || pageNumber === 'ellipsis-end') {
                   return (
-                    <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationItem key={`ellipsis-${index}`} className={isMobile ? "hidden sm:block" : ""}>
                       <PaginationEllipsis />
                     </PaginationItem>
                   );
@@ -399,15 +425,17 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                 />
               </PaginationItem>
               
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={goToLastPage}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                >
-                  Última
-                </PaginationLink>
-              </PaginationItem>
+              {!isMobile && (
+                <PaginationItem>
+                  <PaginationLink
+                    href="#"
+                    onClick={goToLastPage}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  >
+                    Última
+                  </PaginationLink>
+                </PaginationItem>
+              )}
             </PaginationContent>
           </Pagination>
         </div>

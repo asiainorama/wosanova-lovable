@@ -19,6 +19,7 @@ import ConverterWidget from './pages/widgets/ConverterWidget';
 import NotesWidget from './pages/widgets/NotesWidget';
 import AlarmWidget from './pages/widgets/AlarmWidget';
 import Admin from './pages/Admin';
+import InstallAppPrompt from './components/InstallAppPrompt';
 
 // Importar el script de sincronización para que esté disponible globalmente
 import "./scripts/syncAppsToSupabase";
@@ -81,8 +82,12 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      <div className="flex h-screen w-screen items-center justify-center bg-white">
+        <img 
+          src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
+          alt="WosaNova Logo" 
+          className="w-24 h-24"
+        />
       </div>
     );
   }
@@ -94,6 +99,7 @@ const App = () => {
           <AppProvider>
             <TooltipProvider>
               <BrowserRouter>
+                <InstallAppPrompt />
                 <Routes>
                   <Route
                     path="/"

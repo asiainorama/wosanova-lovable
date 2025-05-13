@@ -1,279 +1,106 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import Header from '@/components/Header';
-import AppGrid from '@/components/AppGrid';
-import SearchBar from '@/components/SearchBar';
-import { AppData, categoryGroups } from '@/data/apps';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { prefetchAppLogos } from '@/services/LogoCacheService';
-import CategoryFilter from '@/components/CategoryFilter';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
-
-// Traducir los nombres de grupos de categorías
-const translateCategoryGroupName = (groupName: string): string => {
-  switch (groupName) {
-    case "Productivity": return "Productividad";
-    case "Entertainment": return "Entretenimiento";
-    case "Utilities": return "Utilidades";
-    case "Lifestyle": return "Estilo de vida";
-    case "Finance": return "Finanzas";
-    default: return groupName;
-  }
-};
+import { useState, useEffect } from "react";
+import Header from "@/components/Header";
+import SearchBar from "@/components/SearchBar";
+import CategoryFilter from "@/components/CategoryFilter";
+import AppGrid from "@/components/AppGrid";
+import { useApp } from "@/contexts/AppContext";
+import { AppData } from "@/data/types";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Catalog = () => {
-  const { t } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [filteredApps, setFilteredApps] = useState<AppData[]>([]);
-  const [prefetchStatus, setPrefetchStatus] = useState<'idle' | 'loading' | 'complete'>('idle');
-  const [allApps, setAllApps] = useState<AppData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { favorites, addFavorite, removeFavorite, apps, setApps } = useApp();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch apps from Supabase
+  // Load apps from Supabase
   useEffect(() => {
-    const fetchApps = async () => {
-      setIsLoading(true);
+    const loadApps = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('apps')
-          .select('*');
-
-        if (error) throw error;
+          .select('*')
+          .order('name');
         
-        // Map Supabase data to AppData format
-        const fetchedApps: AppData[] = data.map(app => ({
-          id: app.id,
-          name: app.name,
-          description: app.description,
-          url: app.url,
-          icon: app.icon,
-          category: app.category,
-          subcategory: app.subcategory || "", // This should now work with our database changes
-          isAI: app.is_ai,
-          created_at: app.created_at,
-          updated_at: app.updated_at
-        }));
+        if (error) {
+          throw error;
+        }
         
-        setAllApps(fetchedApps);
-        
-        // Start prefetching icons for better performance
-        prefetchIconsInBatches(fetchedApps);
-        
+        if (data) {
+          console.info(`Loaded apps from Supabase: ${data.length}`);
+          setApps(data as AppData[]);
+        }
       } catch (error) {
-        console.error('Error fetching apps from Supabase:', error);
-        toast.error('Error al cargar las aplicaciones');
+        console.error('Error loading apps:', error);
+        toast.error('Error al cargar aplicaciones');
       } finally {
-        setIsLoading(false);
+        // Add small delay to avoid flash of "no apps" message
+        setTimeout(() => {
+          setLoading(false);
+        }, 200);
       }
     };
     
-    // Prefetch icons in batches for better performance
-    const prefetchIconsInBatches = async (apps: AppData[]) => {
-      const batchSize = 10; // Process 10 icons at a time
-      
-      // First prefetch prioritized icons (first visible batch)
-      const priorityApps = apps.slice(0, batchSize);
-      try {
-        await prefetchAppLogos(priorityApps);
-        
-        // Then process the rest in the background in small batches
-        let loadedCount = batchSize;
-        
-        for (let i = batchSize; i < apps.length; i += batchSize) {
-          const batch = apps.slice(i, Math.min(i + batchSize, apps.length));
-          
-          await new Promise(resolve => setTimeout(resolve, 100));
-          await prefetchAppLogos(batch).catch(console.error);
-          
-          loadedCount += batch.length;
-        }
-      } catch (error) {
-        console.error('Error prefetching app logos:', error);
-      }
-    };
-    
-    fetchApps();
+    loadApps();
+  }, [setApps]);
 
-    // Subscribe to real-time changes
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on('postgres_changes', 
-        {
-          event: '*', // Listen to INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'apps'
-        }, 
-        (payload) => {
-          console.log('Change detected in apps:', payload);
-          // Reload apps when there are changes
-          fetchApps();
-        }
-      )
-      .subscribe();
+  // Filter apps based on search term and category
+  const filteredApps = apps.filter((app) => {
+    const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         app.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Clean up subscription on unmount
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    const matchesCategory = !selectedCategory || app.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
 
-  // Sort apps by name alphabetically
-  const sortedApps = useMemo(() => {
-    return [...allApps].sort((a, b) => a.name.localeCompare(b.name));
-  }, [allApps]);
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+  };
 
-  // Handle special category:subcategory format for filtering
-  useEffect(() => {
-    let filtered = [...sortedApps];
-    
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(app => 
-        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Filter by category/group or subcategory
-    if (selectedFilter !== 'all') {
-      // Check if the filter contains a subcategory (format: "category:subcategory")
-      if (selectedFilter.includes(':')) {
-        const [category, subcategory] = selectedFilter.split(':');
-        filtered = filtered.filter(app => 
-          app.category === category && app.subcategory === subcategory
-        );
-      } else {
-        // Check if selected filter is a group or a category
-        const isGroup = categoryGroups.some(group => group.name === selectedFilter);
-        
-        if (isGroup) {
-          // Filter by group
-          const categoriesInGroup = categoryGroups.find(group => group.name === selectedFilter)?.categories || [];
-          filtered = filtered.filter(app => categoriesInGroup.includes(app.category));
-        } else {
-          // Filter by specific category
-          filtered = filtered.filter(app => app.category === selectedFilter);
-        }
-      }
-    }
-    
-    setFilteredApps(filtered);
-    
-    // Reset prefetch status to idle to trigger a new prefetch when filter changes
-    setPrefetchStatus('idle');
-  }, [searchTerm, selectedFilter, sortedApps]);
+  const handleCategorySelect = (category: string | null) => {
+    setSelectedCategory(category);
+  };
 
-  // Group apps by category for display
-  const groupedApps = useMemo(() => {
-    const grouped: Record<string, AppData[]> = {};
-    
-    filteredApps.forEach(app => {
-      if (!grouped[app.category]) {
-        grouped[app.category] = [];
-      }
-      grouped[app.category].push(app);
-    });
-    
-    // Sort categories alphabetically
-    return Object.keys(grouped)
-      .sort()
-      .reduce((result, category) => {
-        // Sort apps within each category alphabetically
-        result[category] = grouped[category].sort((a, b) => a.name.localeCompare(b.name));
-        return result;
-      }, {} as Record<string, AppData[]>);
-  }, [filteredApps]);
-
-  // Loading skeleton for apps
-  const AppsSkeleton = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {Array(10).fill(0).map((_, i) => (
-        <div key={i} className="flex flex-col items-center p-2 space-y-2 animate-pulse">
-          <Skeleton className="h-12 w-12 rounded-lg mb-2" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-32" />
-        </div>
-      ))}
-    </div>
-  );
+  // Get all unique categories
+  const categories = [...new Set(apps.map(app => app.category))].sort();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <Header title={t('catalog.title') || "Catálogo"} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header title="Catálogo" />
       
-      {/* Fixed search/filter bar - optimized for mobile */}
-      <div className="sticky top-14 z-40 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 px-4 shadow-sm">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <SearchBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm} 
-              />
-            </div>
-            
-            <div className="w-full md:max-w-[220px]">
-              <CategoryFilter 
-                selectedCategory={selectedFilter}
-                onCategoryChange={setSelectedFilter}
-              />
-            </div>
-          </div>
+      <div className="container max-w-7xl mx-auto px-4 py-6">
+        <div className="mb-6">
+          <SearchBar onSearch={handleSearch} />
         </div>
-      </div>
-      
-      <main className="container mx-auto px-4 py-4 flex-1">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-[70vh]">
-            <div className="h-12 w-12 rounded-full border-4 border-primary border-r-transparent animate-spin mb-4"></div>
-            <p className="text-gray-500">Cargando aplicaciones...</p>
+        
+        <div className="mb-6 overflow-x-auto pb-2">
+          <CategoryFilter 
+            categories={categories} 
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+        
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : (
-          <>
-            <h3 className="text-lg font-medium mb-4 dark:text-white">
-              {searchTerm || selectedFilter !== 'all'
-                ? (t('catalog.results') || "Resultados") 
-                : ""}
-              {selectedFilter !== 'all' && !selectedFilter.includes(':') && (
-                <span>
-                  {` > ${
-                    categoryGroups.some(group => group.name === selectedFilter)
-                      ? translateCategoryGroupName(selectedFilter)
-                      : selectedFilter
-                  }`}
-                </span>
-              )}
-              {selectedFilter.includes(':') && (
-                <span>{` > ${selectedFilter.split(':')[0]} > ${selectedFilter.split(':')[1]}`}</span>
-              )}
-            </h3>
-            
-            {/* Display apps grouped by category */}
-            {Object.keys(groupedApps).length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con tu búsqueda</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {Object.entries(groupedApps).map(([category, apps]) => (
-                  <div key={category} className="space-y-3 animate-fade-in">
-                    <h2 className="text-xl font-semibold border-b pb-2 gradient-text">
-                      {category}
-                    </h2>
-                    <AppGrid 
-                      apps={apps}
-                      showManage={false}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          <AppGrid 
+            apps={filteredApps} 
+            favorites={favorites}
+            onAddFavorite={addFavorite}
+            onRemoveFavorite={removeFavorite}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+            showEmptyState={!loading && filteredApps.length === 0 && (searchTerm || selectedCategory)}
+          />
         )}
-      </main>
+      </div>
     </div>
   );
 };
