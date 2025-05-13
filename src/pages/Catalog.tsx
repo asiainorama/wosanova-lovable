@@ -4,13 +4,13 @@ import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import CategoryFilter from "@/components/CategoryFilter";
 import AppGrid from "@/components/AppGrid";
-import { useApp } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Catalog = () => {
-  const { favorites, addFavorite, removeFavorite, apps, setApps } = useApp();
+  const { favorites, addToFavorites: addFavorite, removeFromFavorites: removeFavorite, allApps, setAllApps: setApps } = useAppContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,20 @@ const Catalog = () => {
         
         if (data) {
           console.info(`Loaded apps from Supabase: ${data.length}`);
-          setApps(data as AppData[]);
+          // Convert is_ai to isAI in the data to match AppData type
+          const convertedData: AppData[] = data.map(app => ({
+            id: app.id,
+            name: app.name,
+            icon: app.icon,
+            url: app.url,
+            category: app.category,
+            subcategory: app.subcategory,
+            description: app.description,
+            isAI: app.is_ai,
+            created_at: app.created_at,
+            updated_at: app.updated_at
+          }));
+          setApps(convertedData);
         }
       } catch (error) {
         console.error('Error loading apps:', error);
@@ -48,7 +61,7 @@ const Catalog = () => {
   }, [setApps]);
 
   // Filter apps based on search term and category
-  const filteredApps = apps.filter((app) => {
+  const filteredApps = allApps.filter((app) => {
     const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          app.description.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -66,7 +79,7 @@ const Catalog = () => {
   };
 
   // Get all unique categories
-  const categories = [...new Set(apps.map(app => app.category))].sort();
+  const categories = [...new Set(allApps.map(app => app.category))].sort();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -74,14 +87,14 @@ const Catalog = () => {
       
       <div className="container max-w-7xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar value={searchTerm} onChange={handleSearch} />
         </div>
         
         <div className="mb-6 overflow-x-auto pb-2">
           <CategoryFilter 
-            categories={categories} 
-            selectedCategory={selectedCategory}
-            onCategorySelect={handleCategorySelect}
+            items={categories} 
+            selectedItem={selectedCategory}
+            onSelect={handleCategorySelect}
           />
         </div>
         
@@ -91,13 +104,11 @@ const Catalog = () => {
           </div>
         ) : (
           <AppGrid 
-            apps={filteredApps} 
-            favorites={favorites}
+            items={filteredApps} 
             onAddFavorite={addFavorite}
             onRemoveFavorite={removeFavorite}
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            showEmptyState={!loading && filteredApps.length === 0 && (searchTerm || selectedCategory)}
+            favorites={favorites}
+            emptyState={searchTerm || selectedCategory ? true : false}
           />
         )}
       </div>

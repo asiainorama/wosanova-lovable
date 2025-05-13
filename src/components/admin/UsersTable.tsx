@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +23,17 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+interface AuthUser {
+  id: string;
+  app_metadata: {
+    login_count?: number;
+  };
+}
+
+interface AuthUsersResponse {
+  users: AuthUser[];
+}
 
 interface UserData {
   id: string;
@@ -72,7 +82,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       setRefreshing(true);
       
       // Get auth users to get login count data
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
       
       if (authError) {
         console.error("Error fetching auth users:", authError);
@@ -80,8 +90,9 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       
       // Map of user ID to login count
       const userLoginCounts = new Map();
-      if (authUsers) {
-        authUsers.users.forEach(user => {
+      if (authData) {
+        const authUsers = (authData as unknown as AuthUsersResponse).users;
+        authUsers.forEach(user => {
           userLoginCounts.set(user.id, user.app_metadata.login_count || 0);
         });
       }
