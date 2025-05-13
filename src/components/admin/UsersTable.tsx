@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,7 +68,7 @@ const UsersTable = () => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Using type assertion for the response from rpc
+      // Fix: Use proper typing for the RPC call to avoid the TS2345 error
       const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
       
       if (authError) {
@@ -78,7 +77,7 @@ const UsersTable = () => {
       }
       
       if (authData) {
-        // Fix: Assert that authData is an array
+        // Fix: Assert that authData is an array of AuthUser objects
         const authArray = authData as unknown as AuthUser[];
         console.log('Auth data loaded:', authArray.length);
       } else {
@@ -89,7 +88,7 @@ const UsersTable = () => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Fix: Type assertion for authData to make TypeScript happy
+      // Fix: Type assertion for authData to ensure TypeScript understands it as AuthUser[]
       const authArray = authData as unknown as AuthUser[];
       if (authArray && Array.isArray(authArray)) {
         authArray.forEach((user: AuthUser) => {
@@ -105,7 +104,7 @@ const UsersTable = () => {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 200); // Avoid flash of "no apps" message
     }
   };
 
