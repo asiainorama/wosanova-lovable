@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +69,8 @@ const UsersTable = () => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix: Specify both generic type parameters for the RPC call
-      // We need to specify both the return type and params type
-      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>('get_auth_users');
+      // Using type assertion for the response from rpc
+      const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
