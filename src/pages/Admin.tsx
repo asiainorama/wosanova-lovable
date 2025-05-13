@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,27 +8,22 @@ import AppsTable from "@/components/admin/AppsTable";
 import UsersTable from "@/components/admin/UsersTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
-import { 
-  saveAppToSupabase, 
-  deleteAppFromSupabase, 
-  fetchAppsFromSupabase, 
-  deleteAllAppsFromSupabase 
+import {
+  saveAppToSupabase,
+  deleteAppFromSupabase,
+  fetchAppsFromSupabase,
+  deleteAllAppsFromSupabase,
 } from "@/services/AppsService";
 import { exportAppsToExcel, importAppsFromExcel } from "@/services/ExportService";
 import { FileDown, FileUp, Plus, Trash2 } from "lucide-react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import AdminLayout from "@/components/admin/AdminLayout";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import AlertDialogComponent from "@/components/ui/AlertDialogComponent";
+
+const TABS = {
+  APPS: "apps",
+  USERS: "users",
+};
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -40,39 +34,42 @@ const Admin = () => {
   const [editingApp, setEditingApp] = useState<AppData | null>(null);
   const [apps, setApps] = useState<AppData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState<string>("apps");
+  const [activeTab, setActiveTab] = useState<string>(TABS.APPS);
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        
-        if (data.session?.user?.email) {
-          // Check if user is admin (can be expanded with proper admin roles)
-          // For now we're just checking if the email ends with wosanova.com
-          const isAdminUser = data.session.user.email.endsWith("@wosanova.com") || 
-                             data.session.user.email === "asiainorama@gmail.com";
-          setIsAdmin(isAdminUser);
-          
-          if (!isAdminUser) {
-            toast.error("Acceso restringido a administradores");
-            navigate("/");
-          }
-        } else {
-          navigate("/auth");
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        navigate("/auth");
-      } finally {
-        setLoading(false);
-      }
+    const initialize = async () => {
+      await checkSession();
+      await loadApps();
     };
 
-    checkSession();
-    loadApps();
+    initialize();
   }, [navigate]);
+
+  const checkSession = async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+
+      if (data.session?.user?.email) {
+        const isAdminUser =
+          data.session.user.email.endsWith("@wosanova.com") ||
+          data.session.user.email === "asiainorama@gmail.com";
+        setIsAdmin(isAdminUser);
+
+        if (!isAdminUser) {
+          toast.error("Acceso restringido a administradores");
+          navigate("/");
+        }
+      } else {
+        navigate("/auth");
+      }
+    } catch (error) {
+      console.error("Error checking session:", error);
+      navigate("/auth");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadApps = async () => {
     try {
@@ -99,13 +96,8 @@ const Admin = () => {
 
   const handleDeleteApp = async (appId: string) => {
     try {
-      // Delete from Supabase
       await deleteAppFromSupabase(appId);
-      
-      // Update local state
-      const updatedApps = apps.filter(app => app.id !== appId);
-      setApps(updatedApps);
-      
+      setApps((prevApps) => prevApps.filter((app) => app.id !== appId));
       toast.success(`Aplicación eliminada correctamente`);
     } catch (error) {
       console.error("Error deleting app:", error);
@@ -129,21 +121,19 @@ const Admin = () => {
 
   const handleSaveApp = async (app: AppData) => {
     try {
-      // Save to Supabase
       await saveAppToSupabase(app);
-      
-      // Update local state
-      if (editingApp) {
-        // Update existing app
-        const updatedApps = apps.map(a => a.id === app.id ? app : a);
-        setApps(updatedApps);
-        toast.success(`Aplicación "${app.name}" actualizada`);
-      } else {
-        // Add new app
-        setApps([...apps, app]);
-        toast.success(`Aplicación "${app.name}" añadida`);
-      }
-      
+
+      setApps((prevApps) =>
+        editingApp
+          ? prevApps.map((a) => (a.id === app.id ? app : a))
+          : [...prevApps, app]
+      );
+
+      toast.success(
+        editingApp
+          ? `Aplicación "${app.name}" actualizada`
+          : `Aplicación "${app.name}" añadida`
+      );
       setShowForm(false);
     } catch (error) {
       console.error("Error saving app:", error);
@@ -151,35 +141,15 @@ const Admin = () => {
     }
   };
 
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingApp(null);
-  };
-
-  const handleExport = () => {
-    exportAppsToExcel(apps, 'admin-apps-export');
-  };
-
-  const handleImportClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleImportChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const handleImportApps = async (file: File) => {
     try {
       setLoading(true);
       const importedApps = await importAppsFromExcel(file);
-      
-      // Save each imported app to Supabase
+
       for (const app of importedApps) {
         await saveAppToSupabase(app);
       }
-      
-      // Reload apps
+
       await loadApps();
       toast.success(`${importedApps.length} aplicaciones importadas correctamente`);
     } catch (error) {
@@ -187,17 +157,10 @@ const Admin = () => {
       toast.error(`Error al importar aplicaciones: ${error}`);
     } finally {
       setLoading(false);
-      // Clear the input file
-      if (event.target) {
-        event.target.value = '';
-      }
     }
   };
 
-  const handleTabChange = (value: string) => {
-    console.log("Tab changed to:", value);
-    setActiveTab(value);
-  };
+  const handleTabChange = (value: string) => setActiveTab(value);
 
   if (loading && !showForm) {
     return (
@@ -208,102 +171,34 @@ const Admin = () => {
   }
 
   if (!session || !isAdmin) {
-    return null; // Will redirect in useEffect
+    return null; // Redirect handled in useEffect
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header title="Admin" />
-      
+
       <main className="container mx-auto px-4 py-6 flex-1">
         <AdminLayout activeTab={activeTab} onTabChange={handleTabChange}>
           {showForm ? (
-            <AppForm 
-              app={editingApp} 
-              onSave={handleSaveApp} 
-              onCancel={handleCancelForm}
-            />
+            <AppForm app={editingApp} onSave={handleSaveApp} onCancel={() => setShowForm(false)} />
           ) : (
             <Tabs value={activeTab} className="w-full">
-              <TabsContent value="apps" className="mt-0">
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-2xl font-bold">Apps</h1>
-                  <div className="flex gap-2">
-                    <input 
-                      type="file" 
-                      accept=".xlsx,.xls" 
-                      onChange={handleImportChange} 
-                      className="hidden"
-                      ref={fileInputRef}
-                    />
-                    
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="destructive" 
-                          className="flex items-center justify-center rounded-xl" 
-                          size="icon" 
-                          title="Eliminar todo el catálogo"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar todas las aplicaciones?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción eliminará todas las aplicaciones del catálogo. Esta acción no se puede deshacer.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleDeleteAllApps}>
-                            Eliminar todo
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={handleImportClick} 
-                      className="flex items-center justify-center rounded-xl" 
-                      size="icon" 
-                      title="Importar Excel"
-                    >
-                      <FileUp className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleExport} 
-                      className="flex items-center justify-center rounded-xl" 
-                      size="icon" 
-                      title="Exportar Excel"
-                    >
-                      <FileDown className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      onClick={handleAddApp} 
-                      size="icon" 
-                      className="flex items-center justify-center rounded-xl"
-                      title="Añadir Nueva Aplicación"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <AppsTable 
-                  apps={apps} 
-                  onEdit={handleEditApp} 
-                  onDelete={handleDeleteApp} 
+              <TabsContent value={TABS.APPS}>
+                <AppManagement
+                  apps={apps}
+                  onAdd={handleAddApp}
+                  onEdit={handleEditApp}
+                  onDelete={handleDeleteApp}
+                  onDeleteAll={handleDeleteAllApps}
+                  onExport={() => exportAppsToExcel(apps, "admin-apps-export")}
+                  onImport={(file) => handleImportApps(file)}
+                  fileInputRef={fileInputRef}
                 />
               </TabsContent>
-              
-              <TabsContent value="users" className="mt-0">
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-2xl font-bold">Usuarios</h1>
-                </div>
-                <UsersTable />
+
+              <TabsContent value={TABS.USERS}>
+                <UserManagement />
               </TabsContent>
             </Tabs>
           )}
@@ -312,5 +207,90 @@ const Admin = () => {
     </div>
   );
 };
+
+const AppManagement = ({
+  apps,
+  onAdd,
+  onEdit,
+  onDelete,
+  onDeleteAll,
+  onExport,
+  onImport,
+  fileInputRef,
+}) => {
+  const handleImportClick = () => fileInputRef.current?.click();
+
+  const handleImportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) onImport(file);
+
+    if (event.target) {
+      event.target.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Apps</h1>
+        <div className="flex gap-2">
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImportChange}
+            className="hidden"
+            ref={fileInputRef}
+          />
+
+          <AlertDialogComponent onConfirm={onDeleteAll}>
+            <Button
+              variant="destructive"
+              className="flex items-center justify-center rounded-xl"
+              size="icon"
+              title="Eliminar todo el catálogo"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogComponent>
+
+          <Button
+            variant="outline"
+            onClick={handleImportClick}
+            className="flex items-center justify-center rounded-xl"
+            size="icon"
+            title="Importar Excel"
+          >
+            <FileUp className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onExport}
+            className="flex items-center justify-center rounded-xl"
+            size="icon"
+            title="Exportar Excel"
+          >
+            <FileDown className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={onAdd}
+            size="icon"
+            className="flex items-center justify-center rounded-xl"
+            title="Añadir Nueva Aplicación"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <AppsTable apps={apps} onEdit={onEdit} onDelete={onDelete} />
+    </div>
+  );
+};
+
+const UserManagement = () => (
+  <div>
+    <h1 className="text-2xl font-bold">Usuarios</h1>
+    <UsersTable />
+  </div>
+);
 
 export default Admin;
