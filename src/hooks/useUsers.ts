@@ -54,12 +54,11 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Using type assertion to bypass TypeScript's type checking for the RPC function
-      const authResponse = await supabase.rpc('get_auth_users', {}) as unknown;
-      const { data: authData, error: authError } = authResponse as { 
-        data: unknown; 
-        error: { message: string } | null;
-      };
+      // Fix for TS2345 error - use proper typing for the RPC call
+      const { data: authData, error: authError } = await supabase.rpc(
+        'get_auth_users',
+        {} as Record<string, never> // Empty object with correct type
+      );
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
