@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Search } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -20,14 +20,20 @@ interface AppsTableProps {
   apps: AppData[];
   onEdit: (app: AppData) => void;
   onDelete: (appId: string) => void;
+  currentPage: number;
 }
 
-const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
+const AppsTable = ({ apps, onEdit, onDelete, currentPage }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [localCurrentPage, setLocalCurrentPage] = useState(currentPage);
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
   const [isLandscape, setIsLandscape] = useState(false);
+
+  // Pass the current page back to parent when it changes
+  useEffect(() => {
+    setLocalCurrentPage(currentPage);
+  }, [currentPage]);
 
   // Effect to detect landscape orientation
   useEffect(() => {
@@ -52,18 +58,25 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       app.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const indexOfLastApp = currentPage * itemsPerPage;
+  const indexOfLastApp = localCurrentPage * itemsPerPage;
   const indexOfFirstApp = indexOfLastApp - itemsPerPage;
   const currentApps = filteredApps.slice(indexOfFirstApp, indexOfLastApp);
   const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
 
   // Reset to first page when search term changes
   useEffect(() => {
-    setCurrentPage(1);
+    setLocalCurrentPage(1);
   }, [searchTerm]);
 
   // Display condition for columns - mobile in portrait mode shows minimal columns
   const showDetails = !isMobile || isLandscape;
+
+  const handlePageChange = (newPage: number) => {
+    setLocalCurrentPage(newPage);
+    // Pass the new page to the parent component
+    const event = new CustomEvent('pageChanged', { detail: { page: newPage } });
+    document.dispatchEvent(event);
+  };
 
   return (
     <div className="space-y-4">
@@ -105,7 +118,11 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
               currentApps.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell>
-                    <div className="w-10 h-10 overflow-hidden rounded-md">
+                    <div 
+                      className="w-10 h-10 overflow-hidden rounded-md cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => onEdit(app)}
+                      title="Editar aplicación"
+                    >
                       <AspectRatio ratio={1 / 1}>
                         <img
                           src={app.icon}
@@ -118,7 +135,12 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       </AspectRatio>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{app.name}</TableCell>
+                  <TableCell 
+                    className="font-medium cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => onEdit(app)}
+                  >
+                    {app.name}
+                  </TableCell>
                   
                   {showDetails && (
                     <>
@@ -141,17 +163,6 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   
                   <TableCell className="text-right">
                     <div className="flex space-x-2 justify-end">
-                      {showDetails && (
-                        <Button
-                          onClick={() => onEdit(app)}
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      )}
-                      
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -189,22 +200,22 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
       {totalPages > 1 && (
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Página {currentPage} de {totalPages}
+            Página {localCurrentPage} de {totalPages}
           </div>
           <div className="flex space-x-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(Math.max(1, localCurrentPage - 1))}
+              disabled={localCurrentPage === 1}
             >
               Anterior
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(Math.min(totalPages, localCurrentPage + 1))}
+              disabled={localCurrentPage === totalPages}
             >
               Siguiente
             </Button>

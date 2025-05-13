@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,17 +25,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-interface AuthUser {
-  id: string;
-  app_metadata: {
-    login_count?: number;
-  };
-}
-
-interface AuthUsersResponse {
-  users: AuthUser[];
-}
-
 interface UserData {
   id: string;
   username?: string;
@@ -57,7 +47,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20; // Increased from 10 to show more users per page
   const isMobile = useIsMobile();
 
   // Detect landscape orientation on mobile devices
@@ -76,50 +66,59 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     };
   }, []);
 
-  // Fetch users from user_profiles table
+  // Fetch users from user_profiles table and auth users for login count
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
       
-      // Get auth users to get login count data
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        console.error("Error fetching auth users:", authError);
-      }
-      
-      // Map of user ID to login count
-      const userLoginCounts = new Map();
-      if (authData) {
-        const authUsers = (authData as unknown as AuthUsersResponse).users;
-        authUsers.forEach(user => {
-          userLoginCounts.set(user.id, user.app_metadata.login_count || 0);
-        });
-      }
-      
-      // Get user profiles
-      const { data, error } = await supabase
+      // Get user profiles first
+      const { data: profilesData, error: profilesError } = await supabase
         .from('user_profiles')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        toast.error(`Error al cargar usuarios: ${error.message}`);
-        console.error("Error fetching users:", error);
+      if (profilesError) {
+        toast.error(`Error al cargar perfiles: ${profilesError.message}`);
+        console.error("Error fetching profiles:", profilesError);
+        setRefreshing(false);
         return;
       }
-
-      if (data) {
-        console.log("Fetched users:", data.length);
+      
+      // Get auth data with a direct function call to the admin API
+      const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
+      
+      if (authError) {
+        toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
+        console.error("Error fetching auth data:", authError);
         
-        // Combine data with login counts
-        const usersWithLoginCount = data.map((user: UserData) => ({
-          ...user,
-          login_count: userLoginCounts.get(user.id) || 0
-        }));
-        
-        setUsers(usersWithLoginCount);
+        // Even if we fail to get auth data, still set the profiles
+        setUsers(profilesData || []);
+        setLoading(false);
+        setRefreshing(false);
+        return;
       }
+      
+      console.log("Auth data:", authData);
+      
+      // Create a map of user IDs to login counts
+      const loginCountMap = new Map();
+      if (authData && Array.isArray(authData)) {
+        authData.forEach(user => {
+          const id = user.id;
+          const count = user.login_count || 0;
+          loginCountMap.set(id, count);
+        });
+      }
+      
+      // Combine profile data with login counts
+      const combinedUsers = (profilesData || []).map(profile => ({
+        ...profile,
+        login_count: loginCountMap.get(profile.id) || 0
+      }));
+      
+      console.log(`Loaded ${combinedUsers.length} users with login data`);
+      setUsers(combinedUsers);
+      
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Error al cargar usuarios");
@@ -133,7 +132,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   useEffect(() => {
     fetchUsers();
     
-    // Set up a real-time subscription
+    // Set up a real-time subscription for user profile changes
     const channel = supabase
       .channel('schema-db-changes')
       .on(
