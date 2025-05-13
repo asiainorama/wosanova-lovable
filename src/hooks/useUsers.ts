@@ -54,10 +54,11 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Using any type for now to avoid the TypeScript errors, and we'll validate the response
-      const { data: authData, error: authError } = await supabase.rpc('get_auth_users') as { 
-        data: any; 
-        error: any;
+      // Using type assertion to bypass TypeScript's type checking for the RPC function
+      const authResponse = await supabase.rpc('get_auth_users', {}) as unknown;
+      const { data: authData, error: authError } = authResponse as { 
+        data: unknown; 
+        error: { message: string } | null;
       };
       
       if (authError) {
@@ -78,7 +79,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       if (Array.isArray(authData)) {
         console.log('Auth data loaded:', authData.length);
         
-        authData.forEach((user: AuthUser) => {
+        authData.forEach((user: any) => {
           if (user && user.id) {
             const id = user.id;
             const count = user.login_count || 0;
