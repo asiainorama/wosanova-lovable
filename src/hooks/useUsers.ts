@@ -54,10 +54,10 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix for TS2345 error - use proper typing for the RPC call
-      const { data: authData, error: authError } = await supabase.rpc(
+      // Fix for TypeScript errors: use explicit type assertion for both parameters and return type
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>(
         'get_auth_users',
-        {} as Record<string, never> // Empty object with correct type
+        {} // Empty object is fine when properly typed with generics
       );
       
       if (authError) {
@@ -74,22 +74,18 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Validate that authData is an array and contains the expected structure
-      if (Array.isArray(authData)) {
-        console.log('Auth data loaded:', authData.length);
-        
-        authData.forEach((user: any) => {
-          if (user && user.id) {
-            const id = user.id;
-            const count = user.login_count || 0;
-            loginCountMap[id] = count;
-          }
-        });
-        
-        setLoginCounts(loginCountMap);
-      } else {
-        console.warn('Auth data is not an array:', typeof authData);
-      }
+      // Since we've typed the RPC call with AuthUser[], TypeScript now knows it's an array
+      console.log('Auth data loaded:', authData.length);
+      
+      authData.forEach((user: AuthUser) => {
+        if (user && user.id) {
+          const id = user.id;
+          const count = user.login_count || 0;
+          loginCountMap[id] = count;
+        }
+      });
+      
+      setLoginCounts(loginCountMap);
       
     } catch (error) {
       console.error("Error fetching users:", error);
