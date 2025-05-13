@@ -53,11 +53,10 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
         setUsers(userData);
       }
       
-      // Get auth data with a direct function call to the admin API
-      // Fix for TypeScript errors: We need to specify both the return type and params type
-      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>(
-        'get_auth_users',
-        {}
+      // Get auth data from the RPC function
+      // Fix the typing by using a simpler approach without generic parameters
+      const { data: authData, error: authError } = await supabase.rpc(
+        'get_auth_users'
       );
       
       if (authError) {
@@ -65,7 +64,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
         return;
       }
       
-      // Check if authData exists and is an array before processing
+      // Check if authData exists before processing
       if (!authData) {
         console.warn('No auth data returned from get_auth_users');
         return;
@@ -74,16 +73,18 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Since we've typed the RPC call with AuthUser[], TypeScript now knows it's an array
-      console.log('Auth data loaded:', authData.length);
+      // Type assertion to treat authData as array of AuthUser
+      console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'not an array');
       
-      authData.forEach((user: AuthUser) => {
-        if (user && user.id) {
-          const id = user.id;
-          const count = user.login_count || 0;
-          loginCountMap[id] = count;
-        }
-      });
+      if (Array.isArray(authData)) {
+        authData.forEach((user: AuthUser) => {
+          if (user && user.id) {
+            const id = user.id;
+            const count = user.login_count || 0;
+            loginCountMap[id] = count;
+          }
+        });
+      }
       
       setLoginCounts(loginCountMap);
       
