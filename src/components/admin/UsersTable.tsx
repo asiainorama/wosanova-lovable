@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,7 +69,7 @@ const UsersTable = () => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix: Use proper typing for the RPC call to avoid the TS2345 error
+      // Properly type the RPC call to fix the TS2345 error
       const { data: authData, error: authError } = await supabase.rpc('get_auth_users') as { 
         data: AuthUser[] | null; 
         error: any; 
@@ -80,7 +81,7 @@ const UsersTable = () => {
       }
       
       if (authData) {
-        // Fix: Assert that authData is an array of AuthUser objects
+        // Assert that authData is an array of AuthUser objects
         const authArray = authData as AuthUser[];
         console.log('Auth data loaded:', authArray.length);
       } else {
@@ -91,7 +92,7 @@ const UsersTable = () => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Fix: Type assertion for authData to ensure TypeScript understands it as AuthUser[]
+      // Type assertion for authData to ensure TypeScript understands it as AuthUser[]
       const authArray = authData as AuthUser[];
       if (authArray && Array.isArray(authArray)) {
         authArray.forEach((user: AuthUser) => {
