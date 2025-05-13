@@ -54,8 +54,11 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix: Use proper typing for the RPC function call and handle the response type properly
-      const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
+      // Using any type for now to avoid the TypeScript errors, and we'll validate the response
+      const { data: authData, error: authError } = await supabase.rpc('get_auth_users') as { 
+        data: any; 
+        error: any;
+      };
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -63,9 +66,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Check if authData exists and is an array before processing
-      if (authData) {
-        console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'not an array');
-      } else {
+      if (!authData) {
         console.warn('No auth data returned from get_auth_users');
         return;
       }
@@ -73,14 +74,21 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      if (authData && Array.isArray(authData)) {
+      // Validate that authData is an array and contains the expected structure
+      if (Array.isArray(authData)) {
+        console.log('Auth data loaded:', authData.length);
+        
         authData.forEach((user: AuthUser) => {
-          const id = user.id;
-          const count = user.login_count || 0;
-          loginCountMap[id] = count;
+          if (user && user.id) {
+            const id = user.id;
+            const count = user.login_count || 0;
+            loginCountMap[id] = count;
+          }
         });
         
         setLoginCounts(loginCountMap);
+      } else {
+        console.warn('Auth data is not an array:', typeof authData);
       }
       
     } catch (error) {
