@@ -1,9 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AppData } from '@/data/types';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuSeparator,
+  DropdownMenuLabel
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
   selectedCategory: string | null;
@@ -20,7 +32,6 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   selectedSubcategory = null,
   onSubcategoryChange = () => {},
-  subcategories = []
 }) => {
   const { t, language } = useLanguage();
   const [allApps, setAllApps] = useState<AppData[]>([]);
@@ -107,7 +118,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   // Obtener categorías que tienen aplicaciones
   const usedCategories = React.useMemo(() => {
     const usedCats = new Set(allApps.map(app => app.category));
-    return categories.filter(cat => usedCats.has(cat));
+    return categories.filter(cat => usedCats.has(cat)).sort();
   }, [allApps, categories]);
   
   // Responder a los cambios de idioma
@@ -124,58 +135,123 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     };
   }, [language, forceUpdate]);
 
-  return (
-    <div className="space-y-2">
-      <Select 
-        value={selectedCategory || ""} 
-        onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}
-      >
-        <SelectTrigger className="w-full bg-gray-100 border-none text-gray-500">
-          <SelectValue 
-            placeholder="Filtrar por categoría..."
-          />
-        </SelectTrigger>
-        <SelectContent className="max-h-80">
-          <SelectItem 
-            key="all" 
-            value="all"
-            className="text-left font-normal"
-          >
-            {t('catalog.allCategories')}
-          </SelectItem>
-          
-          {/* Mostrar categorías directamente */}
-          {usedCategories.map((category) => (
-            <SelectItem 
-              key={category}
-              value={category}
-              className="text-left font-normal"
-            >
-              {translateCategory(category)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+  const getDisplayText = () => {
+    if (selectedCategory && selectedSubcategory) {
+      return `${translateCategory(selectedCategory)} > ${selectedSubcategory}`;
+    } else if (selectedCategory) {
+      return translateCategory(selectedCategory);
+    } else {
+      return t('catalog.allCategories') || 'Todas las categorías';
+    }
+  };
 
-      {/* Subcategory filter, shown only when a category is selected and has subcategories */}
-      {selectedCategory && subcategories.length > 0 && (
-        <Select 
-          value={selectedSubcategory || ""}
-          onValueChange={(value) => onSubcategoryChange(value === "all" ? null : value)}
+  const handleCategorySelect = (category: string | null, subcategory: string | null = null) => {
+    onCategoryChange(category);
+    onSubcategoryChange(subcategory);
+  };
+
+  return (
+    <div className="relative">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="w-full flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md border-none hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <span className="truncate">{getDisplayText()}</span>
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50"
+          align="start"
         >
-          <SelectTrigger className="w-full bg-gray-100 border-none text-gray-500">
-            <SelectValue 
-              placeholder="Filtrar por subcategoría..."
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas las subcategorías</SelectItem>
-            {subcategories.map(subcat => (
-              <SelectItem key={subcat} value={subcat}>{subcat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
+          <DropdownMenuLabel>{t('catalog.filterByCategory')}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          
+          {/* All Categories option */}
+          <DropdownMenuItem 
+            onClick={() => handleCategorySelect(null, null)}
+            className={cn("cursor-pointer", 
+              (!selectedCategory && !selectedSubcategory) && "bg-gray-100 dark:bg-gray-700"
+            )}
+          >
+            <span className="flex items-center">
+              {(!selectedCategory && !selectedSubcategory) && <Check className="h-4 w-4 mr-2" />}
+              {t('catalog.allCategories')}
+            </span>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          {/* Categories with subcategories */}
+          {usedCategories.map((category) => {
+            const hasSubcategories = categorySubcategories[category]?.length > 0;
+            
+            if (hasSubcategories) {
+              return (
+                <DropdownMenuSub key={category}>
+                  <DropdownMenuSubTrigger
+                    className={cn("cursor-pointer", 
+                      (selectedCategory === category && !selectedSubcategory) && "bg-gray-100 dark:bg-gray-700"
+                    )}
+                  >
+                    <span className="flex items-center">
+                      {(selectedCategory === category && !selectedSubcategory) && <Check className="h-4 w-4 mr-2" />}
+                      {translateCategory(category)}
+                    </span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                    {/* Option for the main category */}
+                    <DropdownMenuItem 
+                      onClick={() => handleCategorySelect(category, null)} 
+                      className={cn("cursor-pointer", 
+                        (selectedCategory === category && !selectedSubcategory) && "bg-gray-100 dark:bg-gray-700"
+                      )}
+                    >
+                      <span className="flex items-center">
+                        {(selectedCategory === category && !selectedSubcategory) && <Check className="h-4 w-4 mr-2" />}
+                        {t('catalog.allInCategory', { category: translateCategory(category) }) || `Todas en ${translateCategory(category)}`}
+                      </span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    {/* Options for subcategories */}
+                    {categorySubcategories[category].map((subcat) => (
+                      <DropdownMenuItem 
+                        key={`${category}-${subcat}`} 
+                        onClick={() => handleCategorySelect(category, subcat)}
+                        className={cn("cursor-pointer", 
+                          (selectedCategory === category && selectedSubcategory === subcat) && "bg-gray-100 dark:bg-gray-700"
+                        )}
+                      >
+                        <span className="flex items-center">
+                          {(selectedCategory === category && selectedSubcategory === subcat) && <Check className="h-4 w-4 mr-2" />}
+                          {subcat}
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              );
+            } else {
+              // Categories without subcategories
+              return (
+                <DropdownMenuItem 
+                  key={category} 
+                  onClick={() => handleCategorySelect(category, null)}
+                  className={cn("cursor-pointer", 
+                    (selectedCategory === category) && "bg-gray-100 dark:bg-gray-700"
+                  )}
+                >
+                  <span className="flex items-center">
+                    {(selectedCategory === category) && <Check className="h-4 w-4 mr-2" />}
+                    {translateCategory(category)}
+                  </span>
+                </DropdownMenuItem>
+              );
+            }
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

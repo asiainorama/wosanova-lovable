@@ -59,11 +59,6 @@ const Catalog = () => {
     fetchApps(setAllApps, setLoading);
   }, [setAllApps]);
 
-  // Reset subcategory when category changes
-  useEffect(() => {
-    setSelectedSubcategory(null);
-  }, [selectedCategory]);
-
   const filteredApps = useMemo(() => {
     return allApps.filter(app => {
       const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -95,16 +90,6 @@ const Catalog = () => {
 
   // Get a sorted list of categories 
   const categories = [...new Set(allApps.map(app => app.category))].sort();
-  
-  // Get subcategories for the selected category
-  const subcategories = useMemo(() => {
-    if (!selectedCategory) return [];
-    return [...new Set(allApps
-      .filter(app => app.category === selectedCategory && app.subcategory)
-      .map(app => app.subcategory))]
-      .filter(Boolean)
-      .sort();
-  }, [allApps, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -125,7 +110,6 @@ const Catalog = () => {
               categories={categories}
               selectedSubcategory={selectedSubcategory}
               onSubcategoryChange={setSelectedSubcategory}
-              subcategories={subcategories}
             />
           </div>
         </div>
