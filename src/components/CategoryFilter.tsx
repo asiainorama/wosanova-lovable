@@ -145,9 +145,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     }
   };
 
-  const handleCategorySelect = (category: string | null, subcategory: string | null = null) => {
+  // Fix: Remove the subcategory parameter that's causing the TS2554 error
+  const handleCategorySelect = (category: string | null) => {
     onCategoryChange(category);
-    onSubcategoryChange(subcategory);
+    onSubcategoryChange(null);
   };
 
   return (
@@ -168,7 +169,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
           
           {/* All Categories option */}
           <DropdownMenuItem 
-            onClick={() => handleCategorySelect(null, null)}
+            onClick={() => handleCategorySelect(null)}
             className={cn("cursor-pointer", 
               (!selectedCategory && !selectedSubcategory) && "bg-gray-100 dark:bg-gray-700"
             )}
@@ -201,7 +202,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                   <DropdownMenuSubContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                     {/* Option for the main category */}
                     <DropdownMenuItem 
-                      onClick={() => handleCategorySelect(category, null)} 
+                      onClick={() => handleCategorySelect(category)} 
                       className={cn("cursor-pointer", 
                         (selectedCategory === category && !selectedSubcategory) && "bg-gray-100 dark:bg-gray-700"
                       )}
@@ -218,7 +219,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     {categorySubcategories[category].map((subcat) => (
                       <DropdownMenuItem 
                         key={`${category}-${subcat}`} 
-                        onClick={() => handleCategorySelect(category, subcat)}
+                        onClick={() => {
+                          onCategoryChange(category);
+                          onSubcategoryChange(subcat);
+                        }}
                         className={cn("cursor-pointer", 
                           (selectedCategory === category && selectedSubcategory === subcat) && "bg-gray-100 dark:bg-gray-700"
                         )}
@@ -237,7 +241,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
               return (
                 <DropdownMenuItem 
                   key={category} 
-                  onClick={() => handleCategorySelect(category, null)}
+                  onClick={() => handleCategorySelect(category)}
                   className={cn("cursor-pointer", 
                     (selectedCategory === category) && "bg-gray-100 dark:bg-gray-700"
                   )}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,7 @@ const UsersTable = () => {
   const [users, setUsers] = useState<Tables<"user_profiles">[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const { isDarkMode } = useTheme();
+  const { mode } = useTheme(); // Fix: use mode instead of isDarkMode
   const [loginCounts, setLoginCounts] = useState<Record<string, number>>({});
 
   // Define how many users to show per page
@@ -69,8 +68,8 @@ const UsersTable = () => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Specify the correct generic type parameters for the RPC call
-      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>('get_auth_users');
+      // Fix: Specify both generic type parameters for the RPC call
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], unknown>('get_auth_users');
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -78,7 +77,9 @@ const UsersTable = () => {
       }
       
       if (authData) {
-        console.log('Auth data loaded:', authData.length);
+        // Fix: Assert that authData is an array
+        const authArray = authData as AuthUser[];
+        console.log('Auth data loaded:', authArray.length);
       } else {
         console.warn('No auth data returned from get_auth_users');
         return;
@@ -86,9 +87,11 @@ const UsersTable = () => {
       
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
-      // Explicitly check if authData is an array before using forEach
-      if (authData && Array.isArray(authData)) {
-        authData.forEach((user: AuthUser) => {
+      
+      // Fix: Assert that authData is an array before using forEach
+      const authArray = authData as AuthUser[];
+      if (authArray && Array.isArray(authArray)) {
+        authArray.forEach((user: AuthUser) => {
           const id = user.id;
           const count = user.login_count || 0;
           loginCountMap[id] = count;
