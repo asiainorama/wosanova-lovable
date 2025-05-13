@@ -54,8 +54,8 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix: Properly type the RPC function call with empty params object
-      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>('get_auth_users', {});
+      // Fix: Properly type the RPC function call with both return type and params type
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>('get_auth_users', {});
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
