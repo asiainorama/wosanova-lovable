@@ -54,8 +54,8 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data from the RPC function
-      // Fix the typing by using a simpler approach without generic parameters
-      const { data: authData, error: authError } = await supabase.rpc(
+      // Use the correct type for the Supabase rpc function call
+      const { data: authData, error: authError } = await supabase.rpc<any>(
         'get_auth_users'
       );
       
@@ -73,9 +73,10 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Type assertion to treat authData as array of AuthUser
+      // Safely check if authData is an array and log its length
       console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'not an array');
       
+      // Only process authData if it's an array
       if (Array.isArray(authData)) {
         authData.forEach((user: AuthUser) => {
           if (user && user.id) {
