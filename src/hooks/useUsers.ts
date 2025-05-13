@@ -54,10 +54,8 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      const { data: authData, error: authError } = await supabase.rpc('get_auth_users', {}) as { 
-        data: AuthUser[] | null; 
-        error: any; 
-      };
+      // Fix: Properly type the RPC function call with empty params object
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>('get_auth_users', {});
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -65,9 +63,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       if (authData) {
-        // Assert that authData is an array of AuthUser objects
-        const authArray = authData as AuthUser[];
-        console.log('Auth data loaded:', authArray.length);
+        console.log('Auth data loaded:', authData.length);
       } else {
         console.warn('No auth data returned from get_auth_users');
         return;
@@ -76,10 +72,8 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Type assertion for authData to ensure TypeScript understands it as AuthUser[]
-      const authArray = authData as AuthUser[];
-      if (authArray && Array.isArray(authArray)) {
-        authArray.forEach((user: AuthUser) => {
+      if (authData && Array.isArray(authData)) {
+        authData.forEach((user: AuthUser) => {
           const id = user.id;
           const count = user.login_count || 0;
           loginCountMap[id] = count;
