@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AppData, allApps } from '@/data/apps';
+import { AppData } from '@/data/types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
@@ -73,21 +72,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadAppsFromSupabase = async () => {
       try {
-        // Primero intentamos cargar desde Supabase
+        // Intentamos cargar desde Supabase
         const appsFromSupabase = await fetchAppsFromSupabase();
         
         if (appsFromSupabase.length > 0) {
           console.log('Loaded apps from Supabase:', appsFromSupabase.length);
           setAllApps(appsFromSupabase);
-        } else {
-          // Si no hay datos en Supabase, usamos las apps estáticas como respaldo
-          console.log('No apps found in Supabase, using static data');
-          setAllApps(allApps);
         }
       } catch (error) {
         console.error('Error loading apps from Supabase:', error);
-        // En caso de error, también usamos los datos estáticos
-        setAllApps(allApps);
       }
     };
     
@@ -247,7 +240,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     
     loadFavorites();
-  }, [userId]);
+  }, [userId, initialLoadComplete]);
 
   // Sync favorites to Supabase with upsert
   const syncFavoritesToSupabase = async (favoritesToSync: AppData[] = favorites) => {

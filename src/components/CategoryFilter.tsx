@@ -1,18 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { categories } from '@/data/apps';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { categoryGroups } from '@/data/apps';
 import { supabase } from '@/integrations/supabase/client';
 import { AppData } from '@/data/types';
 
 interface CategoryFilterProps {
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  selectedCategory: string | null;
+  onCategoryChange: (category: string | null) => void;
+  categories: string[];
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange, categories }) => {
   const { t, language } = useLanguage();
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [, updateState] = useState<{}>({});
@@ -99,7 +98,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   const usedCategories = React.useMemo(() => {
     const usedCats = new Set(allApps.map(app => app.category));
     return categories.filter(cat => usedCats.has(cat));
-  }, [allApps]);
+  }, [allApps, categories]);
   
   // Responder a los cambios de idioma
   useEffect(() => {
@@ -128,10 +127,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   };
 
   return (
-    <Select value={selectedCategory} onValueChange={onCategoryChange}>
+    <Select value={selectedCategory || ""} onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}>
       <SelectTrigger className="w-full bg-gray-100 border-none">
         <SelectValue 
-          placeholder={t('catalog.allCategories')}
+          placeholder="Buscar por categoría..."
         />
       </SelectTrigger>
       <SelectContent className="max-h-80">
@@ -143,54 +142,16 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           {t('catalog.allCategories')}
         </SelectItem>
         
-        {/* Mostrar grupos de categorías con subcategorías indentadas */}
-        {categoryGroups.map((group) => {
-          // No mostrar el grupo "Other"
-          if (group.name === "Other") return null;
-          
-          // Filtrar solo las categorías del grupo que tienen aplicaciones
-          const categoriesWithApps = group.categories.filter(cat => 
-            usedCategories.includes(cat)
-          );
-          
-          // Solo mostrar grupos que tienen al menos una categoría con aplicaciones
-          if (categoriesWithApps.length === 0) return null;
-          
-          return (
-            <React.Fragment key={group.name}>
-              {/* Nombre del grupo */}
-              <SelectItem 
-                value={group.name} 
-                className="text-left font-semibold border-b"
-              >
-                {getCategoryGroupName(group.name)}
-              </SelectItem>
-              
-              {/* Categorías dentro del grupo (indentadas) */}
-              {categoriesWithApps.map((category) => (
-                <React.Fragment key={category}>
-                  <SelectItem 
-                    value={category}
-                    className="text-left pl-6 font-normal"
-                  >
-                    {translateCategory(category)}
-                  </SelectItem>
-                  
-                  {/* Subcategorías dentro de cada categoría (doble indentación) */}
-                  {categorySubcategories[category]?.map((subcategory) => (
-                    <SelectItem 
-                      key={`${category}-${subcategory}`} 
-                      value={`${category}:${subcategory}`}
-                      className="text-left pl-10 font-normal text-sm"
-                    >
-                      {subcategory}
-                    </SelectItem>
-                  ))}
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          );
-        })}
+        {/* Mostrar categorías directamente */}
+        {usedCategories.map((category) => (
+          <SelectItem 
+            key={category}
+            value={category}
+            className="text-left font-normal"
+          >
+            {translateCategory(category)}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
