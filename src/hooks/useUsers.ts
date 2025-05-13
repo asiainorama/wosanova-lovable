@@ -54,7 +54,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      // Fix: Use proper typing for the RPC function call
+      // Fix: Use proper typing for the RPC function call and handle the response type properly
       const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
       
       if (authError) {
@@ -62,8 +62,9 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
         return;
       }
       
+      // Check if authData exists and is an array before processing
       if (authData) {
-        console.log('Auth data loaded:', authData.length);
+        console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'not an array');
       } else {
         console.warn('No auth data returned from get_auth_users');
         return;
