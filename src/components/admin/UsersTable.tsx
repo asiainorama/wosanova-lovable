@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +33,15 @@ interface UserData {
   theme_mode?: string;
   language?: string;
   login_count?: number;
+}
+
+interface AuthUser {
+  id: string;
+  email: string;
+  last_sign_in_at: string | null;
+  created_at: string;
+  updated_at: string | null;
+  login_count: number;
 }
 
 interface UsersTableProps {
@@ -85,7 +93,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       }
       
       // Get auth data with a direct function call to the admin API
-      const { data: authData, error: authError } = await supabase.rpc('get_auth_users');
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[]>('get_auth_users');
       
       if (authError) {
         toast.error(`Error al cargar datos de autenticación: ${authError.message}`);
@@ -101,9 +109,9 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       console.log("Auth data:", authData);
       
       // Create a map of user IDs to login counts
-      const loginCountMap = new Map();
+      const loginCountMap = new Map<string, number>();
       if (authData && Array.isArray(authData)) {
-        authData.forEach(user => {
+        authData.forEach((user: AuthUser) => {
           const id = user.id;
           const count = user.login_count || 0;
           loginCountMap.set(id, count);
