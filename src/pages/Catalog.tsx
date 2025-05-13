@@ -87,14 +87,16 @@ const Catalog = () => {
       
       <div className="container max-w-7xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <SearchBar value={searchTerm} onChange={handleSearch} />
+          <SearchBar 
+            searchTerm={searchTerm} 
+            onSearchChange={handleSearch} 
+          />
         </div>
         
         <div className="mb-6 overflow-x-auto pb-2">
           <CategoryFilter 
-            items={categories} 
-            selectedItem={selectedCategory}
-            onSelect={handleCategorySelect}
+            selectedCategory={selectedCategory} 
+            onCategoryChange={handleCategorySelect}
           />
         </div>
         
@@ -104,11 +106,10 @@ const Catalog = () => {
           </div>
         ) : (
           <AppGrid 
-            items={filteredApps} 
-            onAddFavorite={addFavorite}
-            onRemoveFavorite={removeFavorite}
-            favorites={favorites}
-            emptyState={searchTerm || selectedCategory ? true : false}
+            apps={filteredApps}
+            showRemove={false}
+            showManage={false}
+            onShowDetails={undefined}
           />
         )}
       </div>
