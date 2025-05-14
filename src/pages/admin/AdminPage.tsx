@@ -8,6 +8,8 @@ import { AppData } from "@/data/types";
 import { fetchAppsFromSupabase } from "@/services/AppsService";
 import AdminLayout from "@/components/admin/AdminLayout";
 import useAdminSession from "@/hooks/useAdminSession";
+import AppFormContainer from "./components/AppFormContainer";
+import AdminContent from "./components/AdminContent";
 
 const TABS = {
   APPS: "apps",
