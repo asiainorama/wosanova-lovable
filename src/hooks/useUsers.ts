@@ -14,7 +14,19 @@ export interface AuthUser {
   login_count: number | null;
 }
 
-export const useUsers = (initialPage = 1, usersPerPage = 20) => {
+// Define hook return type for better type safety
+interface UseUsersReturn {
+  users: Tables<"user_profiles">[];
+  loginCounts: Record<string, number>;
+  loading: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalUsers: number;
+  usersPerPage: number;
+  refreshUsers: () => Promise<void>;
+}
+
+export const useUsers = (initialPage = 1, usersPerPage = 20): UseUsersReturn => {
   const [users, setUsers] = useState<Tables<"user_profiles">[]>([]);
   const [loginCounts, setLoginCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -25,7 +37,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
     try {
       setLoading(true);
       
-      // First, get the total count of users for pagination
+      // Get total count of users for pagination
       const { count, error: countError } = await supabase
         .from('user_profiles')
         .select('*', { count: 'exact', head: true });
@@ -37,7 +49,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       
       setTotalUsers(count || 0);
       
-      // Then fetch the current page of users
+      // Fetch the current page of users
       const { data: userData, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -54,7 +66,6 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data from the RPC function
-      // Corregimos tipos para la llamada RPC - especificamos entrada vacía y salida AuthUser[]
       const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>(
         'get_auth_users',
         {}
@@ -74,16 +85,14 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Log authData details for debugging - comprobamos si es array antes de acceder a length
+      // Log authData details for debugging
       console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'no data');
       
-      // Process auth data safely con verificación de Array.isArray
+      // Process auth data safely
       if (Array.isArray(authData)) {
         authData.forEach((user: AuthUser) => {
           if (user && user.id) {
-            const id = user.id;
-            const count = user.login_count || 0;
-            loginCountMap[id] = count;
+            loginCountMap[user.id] = user.login_count || 0;
           }
         });
       }
@@ -94,7 +103,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
     } finally {
-      setTimeout(() => setLoading(false), 200); // Avoid flash of "no apps" message
+      setTimeout(() => setLoading(false), 200); // Avoid flash of "no users" message
     }
   };
 
@@ -109,6 +118,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
     currentPage,
     setCurrentPage,
     totalUsers,
-    usersPerPage
+    usersPerPage,
+    refreshUsers: fetchUsers
   };
 };
