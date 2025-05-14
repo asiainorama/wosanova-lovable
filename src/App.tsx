@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -18,7 +17,7 @@ import CalculatorWidget from './pages/widgets/CalculatorWidget';
 import ConverterWidget from './pages/widgets/ConverterWidget';
 import NotesWidget from './pages/widgets/NotesWidget';
 import AlarmWidget from './pages/widgets/AlarmWidget';
-import Admin from './pages/Admin';
+import Admin from "./pages/admin";
 import InstallAppPrompt from './components/InstallAppPrompt';
 
 // Importar el script de sincronización para que esté disponible globalmente
