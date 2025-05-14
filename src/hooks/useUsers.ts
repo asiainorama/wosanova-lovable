@@ -54,9 +54,10 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       }
       
       // Get auth data from the RPC function
-      // Corrección: Simplificar los tipos genéricos y usar 'any' para evitar restricciones incorrectas
-      const { data: authData, error: authError } = await supabase.rpc<any>(
-        'get_auth_users'
+      // Corregimos tipos para la llamada RPC - especificamos entrada vacía y salida AuthUser[]
+      const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>(
+        'get_auth_users',
+        {}
       );
       
       if (authError) {
@@ -73,10 +74,10 @@ export const useUsers = (initialPage = 1, usersPerPage = 20) => {
       // Create a map of user IDs to login counts
       const loginCountMap: Record<string, number> = {};
       
-      // Log authData details for debugging
+      // Log authData details for debugging - comprobamos si es array antes de acceder a length
       console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'no data');
       
-      // Process auth data safely with appropriate type assertion
+      // Process auth data safely con verificación de Array.isArray
       if (Array.isArray(authData)) {
         authData.forEach((user: AuthUser) => {
           if (user && user.id) {
