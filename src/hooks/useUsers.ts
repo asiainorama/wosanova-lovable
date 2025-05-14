@@ -66,6 +66,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20): UseUsersReturn => 
       }
       
       // Get auth data from the RPC function
+      // Fix: Explicitly set both generic type parameters for rpc
       const { data: authData, error: authError } = await supabase.rpc<AuthUser[], Record<string, never>>(
         'get_auth_users',
         {}
@@ -88,7 +89,7 @@ export const useUsers = (initialPage = 1, usersPerPage = 20): UseUsersReturn => 
       // Log authData details for debugging
       console.log('Auth data loaded:', Array.isArray(authData) ? authData.length : 'no data');
       
-      // Process auth data safely
+      // Process auth data safely with explicit type checking
       if (Array.isArray(authData)) {
         authData.forEach((user: AuthUser) => {
           if (user && user.id) {
