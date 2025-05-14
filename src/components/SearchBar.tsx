@@ -17,7 +17,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => 
         placeholder="Buscar aplicaciones..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 pr-8 py-2 w-full bg-gray-100 border-none"
+        className="pl-10 pr-8 py-2 w-full bg-gray-100 border-none text-gray-800 placeholder:text-gray-500"
         aria-label="Buscar aplicaciones"
       />
       {searchTerm && (

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Search } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -105,7 +105,10 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
               currentApps.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell>
-                    <div className="w-10 h-10 overflow-hidden rounded-md">
+                    <div 
+                      className="w-10 h-10 overflow-hidden rounded-md cursor-pointer transition-all hover:opacity-80"
+                      onClick={() => onEdit(app)}
+                    >
                       <AspectRatio ratio={1 / 1}>
                         <img
                           src={app.icon}
@@ -118,7 +121,12 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                       </AspectRatio>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{app.name}</TableCell>
+                  <TableCell 
+                    className="font-medium cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => onEdit(app)}
+                  >
+                    {app.name}
+                  </TableCell>
                   
                   {showDetails && (
                     <>
@@ -140,18 +148,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   )}
                   
                   <TableCell className="text-right">
-                    <div className="flex space-x-2 justify-end">
-                      {showDetails && (
-                        <Button
-                          onClick={() => onEdit(app)}
-                          variant="outline"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      )}
-                      
+                    <div className="flex justify-end">                      
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button

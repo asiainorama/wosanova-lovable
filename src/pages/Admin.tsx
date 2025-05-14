@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const Admin = () => {
   const [apps, setApps] = useState<AppData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<string>(TABS.APPS);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const initialize = async () => {
@@ -135,6 +137,7 @@ const Admin = () => {
           : `Aplicación "${app.name}" añadida`
       );
       setShowForm(false);
+      // Mantener la página actual después de editar
     } catch (error) {
       console.error("Error saving app:", error);
       toast.error("Error al guardar la aplicación");
@@ -194,6 +197,8 @@ const Admin = () => {
                   onExport={() => exportAppsToExcel(apps, "admin-apps-export")}
                   onImport={(file) => handleImportApps(file)}
                   fileInputRef={fileInputRef}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
                 />
               </TabsContent>
 
@@ -217,6 +222,8 @@ const AppManagement = ({
   onExport,
   onImport,
   fileInputRef,
+  currentPage,
+  setCurrentPage
 }) => {
   const handleImportClick = () => fileInputRef.current?.click();
 
@@ -281,7 +288,11 @@ const AppManagement = ({
           </Button>
         </div>
       </div>
-      <AppsTable apps={apps} onEdit={onEdit} onDelete={onDelete} />
+      <AppsTable 
+        apps={apps} 
+        onEdit={onEdit} 
+        onDelete={onDelete} 
+      />
     </div>
   );
 };

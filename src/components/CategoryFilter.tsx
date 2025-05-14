@@ -9,9 +9,17 @@ interface CategoryFilterProps {
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   categories: string[];
+  onSubcategoryChange?: (subcategory: string | null) => void;
+  selectedSubcategory?: string | null;
 }
 
-const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange, categories }) => {
+const CategoryFilter: React.FC<CategoryFilterProps> = ({ 
+  selectedCategory, 
+  onCategoryChange, 
+  categories, 
+  onSubcategoryChange, 
+  selectedSubcategory 
+}) => {
   const { t, language } = useLanguage();
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [, updateState] = useState<{}>({});
@@ -97,7 +105,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
   // Obtener categorías que tienen aplicaciones
   const usedCategories = React.useMemo(() => {
     const usedCats = new Set(allApps.map(app => app.category));
-    return categories.filter(cat => usedCats.has(cat));
+    return categories.filter(cat => usedCats.has(cat)).sort();
   }, [allApps, categories]);
   
   // Responder a los cambios de idioma
@@ -114,46 +122,77 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
     };
   }, [language, forceUpdate]);
 
-  // Función para mostrar los nombres correctos de los grupos de categorías
-  const getCategoryGroupName = (groupName: string): string => {
-    switch (groupName) {
-      case "Productivity": return "Productividad";
-      case "Entertainment": return "Entretenimiento";
-      case "Utilities": return "Utilidades";
-      case "Lifestyle": return "Estilo de vida";
-      case "Finance": return "Finanzas";
-      default: return groupName;
-    }
-  };
+  // Obtener subcategorías para la categoría seleccionada
+  const availableSubcategories = selectedCategory 
+    ? categorySubcategories[selectedCategory] || []
+    : [];
 
   return (
-    <Select value={selectedCategory || ""} onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}>
-      <SelectTrigger className="w-full bg-gray-100 border-none">
-        <SelectValue 
-          placeholder="Buscar por categoría..."
-        />
-      </SelectTrigger>
-      <SelectContent className="max-h-80">
-        <SelectItem 
-          key="all" 
-          value="all"
-          className="text-left font-normal"
-        >
-          {t('catalog.allCategories')}
-        </SelectItem>
-        
-        {/* Mostrar categorías directamente */}
-        {usedCategories.map((category) => (
+    <div className="space-y-2">
+      <Select 
+        value={selectedCategory || ""} 
+        onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}
+      >
+        <SelectTrigger className="w-full bg-gray-100 border-none text-gray-500">
+          <SelectValue 
+            placeholder="Filtrar por categoría..."
+          />
+        </SelectTrigger>
+        <SelectContent className="max-h-80">
           <SelectItem 
-            key={category}
-            value={category}
+            key="all" 
+            value="all"
             className="text-left font-normal"
           >
-            {translateCategory(category)}
+            {t('catalog.allCategories')}
           </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+          
+          {/* Mostrar categorías ordenadas alfabéticamente */}
+          {usedCategories.map((category) => (
+            <SelectItem 
+              key={category}
+              value={category}
+              className="text-left font-normal"
+            >
+              {translateCategory(category)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Mostrar filtro de subcategorías solo si hay subcategorías disponibles */}
+      {selectedCategory && availableSubcategories.length > 0 && onSubcategoryChange && (
+        <Select 
+          value={selectedSubcategory || ""} 
+          onValueChange={(value) => onSubcategoryChange(value === "all" ? null : value)}
+        >
+          <SelectTrigger className="w-full bg-gray-100 border-none text-gray-500">
+            <SelectValue 
+              placeholder="Filtrar por subcategoría..."
+            />
+          </SelectTrigger>
+          <SelectContent className="max-h-80">
+            <SelectItem 
+              key="all" 
+              value="all"
+              className="text-left font-normal"
+            >
+              Todas las subcategorías
+            </SelectItem>
+            
+            {availableSubcategories.map((subcategory) => (
+              <SelectItem 
+                key={subcategory}
+                value={subcategory}
+                className="text-left font-normal"
+              >
+                {subcategory}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
   );
 };
 

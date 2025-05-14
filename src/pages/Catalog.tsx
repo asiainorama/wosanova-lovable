@@ -8,6 +8,16 @@ import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Utility functions
 const mapAppData = (data: any[]): AppData[] => 
@@ -48,83 +58,147 @@ const fetchApps = async (setApps: (apps: AppData[]) => void, setLoading: (loadin
 };
 
 const Catalog = () => {
-  const { favorites, addToFavorites, removeFromFavorites, allApps, setAllApps } = useAppContext();
+  const { favorites, allApps, setAllApps } = useAppContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     fetchApps(setAllApps, setLoading);
   }, [setAllApps]);
 
+  // Reset subcategory when category changes
+  useEffect(() => {
+    setSelectedSubcategory(null);
+  }, [selectedCategory]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, selectedSubcategory]);
+
+  // Filter apps by search term, category and subcategory
   const filteredApps = allApps.filter(app => {
     const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           app.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || app.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSubcategory = !selectedSubcategory || app.subcategory === selectedSubcategory;
+    return matchesSearch && matchesCategory && matchesSubcategory;
+  });
+
+  // Group apps by category
+  const groupedApps: Record<string, AppData[]> = {};
+  
+  filteredApps.forEach(app => {
+    if (!groupedApps[app.category]) {
+      groupedApps[app.category] = [];
+    }
+    groupedApps[app.category].push(app);
+  });
+  
+  // Sort categories alphabetically
+  const sortedCategories = Object.keys(groupedApps).sort();
+  
+  // Sort apps within each category alphabetically
+  sortedCategories.forEach(category => {
+    groupedApps[category].sort((a, b) => a.name.localeCompare(b.name));
   });
 
   const categories = [...new Set(allApps.map(app => app.category))].sort();
+
+  const totalPages = Math.ceil(Object.keys(groupedApps).length / itemsPerPage);
+  const visibleCategories = sortedCategories.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header title="Catálogo" />
 
       <div className="container max-w-7xl mx-auto px-4 py-6">
-        <SearchSection 
-          searchTerm={searchTerm} 
-          onSearchChange={setSearchTerm} 
-          selectedCategory={selectedCategory} 
-          onCategoryChange={setSelectedCategory} 
-          categories={categories} 
-        />
+        <div className="flex flex-col md:flex-row gap-4 mb-6 items-start">
+          <div className="w-full md:w-2/3">
+            <SearchBar 
+              searchTerm={searchTerm} 
+              onSearchChange={setSearchTerm} 
+            />
+          </div>
+          <div className="w-full md:w-1/3">
+            <CategoryFilter 
+              selectedCategory={selectedCategory} 
+              onCategoryChange={setSelectedCategory} 
+              categories={categories}
+              selectedSubcategory={selectedSubcategory}
+              onSubcategoryChange={setSelectedSubcategory}
+            />
+          </div>
+        </div>
         
         {loading ? (
           <LoadingIndicator />
+        ) : visibleCategories.length > 0 ? (
+          <>
+            {visibleCategories.map(category => (
+              <div key={category} className="mb-8">
+                <h2 className="text-xl font-semibold mb-3 dark:text-white">{category}</h2>
+                <Separator className="mb-4" />
+                <AppGrid 
+                  apps={groupedApps[category]}
+                  showRemove={false}
+                  showManage={false}
+                  onShowDetails={undefined}
+                />
+              </div>
+            ))}
+
+            {totalPages > 1 && (
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        className={cn(currentPage === 1 ? "pointer-events-none opacity-50" : "")}
+                      />
+                    </PaginationItem>
+                    
+                    {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={page === currentPage}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        className={cn(currentPage === totalPages ? "pointer-events-none opacity-50" : "")}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         ) : (
-          <AppGrid 
-            apps={filteredApps}
-            showRemove={false}
-            showManage={false}
-            onShowDetails={undefined}
-          />
+          <div className="text-center py-10">
+            <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con los criterios de búsqueda</p>
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-// Extracted Components
-const SearchSection = ({ 
-  searchTerm, 
-  onSearchChange, 
-  selectedCategory, 
-  onCategoryChange, 
-  categories 
-}: {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  selectedCategory: string | null;
-  onCategoryChange: (category: string | null) => void;
-  categories: string[];
-}) => (
-  <div>
-    <div className="mb-6">
-      <SearchBar 
-        searchTerm={searchTerm} 
-        onSearchChange={onSearchChange} 
-      />
-    </div>
-    <div className="mb-6 overflow-x-auto pb-2">
-      <CategoryFilter 
-        selectedCategory={selectedCategory} 
-        onCategoryChange={onCategoryChange} 
-        categories={categories}
-      />
-    </div>
-  </div>
-);
-
+// Extracted Component
 const LoadingIndicator = () => (
   <div className="flex justify-center items-center h-64">
     <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
