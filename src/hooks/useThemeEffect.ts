@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import * as React from 'react';
 import { ThemeMode } from "@/contexts/ThemeContext";
 
 /**
@@ -7,7 +7,7 @@ import { ThemeMode } from "@/contexts/ThemeContext";
  */
 export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
   // Apply theme when document visibility changes (to prevent theme from resetting on resume)
-  useEffect(() => {
+  React.useEffect(() => {
     // Guard for SSR or non-browser environments
     if (typeof document === 'undefined') return;
     
@@ -25,7 +25,7 @@ export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
   }, [applyTheme]);
 
   // Listen for system preference changes
-  useEffect(() => {
+  React.useEffect(() => {
     // Guard for SSR or non-browser environments
     if (typeof window === 'undefined' || !window.matchMedia) return;
     
@@ -61,7 +61,7 @@ export const useThemeEffect = (mode: ThemeMode, applyTheme: () => void) => {
   }, [mode, applyTheme]);
 
   // Special handler for page transitions
-  useEffect(() => {
+  React.useEffect(() => {
     // Guard for SSR or non-browser environments
     if (typeof window === 'undefined') return;
     

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import * as React from 'react';
 import { getEffectiveTheme, applyThemeToDocument } from '@/utils/themeUtils';
 import { useThemeEffect } from '@/hooks/useThemeEffect';
 
@@ -19,11 +19,11 @@ const defaultContextValue: ThemeContextType = {
   toggleMode: () => {}
 };
 
-const ThemeContext = createContext<ThemeContextType>(defaultContextValue);
+const ThemeContext = React.createContext<ThemeContextType>(defaultContextValue);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize with values from localStorage or defaults
-  const [mode, setModeState] = useState<ThemeMode>(() => {
+  const [mode, setModeState] = React.useState<ThemeMode>(() => {
     // Guard for SSR or non-browser environments
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
       return 'system';
@@ -47,7 +47,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Function to actually apply theme changes to DOM
-  const applyTheme = useCallback(() => {
+  const applyTheme = React.useCallback(() => {
     // Guard for SSR or non-browser environments
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useThemeEffect(mode, applyTheme);
 
   // Apply theme when component mounts or when theme state changes
-  useEffect(() => {
+  React.useEffect(() => {
     // Guard for SSR or non-browser environments
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
@@ -79,17 +79,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [mode, applyTheme]);
 
   // Wrapper functions to update theme state
-  const setMode = useCallback((newMode: ThemeMode) => {
+  const setMode = React.useCallback((newMode: ThemeMode) => {
     setModeState(newMode);
   }, []);
 
-  const toggleMode = useCallback(() => {
+  const toggleMode = React.useCallback(() => {
     const effectiveTheme = getEffectiveTheme(mode);
     const newMode = effectiveTheme === 'light' ? 'dark' : 'light';
     setModeState(newMode);
   }, [mode]);
 
-  const contextValue = useMemo(() => ({
+  const contextValue = React.useMemo(() => ({
     mode,
     setMode, 
     toggleMode
@@ -103,5 +103,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useTheme = () => {
-  return useContext(ThemeContext);
+  return React.useContext(ThemeContext);
 };
