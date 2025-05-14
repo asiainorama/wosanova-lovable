@@ -25,7 +25,7 @@ interface AppsTableProps {
 const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5; // Cambiado de 10 a 5 apps por página
   const isMobile = useIsMobile();
   const [isLandscape, setIsLandscape] = useState(false);
 
@@ -83,7 +83,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[60px]">Logo</TableHead>
-              <TableHead className="w-[180px]">Nombre</TableHead>
+              <TableHead className="w-[220px]">Nombre</TableHead> {/* Aumentado de 180px a 220px */}
               {showDetails && (
                 <>
                   <TableHead className="w-[300px]">Descripción</TableHead>
@@ -122,7 +122,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell 
-                    className="font-medium cursor-pointer hover:text-primary transition-colors"
+                    className="font-medium cursor-pointer hover:text-primary transition-colors max-w-[220px] truncate"
                     onClick={() => onEdit(app)}
                   >
                     {app.name}

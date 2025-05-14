@@ -61,7 +61,6 @@ const Catalog = () => {
   const { favorites, allApps, setAllApps } = useAppContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -70,23 +69,17 @@ const Catalog = () => {
     fetchApps(setAllApps, setLoading);
   }, [setAllApps]);
 
-  // Reset subcategory when category changes
-  useEffect(() => {
-    setSelectedSubcategory(null);
-  }, [selectedCategory]);
-
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedSubcategory]);
+  }, [searchTerm, selectedCategory]);
 
-  // Filter apps by search term, category and subcategory
+  // Filter apps by search term and category
   const filteredApps = allApps.filter(app => {
     const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           app.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || app.category === selectedCategory;
-    const matchesSubcategory = !selectedSubcategory || app.subcategory === selectedSubcategory;
-    return matchesSearch && matchesCategory && matchesSubcategory;
+    return matchesSearch && matchesCategory;
   });
 
   // Group apps by category
@@ -132,8 +125,6 @@ const Catalog = () => {
               selectedCategory={selectedCategory} 
               onCategoryChange={setSelectedCategory} 
               categories={categories}
-              selectedSubcategory={selectedSubcategory}
-              onSubcategoryChange={setSelectedSubcategory}
             />
           </div>
         </div>

@@ -47,6 +47,18 @@
   min-height: 160px;
 }
 
+/* Asegurarse de que la descripción siempre tenga 2 líneas de alto */
+.app-card .app-description {
+  height: 2.4rem; /* Altura fija para 2 líneas */
+  line-height: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limitar a 2 líneas */
+  -webkit-box-orient: vertical;
+  margin-bottom: 12px; /* Espacio consistente antes de los botones */
+}
+
 .dark .app-card {
   background-color: #1f2937;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);

@@ -13,13 +13,19 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
   const { mode, setMode } = useTheme();
   const { t } = useLanguage();
 
-  // Handle theme toggle (light/dark only, not system)
+  // Handle theme toggle between system (default) and user preference
   const handleThemeToggle = (checked: boolean) => {
-    const newMode = checked ? 'dark' : 'light';
+    // Si está activado, usar modo oscuro, si no, usar modo claro
+    // Si está en 'system', cambiar a un modo explícito
+    let newMode = checked ? 'dark' : 'light';
+    
     console.log("Theme toggled to:", newMode);
     setMode(newMode);
     if (onThemeChange) onThemeChange();
   };
+
+  // Determinar si el interruptor debe estar activado
+  const isChecked = mode === 'dark';
 
   return (
     <div className="space-y-4">
@@ -31,7 +37,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
         <div className="flex items-center space-x-2">
           <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           <Switch 
-            checked={mode === 'dark'}
+            checked={isChecked}
             onCheckedChange={handleThemeToggle}
             aria-label={t('profile.theme.toggle')}
           />

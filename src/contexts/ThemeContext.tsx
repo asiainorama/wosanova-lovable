@@ -22,29 +22,8 @@ const defaultContextValue: ThemeContextType = {
 const ThemeContext = React.createContext<ThemeContextType>(defaultContextValue);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with values from localStorage or defaults
-  const [mode, setModeState] = React.useState<ThemeMode>(() => {
-    // Guard for SSR or non-browser environments
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-      return 'system';
-    }
-    
-    try {
-      // Get saved preference from localStorage
-      const savedMode = localStorage.getItem('themeMode') as ThemeMode;
-      
-      // If a valid mode is saved, use it
-      if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
-        return savedMode;
-      }
-      
-      // Default to system preference
-      return 'system';
-    } catch (e) {
-      console.error("Error reading theme from localStorage:", e);
-      return 'system';
-    }
-  });
+  // Initialize with system preference
+  const [mode, setModeState] = React.useState<ThemeMode>('system');
 
   // Function to actually apply theme changes to DOM
   const applyTheme = React.useCallback(() => {
@@ -52,11 +31,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
     
     try {
-      // Save selection to localStorage
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('themeMode', mode);
-      }
-      
       // Determine the effective theme (accounting for system preference)
       const effectiveTheme = getEffectiveTheme(mode);
       
