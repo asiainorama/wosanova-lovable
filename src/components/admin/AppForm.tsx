@@ -1,15 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { AppData } from "@/data/types";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { categories } from "@/data/apps";
-import { autofillFromUrl, autofillFromName, generateIdFromName } from "@/services/AppInfoService";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { validateAppForm, ensureValidId } from "@/utils/formValidation";
+import useAppFormAutofill from "@/hooks/useAppFormAutofill";
+import { 
+  NameField, 
+  UrlField, 
+  IconField, 
+  CategoryField, 
+  SubcategoryField, 
+  AIToggleField, 
+  DescriptionField 
+} from "./form/AppFormFields";
+import AppFormActions from "./form/AppFormActions";
 
 interface AppFormProps {
   app: AppData | null;
@@ -18,7 +21,7 @@ interface AppFormProps {
 }
 
 const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
-  const [formData, setFormData] = useState<AppData>({
+  const initialFormState: AppData = {
     id: "",
     name: "",
     icon: "",
@@ -27,12 +30,13 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
     subcategory: "",
     description: "",
     isAI: false,
-  });
-
+  };
+  
+  const [formData, setFormData] = useState<AppData>(initialFormState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isAutofilling, setIsAutofilling] = useState(false);
   const isEditing = !!app;
+  const { isAutofilling, handleAutofill } = useAppFormAutofill(formData, setFormData, isEditing);
 
   useEffect(() => {
     if (app) {
@@ -55,48 +59,12 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
     
     // Auto-generate ID from name
     if (name === 'name' && !isEditing && value && !formData.id) {
-      const generatedId = generateIdFromName(value);
-      setFormData(prev => ({ ...prev, id: generatedId }));
+      const updatedFormData = ensureValidId({ ...formData, name: value }, isEditing);
+      setFormData(updatedFormData);
     }
     
     // Try to autofill fields based on URL or name
-    if ((name === 'url' || name === 'name') && !isAutofilling && value.length > 3) {
-      setIsAutofilling(true);
-      
-      try {
-        if (name === 'url') {
-          const result = await autofillFromUrl(value);
-          if (Object.keys(result).length > 0) {
-            const updates: Partial<AppData> = {};
-            
-            // Only autofill empty fields
-            if (result.name && !formData.name) updates.name = result.name;
-            if (result.icon && !formData.icon) updates.icon = result.icon;
-            if (result.category && formData.category === "Utilidades") updates.category = result.category;
-            
-            // If we got a name and no ID yet, generate it
-            if (result.name && !formData.id && !isEditing) {
-              updates.id = generateIdFromName(result.name);
-            }
-            
-            if (Object.keys(updates).length > 0) {
-              setFormData(prev => ({ ...prev, ...updates }));
-              toast.success("Algunos campos se han autocompletado");
-            }
-          }
-        } else if (name === 'name' && !formData.icon) {
-          const result = await autofillFromName(value);
-          if (result.icon) {
-            setFormData(prev => ({ ...prev, icon: result.icon }));
-            toast.success("Se ha encontrado un posible icono");
-          }
-        }
-      } catch (error) {
-        console.error("Error autofilling:", error);
-      } finally {
-        setIsAutofilling(false);
-      }
-    }
+    await handleAutofill(name, value);
   };
 
   const handleSwitchChange = (checked: boolean) => {
@@ -104,38 +72,12 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // Required fields
-    if (!formData.name.trim()) newErrors.name = "El nombre es obligatorio";
-    if (!formData.icon.trim()) newErrors.icon = "La URL del icono es obligatoria";
-    if (!formData.url.trim()) newErrors.url = "La URL de la aplicación es obligatoria";
-    if (!formData.description.trim()) 
-      newErrors.description = "La descripción es obligatoria";
+    const newErrors = validateAppForm(formData);
     
-    // ID validation
-    if (!formData.id.trim()) {
-      // Generate ID from name if empty
-      if (formData.name.trim()) {
-        formData.id = formData.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-      } else {
-        newErrors.id = "El ID es obligatorio";
-      }
-    }
-
-    // URL validation
-    if (formData.url.trim() && !formData.url.match(/^https?:\/\/.+/)) {
-      newErrors.url = "La URL debe comenzar con http:// o https://";
-    }
-
-    // Icon URL validation
-    if (formData.icon.trim() && !formData.icon.match(/^https?:\/\/.+/)) {
-      newErrors.icon = "La URL del icono debe comenzar con http:// o https://";
-    }
-
+    // Generate ID from name if empty (ensure valid ID)
+    const updatedFormData = ensureValidId(formData, isEditing);
+    setFormData(updatedFormData);
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -169,134 +111,64 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
           value={formData.id}
         />
 
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre</Label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Nombre de la aplicación"
-          />
-          {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-        </div>
+        <NameField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="url">URL</Label>
-          <div className="relative">
-            <Input
-              id="url"
-              name="url"
-              value={formData.url}
-              onChange={handleChange}
-              placeholder="https://ejemplo.com"
-              className={isAutofilling ? "pr-10" : ""}
-            />
-            {isAutofilling && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              </div>
-            )}
-          </div>
-          {errors.url && <p className="text-sm text-red-500">{errors.url}</p>}
-          <p className="text-xs text-muted-foreground">
-            Al introducir una URL, se intentarán autocompletar los demás campos.
-          </p>
-        </div>
+        <UrlField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling} 
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="icon">URL del Icono</Label>
-          <Input
-            id="icon"
-            name="icon"
-            value={formData.icon}
-            onChange={handleChange}
-            placeholder="https://ejemplo.com/icon.png"
-          />
-          {errors.icon && <p className="text-sm text-red-500">{errors.icon}</p>}
-          {formData.icon && (
-            <div className="mt-2 flex items-center space-x-2">
-              <img 
-                src={formData.icon} 
-                alt="Icono de vista previa" 
-                className="w-8 h-8 object-contain rounded border"
-                onError={(e) => (e.currentTarget.src = "/placeholder.svg")} 
-              />
-              <span className="text-xs text-muted-foreground">Vista previa</span>
-            </div>
-          )}
-        </div>
+        <IconField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="category">Categoría</Label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {categories.sort().map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategoryField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="subcategory">Subcategoría</Label>
-          <Input
-            id="subcategory"
-            name="subcategory"
-            value={formData.subcategory || ""}
-            onChange={handleChange}
-            placeholder="Subcategoría (opcional)"
-          />
-        </div>
+        <SubcategoryField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isAI">¿Es una Aplicación de IA?</Label>
-            <Switch
-              id="isAI"
-              checked={formData.isAI}
-              onCheckedChange={handleSwitchChange}
-            />
-          </div>
-        </div>
+        <AIToggleField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="description">Descripción</Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Descripción de la aplicación"
-            rows={3}
-          />
-          {errors.description && (
-            <p className="text-sm text-red-500">{errors.description}</p>
-          )}
-        </div>
+        <DescriptionField 
+          formData={formData} 
+          errors={errors} 
+          handleChange={handleChange} 
+          handleSwitchChange={handleSwitchChange}
+          isAutofilling={isAutofilling}
+        />
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Guardando...
-            </>
-          ) : (
-            "Guardar"
-          )}
-        </Button>
-      </div>
+      <AppFormActions onCancel={onCancel} isLoading={isLoading} />
     </form>
   );
 };
