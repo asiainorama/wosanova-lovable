@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme, ThemeMode } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Sun, Moon } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +17,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
   const handleThemeToggle = (checked: boolean) => {
     // Si está activado, usar modo oscuro, si no, usar modo claro
     // Si está en 'system', cambiar a un modo explícito
-    let newMode = checked ? 'dark' : 'light';
+    let newMode: ThemeMode = checked ? 'dark' : 'light';
     
     console.log("Theme toggled to:", newMode);
     setMode(newMode);
