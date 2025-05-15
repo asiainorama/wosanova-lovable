@@ -38,6 +38,7 @@ const Index = () => {
               compact={true} 
               moreCompact={true}
               smallerIcons={true}
+              horizontalScroll={true}
             />
           </div>
         ) : (

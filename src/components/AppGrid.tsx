@@ -3,6 +3,7 @@ import React from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
 import { useScreenSize } from '@/hooks/use-screen-size';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AppGridProps {
   apps: AppData[];
@@ -13,6 +14,7 @@ interface AppGridProps {
   compact?: boolean;
   moreCompact?: boolean;
   smallerIcons?: boolean;
+  horizontalScroll?: boolean;
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
@@ -23,7 +25,8 @@ const AppGrid: React.FC<AppGridProps> = ({
   isLarge = false,
   compact = false,
   moreCompact = false,
-  smallerIcons = false
+  smallerIcons = false,
+  horizontalScroll = false
 }) => {
   const { isMobile, isTablet, isDesktop, isPortrait, isLandscape } = useScreenSize();
   
@@ -42,13 +45,16 @@ const AppGrid: React.FC<AppGridProps> = ({
     : compact && !moreCompact
       ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4"
       : moreCompact 
-        ? "grid grid-cols-4 portrait:grid-cols-4 landscape:sm:grid-cols-5 md:portrait:grid-cols-4 md:landscape:grid-cols-6 lg:grid-cols-8 gap-4"
+        ? horizontalScroll
+          ? "flex flex-nowrap gap-4 pb-4"
+          : "grid grid-cols-4 portrait:grid-cols-4 landscape:sm:grid-cols-5 md:portrait:grid-cols-4 md:landscape:grid-cols-6 lg:grid-cols-8 gap-4"
         : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
 
   // Determinar el número de filas según el tamaño y orientación de la pantalla
   let maxItems = apps.length;
   
-  if (compact || moreCompact) {
+  // Solo aplicamos límites si no usamos scroll horizontal
+  if ((compact || moreCompact) && !horizontalScroll) {
     // Limitar el número de elementos según el diseño solicitado
     if (isMobile && isPortrait) {
       // Móvil vertical: 4 columnas x 6 filas = 24 elementos
@@ -68,10 +74,10 @@ const AppGrid: React.FC<AppGridProps> = ({
     }
   }
 
-  // Limitar los elementos a mostrar según el cálculo anterior
-  const visibleApps = apps.slice(0, maxItems);
+  // Limitar los elementos a mostrar según el cálculo anterior o usar todos si hay scroll horizontal
+  const visibleApps = horizontalScroll ? apps : apps.slice(0, maxItems);
 
-  return (
+  const content = (
     <div className={gridClass}>
       {visibleApps.map((app) => (
         <AppCard 
@@ -86,6 +92,16 @@ const AppGrid: React.FC<AppGridProps> = ({
       ))}
     </div>
   );
+
+  if (horizontalScroll) {
+    return (
+      <ScrollArea className="w-full" orientation="horizontal">
+        <div className="min-w-max pb-4">{content}</div>
+      </ScrollArea>
+    );
+  }
+
+  return content;
 };
 
 export default AppGrid;

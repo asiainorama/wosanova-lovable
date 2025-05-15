@@ -139,6 +139,45 @@
   padding: 4px;
 }
 
+/* Estilos para el scroll horizontal */
+.flex-nowrap {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Para scroll suave en iOS */
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory; /* Para que se detenga en cada elemento */
+  padding-bottom: 16px; /* Espacio para el scrollbar */
+}
+
+.flex-nowrap > * {
+  scroll-snap-align: start; /* Para que se detenga en cada elemento */
+  flex: 0 0 auto; /* Impide que los elementos se estiren */
+}
+
+/* Estilizar la barra de desplazamiento para navegadores Webkit */
+.flex-nowrap::-webkit-scrollbar {
+  height: 4px;
+}
+
+.flex-nowrap::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.flex-nowrap::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.dark .flex-nowrap::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .flex-nowrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Styles for the new card design */
 .app-list-card {
   display: flex;
@@ -229,3 +268,4 @@ html:not(.dark) body {
 .dark .min-h-screen {
   background-color: #111827;
 }
+
