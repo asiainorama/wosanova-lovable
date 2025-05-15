@@ -32,16 +32,17 @@ const AppGrid: React.FC<AppGridProps> = ({
     );
   }
 
+  // Clase para la cuadrícula adaptativa según los tamaños de pantalla
+  const gridClass = isLarge 
+    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
+    : compact && !moreCompact
+      ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4"
+      : moreCompact 
+        ? "grid grid-cols-4 portrait:grid-cols-4 landscape:sm:grid-cols-5 md:portrait:grid-cols-4 md:landscape:grid-cols-6 lg:grid-cols-8 gap-4"
+        : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+
   return (
-    <div className={
-      isLarge 
-        ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
-        : moreCompact
-          ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-4" 
-          : compact
-            ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-4" 
-            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
-    }>
+    <div className={gridClass}>
       {apps.map((app) => (
         <AppCard 
           key={app.id} 
