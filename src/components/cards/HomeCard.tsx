@@ -28,16 +28,9 @@ const HomeCard: React.FC<HomeCardProps> = ({
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   
-  // Tamaños adaptables para íconos y botones
-  const iconSize = smallerIcons 
-    ? "w-10 h-10 sm:w-12 sm:h-12 md:w-12 md:h-12 lg:w-12 lg:h-12" 
-    : "w-12 h-12 sm:w-14 sm:h-14 md:w-14 md:h-14";
-  const buttonSize = smallerIcons 
-    ? "h-5 w-5" 
-    : "h-6 w-6";
-  const buttonIconSize = smallerIcons 
-    ? "h-2.5 w-2.5" 
-    : "h-3 w-3";
+  const iconSize = smallerIcons ? "w-10 h-10" : "w-12 h-12";
+  const buttonSize = smallerIcons ? "h-5 w-5" : "h-6 w-6";
+  const buttonIconSize = smallerIcons ? "h-2.5 w-2.5" : "h-3 w-3";
 
   return (
     <div 
@@ -84,7 +77,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
         )}
       </div>
       
-      <h3 className="text-xs font-medium text-center dark:text-white mt-1 line-clamp-2 max-w-full">{app.name}</h3>
+      <h3 className="text-xs font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
     </div>
   );
 };
