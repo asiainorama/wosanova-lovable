@@ -1,0 +1,20 @@
+
+/* New gradient text style for the WosaNova title */
+.gradient-text {
+  background: linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  display: inline-block;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: gradient-shift 8s ease infinite;
+  /* Aseguramos que el gradiente se vea en todos los navegadores */
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

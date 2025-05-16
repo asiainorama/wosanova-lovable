@@ -126,7 +126,7 @@ const AppGrid: React.FC<AppGridProps> = ({
       <PaginationIndicator 
         totalPages={totalPages}
         currentPage={currentPage}
-        onPageChange={(page) => setCurrentPage(page)}
+        onPageChange={setCurrentPage}
       />
     </div>
   );

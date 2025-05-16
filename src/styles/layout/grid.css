@@ -1,0 +1,16 @@
+
+/* App Grid Styles */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Styles for the home page grid */
+.home-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 4px;
+}
