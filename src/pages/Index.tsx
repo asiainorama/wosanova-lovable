@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
@@ -30,15 +30,10 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-8 flex-1">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 flex-1">
         {sortedFavorites.length > 0 ? (
           <div className="py-3">
-            <AppGrid 
-              apps={sortedFavorites} 
-              compact={true} 
-              moreCompact={true}
-              smallerIcons={true}
-            />
+            <AppGrid apps={sortedFavorites} />
           </div>
         ) : (
           <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
