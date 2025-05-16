@@ -1,13 +1,10 @@
 
 import React from 'react';
 import { AppData } from '@/data/apps';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLogo } from '@/hooks/useAppLogo';
-import AppAvatarFallback from './AvatarFallback';
+import { Button } from '@/components/ui/button';
+import { Info } from 'lucide-react';
+import AvatarFallback from './AvatarFallback';
 import FavoriteButton from './FavoriteButton';
 
 interface GridCardProps {
@@ -19,86 +16,97 @@ interface GridCardProps {
   handleAction: (e: React.MouseEvent) => void;
   handleClick?: () => void;
   smallerIcons?: boolean;
+  deviceType?: 'mobile' | 'tablet' | 'desktop';
 }
 
-const GridCard: React.FC<GridCardProps> = ({ 
-  app, 
-  favorite, 
+const GridCard: React.FC<GridCardProps> = ({
+  app,
+  favorite,
   showRemove = false,
   showManage = false,
   onShowDetails,
-  handleAction, 
+  handleAction,
   handleClick,
-  smallerIcons = false
+  smallerIcons = false,
+  deviceType = 'desktop'
 }) => {
-  const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+  const { imageUrl, isLoading, error } = useAppLogo(app.iconUrl);
   
-  return (
-    <Card 
-      className={`relative overflow-hidden transition-shadow duration-300 ${handleClick ? 'hover:shadow-md cursor-pointer' : ''}`}
-      onClick={handleClick ? handleClick : undefined}
-    >
-      <div className="p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center">
-            {imageLoading && (
-              <Skeleton className="h-10 w-10 rounded-md" />
-            )}
-            
-            {!imageError ? (
-              <img 
-                ref={imageRef}
-                src={iconUrl} 
-                alt={`${app.name} icon`}
-                className={`${smallerIcons ? 'h-8 w-8' : 'h-10 w-10'} object-contain rounded-md dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
-                onError={handleImageError}
-                onLoad={handleImageLoad}
-                loading="lazy"
-              />
-            ) : (
-              <AppAvatarFallback
-                appName={app.name}
-                className={`${smallerIcons ? 'h-8 w-8' : 'h-10 w-10'} rounded-md`}
-              />
-            )}
-            
-            <div className="ml-3 flex-grow">
-              <h3 className="font-medium line-clamp-1 dark:text-white">{app.name}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{app.category}</p>
-            </div>
-          </div>
+  // Get icon size based on device type
+  const getIconSize = () => {
+    switch (deviceType) {
+      case 'mobile':
+        return 'w-12 h-12'; // 48px
+      case 'tablet':
+        return 'w-16 h-16'; // 64px
+      case 'desktop':
+        return 'w-20 h-20'; // 80px
+      default:
+        return smallerIcons ? 'w-12 h-12' : 'w-16 h-16';
+    }
+  };
+  
+  const iconSize = getIconSize();
 
-          {app.isAI && (
-            <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20">AI</Badge>
+  return (
+    <div className="catalog-grid-item group">
+      <div className="relative flex flex-col items-center">
+        {/* App Icon with loading states */}
+        <div className="relative mb-3">
+          {isLoading ? (
+            <div className={`${iconSize} bg-gray-200 dark:bg-gray-700 animate-pulse rounded-xl`} />
+          ) : error ? (
+            <div 
+              className={`${iconSize} bg-gray-300 dark:bg-gray-700 rounded-xl flex items-center justify-center`}
+              onClick={handleClick}
+            >
+              <AvatarFallback name={app.name} />
+            </div>
+          ) : (
+            <div className="relative">
+              <img
+                src={imageUrl || app.iconUrl}
+                alt={app.name}
+                className={`${iconSize} object-contain rounded-xl cursor-pointer transition-all group-hover:scale-105`}
+                onClick={handleClick}
+              />
+              
+              {/* Favorite button */}
+              <div className="absolute -top-1 -right-1">
+                <FavoriteButton 
+                  isFavorite={favorite} 
+                  onToggle={handleAction}
+                  smallSize={deviceType === 'mobile'}
+                />
+              </div>
+            </div>
           )}
         </div>
         
-        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2 flex-grow">
-          {app.description}
+        {/* App Name */}
+        <p 
+          className={`font-medium text-center mb-0.5 line-clamp-2 ${deviceType === 'mobile' ? 'text-xs' : deviceType === 'tablet' ? 'text-sm' : 'text-base'}`}
+          onClick={handleClick}
+        >
+          {app.name}
         </p>
-        
-        <div className="flex justify-between items-center mt-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(app.url, "_blank");
-            }}
-          >
-            <ExternalLink className="h-3 w-3 mr-1" />
-            Visitar
-          </Button>
-          
-          <FavoriteButton
-            favorite={favorite}
-            showRemove={showRemove}
-            onClick={handleAction}
-          />
-        </div>
+
+        {/* Action buttons */}
+        {showManage && onShowDetails && (
+          <div className="flex justify-center mt-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={() => onShowDetails(app)}
+            >
+              <Info className="h-3 w-3" />
+              <span className="text-xs">Detalles</span>
+            </Button>
+          </div>
+        )}
       </div>
-    </Card>
+    </div>
   );
 };
 

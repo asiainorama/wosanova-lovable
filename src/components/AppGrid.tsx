@@ -19,6 +19,10 @@ interface AppGridProps {
   useCarousel?: boolean;
 }
 
+// Define device breakpoints
+const MOBILE_BREAKPOINT = 768; // Mobile: up to 767px
+const TABLET_BREAKPOINT = 1024; // Tablet: 768px to 1023px
+
 const AppGrid: React.FC<AppGridProps> = ({ 
   apps, 
   showRemove = false,
@@ -33,25 +37,29 @@ const AppGrid: React.FC<AppGridProps> = ({
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
   
-  // Define grid sizes based on screen size
+  // Define grid sizes based on screen size and orientation
   const getGridConfig = useCallback(() => {
-    // Check if we're on mobile and its orientation
-    if (isMobile) {
-      return window.innerWidth > window.innerHeight 
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isLandscape = width > height;
+    
+    // Mobile (up to 767px)
+    if (width < MOBILE_BREAKPOINT) {
+      return isLandscape 
         ? { cols: 5, rows: 2 } // mobile landscape
         : { cols: 4, rows: 6 }; // mobile portrait
     }
     
-    // For tablets
-    if (window.innerWidth <= 1024) {
-      return window.innerWidth > window.innerHeight
+    // Tablet (768px to 1023px)
+    if (width < TABLET_BREAKPOINT) {
+      return isLandscape
         ? { cols: 6, rows: 4 } // tablet landscape
         : { cols: 5, rows: 6 }; // tablet portrait
     }
     
-    // Large screens
+    // Large screens (1024px or more)
     return { cols: 8, rows: 6 };
-  }, [isMobile]);
+  }, []);
 
   const [gridConfig, setGridConfig] = useState(getGridConfig());
   
@@ -93,6 +101,26 @@ const AppGrid: React.FC<AppGridProps> = ({
     return apps.slice(startIndex, startIndex + appsPerPage);
   };
   
+  // Get device type for icon sizing
+  const getDeviceType = () => {
+    const width = window.innerWidth;
+    if (width < MOBILE_BREAKPOINT) return 'mobile';
+    if (width < TABLET_BREAKPOINT) return 'tablet';
+    return 'desktop';
+  };
+  
+  const [deviceType, setDeviceType] = useState(getDeviceType());
+  
+  // Update device type when window resizes
+  useEffect(() => {
+    const handleResize = () => {
+      setDeviceType(getDeviceType());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   if (apps.length === 0) {
     return (
       <div className="text-center py-10">
@@ -100,11 +128,6 @@ const AppGrid: React.FC<AppGridProps> = ({
       </div>
     );
   }
-
-  // Get grid style classes based on configuration
-  const getGridClasses = () => {
-    return `grid grid-cols-${gridConfig.cols} gap-2 h-full`;
-  };
   
   // If not using carousel, fall back to the original grid implementation
   if (!useCarousel) {
@@ -127,6 +150,7 @@ const AppGrid: React.FC<AppGridProps> = ({
             onShowDetails={onShowDetails}
             isLarge={isLarge}
             smallerIcons={smallerIcons}
+            deviceType={deviceType}
           />
         ))}
       </div>
@@ -136,17 +160,20 @@ const AppGrid: React.FC<AppGridProps> = ({
   // Carousel implementation
   return (
     <div className="relative">
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+      <div className="overflow-hidden h-full" ref={emblaRef}>
+        <div className="flex h-full">
           {Array.from({ length: totalPages }).map((_, pageIndex) => (
-            <div key={`page-${pageIndex}`} className="flex-[0_0_100%] min-w-0">
-              <div className="p-2">
+            <div key={`page-${pageIndex}`} className="flex-[0_0_100%] min-w-0 h-full">
+              <div className="p-2 h-full flex items-center justify-center">
                 <div 
-                  className={getGridClasses()}
+                  className="grid h-full w-full" 
                   style={{
                     display: 'grid',
                     gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
-                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`
+                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+                    gap: deviceType === 'mobile' ? '0.5rem' : deviceType === 'tablet' ? '0.75rem' : '1rem',
+                    justifyContent: 'space-between',
+                    alignContent: 'space-between'
                   }}
                 >
                   {getAppsForPage(pageIndex).map((app, index) => (
@@ -158,6 +185,7 @@ const AppGrid: React.FC<AppGridProps> = ({
                         onShowDetails={onShowDetails}
                         isLarge={false}
                         smallerIcons={true}
+                        deviceType={deviceType}
                       />
                     </div>
                   ))}
