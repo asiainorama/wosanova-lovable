@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
-import { useEmblaCarousel } from 'embla-carousel-react';
+import { EmblaCarouselType } from 'embla-carousel';
+import useEmblaCarousel from 'embla-carousel-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PaginationIndicator from './PaginationIndicator';
 
