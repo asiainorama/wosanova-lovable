@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
@@ -95,7 +94,14 @@ const AppGrid: React.FC<AppGridProps> = ({
 
   return (
     <div className="w-full">
-      <Carousel className="w-full" onSelect={(index) => setCurrentPage(index)}>
+      <Carousel 
+        className="w-full" 
+        onSelect={(api) => {
+          // Extract the page index from the API's selected index
+          const index = api.selectedScrollSnap();
+          setCurrentPage(index);
+        }}
+      >
         <CarouselContent>
           {Array.from({ length: totalPages }).map((_, pageIndex) => {
             const pageStartIndex = pageIndex * gridConfig.itemsPerPage;

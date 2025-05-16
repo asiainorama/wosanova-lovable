@@ -9,10 +9,10 @@ import { ArrowLeft } from 'lucide-react';
 const AppDetails = () => {
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
-  const { apps } = useAppContext();
+  const { allApps, favorites } = useAppContext();
   
-  // Find the app with the matching ID
-  const app = apps.find(app => app.id === appId);
+  // Find the app with the matching ID from either allApps or favorites
+  const app = allApps.find(app => app.id === appId) || favorites.find(app => app.id === appId);
 
   if (!app) {
     return (
