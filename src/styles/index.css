@@ -1,7 +1,0 @@
-
-/* Main CSS entry point that imports all the refactored style files */
-@import './components/app-cards.css';
-@import './layout/grid.css';
-@import './theme/dark-mode.css';
-@import './utils/effects.css';
-@import './pages/page-backgrounds.css';

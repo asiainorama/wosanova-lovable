@@ -1,5 +1,38 @@
 
-/* App Card Styles */
+/* App Grid Styles */
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark .app-card,
+.dark .large-app-card {
+  background-color: #1f2937;
+  color: #ffffff;
+}
+
+.dark img {
+  filter: brightness(1.2);
+}
+
+.dark .text-gray-500 {
+  color: #e2e8f0;
+}
+
+.dark .text-gray-600 {
+  color: #f1f5f9;
+}
+
+.dark .border-gray-300 {
+  color: #f8fafc;
+}
+
 .app-card {
   display: flex;
   flex-direction: column;
@@ -78,6 +111,34 @@
   border-radius: 10px;
 }
 
+/* New gradient text style for the WosaNova title */
+.gradient-text {
+  background: linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  display: inline-block;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: gradient-shift 8s ease infinite;
+  /* Aseguramos que el gradiente se vea en todos los navegadores */
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Styles for the home page grid */
+.home-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 4px;
+}
+
 /* Styles for the new card design */
 .app-list-card {
   display: flex;
@@ -125,4 +186,46 @@
   color: #22863a;
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+/* Theme styles for dark mode */
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 95.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 78%;
+}
+
+/* Ajustes adicionales para colores de página */
+body {
+  background-color: var(--background);
+}
+
+/* Modo claro - fondo blanco grisáceo */
+html:not(.dark) body {
+  background-color: #f3f4f6;
+}
+
+/* Todos los contenedores principales de las páginas deberían tener este fondo */
+.min-h-screen {
+  background-color: #f3f4f6;
+}
+
+.dark .min-h-screen {
+  background-color: #111827;
 }
