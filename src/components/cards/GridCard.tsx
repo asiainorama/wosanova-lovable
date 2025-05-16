@@ -30,7 +30,7 @@ const GridCard: React.FC<GridCardProps> = ({
   smallerIcons = false,
   deviceType = 'desktop'
 }) => {
-  const { imageUrl, isLoading, error } = useAppLogo(app.iconUrl);
+  const { imageUrl, isLoading, error } = useAppLogo(app.icon || '');
   
   // Get icon size based on device type
   const getIconSize = () => {
@@ -60,12 +60,12 @@ const GridCard: React.FC<GridCardProps> = ({
               className={`${iconSize} bg-gray-300 dark:bg-gray-700 rounded-xl flex items-center justify-center`}
               onClick={handleClick}
             >
-              <AvatarFallback name={app.name} />
+              <AvatarFallback letter={app.name.substring(0, 1)} />
             </div>
           ) : (
             <div className="relative">
               <img
-                src={imageUrl || app.iconUrl}
+                src={imageUrl || app.icon}
                 alt={app.name}
                 className={`${iconSize} object-contain rounded-xl cursor-pointer transition-all group-hover:scale-105`}
                 onClick={handleClick}

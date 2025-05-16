@@ -25,7 +25,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   smallerIcons = false,
   deviceType = 'desktop'
 }) => {
-  const { imageUrl, isLoading, error } = useAppLogo(app.iconUrl);
+  const { imageUrl, isLoading, error } = useAppLogo(app.icon || '');
   
   // Define icon sizes based on device type
   const getIconSize = () => {
@@ -72,7 +72,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
           </div>
         ) : (
           <img 
-            src={imageUrl || app.iconUrl} 
+            src={imageUrl || app.icon} 
             alt={app.name} 
             className={`${iconSize} object-contain rounded-xl`}
           />

@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
-import useEmblaCarousel from 'embla-carousel-react';
-import type { EmblaCarouselType } from 'embla-carousel';
+import { EmblaCarouselType } from 'embla-carousel';
+import { useEmblaCarousel } from 'embla-carousel-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PaginationIndicator from './PaginationIndicator';
 
@@ -18,6 +18,9 @@ interface AppGridProps {
   smallerIcons?: boolean;
   useCarousel?: boolean;
 }
+
+// Define device types
+type DeviceType = 'mobile' | 'tablet' | 'desktop';
 
 // Define device breakpoints
 const MOBILE_BREAKPOINT = 768; // Mobile: up to 767px
@@ -102,14 +105,14 @@ const AppGrid: React.FC<AppGridProps> = ({
   };
   
   // Get device type for icon sizing
-  const getDeviceType = () => {
+  const getDeviceType = (): DeviceType => {
     const width = window.innerWidth;
     if (width < MOBILE_BREAKPOINT) return 'mobile';
     if (width < TABLET_BREAKPOINT) return 'tablet';
     return 'desktop';
   };
   
-  const [deviceType, setDeviceType] = useState(getDeviceType());
+  const [deviceType, setDeviceType] = useState<DeviceType>(getDeviceType());
   
   // Update device type when window resizes
   useEffect(() => {
