@@ -5,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from './ui/scroll-area';
 import { Carousel, CarouselContent, CarouselItem } from './ui/carousel';
 import PaginationIndicator from './PaginationIndicator';
+import useEmblaCarousel from 'embla-carousel-react';
 
 interface AppGridProps {
   apps: AppData[];
@@ -33,6 +34,7 @@ const AppGrid: React.FC<AppGridProps> = ({
     window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
   );
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [emblaRef, emblaApi] = useEmblaCarousel();
 
   // Update orientation and window width on resize
   useEffect(() => {
@@ -92,15 +94,34 @@ const AppGrid: React.FC<AppGridProps> = ({
     else return "scale-110"; // Larger for desktop
   };
 
+  // Handle embla carousel events
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    const onSelect = () => {
+      setCurrentPage(emblaApi.selectedScrollSnap());
+    };
+    
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
+
+  // Handle manual page change from pagination indicators
+  const handlePageChange = (pageIndex: number) => {
+    if (emblaApi) {
+      emblaApi.scrollTo(pageIndex);
+    } else {
+      setCurrentPage(pageIndex);
+    }
+  };
+
   return (
     <div className="w-full">
       <Carousel 
         className="w-full" 
-        onSelect={(api) => {
-          // Extract the page index from the API's selected index
-          const index = api.selectedScrollSnap();
-          setCurrentPage(index);
-        }}
+        ref={emblaRef}
       >
         <CarouselContent>
           {Array.from({ length: totalPages }).map((_, pageIndex) => {
@@ -132,7 +153,7 @@ const AppGrid: React.FC<AppGridProps> = ({
       <PaginationIndicator 
         totalPages={totalPages}
         currentPage={currentPage}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
       />
     </div>
   );
