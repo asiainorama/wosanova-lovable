@@ -6,7 +6,7 @@ import { Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import { Skeleton } from '@/components/ui/skeleton';
-import AppAvatarFallback from '@/components/cards/AvatarFallback';
+import AvatarFallback from '@/components/cards/AvatarFallback';
 
 // Define category groups (same as in Catalog.tsx)
 interface CategoryGroup {
@@ -66,32 +66,31 @@ const getGroupDisplayName = (groupName: string): string => {
 
 // Create a new component for app list item with proper image handling
 const AppListItem = ({ app, onRemove }: { app: any, onRemove: () => void }) => {
-  const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+  const { imageUrl, isLoading, error } = useAppLogo(app);
 
   return (
     <div
       className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-800 dark:border-gray-700"
     >
       <div className="flex items-center space-x-3">
-        {imageLoading && (
+        {isLoading && (
           <Skeleton className="w-8 h-8 rounded-md" />
         )}
         
-        {!imageError ? (
+        {!error ? (
           <img
-            ref={imageRef}
-            src={iconUrl}
+            src={imageUrl}
             alt={`${app.name} icon`}
-            className={`w-8 h-8 object-contain rounded-md dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
+            className={`w-8 h-8 object-contain rounded-md dark:brightness-110 ${isLoading ? 'hidden' : 'block'}`}
             loading="lazy"
           />
         ) : (
-          <AppAvatarFallback 
-            appName={app.name}
-            className="w-8 h-8 rounded-md"
-          />
+          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+            <AvatarFallback 
+              letter={app.name.substring(0, 1)}
+              className="w-8 h-8 rounded-md"
+            />
+          </div>
         )}
         
         <div>
