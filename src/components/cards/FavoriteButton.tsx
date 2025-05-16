@@ -1,36 +1,41 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Heart } from 'lucide-react';
 
 interface FavoriteButtonProps {
-  isFavorite: boolean;
-  onToggle: (e: React.MouseEvent) => void;
-  smallSize?: boolean;
+  favorite: boolean;
+  showRemove?: boolean;
+  onClick: (e: React.MouseEvent) => void;
+  className?: string;
+  size?: 'small' | 'normal';
 }
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({
-  isFavorite,
-  onToggle,
-  smallSize = false
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ 
+  favorite, 
+  showRemove = false,
+  onClick,
+  className = '',
+  size = 'normal'
 }) => {
+  const buttonSize = size === 'small' ? 'h-5 w-5' : 'h-6 w-6';
+  const iconSize = size === 'small' ? 'h-2.5 w-2.5' : 'h-3 w-3';
+  
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={onToggle}
-      className={`${smallSize ? 'h-6 w-6' : 'h-8 w-8'} rounded-full bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md transition-all focus:outline-none`}
+    <Button 
+      size="sm"
+      variant="outline"
+      className={`${buttonSize} rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 ${className}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      aria-label={favorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
+      title={favorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
     >
-      <Star
-        className={`${smallSize ? 'h-3.5 w-3.5' : 'h-4 w-4'} ${
-          isFavorite
-            ? 'fill-yellow-400 text-yellow-400'
-            : 'fill-transparent text-gray-400 dark:text-gray-300'
-        }`}
+      <Heart 
+        className={`${iconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
       />
-      <span className="sr-only">
-        {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-      </span>
     </Button>
   );
 };

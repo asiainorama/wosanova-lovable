@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { useAppLogo } from '@/hooks/useAppLogo';
-import AvatarFallback from './AvatarFallback';
+import AppAvatarFallback from './AvatarFallback';
 
 interface ListViewCardProps {
   app: AppData;
@@ -15,7 +15,7 @@ interface ListViewCardProps {
 }
 
 const ListViewCard: React.FC<ListViewCardProps> = ({ app, favorite, handleAction, handleClick }) => {
-  const { imageUrl, isLoading, error } = useAppLogo(app);
+  const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
 
   return (
     <div 
@@ -23,22 +23,23 @@ const ListViewCard: React.FC<ListViewCardProps> = ({ app, favorite, handleAction
       onClick={handleClick}
     >
       <div className="flex items-center space-x-4">
-        {isLoading && <Skeleton className="w-12 h-12 rounded-md" />}
+        {imageLoading && <Skeleton className="w-12 h-12 rounded-md" />}
         
-        {!error ? (
+        {!imageError ? (
           <img 
-            src={imageUrl} 
+            ref={imageRef}
+            src={iconUrl} 
             alt={`${app.name} icon`}
-            className={`w-12 h-12 rounded-md object-contain dark:brightness-110 ${isLoading ? 'hidden' : 'block'}`}
+            className={`w-12 h-12 rounded-md object-contain dark:brightness-110 ${imageLoading ? 'hidden' : 'block'}`}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
             loading="lazy"
           />
         ) : (
-          <div className="w-12 h-12 rounded-md flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-            <AvatarFallback 
-              letter={app.name.substring(0, 1)}
-              className="w-12 h-12 rounded-md"
-            />
-          </div>
+          <AppAvatarFallback 
+            appName={app.name} 
+            className="w-12 h-12 rounded-md"
+          />
         )}
         
         <div>

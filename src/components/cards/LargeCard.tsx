@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { AppData } from '@/data/apps';
 import { Button } from '@/components/ui/button';
 import { Heart, ExternalLink } from 'lucide-react';
 import { useAppLogo } from '@/hooks/useAppLogo';
-import AvatarFallback, { getInitials, getAvatarColor } from './AvatarFallback';
+import { getInitials, getAvatarColor } from './AvatarFallback';
 
 interface LargeCardProps {
   app: AppData;
@@ -24,20 +25,23 @@ const LargeCard: React.FC<LargeCardProps> = ({
   handleAction, 
   handleClick 
 }) => {
-  const { imageUrl, isLoading, error } = useAppLogo(app);
+  const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
 
   return (
     <div className="large-app-card cursor-pointer relative" onClick={handleClick}>
       <div className="h-full w-full">
-        {isLoading && (
+        {imageLoading && (
           <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse"></div>
         )}
         
-        {!error ? (
+        {!imageError ? (
           <img 
-            src={imageUrl} 
+            ref={imageRef}
+            src={iconUrl} 
             alt={`${app.name} icon`}
-            className={`large-app-icon dark:brightness-110 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+            className={`large-app-icon dark:brightness-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
             loading="lazy"
           />
         ) : (

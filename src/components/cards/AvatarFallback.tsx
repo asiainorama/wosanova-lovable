@@ -1,52 +1,56 @@
 
 import React from 'react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AvatarFallbackProps {
-  letter?: string;
-  appName?: string;
+  appName: string;
   className?: string;
 }
 
-// Utility functions for avatar initials and color selection
 export const getInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
+  if (!name) return '?';
+  const words = name.trim().split(' ');
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+  return name.charAt(0).toUpperCase();
 };
 
 export const getAvatarColor = (name: string): string => {
-  // Simple hash function to get a consistent color based on name
-  const hash = name.split('').reduce((acc, char) => {
-    return char.charCodeAt(0) + ((acc << 5) - acc);
-  }, 0);
+  if (!name) return 'bg-gray-200 dark:bg-gray-700';
   
+  // Simple hash function for consistent color
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  // Choose from a set of pleasant colors
   const colors = [
+    'bg-red-100 dark:bg-red-900',
     'bg-blue-100 dark:bg-blue-900',
     'bg-green-100 dark:bg-green-900',
     'bg-yellow-100 dark:bg-yellow-900',
-    'bg-red-100 dark:bg-red-900',
     'bg-purple-100 dark:bg-purple-900',
     'bg-pink-100 dark:bg-pink-900',
     'bg-indigo-100 dark:bg-indigo-900',
-    'bg-gray-100 dark:bg-gray-800',
+    'bg-teal-100 dark:bg-teal-900',
+    'bg-orange-100 dark:bg-orange-900',
+    'bg-cyan-100 dark:bg-cyan-900'
   ];
   
   const index = Math.abs(hash) % colors.length;
   return colors[index];
 };
 
-const AvatarFallback: React.FC<AvatarFallbackProps> = ({ letter, appName, className }) => {
-  // Determine what to display - either the provided letter or initials from appName
-  const displayText = letter || (appName ? getInitials(appName) : '?');
-  
+const AppAvatarFallback: React.FC<AvatarFallbackProps> = ({ appName, className }) => {
   return (
-    <span className={`text-gray-500 dark:text-gray-400 text-xs flex items-center justify-center ${className || ''}`}>
-      {displayText}
-    </span>
+    <Avatar className={`${className} ${getAvatarColor(appName)}`}>
+      <AvatarFallback className="font-semibold text-gray-700 dark:text-gray-300">
+        {getInitials(appName)}
+      </AvatarFallback>
+    </Avatar>
   );
 };
 
-export default AvatarFallback;
+export default AppAvatarFallback;

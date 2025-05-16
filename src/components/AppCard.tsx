@@ -18,7 +18,6 @@ interface AppCardProps {
   isLarge?: boolean;
   listView?: boolean;
   smallerIcons?: boolean;
-  deviceType?: 'mobile' | 'tablet' | 'desktop';
 }
 
 const AppCard: React.FC<AppCardProps> = ({ 
@@ -28,8 +27,7 @@ const AppCard: React.FC<AppCardProps> = ({
   onShowDetails,
   isLarge = false,
   listView = false,
-  smallerIcons = false,
-  deviceType = 'desktop'
+  smallerIcons = false
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const favorite = isFavorite(app.id);
@@ -86,7 +84,6 @@ const AppCard: React.FC<AppCardProps> = ({
         showManage={showManage}
         onShowDetails={onShowDetails}
         smallerIcons={smallerIcons}
-        deviceType={deviceType}
       />
     );
   }
@@ -117,7 +114,6 @@ const AppCard: React.FC<AppCardProps> = ({
       handleAction={handleAction} 
       handleClick={isCatalogPage ? undefined : handleClick}
       smallerIcons={smallerIcons}
-      deviceType={deviceType}
     />
   );
 };

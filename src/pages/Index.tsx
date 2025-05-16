@@ -30,16 +30,14 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-8 flex-1 flex flex-col">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {sortedFavorites.length > 0 ? (
-          <div className="py-3 flex-1 flex flex-col">
-            <div className="flex-1 flex flex-col">
-              <AppGrid 
-                apps={sortedFavorites}
-                useCarousel={true}
-                smallerIcons={true}
-              />
-            </div>
+          <div className="py-3">
+            <AppGrid 
+              apps={sortedFavorites}
+              useCarousel={true}
+              smallerIcons={true}
+            />
           </div>
         ) : (
           <div className="text-center py-10 px-4 bg-background shadow-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700">
