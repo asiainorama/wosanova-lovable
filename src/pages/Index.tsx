@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
@@ -34,9 +34,8 @@ const Index = () => {
         {sortedFavorites.length > 0 ? (
           <div className="py-3">
             <AppGrid 
-              apps={sortedFavorites} 
-              compact={true} 
-              moreCompact={true}
+              apps={sortedFavorites}
+              useCarousel={true}
               smallerIcons={true}
             />
           </div>
