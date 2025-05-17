@@ -17,6 +17,7 @@ interface AppGridProps {
   moreCompact?: boolean;
   smallerIcons?: boolean;
   useCarousel?: boolean;
+  carouselKey?: string;
 }
 
 const AppGrid: React.FC<AppGridProps> = ({ 
@@ -28,7 +29,8 @@ const AppGrid: React.FC<AppGridProps> = ({
   compact = false,
   moreCompact = false,
   smallerIcons = false,
-  useCarousel = false
+  useCarousel = false,
+  carouselKey = ''
 }) => {
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
@@ -130,7 +132,7 @@ const AppGrid: React.FC<AppGridProps> = ({
     );
   }
   
-  // Use the optimized Swiper implementation instead of Embla for better performance
+  // Use the optimized Swiper implementation
   return (
     <SwiperCarousel
       apps={apps}
@@ -139,6 +141,7 @@ const AppGrid: React.FC<AppGridProps> = ({
       showManage={showManage}
       onShowDetails={onShowDetails}
       smallerIcons={smallerIcons}
+      carouselKey={carouselKey}
     />
   );
 };

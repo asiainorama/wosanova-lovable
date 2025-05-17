@@ -21,6 +21,7 @@ interface SwiperCarouselProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   smallerIcons?: boolean;
+  carouselKey?: string;
 }
 
 const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
@@ -29,10 +30,11 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   showRemove = false,
   showManage = false,
   onShowDetails,
-  smallerIcons = false
+  smallerIcons = false,
+  carouselKey = ''
 }) => {
   const swiperRef = useRef<SwiperType | null>(null);
-  const { currentPage, setCurrentPage } = useCarouselState(0);
+  const { currentPage, setCurrentPage, goToPage } = useCarouselState(0, carouselKey);
   
   // Calculate how many apps per page
   const appsPerPage = gridConfig.cols * gridConfig.rows;
@@ -71,6 +73,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   const handleExternalPagination = (pageIndex: number) => {
     if (swiperRef.current && pageIndex !== currentPage) {
       swiperRef.current.slideTo(pageIndex);
+      setCurrentPage(pageIndex);
     }
   };
 
@@ -78,14 +81,31 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   useEffect(() => {
     if (swiperRef.current && currentPage !== swiperRef.current.activeIndex) {
       // Timeout to ensure swiper is fully initialized
-      setTimeout(() => {
-        swiperRef.current?.slideTo(currentPage, 0);
-      }, 0);
+      const timer = setTimeout(() => {
+        if (swiperRef.current) {
+          swiperRef.current.slideTo(currentPage, 0);
+          console.log(`Initialized carousel to page ${currentPage}`);
+        }
+      }, 50);
+      
+      return () => clearTimeout(timer);
     }
   }, [currentPage]);
 
+  // Handle window resize to ensure proper layout
+  useEffect(() => {
+    const handleResize = () => {
+      if (swiperRef.current) {
+        swiperRef.current.update();
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className="relative h-full">
+    <div className="relative h-full will-change-transform">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         initialSlide={currentPage}

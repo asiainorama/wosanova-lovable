@@ -4,6 +4,7 @@
   width: 100%;
   overflow: hidden;
   position: relative;
+  height: 100%;
 }
 
 .app-swiper .swiper-slide {
@@ -11,9 +12,12 @@
   justify-content: center;
   align-items: center;
   transform: translate3d(0, 0, 0);
-  transition: opacity 0.3s;
+  transition: transform 0.3s ease-out, opacity 0.3s ease;
   height: 100%;
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 /* Improve hardware acceleration */
@@ -21,22 +25,25 @@
   display: flex;
   will-change: transform;
   height: 100%;
+  transition-timing-function: ease-out;
+  -webkit-overflow-scrolling: touch; /* For iOS smooth scrolling */
 }
 
 /* Styling for preloading states */
 .swiper-slide-prev,
 .swiper-slide-next {
   opacity: 0.98;
+  pointer-events: none; /* Prevent interaction with off-screen slides */
 }
 
-/* Smooth transitions */
-.app-swiper .swiper-wrapper {
-  transition-timing-function: ease-out;
+/* Virtual rendering optimization */
+.swiper-slide-visible:not(.swiper-slide-active) {
+  transition: transform 0.25s ease-out, opacity 0.2s ease;
 }
 
-/* Override default pagination behavior */
-.swiper-pagination {
-  bottom: 10px !important;
+/* Custom animation for slide transitions */
+.swiper-slide-active {
+  z-index: 2;
 }
 
 /* Make sure that swiper inherits the height properly */
@@ -44,4 +51,31 @@
 .swiper-wrapper,
 .swiper-slide {
   height: 100%;
+  transform-style: preserve-3d;
+}
+
+/* Override default pagination behavior */
+.swiper-pagination {
+  bottom: 10px !important;
+  z-index: 10;
+}
+
+/* Ensure smooth swipe gesture */
+.app-swiper {
+  touch-action: pan-y;
+}
+
+/* Optimize paint layers */
+.swiper-slide > div {
+  transform: translateZ(0);
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+.app-swiper:not(.swiper-initialized) {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.app-swiper.swiper-initialized {
+  opacity: 1;
 }

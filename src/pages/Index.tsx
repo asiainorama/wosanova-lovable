@@ -37,6 +37,7 @@ const Index = () => {
               apps={sortedFavorites}
               useCarousel={true}
               smallerIcons={true}
+              carouselKey="home" // Unique key for the home carousel
             />
           </div>
         ) : (
