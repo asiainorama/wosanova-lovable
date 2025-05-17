@@ -26,6 +26,30 @@ const Index = () => {
     }
   }, [favorites]);
 
+  // Set up horizontal scroll mode
+  useEffect(() => {
+    const setupScrollMode = () => {
+      document.body.style.overflowY = 'hidden';
+      document.body.style.overflowX = 'auto';
+    };
+    
+    setupScrollMode();
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setupScrollMode();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', setupScrollMode);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', setupScrollMode);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />

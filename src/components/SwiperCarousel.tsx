@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Virtual } from 'swiper/modules';
 import { type Swiper as SwiperType } from 'swiper';
@@ -35,6 +35,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
 }) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const { currentPage, setCurrentPage, goToPage } = useCarouselState(0, carouselKey);
+  const [resetKey, setResetKey] = useState<number>(0);
   
   // Calculate how many apps per page
   const appsPerPage = gridConfig.cols * gridConfig.rows;
@@ -42,18 +43,21 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   // Calculate total pages
   const totalPages = Math.ceil(apps.length / appsPerPage);
 
-  // Function to get apps for a specific page
-  const getAppsForPage = (pageIndex: number) => {
-    const startIndex = pageIndex * appsPerPage;
-    return apps.slice(startIndex, startIndex + appsPerPage);
-  };
-  
-  // All pages data - memoized to prevent recalculation
-  const pages = useMemo(() => {
-    return Array.from({ length: totalPages }).map((_, i) => getAppsForPage(i));
+  // Create paginated apps with precise ordering algorithm
+  const paginatedApps = useMemo(() => {
+    return Array(totalPages).fill(null).map((_, pageIndex) => {
+      const startIdx = pageIndex * appsPerPage;
+      const pageItems = apps.slice(startIdx, startIdx + appsPerPage);
+      
+      // Fill with empty items to maintain structure
+      if (pageItems.length < appsPerPage && pageIndex === totalPages - 1) {
+        return [...pageItems, ...Array(appsPerPage - pageItems.length).fill(null)];
+      }
+      return pageItems;
+    });
   }, [apps, appsPerPage, totalPages]);
 
-  // Determine grid gap based on device type
+  // Calculate dynamic gap based on device size
   const getGridGap = () => {
     if (window.innerWidth < 768) {
       return 'gap-2'; // Small gap for mobile
@@ -76,6 +80,69 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
       setCurrentPage(pageIndex);
     }
   };
+
+  // Force carousel reset when needed
+  const forceCarouselReset = useCallback(() => {
+    // Save temp state
+    const currentPageBackup = currentPage;
+    
+    // Force component remount
+    setResetKey(prev => prev + 1);
+    
+    // Restore after remount
+    setTimeout(() => {
+      if (swiperRef.current) {
+        swiperRef.current.slideTo(currentPageBackup, 0);
+      }
+    }, 50);
+  }, [currentPage]);
+
+  // Setup scroll behavior and restore state
+  const setupScrollBehavior = useCallback(() => {
+    // Force horizontal scroll mode
+    document.body.style.overflowY = 'hidden';
+    document.body.style.overflowX = 'auto';
+    
+    // Restore carousel position
+    if (swiperRef.current && swiperRef.current.activeIndex !== currentPage) {
+      swiperRef.current.slideTo(currentPage, 0);
+      console.log(`Restored carousel to page ${currentPage}`);
+    }
+  }, [currentPage]);
+
+  // Lock scroll behavior to prevent layout changes
+  const lockScrollBehavior = useCallback(() => {
+    const scrollHandler = () => {
+      if (document.body.style.overflowY !== 'hidden') {
+        document.body.style.overflowY = 'hidden';
+        document.body.style.overflowX = 'auto';
+      }
+    };
+    
+    // Check frequently for a short period
+    const intervalId = setInterval(scrollHandler, 100);
+    setTimeout(() => clearInterval(intervalId), 2000);
+  }, []);
+
+  // Detect app return with triple redundancy
+  const detectAppReturn = useCallback(() => {
+    console.log('App return detected');
+    setupScrollBehavior();
+    lockScrollBehavior();
+    
+    // If layout seems to be broken, reset the carousel
+    if (swiperRef.current && swiperRef.current.activeIndex !== currentPage) {
+      forceCarouselReset();
+    }
+  }, [setupScrollBehavior, lockScrollBehavior, forceCarouselReset, currentPage]);
+
+  // Save the current state
+  const saveGridState = useCallback(() => {
+    const stateToSave = { currentPage };
+    localStorage.setItem('appGridState', JSON.stringify(stateToSave));
+    sessionStorage.setItem('appGridState', JSON.stringify(stateToSave));
+    console.log(`Saved grid state: page ${currentPage}`);
+  }, [currentPage]);
 
   // Initialize the swiper with the saved page
   useEffect(() => {
@@ -104,8 +171,36 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Persistent state and app return detection
+  useEffect(() => {
+    // Initial setup
+    setupScrollBehavior();
+    
+    // Event listeners for app return
+    window.addEventListener('focus', detectAppReturn);
+    window.addEventListener('pageshow', detectAppReturn);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') detectAppReturn();
+    });
+    
+    // iOS Safari specific
+    window.addEventListener('pagehide', saveGridState);
+    
+    return () => {
+      window.removeEventListener('focus', detectAppReturn);
+      window.removeEventListener('pageshow', detectAppReturn);
+      document.removeEventListener('visibilitychange', detectAppReturn);
+      window.removeEventListener('pagehide', saveGridState);
+    };
+  }, [detectAppReturn, setupScrollBehavior, saveGridState]);
+
+  // Save state when current page changes
+  useEffect(() => {
+    saveGridState();
+  }, [currentPage, saveGridState]);
+
   return (
-    <div className="relative h-full will-change-transform">
+    <div className="relative h-full w-full will-change-transform grid-container" key={`carousel-container-${resetKey}`}>
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         initialSlide={currentPage}
@@ -124,29 +219,36 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
         className="h-full app-swiper"
         wrapperClass="h-full"
       >
-        {pages.map((pageApps, pageIndex) => (
+        {paginatedApps.map((pageApps, pageIndex) => (
           <SwiperSlide key={`page-${pageIndex}`} className="h-full" virtualIndex={pageIndex}>
-            <div className="h-full p-2 flex items-center will-change-transform">
+            <div className="h-full w-full p-2 flex items-center justify-center will-change-transform">
               <div
-                className={`w-full h-full grid ${getGridGap()} mx-auto my-auto`}
+                className={`w-full h-full grid ${getGridGap()}`}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                   gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                  justifyContent: 'space-between',
                   alignContent: 'space-between',
+                  justifyContent: 'space-between',
+                  padding: '16px',
+                  width: '100%',
+                  height: '100%'
                 }}
               >
                 {pageApps.map((app, index) => (
-                  <div key={`${pageIndex}-${app.id}`} className="flex items-center justify-center">
-                    <AppCard 
-                      app={app} 
-                      showRemove={showRemove}
-                      showManage={showManage}
-                      onShowDetails={onShowDetails}
-                      isLarge={false}
-                      smallerIcons={smallerIcons}
-                    />
+                  <div key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} className="flex items-center justify-center">
+                    {app ? (
+                      <AppCard 
+                        app={app} 
+                        showRemove={showRemove}
+                        showManage={showManage}
+                        onShowDetails={onShowDetails}
+                        isLarge={false}
+                        smallerIcons={smallerIcons}
+                      />
+                    ) : (
+                      <div className="empty-slot w-full h-full opacity-0"></div>
+                    )}
                   </div>
                 ))}
               </div>

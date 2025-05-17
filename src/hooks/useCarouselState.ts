@@ -39,7 +39,14 @@ const useCarouselState = (initialPage = 0, key = '') => {
   useEffect(() => {
     if (!isInitialized.current) {
       try {
-        const savedState = localStorage.getItem(storageKey);
+        // Try to get state from sessionStorage first (for current session)
+        let savedState = sessionStorage.getItem(storageKey);
+        
+        // If not found in session, try localStorage (for persistent state)
+        if (!savedState) {
+          savedState = localStorage.getItem(storageKey);
+        }
+        
         if (savedState) {
           const parsedState: CarouselState = JSON.parse(savedState);
           // Only use saved state if it exists and we're mounted
@@ -63,7 +70,10 @@ const useCarouselState = (initialPage = 0, key = '') => {
           currentPage,
           lastVisited: Date.now()
         };
+        
+        // Save to both storage mechanisms for redundancy
         localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+        sessionStorage.setItem(storageKey, JSON.stringify(stateToSave));
       } catch (error) {
         console.error('Error saving carousel state:', error);
       }
@@ -71,7 +81,7 @@ const useCarouselState = (initialPage = 0, key = '') => {
   }, [currentPage, storageKey]);
   
   // Method to set the page with bounds checking
-  const goToPage = useCallback((pageIndex: number, totalPages: number) => {
+  const goToPage = useCallback((pageIndex: number, totalPages?: number) => {
     if (pageIndex >= 0 && (totalPages === undefined || pageIndex < totalPages)) {
       setCurrentPage(pageIndex);
     }

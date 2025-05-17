@@ -79,3 +79,17 @@
 .app-swiper.swiper-initialized {
   opacity: 1;
 }
+
+/* Grid container styling */
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Empty slot styling */
+.empty-slot {
+  border: none;
+  background: transparent;
+  visibility: hidden;
+}
