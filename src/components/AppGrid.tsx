@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
 import useEmblaCarousel from 'embla-carousel-react';
-import type { EmblaCarouselType } from 'embla-carousel';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PaginationIndicator from './PaginationIndicator';
 
@@ -33,25 +32,27 @@ const AppGrid: React.FC<AppGridProps> = ({
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
   
-  // Define grid sizes based on screen size
+  // Define grid sizes based on screen size and orientation
   const getGridConfig = useCallback(() => {
-    // Check if we're on mobile and its orientation
-    if (isMobile) {
-      return window.innerWidth > window.innerHeight 
+    const isLandscape = window.innerWidth > window.innerHeight;
+    
+    // Check if we're on mobile
+    if (window.innerWidth < 768) {
+      return isLandscape 
         ? { cols: 5, rows: 2 } // mobile landscape
         : { cols: 4, rows: 6 }; // mobile portrait
     }
     
-    // For tablets
-    if (window.innerWidth <= 1024) {
-      return window.innerWidth > window.innerHeight
+    // For tablets (768px - 1023px)
+    if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+      return isLandscape
         ? { cols: 6, rows: 4 } // tablet landscape
         : { cols: 5, rows: 6 }; // tablet portrait
     }
     
-    // Large screens
+    // Large screens (≥1024px)
     return { cols: 8, rows: 6 };
-  }, [isMobile]);
+  }, []);
 
   const [gridConfig, setGridConfig] = useState(getGridConfig());
   
@@ -101,11 +102,6 @@ const AppGrid: React.FC<AppGridProps> = ({
     );
   }
 
-  // Get grid style classes based on configuration
-  const getGridClasses = () => {
-    return `grid grid-cols-${gridConfig.cols} gap-2 h-full`;
-  };
-  
   // If not using carousel, fall back to the original grid implementation
   if (!useCarousel) {
     return (
@@ -133,20 +129,33 @@ const AppGrid: React.FC<AppGridProps> = ({
     );
   }
   
+  // Determine grid gap based on device type
+  const getGridGap = () => {
+    if (window.innerWidth < 768) {
+      return 'gap-2'; // Small gap for mobile
+    } else if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+      return 'gap-3'; // Medium gap for tablets
+    } else {
+      return 'gap-4'; // Larger gap for desktop
+    }
+  };
+  
   // Carousel implementation
   return (
-    <div className="relative">
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+    <div className="relative h-full">
+      <div className="overflow-hidden h-full" ref={emblaRef}>
+        <div className="flex h-full">
           {Array.from({ length: totalPages }).map((_, pageIndex) => (
-            <div key={`page-${pageIndex}`} className="flex-[0_0_100%] min-w-0">
-              <div className="p-2">
+            <div key={`page-${pageIndex}`} className="flex-[0_0_100%] min-w-0 h-full">
+              <div className="p-2 h-full flex items-center">
                 <div 
-                  className={getGridClasses()}
+                  className={`w-full h-full grid ${getGridGap()} mx-auto my-auto`}
                   style={{
                     display: 'grid',
                     gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
-                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`
+                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+                    justifyContent: 'space-between',
+                    alignContent: 'space-between',
                   }}
                 >
                   {getAppsForPage(pageIndex).map((app, index) => (

@@ -44,7 +44,7 @@ const PaginationIndicator: React.FC<PaginationIndicatorProps> = ({
   };
 
   return (
-    <div className="flex justify-center items-center py-4 space-x-2">
+    <div className="flex justify-center items-center py-2 mt-2 space-x-2">
       {getVisibleDots().map((dot, index) => {
         if (dot === 'ellipsis') {
           return (

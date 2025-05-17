@@ -30,9 +30,9 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-8 flex-1">
+      <main className="container mx-auto px-4 py-4 flex-1 flex flex-col">
         {sortedFavorites.length > 0 ? (
-          <div className="py-3">
+          <div className="flex-grow flex flex-col h-full">
             <AppGrid 
               apps={sortedFavorites}
               useCarousel={true}
