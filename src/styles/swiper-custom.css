@@ -1,0 +1,47 @@
+
+/* Custom styling for Swiper */
+.app-swiper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-swiper .swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 0.3s;
+  height: 100%;
+  will-change: transform;
+}
+
+/* Improve hardware acceleration */
+.app-swiper .swiper-wrapper {
+  display: flex;
+  will-change: transform;
+  height: 100%;
+}
+
+/* Styling for preloading states */
+.swiper-slide-prev,
+.swiper-slide-next {
+  opacity: 0.98;
+}
+
+/* Smooth transitions */
+.app-swiper .swiper-wrapper {
+  transition-timing-function: ease-out;
+}
+
+/* Override default pagination behavior */
+.swiper-pagination {
+  bottom: 10px !important;
+}
+
+/* Make sure that swiper inherits the height properly */
+.swiper-container, 
+.swiper-wrapper,
+.swiper-slide {
+  height: 100%;
+}

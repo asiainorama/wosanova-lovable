@@ -5,6 +5,7 @@ import AppCard from './AppCard';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PaginationIndicator from './PaginationIndicator';
+import SwiperCarousel from './SwiperCarousel';
 
 interface AppGridProps {
   apps: AppData[];
@@ -129,65 +130,17 @@ const AppGrid: React.FC<AppGridProps> = ({
     );
   }
   
-  // Determine grid gap based on device type
-  const getGridGap = () => {
-    if (window.innerWidth < 768) {
-      return 'gap-2'; // Small gap for mobile
-    } else if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-      return 'gap-3'; // Medium gap for tablets
-    } else {
-      return 'gap-4'; // Larger gap for desktop
-    }
-  };
-  
-  // Carousel implementation
+  // Use the optimized Swiper implementation instead of Embla for better performance
   return (
-    <div className="relative h-full">
-      <div className="overflow-hidden h-full" ref={emblaRef}>
-        <div className="flex h-full">
-          {Array.from({ length: totalPages }).map((_, pageIndex) => (
-            <div key={`page-${pageIndex}`} className="flex-[0_0_100%] min-w-0 h-full">
-              <div className="p-2 h-full flex items-center">
-                <div 
-                  className={`w-full h-full grid ${getGridGap()} mx-auto my-auto`}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
-                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                    justifyContent: 'space-between',
-                    alignContent: 'space-between',
-                  }}
-                >
-                  {getAppsForPage(pageIndex).map((app, index) => (
-                    <div key={`${pageIndex}-${app.id}`} className="flex items-center justify-center">
-                      <AppCard 
-                        app={app} 
-                        showRemove={showRemove}
-                        showManage={showManage}
-                        onShowDetails={onShowDetails}
-                        isLarge={false}
-                        smallerIcons={true}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {totalPages > 1 && (
-        <PaginationIndicator 
-          totalPages={totalPages} 
-          currentPage={currentPage}
-          onPageChange={(index) => {
-            if (emblaApi) emblaApi.scrollTo(index);
-          }}
-        />
-      )}
-    </div>
+    <SwiperCarousel
+      apps={apps}
+      gridConfig={gridConfig}
+      showRemove={showRemove}
+      showManage={showManage}
+      onShowDetails={onShowDetails}
+      smallerIcons={smallerIcons}
+    />
   );
 };
 
-export default AppGrid;
+export default React.memo(AppGrid);
