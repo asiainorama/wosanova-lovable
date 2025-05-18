@@ -37,24 +37,27 @@ const AppGrid: React.FC<AppGridProps> = ({
   
   // Define grid sizes based on screen size and orientation
   const getGridConfig = useCallback(() => {
-    const isLandscape = window.innerWidth > window.innerHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isLandscape = width > height;
     
-    // Check if we're on mobile
-    if (window.innerWidth < 768) {
-      return isLandscape 
-        ? { cols: 5, rows: 2 } // mobile landscape
-        : { cols: 4, rows: 6 }; // mobile portrait
+    // iPad (768px - 1024px)
+    if (width >= 768 && width <= 1024) {
+      return isLandscape ? { cols: 6, rows: 4 } : { cols: 5, rows: 6 };
     }
     
-    // For tablets (768px - 1023px)
-    if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-      return isLandscape
-        ? { cols: 6, rows: 4 } // tablet landscape
-        : { cols: 5, rows: 6 }; // tablet portrait
+    // Laptop (1024px - 1440px)
+    if (width > 1024 && width <= 1440) {
+      return { cols: 6, rows: 5 };
     }
     
-    // Large screens (≥1024px)
-    return { cols: 8, rows: 6 };
+    // Large screens (>1440px)
+    if (width > 1440) {
+      return { cols: 6, rows: 8 };
+    }
+    
+    // Mobile (default)
+    return isLandscape ? { cols: 5, rows: 2 } : { cols: 4, rows: 6 };
   }, []);
 
   const [gridConfig, setGridConfig] = useState(getGridConfig());
@@ -62,7 +65,9 @@ const AppGrid: React.FC<AppGridProps> = ({
   // Recalculate grid on window resize
   useEffect(() => {
     const handleResize = () => {
-      setGridConfig(getGridConfig());
+      const newConfig = getGridConfig();
+      setGridConfig(newConfig);
+      console.log("Grid config updated:", newConfig);
     };
     
     window.addEventListener('resize', handleResize);

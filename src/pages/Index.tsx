@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+  useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
@@ -25,30 +27,6 @@ const Index = () => {
       prefetchAppLogos(favorites);
     }
   }, [favorites]);
-
-  // Set up horizontal scroll mode
-  useEffect(() => {
-    const setupScrollMode = () => {
-      document.body.style.overflowY = 'hidden';
-      document.body.style.overflowX = 'auto';
-    };
-    
-    setupScrollMode();
-    
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        setupScrollMode();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', setupScrollMode);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', setupScrollMode);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">

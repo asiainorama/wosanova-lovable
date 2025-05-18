@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
+import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import {
   Pagination,
   PaginationContent,
@@ -64,6 +65,25 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
+
+  // Forzar comportamiento vertical para esta página específica
+  useEffect(() => {
+    const catalogElement = document.getElementById('catalog-container');
+    if (catalogElement) {
+      catalogElement.style.height = '100%';
+      catalogElement.style.overflowY = 'auto';
+      catalogElement.style.overflowX = 'hidden';
+    }
+    
+    document.body.style.overflowY = 'auto';
+    document.body.style.overflowX = 'hidden';
+    
+    return () => {
+      document.body.style.removeProperty('overflowY');
+      document.body.style.removeProperty('overflowX');
+    };
+  }, []);
 
   useEffect(() => {
     fetchApps(setAllApps, setLoading);
@@ -109,7 +129,7 @@ const Catalog = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto">
       <Header title="Catálogo" />
 
       <div className="container max-w-7xl mx-auto px-4 py-6">

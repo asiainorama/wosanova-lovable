@@ -36,6 +36,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   const swiperRef = useRef<SwiperType | null>(null);
   const { currentPage, setCurrentPage, goToPage } = useCarouselState(0, carouselKey);
   const [resetKey, setResetKey] = useState<number>(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Calculate how many apps per page
   const appsPerPage = gridConfig.cols * gridConfig.rows;
@@ -56,21 +57,14 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
       return pageItems;
     });
   }, [apps, appsPerPage, totalPages]);
-
-  // Calculate dynamic gap based on device size
-  const getGridGap = () => {
-    if (window.innerWidth < 768) {
-      return 'gap-2'; // Small gap for mobile
-    } else if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-      return 'gap-3'; // Medium gap for tablets
-    } else {
-      return 'gap-4'; // Larger gap for desktop
-    }
-  };
-
+  
   // Handle slide change
   const handleSlideChange = (swiper: SwiperType) => {
     setCurrentPage(swiper.activeIndex);
+    setIsTransitioning(true);
+    
+    // Ensure transition completes
+    setTimeout(() => setIsTransitioning(false), 350);
   };
 
   // Synchronize with external pagination
@@ -144,6 +138,18 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
     console.log(`Saved grid state: page ${currentPage}`);
   }, [currentPage]);
 
+  // Force transition completion for iPad horizontal mode
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => {
+        if (swiperRef.current) {
+          swiperRef.current.slideTo(currentPage, 300, true);
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isTransitioning, currentPage]);
+
   // Initialize the swiper with the saved page
   useEffect(() => {
     if (swiperRef.current && currentPage !== swiperRef.current.activeIndex) {
@@ -164,12 +170,17 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
     const handleResize = () => {
       if (swiperRef.current) {
         swiperRef.current.update();
+        setTimeout(() => {
+          if (swiperRef.current) {
+            swiperRef.current.slideTo(currentPage, 0, false);
+          }
+        }, 100);
       }
     };
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [currentPage]);
 
   // Persistent state and app return detection
   useEffect(() => {
@@ -199,6 +210,14 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
     saveGridState();
   }, [currentPage, saveGridState]);
 
+  // Calculate dynamic cell height for proper spacing
+  const calculateMinCellHeight = () => {
+    const viewportHeight = window.innerHeight;
+    const headerHeight = 100; // Approximate header height
+    const footerHeight = 20; // Approximate footer/padding height
+    return `calc((${viewportHeight}px - ${headerHeight + footerHeight}px) / ${gridConfig.rows})`;
+  };
+
   return (
     <div className="relative h-full w-full will-change-transform grid-container" key={`carousel-container-${resetKey}`}>
       <Swiper
@@ -207,7 +226,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
         onSlideChange={handleSlideChange}
         modules={[Navigation, Pagination, Virtual]}
         speed={300}
-        cssMode={true}
+        cssMode={false}
         resistanceRatio={0.85}
         threshold={20}
         followFinger={true}
@@ -223,20 +242,33 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
           <SwiperSlide key={`page-${pageIndex}`} className="h-full" virtualIndex={pageIndex}>
             <div className="h-full w-full p-2 flex items-center justify-center will-change-transform">
               <div
-                className={`w-full h-full grid ${getGridGap()}`}
+                className="w-full h-full grid-container-evenly"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
                   gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
-                  alignContent: 'space-between',
-                  justifyContent: 'space-between',
-                  padding: '16px',
+                  alignContent: 'space-evenly',
+                  justifyContent: 'space-evenly',
+                  padding: '5% 8%',
                   width: '100%',
-                  height: '100%'
+                  height: '100%',
+                  margin: '0 auto',
+                  maxWidth: 'min(100%, 1200px)'
                 }}
               >
                 {pageApps.map((app, index) => (
-                  <div key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} className="flex items-center justify-center">
+                  <div 
+                    key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
+                    className="app-grid-item"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      height: '100%',
+                      minHeight: calculateMinCellHeight()
+                    }}
+                  >
                     {app ? (
                       <AppCard 
                         app={app} 
