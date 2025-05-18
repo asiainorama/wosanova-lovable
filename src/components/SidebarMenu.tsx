@@ -89,7 +89,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-y-auto"
+        className="w-full sm:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-hidden fixed"
       >
         <div className="flex flex-col h-full">
           <SidebarHeader 
@@ -99,26 +99,30 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
             onClose={() => onOpenChange(false)}
           />
 
-          <div className="px-4 py-2">
-            <TimeWidget />
-          </div>
+          <div className="fixed top-[60px] left-0 right-0 bottom-0 overflow-y-auto px-4 py-0">
+            <div className="py-1">
+              <TimeWidget />
+            </div>
 
-          <div className="px-4 py-2">
-            <WeatherWidget />
-          </div>
-          
-          <Separator className="mx-4 my-2" />
-          
-          <WidgetIconsRow />
+            <div className="py-1">
+              <WeatherWidget />
+            </div>
+            
+            <Separator className="mx-0 my-1" />
+            
+            <div className="py-1">
+              <WidgetIconsRow />
+            </div>
 
-          <Separator className="my-2" />
-          
-          <div className="px-4 py-2">
-            <h3 className="text-sm font-medium mb-2 dark:text-gray-300">Calendario</h3>
-            <CalendarWidget />
-          </div>
+            <Separator className="my-1" />
+            
+            <div className="py-1">
+              <h3 className="text-sm font-medium mb-1 dark:text-gray-300">Calendario</h3>
+              <CalendarWidget />
+            </div>
 
-          <SidebarFooter />
+            <SidebarFooter />
+          </div>
         </div>
       </SheetContent>
     </Sheet>

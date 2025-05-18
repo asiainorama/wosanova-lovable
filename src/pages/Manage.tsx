@@ -163,7 +163,10 @@ const Manage = () => {
 
   return (
     <div className="min-h-screen flex flex-col overflow-y-auto">
-      <Header title={t('header.manage') || "Gestionar Apps"} />
+      {/* Header con position sticky */}
+      <div className="sticky top-0 z-50 w-full">
+        <Header title={t('header.manage') || "Gestionar Apps"} />
+      </div>
       
       <main className="container mx-auto px-4 py-6 flex-1 overflow-y-auto">
         <Card className="p-6">

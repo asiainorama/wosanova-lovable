@@ -14,7 +14,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
   const { t } = useLanguage();
 
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+    <div className="p-3 border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 bg-background dark:bg-gray-900 z-50">
       <div className="flex items-center justify-between px-2 w-full">
         <div className="w-1/3 text-start">
           <h2 className="text-xl font-bold gradient-text truncate">

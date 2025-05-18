@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+    <header className="bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button 
