@@ -26,13 +26,17 @@ const Index = () => {
       // Use silent mode to avoid notifications
       prefetchAppLogos(favorites);
     }
+    
+    // Forzar el comportamiento de scroll horizontal adecuado
+    document.body.style.overflowY = 'hidden';
+    document.body.style.overflowX = 'auto';
   }, [favorites]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background dark:bg-gray-900">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-4 py-4 flex-1 flex flex-col">
+      <main className="container mx-auto px-2 py-2 flex-1 flex flex-col">
         {sortedFavorites.length > 0 ? (
           <div className="flex-grow flex flex-col h-full">
             <AppGrid 

@@ -57,13 +57,14 @@
 
 /* Override default pagination behavior */
 .swiper-pagination {
-  bottom: 10px !important;
+  bottom: 5px !important;
   z-index: 10;
 }
 
 /* Ensure smooth swipe gesture */
 .app-swiper {
-  touch-action: pan-y;
+  touch-action: pan-y pan-x;
+  user-select: none;
 }
 
 /* Optimize paint layers */
@@ -97,6 +98,18 @@
   position: relative;
   left: 0 !important;
   transform: translateX(0) !important;
+}
+
+/* Pagination container - posicionamiento mejorado */
+.pagination-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2px;
+  padding-bottom: 5px;
+  margin-top: 0;
 }
 
 /* App grid item styling for consistent layout */
@@ -145,4 +158,40 @@
   border: none;
   background: transparent;
   visibility: hidden;
+}
+
+/* Mejor soporte para gestos de trackpad */
+@supports (pointer-events: none) {
+  .app-swiper {
+    cursor: grab;
+  }
+  
+  .app-swiper:active {
+    cursor: grabbing;
+  }
+}
+
+/* Asegurarse que los indicadores de paginación siempre sean visibles */
+.swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  margin: 0 6px;
+}
+
+/* Adaptar espaciado en dispositivos móviles */
+@media (max-width: 640px) {
+  .app-swiper {
+    padding: 0;
+  }
+  
+  .pagination-container {
+    margin-top: 0;
+    padding-bottom: 4px;
+  }
+  
+  .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    margin: 0 4px;
+  }
 }

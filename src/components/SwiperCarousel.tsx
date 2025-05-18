@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Virtual } from 'swiper/modules';
+import { Navigation, Pagination, Virtual, Mousewheel } from 'swiper/modules';
 import { type Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -214,7 +214,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   const calculateMinCellHeight = () => {
     const viewportHeight = window.innerHeight;
     const headerHeight = 100; // Approximate header height
-    const footerHeight = 20; // Approximate footer/padding height
+    const footerHeight = 40; // Approximate footer/padding/indicator height
     return `calc((${viewportHeight}px - ${headerHeight + footerHeight}px) / ${gridConfig.rows})`;
   };
 
@@ -224,13 +224,21 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         initialSlide={currentPage}
         onSlideChange={handleSlideChange}
-        modules={[Navigation, Pagination, Virtual]}
+        modules={[Navigation, Pagination, Virtual, Mousewheel]}
+        mousewheel={{
+          forceToAxis: true,
+          sensitivity: 1.2,
+          thresholdDelta: 50,
+          thresholdTime: 150,
+        }}
         speed={300}
         cssMode={false}
         resistanceRatio={0.85}
         threshold={20}
         followFinger={true}
         touchRatio={1}
+        watchSlidesProgress={true}
+        grabCursor={true}
         virtual={{
           addSlidesAfter: 1,
           addSlidesBefore: 1,
@@ -240,7 +248,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
       >
         {paginatedApps.map((pageApps, pageIndex) => (
           <SwiperSlide key={`page-${pageIndex}`} className="h-full" virtualIndex={pageIndex}>
-            <div className="h-full w-full p-2 flex items-center justify-center will-change-transform">
+            <div className="h-full w-full px-1 flex items-center justify-center will-change-transform">
               <div
                 className="w-full h-full grid-container-evenly"
                 style={{
@@ -249,7 +257,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
                   gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
                   alignContent: 'space-evenly',
                   justifyContent: 'space-evenly',
-                  padding: '5% 8%',
+                  padding: '3% 4%', // Reducido del 5% 8% original
                   width: '100%',
                   height: '100%',
                   margin: '0 auto',
@@ -290,11 +298,13 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
       </Swiper>
 
       {totalPages > 1 && (
-        <PaginationIndicator
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handleExternalPagination}
-        />
+        <div className="pagination-container" style={{ marginTop: '5px', paddingBottom: '8px' }}>
+          <PaginationIndicator
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={handleExternalPagination}
+          />
+        </div>
       )}
     </div>
   );

@@ -7,7 +7,6 @@ type ScrollBehaviorType = 'horizontal' | 'vertical';
 /**
  * Hook personalizado para manejar el comportamiento de scroll basado en la ruta actual
  * 
- * @param defaultType - Tipo de scroll por defecto
  * @returns void
  */
 export function useScrollBehavior() {
@@ -18,6 +17,7 @@ export function useScrollBehavior() {
     
     // Determinar el tipo de scroll basado en la ruta actual
     const isHomePage = currentPath === '/' || currentPath === '/home';
+    const isManagePage = currentPath === '/manage';
     
     if (isHomePage) {
       // Configuración para página de inicio: scroll horizontal
@@ -25,6 +25,18 @@ export function useScrollBehavior() {
       document.body.style.overflowX = 'auto';
       
       console.log('Aplicando scroll horizontal para la página de inicio');
+    } else if (isManagePage) {
+      // Página de gestión: asegurar scroll vertical
+      document.body.style.overflowY = 'auto';
+      document.body.style.overflowX = 'hidden';
+      
+      // Importante: forzar scroll vertical para esta página
+      setTimeout(() => {
+        document.body.style.overflowY = 'auto';
+        document.body.style.overflowX = 'hidden';
+      }, 100);
+      
+      console.log('Forzando scroll vertical para página de gestión');
     } else {
       // Configuración para otras páginas: scroll vertical
       document.body.style.overflowY = 'auto';
