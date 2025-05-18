@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Virtual, Mousewheel } from 'swiper/modules';
@@ -214,7 +213,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
   const calculateMinCellHeight = () => {
     const viewportHeight = window.innerHeight;
     const headerHeight = 100; // Approximate header height
-    const footerHeight = 40; // Approximate footer/padding/indicator height
+    const footerHeight = 60; // Increased footer height to account for pagination dots
     return `calc((${viewportHeight}px - ${headerHeight + footerHeight}px) / ${gridConfig.rows})`;
   };
 
@@ -257,7 +256,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
                   gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
                   alignContent: 'space-evenly',
                   justifyContent: 'space-evenly',
-                  padding: '3% 4%', // Reducido del 5% 8% original
+                  padding: '2% 3%', // Reduced padding from previous values
                   width: '100%',
                   height: '100%',
                   margin: '0 auto',
@@ -298,7 +297,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
       </Swiper>
 
       {totalPages > 1 && (
-        <div className="pagination-container" style={{ marginTop: '5px', paddingBottom: '8px' }}>
+        <div className="pagination-container">
           <PaginationIndicator
             totalPages={totalPages}
             currentPage={currentPage}

@@ -100,16 +100,25 @@
   transform: translateX(0) !important;
 }
 
-/* Pagination container - posicionamiento mejorado */
+/* Pagination container - posición fija en la parte inferior */
 .pagination-container {
-  position: relative;
-  width: 100%;
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 2px;
-  padding-bottom: 5px;
-  margin-top: 0;
+  padding: 3px 0;
+  margin: 0;
+  width: 100%;
+  z-index: 50;
+  pointer-events: none; /* Permite tocar elementos debajo */
+}
+
+/* Permitir clics en los puntos de paginación */
+.pagination-container > * {
+  pointer-events: auto;
 }
 
 /* App grid item styling for consistent layout */
@@ -176,6 +185,13 @@
   width: 8px;
   height: 8px;
   margin: 0 6px;
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.swiper-pagination-bullet-active {
+  transform: scale(1.2);
+  opacity: 1;
 }
 
 /* Adaptar espaciado en dispositivos móviles */
@@ -185,8 +201,7 @@
   }
   
   .pagination-container {
-    margin-top: 0;
-    padding-bottom: 4px;
+    bottom: 15px; /* Un poco más cerca del borde en móviles */
   }
   
   .swiper-pagination-bullet {
