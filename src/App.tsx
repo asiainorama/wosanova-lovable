@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -11,7 +10,7 @@ import Manage from "./pages/Manage";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import CalculatorWidget from './pages/widgets/CalculatorWidget';
@@ -23,9 +22,6 @@ import InstallAppPrompt from './components/InstallAppPrompt';
 
 // Importar el script de sincronización para que esté disponible globalmente
 import "./scripts/syncAppsToSupabase";
-
-// Importar los estilos CSS para asegurar que están disponibles
-import "./styles/app-styles.css";
 
 // Move AppContextUpdater import here but don't render it at the top level
 import { AppContextUpdater } from "./contexts/AppContextUpdater";
@@ -102,60 +98,58 @@ const App = () => {
           <AppProvider>
             <TooltipProvider>
               <BrowserRouter>
-                <div className="page-transition-container">
-                  <InstallAppPrompt />
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Index />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/catalog"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Catalog />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/manage"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Manage />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/profile"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Profile />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/admin"
-                      element={session ? <Admin /> : <Navigate to="/auth" />}
-                    />
-                    <Route
-                      path="/auth"
-                      element={!session ? <Auth /> : <Navigate to="/" />}
-                    />
-                    <Route path="/widgets/calculator" element={<CalculatorWidget />} />
-                    <Route path="/widgets/converter" element={<ConverterWidget />} />
-                    <Route path="/widgets/notes" element={<NotesWidget />} />
-                    <Route path="/widgets/alarm" element={<AlarmWidget />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
+                <InstallAppPrompt />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Index />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
+                  />
+                  <Route
+                    path="/catalog"
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Catalog />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
+                  />
+                  <Route
+                    path="/manage"
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Manage />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={session ? 
+                      <AppWithContextUpdater>
+                        <Profile />
+                      </AppWithContextUpdater> : 
+                      <Navigate to="/auth" />
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={session ? <Admin /> : <Navigate to="/auth" />}
+                  />
+                  <Route
+                    path="/auth"
+                    element={!session ? <Auth /> : <Navigate to="/" />}
+                  />
+                  <Route path="/widgets/calculator" element={<CalculatorWidget />} />
+                  <Route path="/widgets/converter" element={<ConverterWidget />} />
+                  <Route path="/widgets/notes" element={<NotesWidget />} />
+                  <Route path="/widgets/alarm" element={<AlarmWidget />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
               </BrowserRouter>
             </TooltipProvider>
           </AppProvider>

@@ -3,7 +3,7 @@ import React from 'react';
 import { AppData } from '@/data/apps';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Heart, Package, ExternalLink } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
 
@@ -16,12 +16,6 @@ interface ListViewCardProps {
 
 const ListViewCard: React.FC<ListViewCardProps> = ({ app, favorite, handleAction, handleClick }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
-
-  // Función para manejar la instalación como PWA
-  const handleInstall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(`${app.url}`, '_blank', 'width=1024,height=768,noopener,noreferrer,standalone=yes');
-  };
 
   return (
     <div 
@@ -51,31 +45,6 @@ const ListViewCard: React.FC<ListViewCardProps> = ({ app, favorite, handleAction
         <div>
           <h3 className="text-lg font-medium dark:text-white">{app.name}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-300">{app.description}</p>
-          
-          <div className="flex gap-2 mt-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="h-8 text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(app.url, "_blank");
-              }}
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Visitar
-            </Button>
-            
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-8 text-xs"
-              onClick={handleInstall}
-            >
-              <Package className="h-3 w-3 mr-1" />
-              Instalar
-            </Button>
-          </div>
         </div>
       </div>
 

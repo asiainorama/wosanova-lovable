@@ -1,19 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SidebarMenu from './SidebarMenu';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import TopBar from './TopBar';
 
 interface HeaderProps {
-  title?: string; // Made optional since we're removing title display
+  title: string;
 }
 
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   // Check if user is admin
   useEffect(() => {
     const checkIfAdmin = async () => {
@@ -21,7 +23,6 @@ const Header: React.FC<HeaderProps> = () => {
       const session = data.session;
       
       if (session?.user?.email) {
-        // Solo se considera administrador si el email es asiainorama@gmail.com o termina en @wosanova.com
         const isAdminUser = session.user.email.endsWith("@wosanova.com") || 
                           session.user.email === "asiainorama@gmail.com";
         setIsAdmin(isAdminUser);
@@ -32,7 +33,7 @@ const Header: React.FC<HeaderProps> = () => {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[1000] bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 h-[64px]">
+    <header className="sticky top-0 z-50 bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button 
@@ -43,10 +44,33 @@ const Header: React.FC<HeaderProps> = () => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          {/* Title has been removed */}
+          <h1 className="text-2xl font-bold gradient-text">{title}</h1>
         </div>
         
-        <TopBar isAdmin={isAdmin} />
+        <div className="flex items-center gap-2">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Inicio">
+              <Home className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/catalog">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Catálogo">
+              <Search className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/manage">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Gestionar">
+              <Trash2 className="h-5 w-5" />
+            </Button>
+          </Link>
+          {isAdmin && (
+            <Link to="/admin">
+              <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Administración">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+        </div>
 
         <SidebarMenu isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
       </div>
@@ -54,4 +78,4 @@ const Header: React.FC<HeaderProps> = () => {
   );
 };
 
-export default React.memo(Header);
+export default Header;
