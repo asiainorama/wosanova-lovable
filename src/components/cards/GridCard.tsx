@@ -4,7 +4,7 @@ import { AppData } from '@/data/apps';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Package } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
@@ -32,6 +32,15 @@ const GridCard: React.FC<GridCardProps> = ({
   smallerIcons = false
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+
+  // Función para manejar la instalación como PWA
+  const handleInstall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Crear una nueva ventana con la URL de la app
+    // El parámetro 'standalone' ayuda a que el navegador la trate como app independiente
+    window.open(`${app.url}`, '_blank', 'width=1024,height=768,noopener,noreferrer,standalone=yes');
+  };
   
   return (
     <Card 
@@ -78,18 +87,30 @@ const GridCard: React.FC<GridCardProps> = ({
         </p>
         
         <div className="flex justify-between items-center mt-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(app.url, "_blank");
-            }}
-          >
-            <ExternalLink className="h-3 w-3 mr-1" />
-            Visitar
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(app.url, "_blank");
+              }}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Visitar
+            </Button>
+            
+            <Button
+              size="sm"
+              variant="secondary"
+              className="text-xs"
+              onClick={handleInstall}
+            >
+              <Package className="h-3 w-3 mr-1" />
+              Instalar
+            </Button>
+          </div>
           
           <FavoriteButton
             favorite={favorite}

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Package } from "lucide-react";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -11,12 +11,67 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
+
+// Interfaz para la instalación de PWAs individuales
+export const useAppInstall = (appName: string, appUrl: string) => {
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    // Verificar si la app ya está instalada o si está en un entorno donde se puede instalar
+    const checkInstallability = () => {
+      // Si estamos en standalone mode, significa que ya está instalada
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone ||
+                          document.referrer.includes('android-app://');
+      
+      setCanInstall(!isStandalone);
+    };
+    
+    checkInstallability();
+    
+    // Re-verificar cuando cambia la visibilidad (por si el usuario instala en otra pestaña)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkInstallability();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [appUrl]);
+
+  const installApp = () => {
+    try {
+      // Abrir la URL como una ventana independiente
+      const windowFeatures = 'width=1024,height=768,noopener,noreferrer';
+      const newWindow = window.open(appUrl, '_blank', windowFeatures);
+      
+      if (newWindow) {
+        toast.success(`Abriendo ${appName} como aplicación`, {
+          description: "Guarda esta página como acceso directo para futuras visitas",
+          duration: 5000
+        });
+      } else {
+        toast.error("No se pudo abrir la aplicación", {
+          description: "Tu navegador puede estar bloqueando ventanas emergentes",
+        });
+      }
+    } catch (error) {
+      console.error("Error al instalar la app:", error);
+      toast.error("Hubo un problema al instalar la aplicación");
+    }
+  };
+
+  return { canInstall, installApp };
 };
 
 const InstallAppPrompt = () => {
@@ -99,7 +154,8 @@ const InstallAppPrompt = () => {
             <Button variant="outline" className="w-full sm:w-auto">Ahora no</Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Button className="w-full sm:w-auto" onClick={handleInstallClick}>
+            <Button className="w-full sm:w-auto flex items-center gap-2" onClick={handleInstallClick}>
+              <Package className="h-4 w-4" />
               Instalar aplicación
             </Button>
           </AlertDialogAction>
