@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -140,7 +139,7 @@ const Manage = () => {
   }, [favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col pt-16">
+    <div className="min-h-screen flex flex-col">
       <Header title={t('header.manage') || "Gestionar Apps"} />
       
       <main className="container mx-auto px-4 py-6 flex-1">

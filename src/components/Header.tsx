@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+    <header className="fixed top-0 left-0 right-0 z-[1000] bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 h-[64px]">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button 
@@ -57,9 +57,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <div className="flex items-center gap-2">
           <Link to="/">
             <Button 
-              variant={isActive("/") ? "secondary" : "ghost"} 
+              variant="ghost"
               size="icon" 
-              className={`rounded-full transition-all duration-200 ${isActive("/") ? "bg-primary text-white dark:bg-primary dark:text-white" : "dark:text-white dark:hover:bg-gray-800"}`}
+              className={`rounded-full navigation-icon ${isActive("/") ? "active-icon" : ""} transition-none dark:text-white`}
               aria-label={t('header.home') || "Inicio"}
             >
               <Home className="h-5 w-5" />
@@ -67,9 +67,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           </Link>
           <Link to="/catalog">
             <Button 
-              variant={isActive("/catalog") ? "secondary" : "ghost"} 
+              variant="ghost"
               size="icon" 
-              className={`rounded-full transition-all duration-200 ${isActive("/catalog") ? "bg-primary text-white dark:bg-primary dark:text-white" : "dark:text-white dark:hover:bg-gray-800"}`}
+              className={`rounded-full navigation-icon ${isActive("/catalog") ? "active-icon" : ""} transition-none dark:text-white`}
               aria-label={t('header.catalog') || "Catálogo"}
             >
               <Search className="h-5 w-5" />
@@ -77,9 +77,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           </Link>
           <Link to="/manage">
             <Button 
-              variant={isActive("/manage") ? "secondary" : "ghost"} 
+              variant="ghost"
               size="icon" 
-              className={`rounded-full transition-all duration-200 ${isActive("/manage") ? "bg-primary text-white dark:bg-primary dark:text-white" : "dark:text-white dark:hover:bg-gray-800"}`}
+              className={`rounded-full navigation-icon ${isActive("/manage") ? "active-icon" : ""} transition-none dark:text-white`}
               aria-label={t('header.manage') || "Gestionar"}
             >
               <Trash2 className="h-5 w-5" />
@@ -88,9 +88,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           {isAdmin && (
             <Link to="/admin">
               <Button 
-                variant={isActive("/admin") ? "secondary" : "ghost"} 
+                variant="ghost"
                 size="icon" 
-                className={`rounded-full transition-all duration-200 ${isActive("/admin") ? "bg-primary text-white dark:bg-primary dark:text-white" : "dark:text-white dark:hover:bg-gray-800"}`}
+                className={`rounded-full navigation-icon ${isActive("/admin") ? "active-icon" : ""} transition-none dark:text-white`}
                 aria-label={t('header.admin') || "Administración"}
               >
                 <Settings className="h-5 w-5" />

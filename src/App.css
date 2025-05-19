@@ -46,7 +46,7 @@
 .page-transition-container {
   position: relative;
   min-height: 100vh;
-  padding-top: 64px; /* Altura aproximada del encabezado */
+  padding-top: 64px; /* Altura exacta del encabezado */
 }
 
 header {
@@ -55,7 +55,22 @@ header {
 }
 
 header button {
-  transition: all 0.3s ease !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+/* Estilo para los iconos de navegación */
+.navigation-icon {
+  transition: none;
+  will-change: auto;
+}
+
+/* Estilo para el icono activo */
+.active-icon {
+  background-color: #8B5CF6; /* Color primario */
+  border-radius: 50%;
+  padding: 8px;
+  color: white !important;
 }
 
 header .bg-primary {
@@ -76,4 +91,3 @@ header .bg-primary {
 main {
   width: 100%;
 }
-
