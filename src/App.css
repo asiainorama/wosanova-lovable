@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -40,3 +41,39 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Nuevos estilos para la navegación */
+.page-transition-container {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 64px; /* Altura aproximada del encabezado */
+}
+
+header {
+  transition: background-color 0.3s ease;
+  height: 64px; /* Altura fija del encabezado */
+}
+
+header button {
+  transition: all 0.3s ease !important;
+}
+
+header .bg-primary {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajuste de las páginas con contenido para evitar superposición */
+.min-h-screen {
+  padding-top: 0; /* Eliminado porque ahora usamos el contenedor con padding */
+}
+
+/* Asegurar que las transiciones sean suaves */
+.container {
+  transition: opacity 0.2s ease;
+}
+
+/* Ensure content below header */
+main {
+  width: 100%;
+}
+

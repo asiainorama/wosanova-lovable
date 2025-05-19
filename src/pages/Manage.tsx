@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import AppAvatarFallback from '@/components/cards/AvatarFallback';
 // Define category groups (same as in Catalog.tsx)
 interface CategoryGroup {
   name: string;
-  displayName: string; // Add display name for translation
+  displayName: string;
   categories: string[];
 }
 
@@ -139,10 +140,10 @@ const Manage = () => {
   }, [favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-16">
       <Header title={t('header.manage') || "Gestionar Apps"} />
       
-      <main className="container mx-auto px-4 py-6 flex-1 mt-16">
+      <main className="container mx-auto px-4 py-6 flex-1">
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4 gradient-text">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
           
