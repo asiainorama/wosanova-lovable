@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -20,7 +19,7 @@ const NotFound = () => {
   const isDarkMode = mode === 'dark' || (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white pt-[64px]">
       <div className="flex justify-center mb-4">
         <img 
           src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
