@@ -23,6 +23,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       const session = data.session;
       
       if (session?.user?.email) {
+        // Solo se considera administrador si el email es asiainorama@gmail.com o termina en @wosanova.com
         const isAdminUser = session.user.email.endsWith("@wosanova.com") || 
                           session.user.email === "asiainorama@gmail.com";
         setIsAdmin(isAdminUser);
@@ -33,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button 
@@ -49,23 +50,23 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         
         <div className="flex items-center gap-2">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Inicio">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title={t('header.home') || "Inicio"}>
               <Home className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/catalog">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Catálogo">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title={t('header.catalog') || "Catálogo"}>
               <Search className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/manage">
-            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Gestionar">
+            <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title={t('header.manage') || "Gestionar"}>
               <Trash2 className="h-5 w-5" />
             </Button>
           </Link>
           {isAdmin && (
             <Link to="/admin">
-              <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title="Administración">
+              <Button variant="ghost" size="icon" className="rounded-full dark:text-white dark:hover:bg-gray-800" title={t('header.admin') || "Administración"}>
                 <Settings className="h-5 w-5" />
               </Button>
             </Link>

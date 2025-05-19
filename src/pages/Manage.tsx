@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { useAppContext } from '@/contexts/AppContext';
@@ -113,30 +113,7 @@ const Manage = () => {
   const { favorites, removeFromFavorites } = useAppContext();
   const { t } = useLanguage();
   
-  // Asegurar que el scroll vertical esté habilitado para esta página
-  useEffect(() => {
-    // Forzar el scroll vertical para esta página
-    document.body.style.overflowY = 'auto';
-    document.body.style.overflowX = 'hidden';
-    
-    // Ejecutar varias veces para asegurar que los cambios se apliquen
-    const timer1 = setTimeout(() => {
-      document.body.style.overflowY = 'auto';
-      document.body.style.overflowX = 'hidden';
-    }, 100);
-    
-    const timer2 = setTimeout(() => {
-      document.body.style.overflowY = 'auto';
-      document.body.style.overflowX = 'hidden';
-    }, 500);
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
-  
-  // Group favorites by category group and sort alphabetically
+  // Grouping favorites by category
   const groupedFavorites = useMemo(() => {
     // First sort all favorites by name
     const sortedFavorites = [...favorites].sort((a, b) => a.name.localeCompare(b.name));
@@ -162,10 +139,10 @@ const Manage = () => {
   }, [favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col overflow-y-auto">
+    <div className="min-h-screen flex flex-col">
       <Header title={t('header.manage') || "Gestionar Apps"} />
       
-      <main className="container mx-auto px-4 py-6 flex-1 overflow-y-auto">
+      <main className="container mx-auto px-4 py-6 flex-1 mt-16">
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4 gradient-text">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
           
