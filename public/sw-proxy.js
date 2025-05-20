@@ -1,17 +1,16 @@
+// Simple PWA Service Worker for offline support
+const CACHE_NAME = 'wosanova-app-cache-v1';
 
-// PWA Proxy Service Worker - Basic Cache Implementation
-
-const CACHE_NAME = 'wosanova-proxy-cache-v1';
-
-// Files to cache for the proxy pages
+// Core files to cache for offline functionality
 const urlsToCache = [
   '/',
   '/index.html',
+  '/manifest.json',
   '/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png'
 ];
 
+// Install the service worker and cache core files
 self.addEventListener('install', (event) => {
-  // Install service worker and cache core files
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -21,8 +20,8 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
+// Activate and clean up old caches
 self.addEventListener('activate', (event) => {
-  // Clean up old caches
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -37,12 +36,45 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Cache-first strategy for all requests
 self.addEventListener('fetch', (event) => {
-  // Basic network-first strategy
   event.respondWith(
-    fetch(event.request)
-      .catch(() => {
-        return caches.match(event.request);
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached response if found
+        if (response) {
+          return response;
+        }
+        
+        // Otherwise fetch from network and cache the response
+        return fetch(event.request)
+          .then((response) => {
+            // Don't cache if response is not valid
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clone the response as it can only be consumed once
+            const responseToCache = response.clone();
+            
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+              
+            return response;
+          })
+          .catch(() => {
+            // If both cache and network fail, return a simple offline page
+            // This could be enhanced with a custom offline page
+            return new Response('Aplicación no disponible sin conexión.', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
+          });
       })
   );
 });
