@@ -3,10 +3,9 @@ import React from 'react';
 import { AppData } from '@/data/apps';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Heart, ExternalLink } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
-import InstallButton from './InstallButton';
 
 interface ListViewCardProps {
   app: AppData;
@@ -46,26 +45,6 @@ const ListViewCard: React.FC<ListViewCardProps> = ({ app, favorite, handleAction
         <div>
           <h3 className="text-lg font-medium dark:text-white">{app.name}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-300">{app.description}</p>
-          <div className="flex space-x-2 mt-1">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-xs h-7 px-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(app.url, "_blank");
-              }}
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Visitar
-            </Button>
-            
-            <InstallButton 
-              app={app} 
-              size="sm"
-              className="text-xs h-7 px-2"
-            />
-          </div>
         </div>
       </div>
 
