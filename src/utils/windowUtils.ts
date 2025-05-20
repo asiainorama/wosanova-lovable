@@ -1,11 +1,12 @@
 
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-// Enhanced window opening function with PWA-like behavior
+// Enhanced window opening function with error handling
 export const safeOpenWindow = (url: string) => {
   try {
-    // For widgets and internal routes, handle differently
-    if (url.startsWith('/widgets/')) {
+    // For widgets and home page URLs, handle differently based on path
+    if (url.startsWith('/widgets/') || window.location.pathname === '/') {
       window.location.href = url;
       return;
     }
@@ -19,10 +20,8 @@ export const safeOpenWindow = (url: string) => {
       return;
     }
     
-    // On desktop, open in a new window with standalone appearance
+    // On desktop, open in a new window with appropriate dimensions
     const isWidget = url.includes('/widgets/');
-    
-    // Default window dimensions
     let width = 1200;
     let height = 800;
     
@@ -32,18 +31,16 @@ export const safeOpenWindow = (url: string) => {
       height = 700;
     }
     
-    // Open with minimal browser UI (as close to PWA as possible)
     const newWindow = window.open(
       url, 
       '_blank', 
-      `width=${width},height=${height},location=no,menubar=no,toolbar=no,status=no,scrollbars=yes,resizable=yes`
+      `noopener,noreferrer,width=${width},height=${height},menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes`
     );
     
     // If the window is null, it might be blocked by popup blockers
     if (!newWindow) {
       console.warn('Window opening was blocked or failed');
-      
-      // Try a simpler approach as fallback
+      // Fallback - try simple _blank approach
       const fallbackWindow = window.open(url, '_blank');
       
       if (!fallbackWindow) {
@@ -52,7 +49,7 @@ export const safeOpenWindow = (url: string) => {
           className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
         });
         
-        // Last resort - navigate in current window if user confirms
+        // Last resort - change current window location
         if (confirm('¿Quieres abrir la aplicación en esta ventana?')) {
           window.location.href = url;
         }
