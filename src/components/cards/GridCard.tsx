@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
 import FavoriteButton from './FavoriteButton';
+import InstallButton from './InstallButton';
 
 interface GridCardProps {
   app: AppData;
@@ -78,18 +79,26 @@ const GridCard: React.FC<GridCardProps> = ({
         </p>
         
         <div className="flex justify-between items-center mt-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(app.url, "_blank");
-            }}
-          >
-            <ExternalLink className="h-3 w-3 mr-1" />
-            Visitar
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(app.url, "_blank");
+              }}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Visitar
+            </Button>
+            
+            <InstallButton 
+              app={app} 
+              size="sm"
+              className="text-xs"
+            />
+          </div>
           
           <FavoriteButton
             favorite={favorite}
