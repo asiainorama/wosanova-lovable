@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,19 +55,21 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:flex dark:text-white dark:hover:bg-gray-800"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          {/* Title hidden from top bar but kept in component for functionality */}
-          <h1 className="text-2xl font-bold gradient-text hidden">{title}</h1>
+    <header className="sticky top-0 z-50 w-full">
+      <div className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:flex dark:text-white dark:hover:bg-gray-800"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            {/* We keep the title hidden but in the DOM for functionality */}
+            <span className="sr-only">{title}</span>
+          </div>
         </div>
       </div>
       

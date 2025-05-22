@@ -43,7 +43,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, links = [] }) => {
   ];
 
   return (
-    <div className="sticky top-0 z-50 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm w-full">
+    <div className="bg-white w-full z-50 border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm">
       <div className="w-full px-4 py-2">
         <div className="flex justify-center items-center gap-2">
           {navigationLinks.map((link) => (
@@ -56,7 +56,7 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, links = [] }) => {
                     ? "bg-primary text-white"
                     : "text-gray-500 dark:text-gray-300"
                 }`}
-                title={link.text}
+                aria-label={link.text}
               >
                 {link.icon || getIconByName(link.text)}
               </Button>
