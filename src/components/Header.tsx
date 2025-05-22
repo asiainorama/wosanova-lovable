@@ -67,7 +67,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold gradient-text">{title}</h1>
+          {/* Title hidden from top bar but kept in component for functionality */}
+          <h1 className="text-2xl font-bold gradient-text hidden">{title}</h1>
         </div>
       </div>
       
