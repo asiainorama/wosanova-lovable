@@ -13,6 +13,7 @@ interface TopBarLink {
 interface TopBarProps {
   activePage: string;
   links?: TopBarLink[];
+  leftContent?: React.ReactNode; // New prop to add hamburger menu
 }
 
 // Helper function to get icon by name
@@ -34,7 +35,7 @@ const getIconByName = (name: string) => {
   }
 };
 
-const TopBar: React.FC<TopBarProps> = ({ activePage, links = [] }) => {
+const TopBar: React.FC<TopBarProps> = ({ activePage, links = [], leftContent }) => {
   // Default links if none provided
   const navigationLinks = links.length > 0 ? links : [
     { text: 'Home', href: '/', icon: <Home className="h-5 w-5" /> },
@@ -45,23 +46,36 @@ const TopBar: React.FC<TopBarProps> = ({ activePage, links = [] }) => {
   return (
     <div className="bg-white w-full z-50 border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm">
       <div className="w-full px-4 py-2">
-        <div className="flex justify-center items-center gap-2">
-          {navigationLinks.map((link) => (
-            <Link key={link.href} to={link.href}>
-              <Button
-                variant={activePage === link.text.toLowerCase() ? "default" : "ghost"}
-                size="icon"
-                className={`rounded-full ${
-                  activePage === link.text.toLowerCase()
-                    ? "bg-primary text-white"
-                    : "text-gray-500 dark:text-gray-300"
-                }`}
-                aria-label={link.text}
-              >
-                {link.icon || getIconByName(link.text)}
-              </Button>
-            </Link>
-          ))}
+        <div className="flex items-center">
+          {/* Left side content (hamburger menu) */}
+          {leftContent && <div className="mr-auto">{leftContent}</div>}
+          
+          {/* Center navigation icons */}
+          <div className="flex justify-center items-center gap-2 mx-auto">
+            {navigationLinks.map((link) => (
+              <Link key={link.href} to={link.href}>
+                <Button
+                  variant={activePage === link.text.toLowerCase() ? "default" : "ghost"}
+                  size="icon"
+                  className={`rounded-full ${
+                    activePage === link.text.toLowerCase()
+                      ? "bg-primary text-white"
+                      : "text-gray-500 dark:text-gray-300"
+                  }`}
+                  aria-label={link.text}
+                >
+                  {link.icon || getIconByName(link.text)}
+                </Button>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Empty div to balance the layout */}
+          <div className="ml-auto invisible">
+            <Button variant="ghost" size="icon" className="opacity-0">
+              <Home className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -54,28 +54,27 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     return links;
   };
 
+  // Create hamburger menu button
+  const hamburgerButton = (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      className="dark:text-white dark:hover:bg-gray-800"
+      onClick={() => setSidebarOpen(true)}
+    >
+      <Menu className="h-5 w-5" />
+    </Button>
+  );
+
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:flex dark:text-white dark:hover:bg-gray-800"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            {/* We keep the title hidden but in the DOM for functionality */}
-            <span className="sr-only">{title}</span>
-          </div>
-        </div>
-      </div>
+      {/* We keep the title hidden but in the DOM for functionality */}
+      <span className="sr-only">{title}</span>
       
       <TopBar 
         activePage={determineActivePage()} 
-        links={getNavigationLinks()} 
+        links={getNavigationLinks()}
+        leftContent={hamburgerButton}
       />
 
       <SidebarMenu isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
