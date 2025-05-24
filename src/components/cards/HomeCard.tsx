@@ -28,9 +28,20 @@ const HomeCard: React.FC<HomeCardProps> = ({
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   
-  const iconSize = smallerIcons ? "w-10 h-10" : "w-12 h-12";
-  const buttonSize = smallerIcons ? "h-5 w-5" : "h-6 w-6";
-  const buttonIconSize = smallerIcons ? "h-2.5 w-2.5" : "h-3 w-3";
+  // Responsive icon sizes: mobile (w-10 h-10), tablet (w-14 h-14), desktop (w-16 h-16)
+  const iconSize = smallerIcons 
+    ? "w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" 
+    : "w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16";
+    
+  // Responsive button sizes
+  const buttonSize = smallerIcons 
+    ? "h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:h-6" 
+    : "h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7";
+    
+  // Responsive button icon sizes  
+  const buttonIconSize = smallerIcons 
+    ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
+    : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
 
   return (
     <div 
@@ -77,7 +88,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
         )}
       </div>
       
-      <h3 className="text-xs font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
+      <h3 className="text-xs md:text-sm lg:text-base font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
     </div>
   );
 };
