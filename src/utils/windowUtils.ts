@@ -5,14 +5,41 @@ import { useIsMobile } from '@/hooks/use-mobile';
 // Enhanced window opening function with error handling
 export const safeOpenWindow = (url: string) => {
   try {
+    // Check if we're on the home page
+    const isHomePage = window.location.pathname === '/';
+    
     // For widgets and home page URLs, handle differently based on path
     if (url.startsWith('/widgets/') || window.location.pathname === '/') {
-      window.location.href = url;
-      return;
+      // If it's widgets, just navigate normally
+      if (url.startsWith('/widgets/')) {
+        window.location.href = url;
+        return;
+      }
     }
     
     // Check if it's a mobile device
     const isMobile = window.innerWidth < 768;
+    
+    // If we're on the home page, open apps as PWA in independent windows
+    if (isHomePage && !url.startsWith('/widgets/')) {
+      // Try to open as PWA-like window with specific features
+      const pwaWindow = window.open(
+        url,
+        '_blank',
+        `width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes,left=${(screen.width - 1024) / 2},top=${(screen.height - 768) / 2}`
+      );
+      
+      if (pwaWindow) {
+        pwaWindow.focus();
+        return;
+      } else {
+        // Fallback if popup is blocked
+        toast.error('No se pudo abrir la aplicación. Por favor, permita ventanas emergentes para este sitio.', {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+        });
+        return;
+      }
+    }
     
     // On mobile, just navigate to the URL in the same window
     if (isMobile) {
