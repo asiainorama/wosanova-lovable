@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
@@ -84,9 +83,9 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       
       <div className="bg-white w-full border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm">
         <div className="w-full px-4 py-2">
-          <div className="flex items-center">
+          <div className="flex items-center justify-between">
             {/* Left side - hamburger menu */}
-            <div className="mr-4">
+            <div>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -97,8 +96,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               </Button>
             </div>
             
-            {/* Center navigation icons */}
-            <div className="flex justify-center items-center gap-2 mx-auto">
+            {/* Right side - navigation icons */}
+            <div className="flex items-center gap-2">
               {navigationLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Button
@@ -116,9 +115,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 </Link>
               ))}
             </div>
-            
-            {/* Right side - empty space for balance */}
-            <div className="ml-4 w-10"></div>
           </div>
         </div>
       </div>
