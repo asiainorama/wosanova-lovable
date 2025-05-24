@@ -21,9 +21,9 @@ const WidgetButton: React.FC<WidgetProps> = ({ icon, name, url }) => {
       onClick={handleClick}
       variant="ghost" 
       size="icon"
-      className="rounded-full h-12 w-12 flex items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700"
+      className="rounded-full h-10 w-10 flex items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700 flex-1 max-w-[60px]"
     >
-      {icon}
+      {React.cloneElement(icon as React.ReactElement, { size: 20 })}
       <span className="sr-only">{name}</span>
     </Button>
   );
@@ -35,28 +35,28 @@ const WidgetIconsRow: React.FC = () => {
   const widgets = [
     { 
       name: 'Calculadora', 
-      icon: <Calculator size={24} className="text-primary" />, 
+      icon: <Calculator className="text-primary" />, 
       url: '/widgets/calculator'
     },
     { 
       name: 'Conversor', 
-      icon: <ArrowUpDown size={24} className="text-primary" />, 
+      icon: <ArrowUpDown className="text-primary" />, 
       url: '/widgets/converter' 
     },
     { 
       name: 'Notas', 
-      icon: <FileText size={24} className="text-primary" />, 
+      icon: <FileText className="text-primary" />, 
       url: '/widgets/notes'
     },
     { 
       name: 'Alarmas', 
-      icon: <AlarmClock size={24} className="text-primary" />, 
+      icon: <AlarmClock className="text-primary" />, 
       url: '/widgets/alarm'
     }
   ];
 
   return (
-    <div className="flex justify-around items-center p-4 gap-2">
+    <div className="flex justify-between items-center p-3 gap-2">
       {widgets.map((widget) => (
         <WidgetButton 
           key={widget.name}

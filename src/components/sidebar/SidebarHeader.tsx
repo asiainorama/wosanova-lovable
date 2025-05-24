@@ -14,15 +14,15 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
   const { t } = useLanguage();
 
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-      <div className="flex items-center justify-between px-2 w-full">
-        <div className="w-1/3 text-start">
-          <h2 className="text-xl font-bold gradient-text truncate">
+    <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex-1 text-start">
+          <h2 className="text-lg font-bold gradient-text truncate">
             {t('app.name')}
           </h2>
         </div>
         
-        <div className="w-1/3 flex justify-center">
+        <div className="flex-shrink-0 mx-3">
           <UserProfileSection 
             username={username}
             avatarUrl={avatarUrl}
@@ -32,7 +32,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
           />
         </div>
         
-        <div className="w-1/3 text-end">
+        <div className="flex-1 text-end">
           <span className="font-medium dark:text-white truncate text-sm inline-block max-w-full">
             {username || t('profile.username')}
           </span>

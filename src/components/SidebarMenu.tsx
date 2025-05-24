@@ -89,35 +89,50 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white overflow-y-auto"
+        className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white flex flex-col h-full overflow-hidden"
       >
-        <div className="flex flex-col h-full">
+        {/* Header - Fixed height */}
+        <div className="flex-shrink-0">
           <SidebarHeader 
             username={username} 
             avatarUrl={avatarUrl} 
             userId={userId} 
             onClose={() => onOpenChange(false)}
           />
+        </div>
 
-          <div className="px-4 py-2">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          {/* Time Widget - Compact */}
+          <div className="px-3 py-2">
             <TimeWidget />
           </div>
 
-          <div className="px-4 py-2">
+          {/* Weather Widget - Compact */}
+          <div className="px-3 py-1">
             <WeatherWidget />
           </div>
           
-          <Separator className="mx-4 my-2" />
+          <Separator className="mx-3 my-2" />
           
-          <WidgetIconsRow />
-
-          <Separator className="my-2" />
-          
-          <div className="px-4 py-2">
-            <h3 className="text-sm font-medium mb-2 dark:text-gray-300">Calendario</h3>
-            <CalendarWidget />
+          {/* Widget Icons - Responsive */}
+          <div className="px-2">
+            <WidgetIconsRow />
           </div>
 
+          <Separator className="mx-3 my-2" />
+          
+          {/* Calendar Widget - Compact */}
+          <div className="px-3 py-2">
+            <h3 className="text-sm font-medium mb-2 dark:text-gray-300">Calendario</h3>
+            <div className="w-full">
+              <CalendarWidget />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer - Fixed at bottom */}
+        <div className="flex-shrink-0 mt-auto">
           <SidebarFooter />
         </div>
       </SheetContent>

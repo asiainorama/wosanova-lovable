@@ -24,7 +24,7 @@ const CalendarWidget = () => {
           onSelect={handleDateSelect}
           locale={es}
           weekStartsOn={1}
-          className="rounded-md border w-full [&_.rdp-cell]:text-center [&_.rdp-button]:mx-auto [&_.rdp-day]:flex [&_.rdp-day]:justify-center [&_.rdp-table]:w-full [&_.rdp-head_th]:text-center"
+          className="rounded-md border-0 w-full text-xs [&_.rdp-cell]:text-center [&_.rdp-button]:mx-auto [&_.rdp-day]:flex [&_.rdp-day]:justify-center [&_.rdp-table]:w-full [&_.rdp-head_th]:text-center [&_.rdp-head_th]:text-xs [&_.rdp-day]:text-xs [&_.rdp-day]:h-7 [&_.rdp-button]:h-6 [&_.rdp-button]:w-6 [&_.rdp-button]:text-xs"
         />
       </div>
     </div>
