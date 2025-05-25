@@ -132,23 +132,28 @@ const Catalog = () => {
     <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto">
       <Header title="Catálogo" />
 
-      <div className="container max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-6 items-start">
-          <div className="w-full md:w-2/3">
-            <SearchBar 
-              searchTerm={searchTerm} 
-              onSearchChange={setSearchTerm} 
-            />
-          </div>
-          <div className="w-full md:w-1/3">
-            <CategoryFilter 
-              selectedCategory={selectedCategory} 
-              onCategoryChange={setSelectedCategory} 
-              categories={categories}
-            />
+      {/* Filtros fijos - ocupan una sola fila en móvil */}
+      <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4">
+        <div className="container max-w-7xl mx-auto px-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-start">
+            <div className="flex-1 min-w-0">
+              <SearchBar 
+                searchTerm={searchTerm} 
+                onSearchChange={setSearchTerm} 
+              />
+            </div>
+            <div className="w-full sm:w-auto sm:min-w-[200px]">
+              <CategoryFilter 
+                selectedCategory={selectedCategory} 
+                onCategoryChange={setSelectedCategory} 
+                categories={categories}
+              />
+            </div>
           </div>
         </div>
-        
+      </div>
+
+      <div className="container max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <LoadingIndicator />
         ) : visibleCategories.length > 0 ? (
