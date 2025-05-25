@@ -28,10 +28,10 @@ const HomeCard: React.FC<HomeCardProps> = ({
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   
-  // Responsive icon sizes: mobile (w-10 h-10), tablet (w-14 h-14), desktop (w-16 h-16)
+  // Responsive icon sizes: mobile (w-12 h-12), tablet (w-16 h-16), desktop (w-20 h-20)
   const iconSize = smallerIcons 
-    ? "w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" 
-    : "w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16";
+    ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
+    : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20";
     
   // Responsive button sizes
   const buttonSize = smallerIcons 
