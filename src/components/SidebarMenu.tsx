@@ -101,10 +101,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 bg-background border-r-0 dark:bg-gray-900 dark:text-white flex flex-col h-full overflow-hidden"
+        className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 border-r-0 flex flex-col h-full overflow-hidden
+                   backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 
+                   shadow-2xl shadow-black/10 dark:shadow-black/30
+                   border-white/20 dark:border-gray-800/30"
       >
-        {/* Header - Fixed height */}
-        <div className="flex-shrink-0">
+        {/* Header - Fixed height with glassmorphism */}
+        <div className="flex-shrink-0 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-b border-white/20 dark:border-gray-700/30">
           <SidebarHeader 
             username={username} 
             avatarUrl={avatarUrl} 
@@ -125,14 +128,14 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
             <WeatherWidget />
           </div>
           
-          <Separator className="mx-3 my-2" />
+          <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
           
           {/* Widget Icons - Responsive */}
           <div className="px-2">
             <WidgetIconsRow />
           </div>
 
-          <Separator className="mx-3 my-2" />
+          <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
           
           {/* Calendar Widget - Compact */}
           <div className="px-3 py-2">
@@ -145,12 +148,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           {/* Admin Link - Only show for admin users */}
           {isAdmin && (
             <>
-              <Separator className="mx-3 my-2" />
+              <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
               <div className="px-3 py-2">
                 <Link to="/admin" onClick={() => onOpenChange(false)}>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="w-full justify-start text-left hover:bg-white/20 dark:hover:bg-gray-700/50 
+                             backdrop-blur-sm transition-all duration-200"
                   >
                     <Settings className="h-4 w-4 mr-2" />
                     Administración
@@ -161,8 +165,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           )}
         </div>
 
-        {/* Footer - Fixed at bottom */}
-        <div className="flex-shrink-0 mt-auto">
+        {/* Footer - Fixed at bottom with glassmorphism */}
+        <div className="flex-shrink-0 mt-auto backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-t border-white/20 dark:border-gray-700/30">
           <SidebarFooter />
         </div>
       </SheetContent>

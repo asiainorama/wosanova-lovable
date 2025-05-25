@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
@@ -77,7 +78,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       {/* We keep the title hidden but in the DOM for functionality */}
       <span className="sr-only">{title}</span>
       
-      <div className="bg-white w-full border-b border-gray-200 dark:bg-gray-900 dark:border-gray-800 shadow-sm">
+      {/* Glassmorphism effect with backdrop blur and translucent background */}
+      <div className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 w-full border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="w-full px-4 py-2">
           <div className="flex items-center justify-between">
             {/* Left side - hamburger menu */}
@@ -85,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="dark:text-white dark:hover:bg-gray-800"
+                className="dark:text-white dark:hover:bg-white/10 hover:bg-black/5 transition-colors"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="h-5 w-5" />
@@ -99,10 +101,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                   <Button
                     variant={activePage === link.text.toLowerCase() ? "default" : "ghost"}
                     size="icon"
-                    className={`rounded-full ${
+                    className={`rounded-full transition-all ${
                       activePage === link.text.toLowerCase()
-                        ? "bg-primary text-white"
-                        : "text-gray-500 dark:text-gray-300"
+                        ? "bg-primary/90 text-white shadow-lg backdrop-blur-sm"
+                        : "text-gray-500 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10"
                     }`}
                     aria-label={link.text}
                   >
