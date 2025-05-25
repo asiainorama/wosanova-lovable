@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
+import { Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // Import our components
 import TimeWidget from './sidebar/TimeWidget';
@@ -27,6 +30,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Get user session and profile data
   useEffect(() => {
@@ -36,6 +40,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         
         if (session?.user) {
           setUserId(session.user.id);
+          
+          // Check if user is admin
+          if (session.user.email) {
+            const isAdminUser = session.user.email.endsWith("@wosanova.com") || 
+                              session.user.email === "asiainorama@gmail.com";
+            setIsAdmin(isAdminUser);
+          }
           
           // Try to get user profile data
           try {
@@ -75,6 +86,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         setUserId(null);
         setUsername('');
         setAvatarUrl('');
+        setIsAdmin(false);
         localStorage.removeItem('username');
         localStorage.removeItem('avatarUrl');
       }
@@ -129,6 +141,24 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
               <CalendarWidget />
             </div>
           </div>
+
+          {/* Admin Link - Only show for admin users */}
+          {isAdmin && (
+            <>
+              <Separator className="mx-3 my-2" />
+              <div className="px-3 py-2">
+                <Link to="/admin" onClick={() => onOpenChange(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Administración
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer - Fixed at bottom */}

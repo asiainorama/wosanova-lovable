@@ -58,17 +58,13 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     return "home";
   };
 
-  // Create links array with admin link if user is admin
+  // Create links array without admin link (moved to sidebar)
   const getNavigationLinks = () => {
     const links = [
       { text: 'Home', href: '/', icon: null },
       { text: 'Catalog', href: '/catalog', icon: null },
       { text: 'Manage', href: '/manage', icon: null },
     ];
-    
-    if (isAdmin) {
-      links.push({ text: 'Admin', href: '/admin', icon: null });
-    }
     
     return links;
   };
