@@ -14,11 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Rocket, User, Trash2, LogOut } from 'lucide-react';
-import { cn } from "@/lib/utils";
-import { ThemeMode } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
-// Define profile type based on the actual database structure
 interface UserProfile {
   username?: string;
   avatar_url?: string;
@@ -34,9 +32,9 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [selectedBackground, setSelectedBackground] = useState('default');
-  
-  // Debounce timer for auto-save
   const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  useScrollBehavior(); // Apply scroll behavior
 
   // Get current user details and profile data
   useEffect(() => {
@@ -46,7 +44,6 @@ const Profile = () => {
       if (session?.user) {
         setUserId(session.user.id);
         
-        // Try to get user profile data from Supabase
         try {
           const { data, error } = await supabase
             .from('user_profiles')
@@ -55,16 +52,12 @@ const Profile = () => {
             .single();
             
           if (data && !error) {
-            // Use type assertion to ensure proper typing
             const profileData = data as unknown as UserProfile;
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
             setSelectedBackground(profileData.background_preference || 'default');
             
-            // Only log the user's theme preference, don't force it
-            console.log('User has theme_mode stored:', profileData.theme_mode);
-            
-            // Also update localStorage for immediate use
+            // Update localStorage
             localStorage.setItem('username', profileData.username || '');
             localStorage.setItem('avatarUrl', profileData.avatar_url || '');
             localStorage.setItem('backgroundPreference', profileData.background_preference || 'default');
@@ -80,12 +73,10 @@ const Profile = () => {
 
   // Auto-save function with debounce
   const autoSaveChanges = () => {
-    // Clear any existing timer
     if (saveTimer) {
       clearTimeout(saveTimer);
     }
     
-    // Set a new timer to save after 1 second of inactivity
     const timer = setTimeout(() => {
       handleSaveProfile();
     }, 1000);
@@ -102,6 +93,40 @@ const Profile = () => {
     };
   }, [saveTimer]);
 
+  const handleSaveProfile = async () => {
+    if (!userId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({ 
+          id: userId,
+          username,
+          avatar_url: avatarUrl,
+          theme_mode: mode,
+          background_preference: selectedBackground
+        }, { 
+          onConflict: 'id'
+        });
+        
+      if (error) throw error;
+      
+      // Save to localStorage
+      localStorage.setItem('username', username);
+      localStorage.setItem('avatarUrl', avatarUrl);
+      localStorage.setItem('themeMode', mode);
+      localStorage.setItem('backgroundPreference', selectedBackground);
+      
+      // Notify other components about the change
+      window.dispatchEvent(new CustomEvent('backgroundPreferenceUpdated'));
+      
+      console.log('Profile updated successfully');
+    } catch (error: any) {
+      toast.error(t('error.profile'));
+      console.error(error);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -114,7 +139,6 @@ const Profile = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      // In a real app, you'd add proper account deletion logic here
       await supabase.auth.signOut();
       toast.success(t('profile.deleted'));
       navigate('/auth');
@@ -123,48 +147,6 @@ const Profile = () => {
     }
   };
 
-  const handleSaveProfile = async () => {
-    if (!userId) return;
-    
-    try {
-      // Save to Supabase with proper typing
-      try {
-        const { error } = await supabase
-          .from('user_profiles')
-          .upsert({ 
-            id: userId,
-            username,
-            avatar_url: avatarUrl,
-            theme_mode: mode,
-            background_preference: selectedBackground
-          }, { 
-            onConflict: 'id'
-          });
-          
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error upserting to user_profiles:', error);
-        throw error;
-      }
-      
-      // Save to localStorage as well for immediate use
-      localStorage.setItem('username', username);
-      localStorage.setItem('avatarUrl', avatarUrl);
-      localStorage.setItem('themeMode', mode);
-      localStorage.setItem('backgroundPreference', selectedBackground);
-      
-      // Dispatch custom event to notify other components about background change
-      window.dispatchEvent(new CustomEvent('backgroundPreferenceUpdated'));
-      
-      console.log('Profile updated successfully:', { username, avatarUrl, mode, selectedBackground });
-      // No toast notification for auto-save to avoid interruptions
-    } catch (error: any) {
-      toast.error(t('error.profile'));
-      console.error(error);
-    }
-  };
-
-  // Updated input handlers to trigger auto-save
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
     autoSaveChanges();
@@ -180,15 +162,10 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  // Add useEffect to log whenever mode changes in the profile page
-  useEffect(() => {
-    console.log('Profile page - current theme mode:', mode);
-  }, [mode]);
-
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Header title={t('profile.title')} />
-      <div className="container max-w-3xl mx-auto px-4 py-8 pb-20">
+      <div className="container max-w-3xl mx-auto px-4 py-8 pb-24 overflow-y-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
@@ -197,7 +174,7 @@ const Profile = () => {
           <p className="text-gray-600 dark:text-gray-300 mb-6">{t('profile.description')}</p>
 
           <div className="space-y-6">
-            {/* Profile Section with aligned username and avatar */}
+            {/* Profile Section */}
             <div className="flex items-center gap-4">
               <Avatar className="w-14 h-14">
                 <AvatarImage src={avatarUrl} />
@@ -234,7 +211,7 @@ const Profile = () => {
             
             <Separator className="my-2" />
             
-            {/* Theme Selector Section */}
+            {/* Theme Selector */}
             <div>
               <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
               <ThemeSelector onThemeChange={autoSaveChanges} />
@@ -242,7 +219,7 @@ const Profile = () => {
             
             <Separator className="my-2" />
             
-            {/* Background Selector Section */}
+            {/* Background Selector */}
             <div>
               <BackgroundSelector 
                 selectedBackground={selectedBackground}
@@ -252,7 +229,7 @@ const Profile = () => {
             
             <Separator className="my-2" />
             
-            {/* Actions Section */}
+            {/* Actions */}
             <div className="pt-1 flex justify-center gap-4">
               <Button 
                 onClick={handleSignOut} 

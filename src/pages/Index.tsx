@@ -14,80 +14,89 @@ const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
   const [backgroundPreference, setBackgroundPreference] = useState('default');
-  useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
+  useScrollBehavior();
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Load background preference from localStorage and listen for changes
+  // Load and update background preference
   useEffect(() => {
-    const loadBackgroundPreference = () => {
-      const savedBackground = localStorage.getItem('backgroundPreference') || 'default';
-      setBackgroundPreference(savedBackground);
+    const updateBackground = () => {
+      const saved = localStorage.getItem('backgroundPreference') || 'default';
+      setBackgroundPreference(saved);
+      console.log('Background preference updated to:', saved);
     };
 
     // Load initial value
-    loadBackgroundPreference();
+    updateBackground();
 
-    // Listen for storage changes (when updated from Profile page)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'backgroundPreference') {
-        loadBackgroundPreference();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom event for same-tab updates
-    const handleBackgroundUpdate = () => {
-      loadBackgroundPreference();
-    };
-    
+    // Listen for custom events from Profile page
+    const handleBackgroundUpdate = () => updateBackground();
     window.addEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
 
+    // Listen for storage changes from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'backgroundPreference') {
+        updateBackground();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
-  // Prefetch logos for favorite apps as soon as home page loads (without toast)
+  // Prefetch logos for favorite apps
   useEffect(() => {
     if (favorites.length > 0) {
-      // Use silent mode to avoid notifications
       prefetchAppLogos(favorites);
     }
-    
-    // Forzar el comportamiento de scroll horizontal adecuado
-    document.body.style.overflowY = 'hidden';
-    document.body.style.overflowX = 'auto';
   }, [favorites]);
 
-  // Define background styles
+  // Get background style based on preference
   const getBackgroundStyle = () => {
+    console.log('Applying background style for:', backgroundPreference);
+    
     switch (backgroundPreference) {
       case 'pastel':
-        return { background: 'linear-gradient(135deg, #fef7cd 0%, #f9a8d4 50%, #d8b4fe 100%)' };
+        return { 
+          background: 'linear-gradient(135deg, #fef7cd 0%, #f9a8d4 50%, #d8b4fe 100%)'
+        };
       case 'gray':
-        return { background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #4b5563 100%)' };
+        return { 
+          background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #4b5563 100%)'
+        };
       case 'mango':
-        return { background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)' };
+        return { 
+          background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)'
+        };
       case 'pink-orange':
-        return { background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #fb923c 100%)' };
+        return { 
+          background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #fb923c 100%)'
+        };
       case 'green-blue':
-        return { background: 'linear-gradient(135deg, #86efac 0%, #2dd4bf 50%, #3b82f6 100%)' };
+        return { 
+          background: 'linear-gradient(135deg, #86efac 0%, #2dd4bf 50%, #3b82f6 100%)'
+        };
       default:
-        return { backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)' };
+        return { 
+          backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        };
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Background Image with overlay */}
+      {/* Background Layer */}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 z-0"
         style={getBackgroundStyle()}
       >
         {/* Overlay for better contrast */}
@@ -105,7 +114,7 @@ const Index = () => {
                 apps={sortedFavorites}
                 useCarousel={true}
                 smallerIcons={true}
-                carouselKey="home" // Unique key for the home carousel
+                carouselKey="home"
               />
             </div>
           ) : (
