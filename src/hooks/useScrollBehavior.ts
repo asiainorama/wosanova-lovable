@@ -18,6 +18,7 @@ export function useScrollBehavior() {
     // Determinar el tipo de scroll basado en la ruta actual
     const isHomePage = currentPath === '/' || currentPath === '/home';
     const isManagePage = currentPath === '/manage';
+    const isProfilePage = currentPath === '/profile';
     
     if (isHomePage) {
       // Configuración para página de inicio: scroll horizontal
@@ -37,6 +38,14 @@ export function useScrollBehavior() {
       }, 100);
       
       console.log('Forzando scroll vertical para página de gestión');
+    } else if (isProfilePage) {
+      // Página de perfil: permitir scroll vertical completo
+      document.body.style.overflowY = 'auto';
+      document.body.style.overflowX = 'hidden';
+      document.body.style.height = 'auto';
+      document.body.style.minHeight = '100vh';
+      
+      console.log('Permitiendo scroll vertical completo para página de perfil');
     } else {
       // Configuración para otras páginas: scroll vertical
       document.body.style.overflowY = 'auto';
@@ -49,6 +58,8 @@ export function useScrollBehavior() {
       // Limpiar estilos al desmontar o cambiar de ruta
       document.body.style.removeProperty('overflowX');
       document.body.style.removeProperty('overflowY');
+      document.body.style.removeProperty('height');
+      document.body.style.removeProperty('minHeight');
     };
   }, [location.pathname]);
 }

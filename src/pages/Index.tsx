@@ -21,10 +21,36 @@ const Index = () => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Load background preference from localStorage
+  // Load background preference from localStorage and listen for changes
   useEffect(() => {
-    const savedBackground = localStorage.getItem('backgroundPreference') || 'default';
-    setBackgroundPreference(savedBackground);
+    const loadBackgroundPreference = () => {
+      const savedBackground = localStorage.getItem('backgroundPreference') || 'default';
+      setBackgroundPreference(savedBackground);
+    };
+
+    // Load initial value
+    loadBackgroundPreference();
+
+    // Listen for storage changes (when updated from Profile page)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'backgroundPreference') {
+        loadBackgroundPreference();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event for same-tab updates
+    const handleBackgroundUpdate = () => {
+      loadBackgroundPreference();
+    };
+    
+    window.addEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
+    };
   }, []);
 
   // Prefetch logos for favorite apps as soon as home page loads (without toast)

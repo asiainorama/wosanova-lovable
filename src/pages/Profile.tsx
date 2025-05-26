@@ -153,6 +153,9 @@ const Profile = () => {
       localStorage.setItem('themeMode', mode);
       localStorage.setItem('backgroundPreference', selectedBackground);
       
+      // Dispatch custom event to notify other components about background change
+      window.dispatchEvent(new CustomEvent('backgroundPreferenceUpdated'));
+      
       console.log('Profile updated successfully:', { username, avatarUrl, mode, selectedBackground });
       // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
@@ -185,7 +188,7 @@ const Profile = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header title={t('profile.title')} />
-      <div className="container max-w-3xl mx-auto px-4 py-8">
+      <div className="container max-w-3xl mx-auto px-4 py-8 pb-20">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
