@@ -13,12 +13,19 @@ import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+  const [backgroundPreference, setBackgroundPreference] = useState('default');
   useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
+
+  // Load background preference from localStorage
+  useEffect(() => {
+    const savedBackground = localStorage.getItem('backgroundPreference') || 'default';
+    setBackgroundPreference(savedBackground);
+  }, []);
 
   // Prefetch logos for favorite apps as soon as home page loads (without toast)
   useEffect(() => {
@@ -32,14 +39,30 @@ const Index = () => {
     document.body.style.overflowX = 'auto';
   }, [favorites]);
 
+  // Define background styles
+  const getBackgroundStyle = () => {
+    switch (backgroundPreference) {
+      case 'pastel':
+        return { background: 'linear-gradient(135deg, #fef7cd 0%, #f9a8d4 50%, #d8b4fe 100%)' };
+      case 'gray':
+        return { background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #4b5563 100%)' };
+      case 'mango':
+        return { background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)' };
+      case 'pink-orange':
+        return { background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #fb923c 100%)' };
+      case 'green-blue':
+        return { background: 'linear-gradient(135deg, #86efac 0%, #2dd4bf 50%, #3b82f6 100%)' };
+      default:
+        return { backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)' };
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Background Image with overlay */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
-        }}
+        style={getBackgroundStyle()}
       >
         {/* Overlay for better contrast */}
         <div className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-sm"></div>

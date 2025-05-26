@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ThemeSelector } from '@/components/ThemeSelector';
+import { BackgroundSelector } from '@/components/BackgroundSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,6 +23,7 @@ interface UserProfile {
   username?: string;
   avatar_url?: string;
   theme_mode?: string;
+  background_preference?: string;
 }
 
 const Profile = () => {
@@ -30,6 +33,7 @@ const Profile = () => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [selectedBackground, setSelectedBackground] = useState('default');
   
   // Debounce timer for auto-save
   const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
@@ -46,7 +50,7 @@ const Profile = () => {
         try {
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('username, avatar_url, theme_mode')
+            .select('username, avatar_url, theme_mode, background_preference')
             .eq('id', session.user.id)
             .single();
             
@@ -55,6 +59,7 @@ const Profile = () => {
             const profileData = data as unknown as UserProfile;
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
+            setSelectedBackground(profileData.background_preference || 'default');
             
             // Only log the user's theme preference, don't force it
             console.log('User has theme_mode stored:', profileData.theme_mode);
@@ -62,6 +67,7 @@ const Profile = () => {
             // Also update localStorage for immediate use
             localStorage.setItem('username', profileData.username || '');
             localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+            localStorage.setItem('backgroundPreference', profileData.background_preference || 'default');
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
@@ -129,7 +135,8 @@ const Profile = () => {
             id: userId,
             username,
             avatar_url: avatarUrl,
-            theme_mode: mode
+            theme_mode: mode,
+            background_preference: selectedBackground
           }, { 
             onConflict: 'id'
           });
@@ -144,8 +151,9 @@ const Profile = () => {
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
       localStorage.setItem('themeMode', mode);
+      localStorage.setItem('backgroundPreference', selectedBackground);
       
-      console.log('Profile updated successfully:', { username, avatarUrl, mode });
+      console.log('Profile updated successfully:', { username, avatarUrl, mode, selectedBackground });
       // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
       toast.error(t('error.profile'));
@@ -161,6 +169,11 @@ const Profile = () => {
   
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAvatarUrl(e.target.value);
+    autoSaveChanges();
+  };
+
+  const handleBackgroundChange = (background: string) => {
+    setSelectedBackground(background);
     autoSaveChanges();
   };
 
@@ -222,6 +235,16 @@ const Profile = () => {
             <div>
               <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
               <ThemeSelector onThemeChange={autoSaveChanges} />
+            </div>
+            
+            <Separator className="my-2" />
+            
+            {/* Background Selector Section */}
+            <div>
+              <BackgroundSelector 
+                selectedBackground={selectedBackground}
+                onBackgroundChange={handleBackgroundChange}
+              />
             </div>
             
             <Separator className="my-2" />
