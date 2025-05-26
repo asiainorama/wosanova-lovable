@@ -4,7 +4,7 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  height: 100%;
+  height: calc(100vh - 180px) !important; /* Fixed height to ensure pagination is visible */
 }
 
 .app-swiper .swiper-slide {
@@ -26,15 +26,15 @@
   will-change: transform;
   height: 100%;
   transition-timing-function: ease-out;
-  transition-duration: 300ms !important; /* Fixed transition duration */
-  -webkit-overflow-scrolling: touch; /* For iOS smooth scrolling */
+  transition-duration: 300ms !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Styling for preloading states */
 .swiper-slide-prev,
 .swiper-slide-next {
   opacity: 0.98;
-  pointer-events: none; /* Prevent interaction with off-screen slides */
+  pointer-events: none;
 }
 
 /* Virtual rendering optimization */
@@ -87,6 +87,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  height: calc(100vh - 180px); /* Consistent height calculation */
 }
 
 /* Grid container with even spacing */
@@ -100,23 +101,26 @@
   transform: translateX(0) !important;
 }
 
-/* Pagination container - posición fija en la parte inferior */
+/* Pagination container - fixed position at bottom with guaranteed space */
 .pagination-container {
   position: fixed;
-  bottom: 20px;
+  bottom: 15px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 3px 0;
+  padding: 8px 0;
   margin: 0;
   width: 100%;
   z-index: 50;
-  pointer-events: none; /* Permite tocar elementos debajo */
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(255,255,255,0.1) 0%, transparent 100%);
+  backdrop-filter: blur(2px);
+  min-height: 40px; /* Ensure minimum space for pagination */
 }
 
-/* Permitir clics en los puntos de paginación */
+/* Allow clicks on pagination dots */
 .pagination-container > * {
   pointer-events: auto;
 }
@@ -129,6 +133,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
+  overflow: hidden; /* Prevent content overflow */
 }
 
 /* App icon container */
@@ -169,7 +174,7 @@
   visibility: hidden;
 }
 
-/* Mejor soporte para gestos de trackpad */
+/* Better trackpad support */
 @supports (pointer-events: none) {
   .app-swiper {
     cursor: grab;
@@ -180,33 +185,58 @@
   }
 }
 
-/* Asegurarse que los indicadores de paginación siempre sean visibles */
+/* Pagination bullets styling */
 .swiper-pagination-bullet {
   width: 8px;
   height: 8px;
   margin: 0 6px;
   opacity: 0.6;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .swiper-pagination-bullet-active {
   transform: scale(1.2);
   opacity: 1;
+  background: rgba(59, 130, 246, 0.9) !important; /* Primary color */
 }
 
-/* Adaptar espaciado en dispositivos móviles */
+/* Mobile spacing adjustments */
 @media (max-width: 640px) {
   .app-swiper {
     padding: 0;
+    height: calc(100vh - 160px) !important; /* Adjusted for mobile */
+  }
+  
+  .grid-container {
+    height: calc(100vh - 160px);
   }
   
   .pagination-container {
-    bottom: 15px; /* Un poco más cerca del borde en móviles */
+    bottom: 10px;
+    min-height: 35px;
   }
   
   .swiper-pagination-bullet {
     width: 6px;
     height: 6px;
     margin: 0 4px;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 640px) and (orientation: landscape) {
+  .app-swiper {
+    height: calc(100vh - 140px) !important;
+  }
+  
+  .grid-container {
+    height: calc(100vh - 140px);
+  }
+  
+  .pagination-container {
+    bottom: 5px;
+    min-height: 30px;
   }
 }

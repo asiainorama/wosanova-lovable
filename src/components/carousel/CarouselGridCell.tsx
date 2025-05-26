@@ -2,7 +2,6 @@
 import React from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from '../AppCard';
-import { calculateMinCellHeight } from '@/utils/gridCalculator';
 
 interface CarouselGridCellProps {
   app: AppData | null;
@@ -13,6 +12,7 @@ interface CarouselGridCellProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   smallerIcons?: boolean;
+  cellHeight?: string;
 }
 
 const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
@@ -24,18 +24,15 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   showManage = false,
   onShowDetails,
   smallerIcons = false,
+  cellHeight
 }) => {
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item"
+      className="app-grid-item flex flex-col justify-start items-center"
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        height: '100%',
-        minHeight: calculateMinCellHeight(rows)
+        height: cellHeight || 'auto',
+        minHeight: cellHeight || `${100/rows}%`
       }}
     >
       {app ? (

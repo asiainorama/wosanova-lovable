@@ -35,30 +35,44 @@ const AppGrid: React.FC<AppGridProps> = ({
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
   
-  // Define grid sizes based on screen size and orientation
+  // Define grid sizes based on screen size and orientation with improved calculations
   const getGridConfig = useCallback(() => {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const isLandscape = width > height;
     
+    // Calculate available height considering header and pagination
+    const headerHeight = 120; // Header + padding
+    const paginationHeight = 60; // Space for pagination dots
+    const paddingBuffer = 40; // Additional buffer
+    const availableHeight = height - headerHeight - paginationHeight - paddingBuffer;
+    
+    // Base cell height estimates (including icon + label)
+    const baseCellHeight = smallerIcons ? 85 : 100;
+    const maxRows = Math.floor(availableHeight / baseCellHeight);
+    
     // iPad (768px - 1024px)
     if (width >= 768 && width <= 1024) {
-      return isLandscape ? { cols: 6, rows: 4 } : { cols: 5, rows: 6 };
+      const rows = Math.min(maxRows, isLandscape ? 4 : 5);
+      return isLandscape ? { cols: 6, rows } : { cols: 5, rows };
     }
     
     // Laptop (1024px - 1440px)
     if (width > 1024 && width <= 1440) {
-      return { cols: 6, rows: 5 };
+      const rows = Math.min(maxRows, 5);
+      return { cols: 6, rows };
     }
     
     // Large screens (>1440px)
     if (width > 1440) {
-      return { cols: 6, rows: 8 };
+      const rows = Math.min(maxRows, 6);
+      return { cols: 6, rows };
     }
     
-    // Mobile (default)
-    return isLandscape ? { cols: 5, rows: 2 } : { cols: 4, rows: 6 };
-  }, []);
+    // Mobile (default) - be more conservative
+    const mobileRows = Math.min(maxRows, isLandscape ? 2 : 5);
+    return isLandscape ? { cols: 5, rows: mobileRows } : { cols: 4, rows: mobileRows };
+  }, [smallerIcons]);
 
   const [gridConfig, setGridConfig] = useState(getGridConfig());
   
@@ -67,11 +81,15 @@ const AppGrid: React.FC<AppGridProps> = ({
     const handleResize = () => {
       const newConfig = getGridConfig();
       setGridConfig(newConfig);
-      console.log("Grid config updated:", newConfig);
+      console.log("Grid config updated:", newConfig, "Available space optimized for:", window.innerHeight);
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, [getGridConfig]);
   
   const appsPerPage = gridConfig.cols * gridConfig.rows;
