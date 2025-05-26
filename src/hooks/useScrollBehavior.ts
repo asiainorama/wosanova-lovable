@@ -2,28 +2,53 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+type ScrollBehaviorType = 'horizontal' | 'vertical';
+
 /**
- * Hook simplificado para manejar scroll solo cuando es necesario
+ * Hook personalizado para manejar el comportamiento de scroll basado en la ruta actual
+ * 
+ * @returns void
  */
 export function useScrollBehavior() {
   const location = useLocation();
   
   useEffect(() => {
-    // Solo aplicar en la página de inicio y solo para desktop
-    if ((location.pathname === '/' || location.pathname === '/home') && window.innerWidth > 768) {
-      // Permitir scroll horizontal en desktop para el carrusel
+    const currentPath = location.pathname;
+    
+    // Determinar el tipo de scroll basado en la ruta actual
+    const isHomePage = currentPath === '/' || currentPath === '/home';
+    const isManagePage = currentPath === '/manage';
+    
+    if (isHomePage) {
+      // Configuración para página de inicio: scroll horizontal
+      document.body.style.overflowY = 'hidden';
       document.body.style.overflowX = 'auto';
-      console.log('Scroll horizontal habilitado para desktop en home');
-    } else {
-      // Para todo lo demás, scroll normal
-      document.body.style.overflowX = 'hidden';
+      
+      console.log('Aplicando scroll horizontal para la página de inicio');
+    } else if (isManagePage) {
+      // Página de gestión: asegurar scroll vertical
       document.body.style.overflowY = 'auto';
+      document.body.style.overflowX = 'hidden';
+      
+      // Importante: forzar scroll vertical para esta página
+      setTimeout(() => {
+        document.body.style.overflowY = 'auto';
+        document.body.style.overflowX = 'hidden';
+      }, 100);
+      
+      console.log('Forzando scroll vertical para página de gestión');
+    } else {
+      // Configuración para otras páginas: scroll vertical
+      document.body.style.overflowY = 'auto';
+      document.body.style.overflowX = 'hidden';
+      
+      console.log('Aplicando scroll vertical para:', currentPath);
     }
     
     return () => {
-      // Restaurar scroll normal al limpiar
-      document.body.style.overflowX = 'hidden';
-      document.body.style.overflowY = 'auto';
+      // Limpiar estilos al desmontar o cambiar de ruta
+      document.body.style.removeProperty('overflowX');
+      document.body.style.removeProperty('overflowY');
     };
   }, [location.pathname]);
 }

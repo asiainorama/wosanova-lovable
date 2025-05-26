@@ -9,33 +9,37 @@ import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
-import { useBackground } from '@/contexts/BackgroundContext';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-  const { getBackgroundStyle } = useBackground();
-  
-  useScrollBehavior();
+  useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Prefetch logos for favorite apps
+  // Prefetch logos for favorite apps as soon as home page loads (without toast)
   useEffect(() => {
     if (favorites.length > 0) {
+      // Use silent mode to avoid notifications
       prefetchAppLogos(favorites);
     }
+    
+    // Forzar el comportamiento de scroll horizontal adecuado
+    document.body.style.overflowY = 'hidden';
+    document.body.style.overflowX = 'auto';
   }, [favorites]);
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Background Layer */}
+      {/* Background Image with overlay */}
       <div 
-        className="fixed inset-0 z-0"
-        style={getBackgroundStyle()}
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
+        }}
       >
         {/* Overlay for better contrast */}
         <div className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-sm"></div>
@@ -52,7 +56,7 @@ const Index = () => {
                 apps={sortedFavorites}
                 useCarousel={true}
                 smallerIcons={true}
-                carouselKey="home"
+                carouselKey="home" // Unique key for the home carousel
               />
             </div>
           ) : (
