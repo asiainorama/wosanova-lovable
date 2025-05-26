@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Rocket, User, Trash2, LogOut } from 'lucide-react';
 import Header from '@/components/Header';
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { useBackground } from '@/contexts/BackgroundContext';
 
 interface UserProfile {
   username?: string;
@@ -28,13 +28,11 @@ const Profile = () => {
   const navigate = useNavigate();
   const { mode } = useTheme();
   const { t } = useLanguage();
+  const { background, setBackground } = useBackground();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [selectedBackground, setSelectedBackground] = useState('default');
   const [saveTimer, setSaveTimer] = useState<NodeJS.Timeout | null>(null);
-  
-  useScrollBehavior(); // Apply scroll behavior
 
   // Get current user details and profile data
   useEffect(() => {
@@ -55,12 +53,13 @@ const Profile = () => {
             const profileData = data as unknown as UserProfile;
             setUsername(profileData.username || '');
             setAvatarUrl(profileData.avatar_url || '');
-            setSelectedBackground(profileData.background_preference || 'default');
+            if (profileData.background_preference) {
+              setBackground(profileData.background_preference as any);
+            }
             
             // Update localStorage
             localStorage.setItem('username', profileData.username || '');
             localStorage.setItem('avatarUrl', profileData.avatar_url || '');
-            localStorage.setItem('backgroundPreference', profileData.background_preference || 'default');
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
@@ -69,7 +68,7 @@ const Profile = () => {
     };
     
     fetchUserData();
-  }, []);
+  }, [setBackground]);
 
   // Auto-save function with debounce
   const autoSaveChanges = () => {
@@ -104,7 +103,7 @@ const Profile = () => {
           username,
           avatar_url: avatarUrl,
           theme_mode: mode,
-          background_preference: selectedBackground
+          background_preference: background
         }, { 
           onConflict: 'id'
         });
@@ -115,10 +114,6 @@ const Profile = () => {
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
       localStorage.setItem('themeMode', mode);
-      localStorage.setItem('backgroundPreference', selectedBackground);
-      
-      // Notify other components about the change
-      window.dispatchEvent(new CustomEvent('backgroundPreferenceUpdated'));
       
       console.log('Profile updated successfully');
     } catch (error: any) {
@@ -157,15 +152,15 @@ const Profile = () => {
     autoSaveChanges();
   };
 
-  const handleBackgroundChange = (background: string) => {
-    setSelectedBackground(background);
+  const handleBackgroundChange = (newBackground: string) => {
+    setBackground(newBackground as any);
     autoSaveChanges();
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ height: '100vh', overflowY: 'auto' }}>
       <Header title={t('profile.title')} />
-      <div className="container max-w-3xl mx-auto px-4 py-8 pb-24 overflow-y-auto">
+      <div className="container max-w-3xl mx-auto px-4 py-8 pb-24">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
@@ -222,7 +217,7 @@ const Profile = () => {
             {/* Background Selector */}
             <div>
               <BackgroundSelector 
-                selectedBackground={selectedBackground}
+                selectedBackground={background}
                 onBackgroundChange={handleBackgroundChange}
               />
             </div>

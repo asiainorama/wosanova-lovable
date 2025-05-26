@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
 import { useAppContext } from '@/contexts/AppContext';
@@ -9,11 +9,13 @@ import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { useBackground } from '@/contexts/BackgroundContext';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-  const [backgroundPreference, setBackgroundPreference] = useState('default');
+  const { getBackgroundStyle } = useBackground();
+  
   useScrollBehavior();
 
   // Sort favorites alphabetically
@@ -21,76 +23,12 @@ const Index = () => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Load and update background preference
-  useEffect(() => {
-    const updateBackground = () => {
-      const saved = localStorage.getItem('backgroundPreference') || 'default';
-      setBackgroundPreference(saved);
-      console.log('Background preference updated to:', saved);
-    };
-
-    // Load initial value
-    updateBackground();
-
-    // Listen for custom events from Profile page
-    const handleBackgroundUpdate = () => updateBackground();
-    window.addEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
-
-    // Listen for storage changes from other tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'backgroundPreference') {
-        updateBackground();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('backgroundPreferenceUpdated', handleBackgroundUpdate);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
   // Prefetch logos for favorite apps
   useEffect(() => {
     if (favorites.length > 0) {
       prefetchAppLogos(favorites);
     }
   }, [favorites]);
-
-  // Get background style based on preference
-  const getBackgroundStyle = () => {
-    console.log('Applying background style for:', backgroundPreference);
-    
-    switch (backgroundPreference) {
-      case 'pastel':
-        return { 
-          background: 'linear-gradient(135deg, #fef7cd 0%, #f9a8d4 50%, #d8b4fe 100%)'
-        };
-      case 'gray':
-        return { 
-          background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #4b5563 100%)'
-        };
-      case 'mango':
-        return { 
-          background: 'linear-gradient(135deg, #fbbf24 0%, #f97316 50%, #ef4444 100%)'
-        };
-      case 'pink-orange':
-        return { 
-          background: 'linear-gradient(135deg, #f472b6 0%, #ec4899 50%, #fb923c 100%)'
-        };
-      case 'green-blue':
-        return { 
-          background: 'linear-gradient(135deg, #86efac 0%, #2dd4bf 50%, #3b82f6 100%)'
-        };
-      default:
-        return { 
-          backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        };
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col relative">

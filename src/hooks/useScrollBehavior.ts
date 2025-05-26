@@ -3,38 +3,27 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
- * Hook personalizado para manejar el comportamiento de scroll basado en la ruta actual
+ * Hook simplificado para manejar scroll solo cuando es necesario
  */
 export function useScrollBehavior() {
   const location = useLocation();
   
   useEffect(() => {
-    const currentPath = location.pathname;
-    
-    // Limpiar todos los estilos previos
-    document.body.style.removeProperty('overflowX');
-    document.body.style.removeProperty('overflowY');
-    document.body.style.removeProperty('height');
-    document.body.style.removeProperty('minHeight');
-    
-    // Solo aplicar scroll horizontal en la página de inicio
-    if (currentPath === '/' || currentPath === '/home') {
-      document.body.style.overflowY = 'hidden';
+    // Solo aplicar en la página de inicio y solo para desktop
+    if ((location.pathname === '/' || location.pathname === '/home') && window.innerWidth > 768) {
+      // Permitir scroll horizontal en desktop para el carrusel
       document.body.style.overflowX = 'auto';
-      console.log('Aplicando scroll horizontal para la página de inicio');
+      console.log('Scroll horizontal habilitado para desktop en home');
     } else {
-      // Para todas las demás páginas, permitir scroll vertical normal
-      document.body.style.overflowY = 'auto';
+      // Para todo lo demás, scroll normal
       document.body.style.overflowX = 'hidden';
-      console.log('Aplicando scroll vertical para:', currentPath);
+      document.body.style.overflowY = 'auto';
     }
     
     return () => {
-      // Limpiar estilos al desmontar
-      document.body.style.removeProperty('overflowX');
-      document.body.style.removeProperty('overflowY');
-      document.body.style.removeProperty('height');
-      document.body.style.removeProperty('minHeight');
+      // Restaurar scroll normal al limpiar
+      document.body.style.overflowX = 'hidden';
+      document.body.style.overflowY = 'auto';
     };
   }, [location.pathname]);
 }

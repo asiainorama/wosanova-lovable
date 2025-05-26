@@ -1,8 +1,10 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { BackgroundProvider } from "./contexts/BackgroundContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
@@ -95,64 +97,66 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
-          <AppProvider>
-            <TooltipProvider>
-              <BrowserRouter>
-                <InstallAppPrompt />
-                <Routes>
-                  <Route
-                    path="/"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Index />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/catalog"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Catalog />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/manage"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Manage />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={session ? 
-                      <AppWithContextUpdater>
-                        <Profile />
-                      </AppWithContextUpdater> : 
-                      <Navigate to="/auth" />
-                    }
-                  />
-                  <Route
-                    path="/admin"
-                    element={session ? <Admin /> : <Navigate to="/auth" />}
-                  />
-                  <Route
-                    path="/auth"
-                    element={!session ? <Auth /> : <Navigate to="/" />}
-                  />
-                  <Route path="/widgets/calculator" element={<CalculatorWidget />} />
-                  <Route path="/widgets/converter" element={<ConverterWidget />} />
-                  <Route path="/widgets/notes" element={<NotesWidget />} />
-                  <Route path="/widgets/alarm" element={<AlarmWidget />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </AppProvider>
+          <BackgroundProvider>
+            <AppProvider>
+              <TooltipProvider>
+                <BrowserRouter>
+                  <InstallAppPrompt />
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={session ? 
+                        <AppWithContextUpdater>
+                          <Index />
+                        </AppWithContextUpdater> : 
+                        <Navigate to="/auth" />
+                      }
+                    />
+                    <Route
+                      path="/catalog"
+                      element={session ? 
+                        <AppWithContextUpdater>
+                          <Catalog />
+                        </AppWithContextUpdater> : 
+                        <Navigate to="/auth" />
+                      }
+                    />
+                    <Route
+                      path="/manage"
+                      element={session ? 
+                        <AppWithContextUpdater>
+                          <Manage />
+                        </AppWithContextUpdater> : 
+                        <Navigate to="/auth" />
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={session ? 
+                        <AppWithContextUpdater>
+                          <Profile />
+                        </AppWithContextUpdater> : 
+                        <Navigate to="/auth" />
+                      }
+                    />
+                    <Route
+                      path="/admin"
+                      element={session ? <Admin /> : <Navigate to="/auth" />}
+                    />
+                    <Route
+                      path="/auth"
+                      element={!session ? <Auth /> : <Navigate to="/" />}
+                    />
+                    <Route path="/widgets/calculator" element={<CalculatorWidget />} />
+                    <Route path="/widgets/converter" element={<ConverterWidget />} />
+                    <Route path="/widgets/notes" element={<NotesWidget />} />
+                    <Route path="/widgets/alarm" element={<AlarmWidget />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </AppProvider>
+          </BackgroundProvider>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
