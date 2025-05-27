@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import SearchBar from "@/components/SearchBar";
-import CategoryFilter from "@/components/CategoryFilter";
+import UnifiedSearchBar from "@/components/UnifiedSearchBar";
 import AppGrid from "@/components/AppGrid";
 import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
@@ -96,8 +95,10 @@ const Catalog = () => {
 
   // Filter apps by search term and category
   const filteredApps = allApps.filter(app => {
-    const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          app.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = searchTerm.trim() 
+      ? app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        app.description.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
     const matchesCategory = !selectedCategory || app.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -132,24 +133,16 @@ const Catalog = () => {
     <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto">
       <Header title="Catálogo" />
 
-      {/* Filtros fijos - ocupan una sola fila en móvil */}
+      {/* Barra de búsqueda unificada */}
       <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4">
         <div className="container max-w-7xl mx-auto px-4 pt-4">
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-start">
-            <div className="flex-1 min-w-0">
-              <SearchBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm} 
-              />
-            </div>
-            <div className="w-full sm:w-auto sm:min-w-[200px]">
-              <CategoryFilter 
-                selectedCategory={selectedCategory} 
-                onCategoryChange={setSelectedCategory} 
-                categories={categories}
-              />
-            </div>
-          </div>
+          <UnifiedSearchBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            categories={categories}
+          />
         </div>
       </div>
 
@@ -206,7 +199,14 @@ const Catalog = () => {
           </>
         ) : (
           <div className="text-center py-10">
-            <p className="text-gray-500 dark:text-gray-400">No hay aplicaciones que coincidan con los criterios de búsqueda</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              {searchTerm.trim() 
+                ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
+                : selectedCategory 
+                  ? `No hay aplicaciones en la categoría "${selectedCategory}"`
+                  : "No hay aplicaciones que coincidan con los criterios de búsqueda"
+              }
+            </p>
           </div>
         )}
       </div>
