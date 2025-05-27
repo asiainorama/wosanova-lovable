@@ -53,6 +53,7 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       try {
         // First try to get from localStorage
         const savedBackground = localStorage.getItem('backgroundPreference') as BackgroundType;
+        console.log('Saved background from localStorage:', savedBackground);
         if (savedBackground && savedBackground in backgroundStyles) {
           setBackgroundState(savedBackground);
           return;
@@ -66,6 +67,8 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             .select('background_preference')
             .eq('id', session.user.id)
             .single();
+          
+          console.log('Background preference from Supabase:', data, error);
           
           if (!error && data?.background_preference && data.background_preference in backgroundStyles) {
             setBackgroundState(data.background_preference as BackgroundType);
@@ -81,6 +84,7 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   const setBackground = async (newBackground: BackgroundType) => {
+    console.log('Setting new background:', newBackground);
     setBackgroundState(newBackground);
     localStorage.setItem('backgroundPreference', newBackground);
 
@@ -103,7 +107,9 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const getBackgroundStyle = () => {
-    return backgroundStyles[background];
+    const style = backgroundStyles[background];
+    console.log('Current background:', background, 'Style:', style);
+    return style;
   };
 
   return (

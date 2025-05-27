@@ -38,10 +38,7 @@ const Index = () => {
       <div 
         className="fixed inset-0 z-0"
         style={getBackgroundStyle()}
-      >
-        {/* Overlay for better contrast */}
-        <div className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-sm"></div>
-      </div>
+      />
       
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
