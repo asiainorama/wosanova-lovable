@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ThemeSelector } from '@/components/ThemeSelector';
+import { BackgroundSelector } from '@/components/BackgroundSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,6 +23,7 @@ interface UserProfile {
   username?: string;
   avatar_url?: string;
   theme_mode?: string;
+  background_preference?: string;
 }
 
 const Profile = () => {
@@ -46,7 +49,7 @@ const Profile = () => {
         try {
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('username, avatar_url, theme_mode')
+            .select('username, avatar_url, theme_mode, background_preference')
             .eq('id', session.user.id)
             .single();
             
@@ -222,6 +225,13 @@ const Profile = () => {
             <div>
               <h3 className="text-xs font-medium mb-1 dark:text-white">{t('profile.appearance')}</h3>
               <ThemeSelector onThemeChange={autoSaveChanges} />
+            </div>
+
+            <Separator className="my-2" />
+            
+            {/* Background Selector Section */}
+            <div>
+              <BackgroundSelector onBackgroundChange={autoSaveChanges} />
             </div>
             
             <Separator className="my-2" />

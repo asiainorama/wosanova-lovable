@@ -9,11 +9,13 @@ import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { useBackground } from '@/contexts/BackgroundContext';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-  useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
+  const { getBackgroundStyle } = useBackground();
+  useScrollBehavior();
 
   // Sort favorites alphabetically
   const sortedFavorites = useMemo(() => {
@@ -23,23 +25,19 @@ const Index = () => {
   // Prefetch logos for favorite apps as soon as home page loads (without toast)
   useEffect(() => {
     if (favorites.length > 0) {
-      // Use silent mode to avoid notifications
       prefetchAppLogos(favorites);
     }
     
-    // Forzar el comportamiento de scroll horizontal adecuado
     document.body.style.overflowY = 'hidden';
     document.body.style.overflowX = 'auto';
   }, [favorites]);
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Background Image with overlay */}
+      {/* Dynamic Background */}
       <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
-        }}
+        className="fixed inset-0 z-0"
+        style={getBackgroundStyle()}
       >
         {/* Overlay for better contrast */}
         <div className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-sm"></div>
@@ -56,7 +54,7 @@ const Index = () => {
                 apps={sortedFavorites}
                 useCarousel={true}
                 smallerIcons={true}
-                carouselKey="home" // Unique key for the home carousel
+                carouselKey="home"
               />
             </div>
           ) : (
