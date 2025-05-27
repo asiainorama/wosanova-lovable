@@ -61,13 +61,13 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         // Then try to get from Supabase
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('user_profiles')
             .select('background_preference')
             .eq('id', session.user.id)
             .single();
           
-          if (data?.background_preference && data.background_preference in backgroundStyles) {
+          if (!error && data?.background_preference && data.background_preference in backgroundStyles) {
             setBackgroundState(data.background_preference as BackgroundType);
             localStorage.setItem('backgroundPreference', data.background_preference);
           }
