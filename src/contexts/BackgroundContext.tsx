@@ -44,8 +44,38 @@ export const useBackground = () => {
   return context;
 };
 
+// Función para aplicar el fondo al body
+const applyBackgroundToBody = (backgroundType: BackgroundType) => {
+  const style = backgroundStyles[backgroundType];
+  const body = document.body;
+  
+  // Limpiar estilos anteriores
+  body.style.backgroundImage = '';
+  body.style.background = '';
+  body.style.backgroundSize = '';
+  body.style.backgroundPosition = '';
+  body.style.backgroundRepeat = '';
+  
+  // Aplicar nuevo estilo
+  if (style.backgroundImage) {
+    body.style.backgroundImage = style.backgroundImage as string;
+    body.style.backgroundSize = style.backgroundSize as string;
+    body.style.backgroundPosition = style.backgroundPosition as string;
+    body.style.backgroundRepeat = style.backgroundRepeat as string;
+  } else if (style.background) {
+    body.style.background = style.background as string;
+  }
+  
+  console.log('Background aplicado al body:', backgroundType, style);
+};
+
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [background, setBackgroundState] = useState<BackgroundType>('default');
+
+  // Aplicar el fondo al body cada vez que cambie
+  useEffect(() => {
+    applyBackgroundToBody(background);
+  }, [background]);
 
   // Load background preference on mount
   useEffect(() => {
