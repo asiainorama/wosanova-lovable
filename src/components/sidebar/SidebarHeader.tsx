@@ -15,29 +15,35 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
 
   return (
     <div className="p-3 border-b border-gray-200 dark:border-gray-800">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex-1 text-start">
+      <div className="flex items-start justify-between w-full">
+        {/* Left side: Profile image and username below */}
+        <div className="flex flex-col items-center">
+          <div className="mb-2">
+            <UserProfileSection 
+              username={username}
+              avatarUrl={avatarUrl}
+              userId={userId}
+              onClose={onClose}
+              avatarOnly={true}
+            />
+          </div>
+          <span className="font-medium dark:text-white truncate text-xs text-center max-w-[80px]">
+            {username || t('profile.username')}
+          </span>
+        </div>
+        
+        {/* Center: App logo */}
+        <div className="flex-1 flex justify-center items-center">
           <img 
             src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
             alt="WosaNova Logo" 
-            className="w-8 h-8"
+            className="w-10 h-10"
           />
         </div>
         
-        <div className="flex-shrink-0 mx-3">
-          <UserProfileSection 
-            username={username}
-            avatarUrl={avatarUrl}
-            userId={userId}
-            onClose={onClose}
-            avatarOnly={true}
-          />
-        </div>
-        
-        <div className="flex-1 text-end">
-          <span className="font-medium dark:text-white truncate text-sm inline-block max-w-full">
-            {username || t('profile.username')}
-          </span>
+        {/* Right side: Empty space for balance */}
+        <div className="w-[80px]">
+          {/* Empty div for layout balance */}
         </div>
       </div>
     </div>
