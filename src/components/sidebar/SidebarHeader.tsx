@@ -17,9 +17,11 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
     <div className="p-3 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center justify-between w-full">
         <div className="flex-1 text-start">
-          <h2 className="text-lg font-bold gradient-text truncate">
-            {t('app.name')}
-          </h2>
+          <img 
+            src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
+            alt="WosaNova Logo" 
+            className="w-8 h-8"
+          />
         </div>
         
         <div className="flex-shrink-0 mx-3">
