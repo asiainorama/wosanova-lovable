@@ -70,12 +70,12 @@ const Catalog = () => {
   useEffect(() => {
     const catalogElement = document.getElementById('catalog-container');
     if (catalogElement) {
-      catalogElement.style.height = '100%';
+      catalogElement.style.height = '100vh';
       catalogElement.style.overflowY = 'auto';
       catalogElement.style.overflowX = 'hidden';
     }
     
-    document.body.style.overflowY = 'auto';
+    document.body.style.overflowY = 'hidden';
     document.body.style.overflowX = 'hidden';
     
     return () => {
@@ -130,12 +130,15 @@ const Catalog = () => {
   );
 
   return (
-    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-      <Header title="Catálogo" />
+    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto flex flex-col">
+      {/* Header fijo */}
+      <div className="sticky top-0 z-50">
+        <Header title="Catálogo" />
+      </div>
 
-      {/* Barra de búsqueda unificada */}
-      <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4">
-        <div className="container max-w-7xl mx-auto px-4 pt-4">
+      {/* Barra de búsqueda fija */}
+      <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4 pt-4">
+        <div className="container max-w-7xl mx-auto px-4">
           <UnifiedSearchBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -146,7 +149,8 @@ const Catalog = () => {
         </div>
       </div>
 
-      <div className="container max-w-7xl mx-auto px-4 py-6">
+      {/* Contenido scrolleable */}
+      <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <LoadingIndicator />
         ) : visibleCategories.length > 0 ? (
