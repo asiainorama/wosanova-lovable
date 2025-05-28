@@ -14,6 +14,7 @@ import { useBackground } from '@/contexts/BackgroundContext';
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+  const { background } = useBackground();
   useScrollBehavior();
 
   // Sort favorites alphabetically
@@ -31,11 +32,16 @@ const Index = () => {
     document.body.style.overflowX = 'auto';
   }, [favorites]);
 
+  // Log current background for debugging
+  useEffect(() => {
+    console.log('Index page - current background:', background);
+  }, [background]);
+
   return (
-    <div className="min-h-screen flex flex-col relative bg-transparent">
+    <div className="min-h-screen flex flex-col relative" style={{ background: 'transparent' }}>
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">
+      <main className="container mx-auto px-1 py-1 flex-1 flex flex-col" style={{ background: 'transparent' }}>
         {sortedFavorites.length > 0 ? (
           <div className="flex-grow flex flex-col h-full">
             <AppGrid 

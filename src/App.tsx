@@ -83,7 +83,7 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-white">
+      <div className="flex h-screen w-screen items-center justify-center">
         <img 
           src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
           alt="WosaNova Logo" 
@@ -101,58 +101,60 @@ const App = () => {
             <AppProvider>
               <TooltipProvider>
                 <BrowserRouter>
-                  <InstallAppPrompt />
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Index />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/catalog"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Catalog />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/manage"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Manage />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/profile"
-                      element={session ? 
-                        <AppWithContextUpdater>
-                          <Profile />
-                        </AppWithContextUpdater> : 
-                        <Navigate to="/auth" />
-                      }
-                    />
-                    <Route
-                      path="/admin"
-                      element={session ? <Admin /> : <Navigate to="/auth" />}
-                    />
-                    <Route
-                      path="/auth"
-                      element={!session ? <Auth /> : <Navigate to="/" />}
-                    />
-                    <Route path="/widgets/calculator" element={<CalculatorWidget />} />
-                    <Route path="/widgets/converter" element={<ConverterWidget />} />
-                    <Route path="/widgets/notes" element={<NotesWidget />} />
-                    <Route path="/widgets/alarm" element={<AlarmWidget />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <div style={{ background: 'transparent', minHeight: '100vh' }}>
+                    <InstallAppPrompt />
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={session ? 
+                          <AppWithContextUpdater>
+                            <Index />
+                          </AppWithContextUpdater> : 
+                          <Navigate to="/auth" />
+                        }
+                      />
+                      <Route
+                        path="/catalog"
+                        element={session ? 
+                          <AppWithContextUpdater>
+                            <Catalog />
+                          </AppWithContextUpdater> : 
+                          <Navigate to="/auth" />
+                        }
+                      />
+                      <Route
+                        path="/manage"
+                        element={session ? 
+                          <AppWithContextUpdater>
+                            <Manage />
+                          </AppWithContextUpdater> : 
+                          <Navigate to="/auth" />
+                        }
+                      />
+                      <Route
+                        path="/profile"
+                        element={session ? 
+                          <AppWithContextUpdater>
+                            <Profile />
+                          </AppWithContextUpdater> : 
+                          <Navigate to="/auth" />
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={session ? <Admin /> : <Navigate to="/auth" />}
+                      />
+                      <Route
+                        path="/auth"
+                        element={!session ? <Auth /> : <Navigate to="/" />}
+                      />
+                      <Route path="/widgets/calculator" element={<CalculatorWidget />} />
+                      <Route path="/widgets/converter" element={<ConverterWidget />} />
+                      <Route path="/widgets/notes" element={<NotesWidget />} />
+                      <Route path="/widgets/alarm" element={<AlarmWidget />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
                 </BrowserRouter>
               </TooltipProvider>
             </AppProvider>
