@@ -1,10 +1,34 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const SidebarFooter = () => {
+interface SidebarFooterProps {
+  isAdmin?: boolean;
+  onClose?: () => void;
+}
+
+const SidebarFooter = ({ isAdmin = false, onClose }: SidebarFooterProps) => {
   return (
-    <div className="p-4 text-xs text-center text-muted-foreground">
-      © {new Date().getFullYear()} WosaNova
+    <div className="p-4 text-xs text-center text-muted-foreground relative">
+      <div>© {new Date().getFullYear()} WosaNova</div>
+      
+      {/* Admin icon in the right corner */}
+      {isAdmin && (
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+          <Link to="/admin" onClick={onClose}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-white/20 dark:hover:bg-gray-700/50 
+                       backdrop-blur-sm transition-all duration-200"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
@@ -144,30 +143,11 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
               <CalendarWidget />
             </div>
           </div>
-
-          {/* Admin Link - Only show for admin users */}
-          {isAdmin && (
-            <>
-              <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
-              <div className="px-3 py-2">
-                <Link to="/admin" onClick={() => onOpenChange(false)}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-left hover:bg-white/20 dark:hover:bg-gray-700/50 
-                             backdrop-blur-sm transition-all duration-200"
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Administración
-                  </Button>
-                </Link>
-              </div>
-            </>
-          )}
         </div>
 
         {/* Footer - Fixed at bottom with glassmorphism */}
         <div className="flex-shrink-0 mt-auto backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-t border-white/20 dark:border-gray-700/30">
-          <SidebarFooter />
+          <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
     </Sheet>
