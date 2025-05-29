@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { useAppLogo } from '@/hooks/useAppLogo';
+import { useBackground } from '@/contexts/BackgroundContext';
 import AppAvatarFallback from './AvatarFallback';
 
 interface HomeCardProps {
@@ -27,6 +28,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   smallerIcons = false
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+  const { isLightBackground } = useBackground();
   
   // Responsive icon sizes: mobile (w-12 h-12), tablet (w-16 h-16), desktop (w-20 h-20)
   const iconSize = smallerIcons 
@@ -42,6 +44,11 @@ const HomeCard: React.FC<HomeCardProps> = ({
   const buttonIconSize = smallerIcons 
     ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
     : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
+
+  // Determinar el color del texto según el fondo
+  const textColorClass = isLightBackground() 
+    ? "text-gray-800 dark:text-white" 
+    : "text-white dark:text-white";
 
   return (
     <div 
@@ -88,7 +95,9 @@ const HomeCard: React.FC<HomeCardProps> = ({
         )}
       </div>
       
-      <h3 className="text-xs md:text-sm lg:text-base font-medium text-center dark:text-white mt-1 line-clamp-2">{app.name}</h3>
+      <h3 className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 ${textColorClass}`}>
+        {app.name}
+      </h3>
     </div>
   );
 };

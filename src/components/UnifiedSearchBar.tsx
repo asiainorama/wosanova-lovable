@@ -133,7 +133,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
     if (selectedCategory) {
       return `Filtrando por: ${translateCategory(selectedCategory)}`;
     }
-    return 'Buscar aplicaciones o filtrar por categoría...';
+    return 'Buscar y Filtrar';
   };
 
   const hasActiveFilter = searchTerm.trim() || selectedCategory;

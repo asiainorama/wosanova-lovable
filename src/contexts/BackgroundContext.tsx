@@ -8,6 +8,7 @@ interface BackgroundContextType {
   background: BackgroundType;
   setBackground: (background: BackgroundType) => void;
   getBackgroundStyle: () => React.CSSProperties;
+  isLightBackground: () => boolean;
 }
 
 const backgroundStyles: Record<BackgroundType, React.CSSProperties> = {
@@ -34,6 +35,9 @@ const backgroundStyles: Record<BackgroundType, React.CSSProperties> = {
     background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
   }
 };
+
+// Fondos que se consideran claros y necesitan texto oscuro
+const lightBackgrounds: BackgroundType[] = ['gradient-green', 'gradient-orange', 'gradient-pink'];
 
 const BackgroundContext = createContext<BackgroundContextType | undefined>(undefined);
 
@@ -160,8 +164,12 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return style;
   };
 
+  const isLightBackground = () => {
+    return lightBackgrounds.includes(background);
+  };
+
   return (
-    <BackgroundContext.Provider value={{ background, setBackground, getBackgroundStyle }}>
+    <BackgroundContext.Provider value={{ background, setBackground, getBackgroundStyle, isLightBackground }}>
       {children}
     </BackgroundContext.Provider>
   );

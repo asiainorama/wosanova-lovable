@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 const backgroundOptions: { value: BackgroundType; label: string; preview: React.CSSProperties }[] = [
   {
     value: 'default',
-    label: 'Imagen por defecto',
+    label: 'Aurora',
     preview: {
       backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
       backgroundSize: 'cover',
@@ -17,27 +17,27 @@ const backgroundOptions: { value: BackgroundType; label: string; preview: React.
   },
   {
     value: 'gradient-blue',
-    label: 'Degradado Azul',
+    label: 'Océano',
     preview: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }
   },
   {
     value: 'gradient-purple',
-    label: 'Degradado Morado',
+    label: 'Pink Bubble',
     preview: { background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }
   },
   {
     value: 'gradient-green',
-    label: 'Degradado Verde',
+    label: 'Cielo',
     preview: { background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }
   },
   {
     value: 'gradient-orange',
-    label: 'Degradado Naranja',
+    label: 'Mango',
     preview: { background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }
   },
   {
     value: 'gradient-pink',
-    label: 'Degradado Rosa',
+    label: 'Algodón',
     preview: { background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }
   }
 ];

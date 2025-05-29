@@ -46,9 +46,9 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
     return { cols: 6, rows };
   }
   
-  // Mobile
+  // Mobile - optimizado para horizontal con 2 filas máximo
   const mobileRows = Math.min(maxRows, isLandscape ? 2 : 5);
-  return isLandscape ? { cols: 5, rows: mobileRows } : { cols: 4, rows: mobileRows };
+  return isLandscape ? { cols: 6, rows: mobileRows } : { cols: 4, rows: mobileRows };
 }
 
 /**
