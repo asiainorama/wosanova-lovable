@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ThemeSelector } from '@/components/ThemeSelector';
@@ -30,6 +31,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { mode } = useTheme();
   const { t } = useLanguage();
+  const { getBackgroundStyle } = useBackground();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -173,10 +175,10 @@ const Profile = () => {
   }, [mode]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen" style={getBackgroundStyle()}>
       <Header title={t('profile.title')} />
       <div className="container max-w-3xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg p-6">
           <div className="flex items-center gap-2 mb-4">
             <Rocket size={24} className="text-primary" />
             <h1 className="text-2xl font-bold dark:text-white theme-text">{t('profile.title')}</h1>
@@ -201,7 +203,7 @@ const Profile = () => {
                     placeholder={t('profile.username')}
                     value={username}
                     onChange={handleUsernameChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800/50 dark:text-white dark:border-gray-700 bg-white/50 backdrop-blur-sm"
                   />
                 </div>
                 
@@ -213,7 +215,7 @@ const Profile = () => {
                     placeholder={t('profile.avatar')}
                     value={avatarUrl}
                     onChange={handleAvatarChange}
-                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    className="w-full h-8 mt-1 text-sm dark:bg-gray-800/50 dark:text-white dark:border-gray-700 bg-white/50 backdrop-blur-sm"
                   />
                 </div>
               </div>
@@ -241,7 +243,7 @@ const Profile = () => {
               <Button 
                 onClick={handleSignOut} 
                 variant="outline" 
-                className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                className="h-9 px-4 text-sm flex items-center gap-2 dark:bg-gray-800/50 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700/50 bg-white/50 backdrop-blur-sm hover:bg-white/70"
               >
                 <LogOut size={14} />
                 {t('profile.logout')}
@@ -257,7 +259,7 @@ const Profile = () => {
                     {t('profile.delete')}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                <AlertDialogContent className="dark:bg-gray-800/90 dark:text-white dark:border-gray-700 bg-white/90 backdrop-blur-sm">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="dark:text-white">{t('profile.delete.confirm')}</AlertDialogTitle>
                     <AlertDialogDescription className="dark:text-gray-300">
@@ -265,7 +267,7 @@ const Profile = () => {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">{t('profile.cancel')}</AlertDialogCancel>
+                    <AlertDialogCancel className="dark:bg-gray-700/50 dark:text-white dark:hover:bg-gray-600/50 bg-white/50 backdrop-blur-sm hover:bg-white/70">{t('profile.cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       className="bg-destructive text-destructive-foreground"
