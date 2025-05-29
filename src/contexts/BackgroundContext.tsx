@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,7 +36,7 @@ const backgroundStyles: Record<BackgroundType, React.CSSProperties> = {
 };
 
 // Fondos que se consideran claros y necesitan texto oscuro
-const lightBackgrounds: BackgroundType[] = ['gradient-green', 'gradient-orange', 'gradient-pink'];
+const lightBackgrounds: BackgroundType[] = ['default', 'gradient-green', 'gradient-orange', 'gradient-pink'];
 
 const BackgroundContext = createContext<BackgroundContextType | undefined>(undefined);
 

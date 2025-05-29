@@ -101,7 +101,7 @@
   transform: translateX(0) !important;
 }
 
-/* Pagination container - fixed position at bottom with guaranteed space */
+/* Pagination container - completely transparent without any background or blur */
 .pagination-container {
   position: fixed;
   bottom: 15px;
@@ -115,8 +115,6 @@
   width: 100%;
   z-index: 50;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(255,255,255,0.1) 0%, transparent 100%);
-  backdrop-filter: blur(2px);
   min-height: 40px; /* Ensure minimum space for pagination */
 }
 
