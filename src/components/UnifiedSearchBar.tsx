@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -150,8 +149,9 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
           onChange={handleInputChange}
           onClick={handleInputClick}
           className={cn(
-            "pl-10 pr-20 py-2 w-full bg-gray-100 border-none text-gray-800 placeholder:text-gray-500 transition-all duration-200",
-            selectedCategory && "border-l-4 border-l-primary bg-blue-50",
+            "pl-10 pr-20 py-2 w-full border-none text-gray-800 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-200",
+            "bg-gray-100 dark:bg-gray-700",
+            selectedCategory && "border-l-4 border-l-primary bg-blue-50 dark:bg-gray-600",
             isOpen && "ring-2 ring-primary/20"
           )}
           aria-label="Buscar aplicaciones o filtrar por categoría"
@@ -163,10 +163,10 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="h-6 w-6 p-0 hover:bg-gray-200"
+              className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
               aria-label="Limpiar filtros"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3 text-gray-600 dark:text-gray-300" />
             </Button>
           )}
           
@@ -175,12 +175,12 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
             size="sm"
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
-              "h-6 w-6 p-0 hover:bg-gray-200 transition-transform duration-200",
+              "h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
             aria-label="Mostrar categorías"
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-3 w-3 text-gray-600 dark:text-gray-300" />
           </Button>
         </div>
       </div>
@@ -189,7 +189,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
+          className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
         >
           <div className="p-1">
             {categoryOptions.map((option, index) => (
@@ -199,10 +199,11 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
                 onMouseEnter={() => setHoveredIndex(index)}
                 className={cn(
                   "w-full text-left px-3 py-2 rounded-sm text-sm transition-colors",
-                  "hover:bg-gray-100 focus:bg-gray-100 focus:outline-none",
-                  hoveredIndex === index && "bg-gray-100",
-                  selectedCategory === option.value && "bg-primary/10 text-primary font-medium",
-                  !option.value && "font-medium text-gray-900 border-b border-gray-100"
+                  "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none",
+                  "text-gray-900 dark:text-gray-100",
+                  hoveredIndex === index && "bg-gray-100 dark:bg-gray-700",
+                  selectedCategory === option.value && "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-medium",
+                  !option.value && "font-medium border-b border-gray-100 dark:border-gray-700"
                 )}
               >
                 {option.label}

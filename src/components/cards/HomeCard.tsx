@@ -45,9 +45,9 @@ const HomeCard: React.FC<HomeCardProps> = ({
     ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
     : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
 
-  // Determinar el color del texto según el fondo
+  // Determinar el color del texto según el fondo (fuerza texto oscuro para fondos claros)
   const textColorClass = isLightBackground() 
-    ? "text-gray-800 dark:text-white" 
+    ? "text-gray-800" 
     : "text-white dark:text-white";
 
   return (
