@@ -53,7 +53,7 @@ const WeatherWidget = () => {
   
   if (loading) {
     return (
-      <div className="p-3 bg-blue-50/30 rounded-lg flex items-center justify-center h-20 dark:bg-gray-800">
+      <div className="p-2 bg-blue-50/30 rounded-lg flex items-center justify-center h-16 dark:bg-gray-800">
         <span className="text-sm">Cargando clima...</span>
       </div>
     );
@@ -61,20 +61,20 @@ const WeatherWidget = () => {
   
   if (error) {
     return (
-      <div className="p-3 bg-blue-50/30 rounded-lg flex items-center justify-center h-20 dark:bg-gray-800">
+      <div className="p-2 bg-blue-50/30 rounded-lg flex items-center justify-center h-16 dark:bg-gray-800">
         <span className="text-sm text-red-500">{error}</span>
       </div>
     );
   }
   
   return (
-    <div className="p-3 bg-blue-50/30 rounded-lg flex items-center h-20 dark:bg-gray-800 cursor-pointer"
+    <div className="p-2 bg-blue-50/30 rounded-lg flex items-center h-16 dark:bg-gray-800 cursor-pointer"
          onClick={handleWeatherClick}>
       <div className="flex-1 flex items-center justify-center pr-2 border-r border-blue-200 dark:border-gray-600">
-        <span className="text-3xl font-bold text-blue-500">{weather.temp}°</span>
+        <span className="text-2xl font-bold text-blue-500">{weather.temp}°</span>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center pl-2">
-        <CloudSun size={24} className="text-blue-500 mb-1" />
+        <CloudSun size={20} className="text-blue-500 mb-1" />
         <span className="text-xs text-muted-foreground line-clamp-1">{weather.condition}</span>
       </div>
     </div>

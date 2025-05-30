@@ -15,7 +15,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
 
   return (
     <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-      <div className="flex items-center gap-3 w-full">
+      <div className="flex items-center w-full">
         {/* Profile image on the left */}
         <div className="flex-shrink-0">
           <UserProfileSection 
@@ -27,12 +27,15 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
           />
         </div>
         
-        {/* Username in the center */}
+        {/* Username perfectly centered */}
         <div className="flex-1 flex justify-center">
           <span className="font-medium dark:text-white text-center text-sm">
             {username || t('profile.username')}
           </span>
         </div>
+        
+        {/* Invisible spacer to balance the layout */}
+        <div className="flex-shrink-0 w-10"></div>
       </div>
     </div>
   );

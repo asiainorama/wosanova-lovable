@@ -31,7 +31,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   
-  // Get user session and profile data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -127,14 +126,10 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
             <WeatherWidget />
           </div>
           
-          <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
-          
           {/* Widget Icons - Responsive */}
-          <div className="px-2">
+          <div className="px-2 py-2">
             <WidgetIconsRow />
           </div>
-
-          <Separator className="mx-3 my-2 bg-white/30 dark:bg-gray-600/30" />
           
           {/* Calendar Widget - Compact */}
           <div className="px-3 py-2">
