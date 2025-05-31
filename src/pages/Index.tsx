@@ -50,6 +50,7 @@ const Index = () => {
       startX = touch.clientX;
       startY = touch.clientY;
       startTime = Date.now();
+      console.log('Touch start:', { startX, startY });
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
@@ -62,10 +63,20 @@ const Index = () => {
       const deltaY = endY - startY;
       const deltaTime = endTime - startTime;
 
-      // Only trigger if swipe starts from the left edge of the screen (first 50px)
-      if (startX <= 50) {
-        // Check if it's a left swipe (negative deltaX) with sufficient distance and speed
-        if (deltaX < -50 && Math.abs(deltaY) < 100 && deltaTime < 300) {
+      console.log('Touch end:', { 
+        startX, 
+        endX, 
+        deltaX, 
+        deltaY, 
+        deltaTime,
+        startFromLeftEdge: startX <= 100
+      });
+
+      // Only trigger if swipe starts from the left edge of the screen (first 100px)
+      if (startX <= 100) {
+        // Check if it's a right swipe (positive deltaX) with sufficient distance and speed
+        if (deltaX > 50 && Math.abs(deltaY) < 100 && deltaTime < 500) {
+          console.log('Opening sidebar from swipe');
           setIsSidebarOpen(true);
         }
       }
