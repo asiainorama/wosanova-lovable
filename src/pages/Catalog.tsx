@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import UnifiedSearchBar from "@/components/UnifiedSearchBar";
@@ -130,12 +131,14 @@ const Catalog = () => {
 
   return (
     <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto flex flex-col">
-      {/* Header y barra de búsqueda como un único bloque */}
-      <div className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
+      {/* Header fijo */}
+      <div className="sticky top-0 z-50">
         <Header title="Catálogo" />
-        
-        {/* Barra de búsqueda integrada sin separación */}
-        <div className="container max-w-7xl mx-auto px-4 pb-4">
+      </div>
+
+      {/* Barra de búsqueda fija */}
+      <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4 pt-4">
+        <div className="container max-w-7xl mx-auto px-4">
           <UnifiedSearchBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
