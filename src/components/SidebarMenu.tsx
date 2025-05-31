@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,12 +101,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       <SheetContent
         side="left"
         className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 border-r-0 flex flex-col h-full overflow-hidden
-                   backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 
+                   backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
                    shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/20 dark:border-gray-800/30"
+                   border-white/10 dark:border-gray-800/20"
       >
         {/* Header - Fixed height with glassmorphism */}
-        <div className="flex-shrink-0 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-b border-white/20 dark:border-gray-700/30">
+        <div className="flex-shrink-0 backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
           <SidebarHeader 
             username={username} 
             avatarUrl={avatarUrl} 
@@ -141,7 +142,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         </div>
 
         {/* Footer - Fixed at bottom with glassmorphism */}
-        <div className="flex-shrink-0 mt-auto backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-t border-white/20 dark:border-gray-700/30">
+        <div className="flex-shrink-0 mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
           <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
