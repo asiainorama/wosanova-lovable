@@ -11,7 +11,7 @@ interface SidebarFooterProps {
 
 const SidebarFooter = ({ isAdmin = false, onClose }: SidebarFooterProps) => {
   return (
-    <div className="p-4 text-xs text-center text-muted-foreground relative">
+    <div className="h-full flex items-center justify-center px-4 text-xs text-muted-foreground relative">
       <div>© {new Date().getFullYear()} WosaNova</div>
       
       {/* Admin icon in the right corner */}

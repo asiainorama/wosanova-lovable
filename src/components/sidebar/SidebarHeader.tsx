@@ -14,7 +14,7 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
   const { t } = useLanguage();
 
   return (
-    <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+    <div className="h-full flex items-center px-4">
       <div className="flex items-center w-full">
         {/* Profile image on the left */}
         <div className="flex-shrink-0">

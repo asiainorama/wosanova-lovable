@@ -105,8 +105,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                    shadow-2xl shadow-black/10 dark:shadow-black/30
                    border-white/10 dark:border-gray-800/20"
       >
-        {/* Header - Fixed height with glassmorphism */}
-        <div className="flex-shrink-0 backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
+        {/* Header - Fixed height matching main app header (60px) */}
+        <div className="flex-shrink-0 h-[60px] backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
           <SidebarHeader 
             username={username} 
             avatarUrl={avatarUrl} 
@@ -141,8 +141,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           </div>
         </div>
 
-        {/* Footer - Fixed at bottom with glassmorphism */}
-        <div className="flex-shrink-0 mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+        {/* Footer - Fixed height matching header for symmetry (60px) */}
+        <div className="flex-shrink-0 h-[60px] mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
           <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
