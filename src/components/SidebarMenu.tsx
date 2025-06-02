@@ -13,9 +13,18 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface SidebarMenuProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  username?: string;
+  avatarUrl?: string;
+  userId?: string | null;
 }
 
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ 
+  isOpen, 
+  onOpenChange, 
+  username = '', 
+  avatarUrl = '', 
+  userId = null 
+}) => {
   const isMobile = useIsMobile();
 
   const handleWidgetOpen = () => {
@@ -25,13 +34,22 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     }
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <div /> {/* Empty trigger since we control open state externally */}
       </SheetTrigger>
       <SheetContent side="left" className="w-80 sm:w-96 p-0 flex flex-col h-full">
-        <SidebarHeader />
+        <SidebarHeader 
+          username={username}
+          avatarUrl={avatarUrl}
+          userId={userId}
+          onClose={handleClose}
+        />
         
         <div className="flex-1 flex flex-col p-4 space-y-4 overflow-y-auto">
           {/* Top section with Time and Weather */}
@@ -54,7 +72,12 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-800">
-          <UserProfileSection />
+          <UserProfileSection 
+            username={username}
+            avatarUrl={avatarUrl}
+            userId={userId}
+            onClose={handleClose}
+          />
           <SidebarFooter />
         </div>
       </SheetContent>
