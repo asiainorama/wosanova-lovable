@@ -11,12 +11,12 @@ interface SidebarFooterProps {
 
 const SidebarFooter = ({ isAdmin = false, onClose }: SidebarFooterProps) => {
   return (
-    <div className="h-full flex items-center justify-center px-4 text-xs text-muted-foreground relative">
+    <div className="flex items-center justify-center w-full px-4 text-xs text-muted-foreground relative">
       <div>© {new Date().getFullYear()} WosaNova</div>
       
       {/* Admin icon in the right corner */}
       {isAdmin && (
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+        <div className="absolute right-4">
           <Link to="/admin" onClick={onClose}>
             <Button
               variant="ghost"

@@ -105,8 +105,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                    shadow-2xl shadow-black/10 dark:shadow-black/30
                    border-white/10 dark:border-gray-800/20"
       >
-        {/* Header - Fixed height matching main app header (60px) */}
-        <div className="flex-shrink-0 h-[60px] backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
+        {/* Header - Fixed height exactly matching main app header */}
+        <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
           <SidebarHeader 
             username={username} 
             avatarUrl={avatarUrl} 
@@ -115,34 +115,34 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           />
         </div>
 
-        {/* Scrollable content area */}
+        {/* Scrollable content area - optimized for mobile */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {/* Time Widget - Compact */}
-          <div className="px-3 py-2">
+          {/* Time Widget - Más compacto */}
+          <div className="px-3 py-1">
             <TimeWidget />
           </div>
 
-          {/* Weather Widget - Compact */}
+          {/* Weather Widget - Más compacto */}
           <div className="px-3 py-1">
             <WeatherWidget />
           </div>
           
-          {/* Widget Icons - Responsive */}
-          <div className="px-2 py-2">
+          {/* Widget Icons - Más compacto */}
+          <div className="px-2 py-1">
             <WidgetIconsRow />
           </div>
           
-          {/* Calendar Widget - Compact */}
-          <div className="px-3 py-2">
-            <h3 className="text-sm font-medium mb-2 dark:text-gray-300">Calendario</h3>
+          {/* Calendar Widget - Más compacto */}
+          <div className="px-3 py-1">
+            <h3 className="text-xs font-medium mb-1 dark:text-gray-300">Calendario</h3>
             <div className="w-full">
               <CalendarWidget />
             </div>
           </div>
         </div>
 
-        {/* Footer - Fixed height matching header for symmetry (60px) */}
-        <div className="flex-shrink-0 h-[60px] mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+        {/* Footer - Fixed height exactly matching header */}
+        <div className="flex-shrink-0 h-[60px] flex items-center mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
           <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
