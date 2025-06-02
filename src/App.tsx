@@ -15,10 +15,6 @@ import NotFound from "./pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import CalculatorWidget from './pages/widgets/CalculatorWidget';
-import ConverterWidget from './pages/widgets/ConverterWidget';
-import NotesWidget from './pages/widgets/NotesWidget';
-import AlarmWidget from './pages/widgets/AlarmWidget';
 import Admin from "./pages/admin";
 import InstallAppPrompt from './components/InstallAppPrompt';
 
@@ -148,10 +144,6 @@ const App = () => {
                         path="/auth"
                         element={!session ? <Auth /> : <Navigate to="/" />}
                       />
-                      <Route path="/widgets/calculator" element={<CalculatorWidget />} />
-                      <Route path="/widgets/converter" element={<ConverterWidget />} />
-                      <Route path="/widgets/notes" element={<NotesWidget />} />
-                      <Route path="/widgets/alarm" element={<AlarmWidget />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
