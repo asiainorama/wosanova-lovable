@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
@@ -115,26 +114,23 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           />
         </div>
 
-        {/* Scrollable content area - optimized for mobile */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
-          {/* Time Widget - Más compacto */}
-          <div className="px-3 py-1">
+        {/* Content area - Using flexbox for better distribution */}
+        <div className="flex-1 flex flex-col justify-between overflow-y-auto overflow-x-hidden">
+          
+          {/* Top section with Time and Weather - takes natural space */}
+          <div className="flex-shrink-0 space-y-2 px-3 py-2">
             <TimeWidget />
-          </div>
-
-          {/* Weather Widget - Más compacto */}
-          <div className="px-3 py-1">
             <WeatherWidget />
           </div>
-          
-          {/* Widget Icons - Más compacto */}
-          <div className="px-2 py-1">
+
+          {/* Center section with Widget Icons - centered in available space */}
+          <div className="flex-1 flex items-center justify-center px-2">
             <WidgetIconsRow />
           </div>
           
-          {/* Calendar Widget - Más compacto */}
-          <div className="px-3 py-1">
-            <h3 className="text-xs font-medium mb-1 dark:text-gray-300">Calendario</h3>
+          {/* Bottom section with Calendar - takes natural space at bottom */}
+          <div className="flex-shrink-0 px-3 pb-2">
+            <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
             <div className="w-full">
               <CalendarWidget />
             </div>
@@ -142,7 +138,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         </div>
 
         {/* Footer - Fixed height exactly matching header */}
-        <div className="flex-shrink-0 h-[60px] flex items-center mt-auto backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+        <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
           <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
