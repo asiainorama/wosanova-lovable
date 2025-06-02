@@ -21,7 +21,7 @@ interface SidebarMenuProps {
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ 
   isOpen, 
   onOpenChange, 
-  username = '', 
+  username = 'Usuario', 
   avatarUrl = '', 
   userId = null 
 }) => {
