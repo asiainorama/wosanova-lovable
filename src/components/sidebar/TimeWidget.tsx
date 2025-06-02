@@ -4,12 +4,8 @@ import { Clock, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
 
-interface TimeWidgetProps {
-  onWidgetOpen?: () => void;
-}
-
 // Widget para mostrar la hora y fecha actual
-const TimeWidget: React.FC<TimeWidgetProps> = ({ onWidgetOpen }) => {
+const TimeWidget = () => {
   const [date, setDate] = useState(new Date());
   const { openWidget } = useFloatingWidgets();
   
@@ -40,10 +36,6 @@ const TimeWidget: React.FC<TimeWidgetProps> = ({ onWidgetOpen }) => {
 
   const handleOpenAlarmWidget = () => {
     openWidget('alarm');
-    // Call callback to close sidebar on mobile
-    if (onWidgetOpen) {
-      onWidgetOpen();
-    }
   };
   
   return (
