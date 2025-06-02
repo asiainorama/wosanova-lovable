@@ -1,5 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Calculator from '@/components/widgets/Calculator';
 import UnitConverter from '@/components/widgets/UnitConverter';
 import Notes from '@/components/widgets/Notes';
@@ -17,8 +19,12 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const widgetRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Don't allow dragging on mobile
+    if (isMobile) return;
+    
     // Only start dragging if clicking on the header area
     const target = e.target as HTMLElement;
     const isHeaderArea = target.closest('[data-widget-header]');
@@ -38,7 +44,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isMobile) return;
 
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
@@ -58,7 +64,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging && !isMobile) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -67,7 +73,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset, isMobile]);
 
   const handleClose = () => {
     closeWidget(id);
@@ -88,6 +94,23 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
     }
   };
 
+  // Mobile: full screen overlay
+  if (isMobile) {
+    return (
+      <div
+        ref={widgetRef}
+        className="fixed inset-0 bg-background z-50"
+        style={{ zIndex }}
+        onClick={() => bringToFront(id)}
+      >
+        <div data-widget-header>
+          {renderWidget()}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: floating draggable widget
   return (
     <div
       ref={widgetRef}

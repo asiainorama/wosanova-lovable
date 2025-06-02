@@ -51,6 +51,11 @@ export const FloatingWidgetsProvider: React.FC<{ children: ReactNode }> = ({ chi
 
     setWidgets(prev => [...prev, newWidget]);
     setNextZIndex(prev => prev + 1);
+    
+    // Automatically bring the new widget to front after a brief delay
+    setTimeout(() => {
+      bringToFront(newWidget.id);
+    }, 100);
   };
 
   const closeWidget = (id: string) => {
