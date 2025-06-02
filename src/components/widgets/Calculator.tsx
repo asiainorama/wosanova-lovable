@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -106,7 +105,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
 
   return (
     <div className={`bg-background flex flex-col h-full w-full rounded-lg`}>
-      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800" data-widget-header>
         <h2 className="text-xl font-bold">Calculadora</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />

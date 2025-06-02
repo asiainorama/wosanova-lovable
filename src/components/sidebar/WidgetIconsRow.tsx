@@ -1,19 +1,20 @@
 
 import React from 'react';
 import { Calculator, ArrowUpDown, FileText, AlarmClock } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { safeOpenWindow } from '@/utils/windowUtils';
+import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
 import { Button } from '@/components/ui/button';
 
 interface WidgetProps {
   icon: React.ReactNode;
   name: string;
-  url: string;
+  type: 'calculator' | 'converter' | 'notes' | 'alarm';
 }
 
-const WidgetButton: React.FC<WidgetProps> = ({ icon, name, url }) => {
+const WidgetButton: React.FC<WidgetProps> = ({ icon, name, type }) => {
+  const { openWidget } = useFloatingWidgets();
+  
   const handleClick = () => {
-    safeOpenWindow(url);
+    openWidget(type);
   };
   
   return (
@@ -30,28 +31,26 @@ const WidgetButton: React.FC<WidgetProps> = ({ icon, name, url }) => {
 };
 
 const WidgetIconsRow: React.FC = () => {
-  const isMobile = useIsMobile();
-  
   const widgets = [
     { 
       name: 'Calculadora', 
       icon: <Calculator className="text-primary" />, 
-      url: '/widgets/calculator'
+      type: 'calculator' as const
     },
     { 
       name: 'Conversor', 
       icon: <ArrowUpDown className="text-primary" />, 
-      url: '/widgets/converter' 
+      type: 'converter' as const
     },
     { 
       name: 'Notas', 
       icon: <FileText className="text-primary" />, 
-      url: '/widgets/notes'
+      type: 'notes' as const
     },
     { 
       name: 'Alarmas', 
       icon: <AlarmClock className="text-primary" />, 
-      url: '/widgets/alarm'
+      type: 'alarm' as const
     }
   ];
 
@@ -62,7 +61,7 @@ const WidgetIconsRow: React.FC = () => {
           key={widget.name}
           icon={widget.icon}
           name={widget.name}
-          url={widget.url}
+          type={widget.type}
         />
       ))}
     </div>

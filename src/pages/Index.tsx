@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -11,6 +10,8 @@ import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useBackground } from '@/contexts/BackgroundContext';
 import SidebarMenu from '@/components/SidebarMenu';
+import { FloatingWidgetsProvider } from '@/contexts/FloatingWidgetsContext';
+import FloatingWidgetsContainer from '@/components/FloatingWidgetsContainer';
 
 const Index = () => {
   const { favorites } = useAppContext();
@@ -93,7 +94,7 @@ const Index = () => {
   }, []);
 
   return (
-    <>
+    <FloatingWidgetsProvider>
       <div className="min-h-screen flex flex-col relative" style={{ background: 'transparent' }}>
         <Header title={t('home.title') || "Inicio"} />
         
@@ -127,13 +128,15 @@ const Index = () => {
             </div>
           )}
         </main>
+
+        <FloatingWidgetsContainer />
       </div>
 
       <SidebarMenu 
         isOpen={isSidebarOpen} 
         onOpenChange={setIsSidebarOpen} 
       />
-    </>
+    </FloatingWidgetsProvider>
   );
 };
 

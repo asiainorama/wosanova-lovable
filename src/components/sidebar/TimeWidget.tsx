@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { safeOpenWindow } from '@/utils/windowUtils';
+import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
 
 // Widget para mostrar la hora y fecha actual
 const TimeWidget = () => {
   const [date, setDate] = useState(new Date());
+  const { openWidget } = useFloatingWidgets();
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -34,7 +35,7 @@ const TimeWidget = () => {
   const minutes = date.getMinutes().toString().padStart(2, '0');
 
   const handleOpenAlarmWidget = () => {
-    safeOpenWindow('/widgets/alarm');
+    openWidget('alarm');
   };
   
   return (
