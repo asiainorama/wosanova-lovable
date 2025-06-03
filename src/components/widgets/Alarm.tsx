@@ -29,11 +29,14 @@ interface AlarmItem {
 const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const [alarms, setAlarms] = useState<AlarmItem[]>([]);
   const [newAlarmTime, setNewAlarmTime] = useState('08:00');
+  const [notificationsPermission, setNotificationsPermission] = useState<NotificationPermission>('default');
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // Load alarms from localStorage on component mount
+  // Request notification permissions on component mount
   useEffect(() => {
+    checkNotificationPermission();
+    
     const savedAlarms = localStorage.getItem('userAlarms');
     if (savedAlarms) {
       setAlarms(JSON.parse(savedAlarms));
@@ -44,13 +47,54 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     audioRef.current.loop = true;
     
     return () => {
-      // Clean up audio when component unmounts
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
       }
     };
   }, []);
+
+  const checkNotificationPermission = async () => {
+    if ('Notification' in window) {
+      const permission = Notification.permission;
+      setNotificationsPermission(permission);
+      
+      if (permission === 'default') {
+        // Show toast asking for permission
+        toast({
+          title: "Permisos de notificación",
+          description: "Permite las notificaciones para recibir alertas de alarma",
+          duration: 5000,
+        });
+      }
+    } else {
+      console.log('Este navegador no soporta notificaciones');
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window) {
+      try {
+        const permission = await Notification.requestPermission();
+        setNotificationsPermission(permission);
+        
+        if (permission === 'granted') {
+          toast({
+            title: "Permisos concedidos",
+            description: "Ahora recibirás notificaciones de alarma",
+          });
+        } else {
+          toast({
+            title: "Permisos denegados",
+            description: "No podrás recibir notificaciones de alarma",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+      }
+    }
+  };
 
   // Save alarms to localStorage whenever they change
   useEffect(() => {
@@ -59,13 +103,11 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
 
   // Check for alarms that need to trigger every minute
   useEffect(() => {
-    // Check once immediately when component mounts
     checkAlarms();
     
-    const intervalId = setInterval(checkAlarms, 10000); // Check every 10 seconds for demo purposes
+    const intervalId = setInterval(checkAlarms, 30000); // Check every 30 seconds
     
     return () => clearInterval(intervalId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alarms]);
 
   const getDayOfWeek = () => {
@@ -86,42 +128,65 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     alarms.forEach(alarm => {
       if (alarm.enabled && alarm.time === currentTime && alarm.days[currentDay]) {
         console.log(`Alarm triggered: ${alarm.time}`);
-        // Play alarm sound
-        if (audioRef.current) {
-          audioRef.current.play().catch(error => console.error('Error playing sound:', error));
-        }
-        
-        // Show toast notification
-        toast({
-          title: "¡Alarma!",
-          description: `Es hora: ${alarm.time}`,
-          duration: 10000,
-        });
-        
-        // Also show a sonner toast for redundancy
-        sonnerToast("¡Alarma activada!", {
-          description: `Es hora: ${alarm.time}`,
-          duration: 10000,
-          action: {
-            label: "Detener",
-            onClick: () => {
-              if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
-              }
-            }
-          }
-        });
+        triggerAlarm(alarm);
       }
     });
   };
 
-  const handleClose = () => {
-    // Stop any playing alarm sound when closing the widget
+  const triggerAlarm = (alarm: AlarmItem) => {
+    // Play alarm sound
+    if (audioRef.current) {
+      audioRef.current.play().catch(error => console.error('Error playing sound:', error));
+    }
+    
+    // Show browser notification
+    if (notificationsPermission === 'granted') {
+      const notification = new Notification('¡Alarma!', {
+        body: `Es hora: ${alarm.time}`,
+        icon: '/icons/icon-192x192.png',
+        requireInteraction: true,
+        tag: `alarm-${alarm.id}`,
+      });
+      
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+        stopAlarm();
+      };
+      
+      // Auto close notification after 30 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 30000);
+    }
+    
+    // Show toast notification
+    toast({
+      title: "¡Alarma!",
+      description: `Es hora: ${alarm.time}`,
+      duration: 10000,
+    });
+    
+    // Also show a sonner toast for redundancy
+    sonnerToast("¡Alarma activada!", {
+      description: `Es hora: ${alarm.time}`,
+      duration: 15000,
+      action: {
+        label: "Detener",
+        onClick: stopAlarm
+      }
+    });
+  };
+
+  const stopAlarm = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+  };
+
+  const handleClose = () => {
+    stopAlarm();
     
     if (onClose) {
       onClose();
@@ -175,25 +240,28 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     ));
   };
 
-  // Demo trigger for testing
   const testAlarm = () => {
-    if (audioRef.current) {
-      audioRef.current.play().catch(error => console.error('Error playing sound:', error));
-      
-      toast({
-        title: "¡Prueba de alarma!",
-        description: "Esto es una prueba de alarma",
-        duration: 5000,
-      });
-      
-      // Stop the test alarm after 3 seconds
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
-      }, 3000);
-    }
+    const testAlarmData: AlarmItem = {
+      id: 'test',
+      time: 'test',
+      enabled: true,
+      days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true, sun: true }
+    };
+    
+    triggerAlarm(testAlarmData);
+    
+    // Stop the test alarm after 3 seconds
+    setTimeout(stopAlarm, 3000);
+  };
+
+  const dayLabels = {
+    mon: 'L',
+    tue: 'M',
+    wed: 'X',
+    thu: 'J',
+    fri: 'V',
+    sat: 'S',
+    sun: 'D'
   };
 
   return (
@@ -204,6 +272,25 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
           <X className="h-5 w-5" />
         </Button>
       </div>
+      
+      {/* Notification permission banner */}
+      {notificationsPermission !== 'granted' && (
+        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Activa las notificaciones para recibir alertas de alarma
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={requestNotificationPermission}
+              className="ml-2 text-yellow-800 border-yellow-300 hover:bg-yellow-100 dark:text-yellow-200 dark:border-yellow-700 dark:hover:bg-yellow-900/40"
+            >
+              Activar
+            </Button>
+          </div>
+        </div>
+      )}
       
       <div className="flex items-center p-4 gap-2 border-b border-gray-200 dark:border-gray-800">
         <Input
@@ -256,7 +343,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
                     className="h-6 min-w-6 p-0 text-xs rounded-full"
                     onClick={() => toggleDay(alarm.id, day as keyof AlarmItem['days'])}
                   >
-                    {day.charAt(0).toUpperCase()}
+                    {dayLabels[day as keyof typeof dayLabels]}
                   </Button>
                 ))}
               </div>

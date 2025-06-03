@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,6 +14,32 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
   const isMobile = useIsMobile();
+
+  // Keyboard support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      
+      // Numbers
+      if (e.key >= '0' && e.key <= '9') {
+        handleDigit(e.key);
+      }
+      // Operators
+      else if (e.key === '+') handleOperator('+');
+      else if (e.key === '-') handleOperator('-');
+      else if (e.key === '*') handleOperator('*');
+      else if (e.key === '/') handleOperator('/');
+      // Special keys
+      else if (e.key === 'Enter' || e.key === '=') handleEqual();
+      else if (e.key === '.') handleDecimal();
+      else if (e.key === 'Escape') clearAll();
+      else if (e.key === 'Backspace') handleDelete();
+      else if (e.key === '%') handlePercentage();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [input, operator, prevValue, waitingForOperand]);
 
   const clearAll = () => {
     setInput('0');
@@ -98,7 +125,6 @@ const Calculator = ({ onClose }: CalculatorProps) => {
     if (onClose) {
       onClose();
     } else {
-      // Fallback close method if no onClose provided
       window.history.back();
     }
   };
@@ -113,10 +139,13 @@ const Calculator = ({ onClose }: CalculatorProps) => {
       </div>
       
       <div className="p-3 flex-1 flex flex-col">
-        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right h-[25%]">
-          <div className="text-4xl font-medium truncate">{input}</div>
+        {/* Fixed height display to prevent size changes */}
+        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right h-20 flex flex-col justify-center">
+          <div className="text-3xl font-medium truncate min-h-[2.25rem] flex items-center justify-end">
+            {input}
+          </div>
           {operator && prevValue && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500 dark:text-gray-400 min-h-[1.25rem]">
               {prevValue} {operator}
             </div>
           )}

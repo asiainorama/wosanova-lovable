@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,8 +79,6 @@ const conversionFactors: Record<string, Record<string, number>> = {
   oz: { mg: 28349.5, g: 28.3495, kg: 0.0283495, oz: 1, lb: 0.0625, t: 0.0000283495 },
   lb: { mg: 453592, g: 453.592, kg: 0.453592, oz: 16, lb: 1, t: 0.000453592 },
   t: { mg: 1000000000, g: 1000000, kg: 1000, oz: 35274, lb: 2204.62, t: 1 },
-  
-  // Temperature has special conversions handled separately
   
   // Volume (base: liters)
   ml: { ml: 1, l: 0.001, gal: 0.000264172, floz: 0.033814 },
@@ -179,13 +176,12 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
     if (onClose) {
       onClose();
     } else {
-      // Fallback close method if no onClose provided
       window.history.back();
     }
   };
 
   return (
-    <div className={`bg-background flex flex-col h-full w-full rounded-lg`}>
+    <div className={`bg-background flex flex-col h-full w-full rounded-lg relative z-50`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Conversor</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -193,27 +189,29 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
         </Button>
       </div>
       
-      <div className="p-4 flex-1 flex flex-col">
+      <div className="p-4 flex-1 flex flex-col relative z-50">
         {/* Conversion Type Selector */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Tipo de conversión
           </label>
-          <Select 
-            value={conversionType} 
-            onValueChange={(value) => setConversionType(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {conversionTypes.map((type) => (
-                <SelectItem key={type.name} value={type.name}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative z-[60]">
+            <Select 
+              value={conversionType} 
+              onValueChange={(value) => setConversionType(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar tipo" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border shadow-lg z-[70]">
+                {conversionTypes.map((type) => (
+                  <SelectItem key={type.name} value={type.name}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         {/* From Unit */}
@@ -231,12 +229,12 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
                 inputMode="decimal"
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 relative z-[60]">
               <Select value={fromUnit} onValueChange={(value) => setFromUnit(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Unidad" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border border-border shadow-lg z-[70]">
                   {activeUnits.map((unit) => (
                     <SelectItem key={unit.value} value={unit.value}>
                       {unit.label}
@@ -274,12 +272,12 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
                 className="w-full bg-gray-100 dark:bg-gray-800"
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 relative z-[60]">
               <Select value={toUnit} onValueChange={(value) => setToUnit(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Unidad" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border border-border shadow-lg z-[70]">
                   {activeUnits.map((unit) => (
                     <SelectItem key={unit.value} value={unit.value}>
                       {unit.label}

@@ -25,9 +25,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   // Auto-focus newly created widgets and clear the new flag
   useEffect(() => {
     if (isNew) {
-      // Bring to front immediately for new widgets
       bringToFront(id);
-      // Clear the new flag after a short delay
       setTimeout(() => {
         clearNewFlag(id);
       }, 100);
@@ -35,10 +33,8 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   }, [isNew, id, bringToFront, clearNewFlag]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Don't allow dragging on mobile since widgets are full-screen
     if (isMobile) return;
     
-    // Only start dragging if clicking on the header area
     const target = e.target as HTMLElement;
     const isHeaderArea = target.closest('[data-widget-header]');
     
@@ -62,9 +58,8 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
 
-    // Keep widget within viewport bounds
-    const maxX = window.innerWidth - 350; // Widget width
-    const maxY = window.innerHeight - 400; // Widget height
+    const maxX = window.innerWidth - 350;
+    const maxY = window.innerHeight - 400;
 
     const constrainedX = Math.max(0, Math.min(newX, maxX));
     const constrainedY = Math.max(0, Math.min(newY, maxY));
@@ -107,19 +102,21 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
     }
   };
 
-  // Mobile full-screen styles
+  // Ensure widgets are always above the sidebar (z-index 40)
+  const baseZIndex = Math.max(zIndex, 50);
+  
   const mobileStyles = isMobile ? {
     left: 0,
     top: 0,
     width: '100vw',
     height: '100vh',
-    zIndex: 9999, // Higher z-index to ensure it's above everything
+    zIndex: 9999,
   } : {
     left: position.x,
     top: position.y,
     width: '350px',
     height: '400px',
-    zIndex,
+    zIndex: baseZIndex,
   };
 
   return (

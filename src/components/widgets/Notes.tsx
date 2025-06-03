@@ -27,6 +27,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     content: '',
     updatedAt: ''
   });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -71,11 +72,34 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     }
   }, [notes]);
 
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      if (hasUnsavedChanges && selectedNoteId) {
+        saveCurrentNote(false); // Silent save
+      }
+    }, 10000); // Auto-save every 10 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [hasUnsavedChanges, selectedNoteId, currentNote]);
+
+  // Track changes in current note
+  useEffect(() => {
+    if (selectedNoteId) {
+      const originalNote = notes.find(note => note.id === selectedNoteId);
+      if (originalNote) {
+        const hasChanges = 
+          originalNote.title !== currentNote.title || 
+          originalNote.content !== currentNote.content;
+        setHasUnsavedChanges(hasChanges);
+      }
+    }
+  }, [currentNote, notes, selectedNoteId]);
+
   const handleClose = () => {
     if (onClose) {
       onClose();
     } else {
-      // Fallback close method if no onClose provided
       window.history.back();
     }
   };
@@ -91,6 +115,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     setNotes([...notes, newNote]);
     setSelectedNoteId(newNote.id);
     setCurrentNote(newNote);
+    setHasUnsavedChanges(false);
     
     toast({
       title: "Nueva nota creada",
@@ -98,7 +123,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     });
   };
 
-  const saveCurrentNote = () => {
+  const saveCurrentNote = (showToast: boolean = true) => {
     if (!selectedNoteId) return;
     
     const updatedNote = {
@@ -110,10 +135,14 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
       note.id === selectedNoteId ? updatedNote : note
     ));
     
-    toast({
-      title: "Nota guardada",
-      description: "Los cambios han sido guardados",
-    });
+    setHasUnsavedChanges(false);
+    
+    if (showToast) {
+      toast({
+        title: "Nota guardada",
+        description: "Los cambios han sido guardados",
+      });
+    }
   };
 
   const deleteNote = (id: string) => {
@@ -144,10 +173,16 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   };
 
   const selectNote = (id: string) => {
+    // Save current note before switching if there are unsaved changes
+    if (hasUnsavedChanges && selectedNoteId) {
+      saveCurrentNote(false);
+    }
+
     const selectedNote = notes.find(note => note.id === id);
     if (selectedNote) {
       setSelectedNoteId(id);
       setCurrentNote(selectedNote);
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -161,6 +196,14 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleTitleChange = (value: string) => {
+    setCurrentNote({...currentNote, title: value});
+  };
+
+  const handleContentChange = (value: string) => {
+    setCurrentNote({...currentNote, content: value});
   };
 
   return (
@@ -189,7 +232,9 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                 <p className="text-sm">Crea una nueva nota con el botón +</p>
               </div>
             ) : (
-              notes.map(note => (
+              notes
+                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .map(note => (
                 <div 
                   key={note.id}
                   onClick={() => selectNote(note.id)}
@@ -226,7 +271,12 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    onClick={() => setSelectedNoteId(null)}
+                    onClick={() => {
+                      if (hasUnsavedChanges) {
+                        saveCurrentNote(false);
+                      }
+                      setSelectedNoteId(null);
+                    }}
                     className="mr-1"
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -234,26 +284,32 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                 )}
                 <Input
                   value={currentNote.title}
-                  onChange={(e) => setCurrentNote({...currentNote, title: e.target.value})}
+                  onChange={(e) => handleTitleChange(e.target.value)}
                   className="border-none text-lg font-medium focus-visible:ring-0 p-0 h-auto flex-1"
                   placeholder="Título de la nota"
                 />
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={saveCurrentNote}
-                  className="gap-1 ml-1"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>Guardar</span>
-                </Button>
+                <div className="flex items-center gap-1 ml-1">
+                  {hasUnsavedChanges && (
+                    <span className="text-xs text-orange-500 mr-2">Sin guardar</span>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => saveCurrentNote(true)}
+                    className="gap-1"
+                    disabled={!hasUnsavedChanges}
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>Guardar</span>
+                  </Button>
+                </div>
               </div>
               
               <Textarea 
                 placeholder="Escribe tu nota aquí..."
                 className="flex-1 resize-none text-base p-3 border-none focus-visible:ring-0"
                 value={currentNote.content}
-                onChange={(e) => setCurrentNote({...currentNote, content: e.target.value})}
+                onChange={(e) => handleContentChange(e.target.value)}
               />
             </>
           ) : (
