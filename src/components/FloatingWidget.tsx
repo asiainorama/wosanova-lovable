@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Calculator from '@/components/widgets/Calculator';
 import UnitConverter from '@/components/widgets/UnitConverter';
 import Notes from '@/components/widgets/Notes';
@@ -19,6 +20,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const widgetRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Auto-focus newly created widgets and clear the new flag
   useEffect(() => {
@@ -33,6 +35,9 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   }, [isNew, id, bringToFront, clearNewFlag]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Don't allow dragging on mobile since widgets are full-screen
+    if (isMobile) return;
+    
     // Only start dragging if clicking on the header area
     const target = e.target as HTMLElement;
     const isHeaderArea = target.closest('[data-widget-header]');
@@ -52,7 +57,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isMobile) return;
 
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
@@ -72,7 +77,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging && !isMobile) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       
@@ -81,7 +86,7 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset, isMobile]);
 
   const handleClose = () => {
     closeWidget(id);
@@ -102,24 +107,35 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
     }
   };
 
+  // Mobile full-screen styles
+  const mobileStyles = isMobile ? {
+    left: 0,
+    top: 0,
+    width: '100vw',
+    height: '100vh',
+    zIndex: 9999, // Higher z-index to ensure it's above everything
+  } : {
+    left: position.x,
+    top: position.y,
+    width: '350px',
+    height: '400px',
+    zIndex,
+  };
+
   return (
     <div
       ref={widgetRef}
       className={`fixed bg-background rounded-lg shadow-2xl border border-border ${
         isNew ? 'animate-pulse' : ''
-      }`}
+      } ${isMobile ? 'rounded-none' : ''}`}
       style={{
-        left: position.x,
-        top: position.y,
-        zIndex,
-        width: '350px',
-        height: '400px',
+        ...mobileStyles,
         cursor: isDragging ? 'grabbing' : 'auto'
       }}
       onMouseDown={handleMouseDown}
       onClick={() => bringToFront(id)}
     >
-      <div data-widget-header className="cursor-grab active:cursor-grabbing">
+      <div data-widget-header className={isMobile ? '' : 'cursor-grab active:cursor-grabbing'}>
         {renderWidget()}
       </div>
     </div>
