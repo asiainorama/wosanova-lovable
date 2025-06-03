@@ -52,16 +52,16 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
         // Try to load from Supabase if user is authenticated
         try {
           const { data, error } = await supabase
-            .from('user_notes')
+            .from('user_notes' as any)
             .select('*')
             .eq('user_id', userId)
             .order('updated_at', { ascending: false });
 
           if (data && !error) {
-            const formattedNotes = data.map(note => ({
+            const formattedNotes = data.map((note: any) => ({
               id: note.id,
               title: note.title,
-              content: note.content,
+              content: note.content || '',
               updatedAt: note.updated_at,
               user_id: note.user_id
             }));
@@ -105,11 +105,11 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     };
 
     loadNotes();
-  }, [userId]);
+  }, [userId, toast]);
 
   // Save notes to both Supabase and localStorage
   const saveNotes = async (notesToSave: NoteItem[]) => {
-    // Always save to localStorage
+    // Always save to localStorage as backup
     try {
       localStorage.setItem('userNotes', JSON.stringify(notesToSave));
     } catch (error) {
@@ -129,7 +129,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
           };
 
           const { error } = await supabase
-            .from('user_notes')
+            .from('user_notes' as any)
             .upsert(noteData, { onConflict: 'id' });
 
           if (error) {
@@ -233,7 +233,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     if (userId) {
       try {
         await supabase
-          .from('user_notes')
+          .from('user_notes' as any)
           .delete()
           .eq('id', id)
           .eq('user_id', userId);
@@ -304,7 +304,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
 
   return (
     <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
-      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800" data-widget-header>
         <h2 className="text-xl font-bold">Notas</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />
