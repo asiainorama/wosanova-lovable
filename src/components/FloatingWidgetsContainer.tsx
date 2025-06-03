@@ -15,6 +15,7 @@ const FloatingWidgetsContainer: React.FC = () => {
           type={widget.type}
           position={widget.position}
           zIndex={widget.zIndex}
+          isNew={widget.isNew}
         />
       ))}
     </>

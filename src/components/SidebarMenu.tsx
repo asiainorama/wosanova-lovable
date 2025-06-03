@@ -95,6 +95,11 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     };
   }, []);
 
+  const handleWidgetOpen = () => {
+    // Close sidebar when a widget is opened
+    onOpenChange(false);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
@@ -119,13 +124,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
           
           {/* Top section with Time and Weather - takes natural space */}
           <div className="flex-shrink-0 space-y-2 px-3 py-2">
-            <TimeWidget />
+            <TimeWidget onWidgetOpen={handleWidgetOpen} />
             <WeatherWidget />
           </div>
 
           {/* Center section with Widget Icons - centered in available space */}
           <div className="flex-1 flex items-center justify-center px-2">
-            <WidgetIconsRow />
+            <WidgetIconsRow onWidgetOpen={handleWidgetOpen} />
           </div>
           
           {/* Bottom section with Calendar - takes natural space at bottom */}

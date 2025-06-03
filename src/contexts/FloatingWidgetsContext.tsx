@@ -6,6 +6,7 @@ export interface FloatingWidget {
   type: 'calculator' | 'converter' | 'notes' | 'alarm';
   position: { x: number; y: number };
   zIndex: number;
+  isNew?: boolean; // Flag to indicate if widget was just created
 }
 
 interface FloatingWidgetsContextType {
@@ -14,6 +15,7 @@ interface FloatingWidgetsContextType {
   closeWidget: (id: string) => void;
   updateWidgetPosition: (id: string, position: { x: number; y: number }) => void;
   bringToFront: (id: string) => void;
+  clearNewFlag: (id: string) => void;
 }
 
 const FloatingWidgetsContext = createContext<FloatingWidgetsContextType | undefined>(undefined);
@@ -38,7 +40,7 @@ export const FloatingWidgetsProvider: React.FC<{ children: ReactNode }> = ({ chi
       return;
     }
 
-    // Create new widget with random position
+    // Create new widget with random position and mark as new
     const newWidget: FloatingWidget = {
       id: `${type}-${Date.now()}`,
       type,
@@ -46,7 +48,8 @@ export const FloatingWidgetsProvider: React.FC<{ children: ReactNode }> = ({ chi
         x: Math.random() * 200 + 50, // Random position but not too close to edges
         y: Math.random() * 200 + 50
       },
-      zIndex: nextZIndex
+      zIndex: nextZIndex,
+      isNew: true // Mark as newly created
     };
 
     setWidgets(prev => [...prev, newWidget]);
@@ -70,13 +73,20 @@ export const FloatingWidgetsProvider: React.FC<{ children: ReactNode }> = ({ chi
     setNextZIndex(prev => prev + 1);
   };
 
+  const clearNewFlag = (id: string) => {
+    setWidgets(prev => prev.map(w => 
+      w.id === id ? { ...w, isNew: false } : w
+    ));
+  };
+
   return (
     <FloatingWidgetsContext.Provider value={{
       widgets,
       openWidget,
       closeWidget,
       updateWidgetPosition,
-      bringToFront
+      bringToFront,
+      clearNewFlag
     }}>
       {children}
     </FloatingWidgetsContext.Provider>

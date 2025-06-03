@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useFloatingWidgets } from '@/contexts/FloatingWidgetsContext';
 import Calculator from '@/components/widgets/Calculator';
@@ -10,13 +11,26 @@ interface FloatingWidgetProps {
   type: 'calculator' | 'converter' | 'notes' | 'alarm';
   position: { x: number; y: number };
   zIndex: number;
+  isNew?: boolean;
 }
 
-const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIndex }) => {
-  const { closeWidget, updateWidgetPosition, bringToFront } = useFloatingWidgets();
+const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIndex, isNew }) => {
+  const { closeWidget, updateWidgetPosition, bringToFront, clearNewFlag } = useFloatingWidgets();
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Auto-focus newly created widgets and clear the new flag
+  useEffect(() => {
+    if (isNew) {
+      // Bring to front immediately for new widgets
+      bringToFront(id);
+      // Clear the new flag after a short delay
+      setTimeout(() => {
+        clearNewFlag(id);
+      }, 100);
+    }
+  }, [isNew, id, bringToFront, clearNewFlag]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Only start dragging if clicking on the header area
@@ -91,7 +105,9 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
   return (
     <div
       ref={widgetRef}
-      className="fixed bg-background rounded-lg shadow-2xl border border-border"
+      className={`fixed bg-background rounded-lg shadow-2xl border border-border ${
+        isNew ? 'animate-pulse' : ''
+      }`}
       style={{
         left: position.x,
         top: position.y,

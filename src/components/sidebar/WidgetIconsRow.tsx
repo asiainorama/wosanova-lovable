@@ -10,11 +10,19 @@ interface WidgetProps {
   type: 'calculator' | 'converter' | 'notes' | 'alarm';
 }
 
-const WidgetButton: React.FC<WidgetProps> = ({ icon, name, type }) => {
+interface WidgetIconsRowProps {
+  onWidgetOpen?: () => void;
+}
+
+const WidgetButton: React.FC<WidgetProps & { onWidgetOpen?: () => void }> = ({ icon, name, type, onWidgetOpen }) => {
   const { openWidget } = useFloatingWidgets();
   
   const handleClick = () => {
     openWidget(type);
+    // Close sidebar when widget is opened
+    if (onWidgetOpen) {
+      onWidgetOpen();
+    }
   };
   
   return (
@@ -30,7 +38,7 @@ const WidgetButton: React.FC<WidgetProps> = ({ icon, name, type }) => {
   );
 };
 
-const WidgetIconsRow: React.FC = () => {
+const WidgetIconsRow: React.FC<WidgetIconsRowProps> = ({ onWidgetOpen }) => {
   const widgets = [
     { 
       name: 'Calculadora', 
@@ -62,6 +70,7 @@ const WidgetIconsRow: React.FC = () => {
           icon={widget.icon}
           name={widget.name}
           type={widget.type}
+          onWidgetOpen={onWidgetOpen}
         />
       ))}
     </div>
