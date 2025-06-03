@@ -130,7 +130,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   };
 
   return (
-    <div className={`bg-background flex flex-col h-full w-full rounded-lg`}>
+    <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800" data-widget-header>
         <h2 className="text-xl font-bold">Calculadora</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -138,157 +138,96 @@ const Calculator = ({ onClose }: CalculatorProps) => {
         </Button>
       </div>
       
-      <div className="p-3 flex-1 flex flex-col">
-        {/* Fixed height display to prevent size changes */}
-        <div className="bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right h-20 flex flex-col justify-center">
-          <div className="text-3xl font-medium truncate min-h-[2.25rem] flex items-center justify-end">
+      <div className={`p-3 flex-1 flex flex-col ${isMobile ? 'min-h-0' : ''}`}>
+        {/* Display area with fixed height */}
+        <div className={`bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right flex flex-col justify-center ${isMobile ? 'h-24' : 'h-20'}`}>
+          <div className={`font-medium truncate flex items-center justify-end ${isMobile ? 'text-4xl min-h-[3rem]' : 'text-3xl min-h-[2.25rem]'}`}>
             {input}
           </div>
           {operator && prevValue && (
-            <div className="text-sm text-gray-500 dark:text-gray-400 min-h-[1.25rem]">
+            <div className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-base min-h-[1.5rem]' : 'text-sm min-h-[1.25rem]'}`}>
               {prevValue} {operator}
             </div>
           )}
         </div>
         
-        <div className="grid grid-cols-4 gap-0 flex-1">
+        <div className="grid grid-cols-4 gap-1 flex-1">
           <Button 
             variant="outline" 
-            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
+            className={`aspect-square bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto ${isMobile ? 'text-2xl' : 'text-xl'}`}
             onClick={clearAll}
           >
             AC
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
+            className={`aspect-square bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto ${isMobile ? 'text-2xl' : 'text-xl'}`}
             onClick={handlePlusMinus}
           >
             +/-
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto"
+            className={`aspect-square bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-0 h-auto ${isMobile ? 'text-2xl' : 'text-xl'}`}
             onClick={handlePercentage}
           >
             %
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
+            className={`aspect-square bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto ${isMobile ? 'text-2xl' : 'text-xl'}`}
             onClick={() => handleOperator('/')}
           >
             ÷
           </Button>
           
-          {/* Row 2 */}
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('7')}
-          >
-            7
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('8')}
-          >
-            8
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('9')}
-          >
-            9
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
-            onClick={() => handleOperator('*')}
-          >
-            ×
-          </Button>
+          {/* Numbers and operators - continuing grid */}
+          {[
+            { label: '7', action: () => handleDigit('7') },
+            { label: '8', action: () => handleDigit('8') },
+            { label: '9', action: () => handleDigit('9') },
+            { label: '×', action: () => handleOperator('*'), isOperator: true },
+            { label: '4', action: () => handleDigit('4') },
+            { label: '5', action: () => handleDigit('5') },
+            { label: '6', action: () => handleDigit('6') },
+            { label: '-', action: () => handleOperator('-'), isOperator: true },
+            { label: '1', action: () => handleDigit('1') },
+            { label: '2', action: () => handleDigit('2') },
+            { label: '3', action: () => handleDigit('3') },
+            { label: '+', action: () => handleOperator('+'), isOperator: true },
+          ].map((btn, index) => (
+            <Button 
+              key={index}
+              variant="outline" 
+              className={`aspect-square p-0 h-auto ${isMobile ? 'text-3xl' : 'text-2xl'} ${
+                btn.isOperator 
+                  ? 'bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50' 
+                  : ''
+              }`}
+              onClick={btn.action}
+            >
+              {btn.label}
+            </Button>
+          ))}
           
-          {/* Row 3 */}
+          {/* Bottom row */}
           <Button 
             variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('4')}
-          >
-            4
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('5')}
-          >
-            5
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('6')}
-          >
-            6
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
-            onClick={() => handleOperator('-')}
-          >
-            -
-          </Button>
-          
-          {/* Row 4 */}
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('1')}
-          >
-            1
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('2')}
-          >
-            2
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
-            onClick={() => handleDigit('3')}
-          >
-            3
-          </Button>
-          <Button 
-            variant="outline" 
-            className="aspect-square text-xl bg-orange-100 hover:bg-orange-200 text-orange-500 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 p-0 h-auto"
-            onClick={() => handleOperator('+')}
-          >
-            +
-          </Button>
-          
-          {/* Row 5 - Reorganized */}
-          <Button 
-            variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
+            className={`aspect-square p-0 h-auto ${isMobile ? 'text-3xl' : 'text-2xl'}`}
             onClick={() => handleDigit('0')}
           >
             0
           </Button>
           <Button 
             variant="outline" 
-            className="aspect-square text-2xl p-0 h-auto"
+            className={`aspect-square p-0 h-auto ${isMobile ? 'text-3xl' : 'text-2xl'}`}
             onClick={handleDecimal}
           >
             .
           </Button>
           <Button 
             variant="outline" 
-            className="col-span-2 text-xl bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto aspect-[2/1]"
+            className={`col-span-2 bg-orange-500 hover:bg-orange-600 text-white p-0 h-auto aspect-[2/1] ${isMobile ? 'text-2xl' : 'text-xl'}`}
             onClick={handleEqual}
           >
             =

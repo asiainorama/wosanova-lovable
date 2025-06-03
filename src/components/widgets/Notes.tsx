@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NotesProps {
   onClose?: () => void;
@@ -16,6 +17,7 @@ interface NoteItem {
   title: string;
   content: string;
   updatedAt: string;
+  user_id?: string;
 }
 
 const Notes: React.FC<NotesProps> = ({ onClose }) => {
@@ -28,49 +30,117 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     updatedAt: ''
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Load notes from localStorage on component mount
+  // Get current user
   useEffect(() => {
-    try {
-      const savedNotes = localStorage.getItem('userNotes');
-      if (savedNotes) {
-        const parsedNotes = JSON.parse(savedNotes) as NoteItem[];
-        setNotes(parsedNotes);
-        
-        // Select the most recent note if there are any
-        if (parsedNotes.length > 0) {
-          const mostRecent = parsedNotes.sort((a, b) => 
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-          )[0];
-          setSelectedNoteId(mostRecent.id);
-          setCurrentNote(mostRecent);
-        }
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
       }
-    } catch (error) {
-      console.error("Error loading notes:", error);
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las notas",
-        variant: "destructive",
-      });
-    }
+    };
+    getUser();
   }, []);
 
-  // Save notes to localStorage whenever they change
+  // Load notes from Supabase or localStorage
   useEffect(() => {
+    const loadNotes = async () => {
+      if (userId) {
+        // Try to load from Supabase if user is authenticated
+        try {
+          const { data, error } = await supabase
+            .from('user_notes')
+            .select('*')
+            .eq('user_id', userId)
+            .order('updated_at', { ascending: false });
+
+          if (data && !error) {
+            const formattedNotes = data.map(note => ({
+              id: note.id,
+              title: note.title,
+              content: note.content,
+              updatedAt: note.updated_at,
+              user_id: note.user_id
+            }));
+            setNotes(formattedNotes);
+            
+            if (formattedNotes.length > 0) {
+              const mostRecent = formattedNotes[0];
+              setSelectedNoteId(mostRecent.id);
+              setCurrentNote(mostRecent);
+            }
+            return;
+          }
+        } catch (error) {
+          console.error("Error loading notes from Supabase:", error);
+        }
+      }
+
+      // Fallback to localStorage
+      try {
+        const savedNotes = localStorage.getItem('userNotes');
+        if (savedNotes) {
+          const parsedNotes = JSON.parse(savedNotes) as NoteItem[];
+          setNotes(parsedNotes);
+          
+          if (parsedNotes.length > 0) {
+            const mostRecent = parsedNotes.sort((a, b) => 
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            )[0];
+            setSelectedNoteId(mostRecent.id);
+            setCurrentNote(mostRecent);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading notes:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las notas",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadNotes();
+  }, [userId]);
+
+  // Save notes to both Supabase and localStorage
+  const saveNotes = async (notesToSave: NoteItem[]) => {
+    // Always save to localStorage
     try {
-      localStorage.setItem('userNotes', JSON.stringify(notes));
+      localStorage.setItem('userNotes', JSON.stringify(notesToSave));
     } catch (error) {
-      console.error("Error saving notes:", error);
-      toast({
-        title: "Error",
-        description: "No se pudieron guardar las notas",
-        variant: "destructive",
-      });
+      console.error("Error saving to localStorage:", error);
     }
-  }, [notes]);
+
+    // Save to Supabase if user is authenticated
+    if (userId) {
+      try {
+        for (const note of notesToSave) {
+          const noteData = {
+            id: note.id,
+            title: note.title,
+            content: note.content,
+            updated_at: note.updatedAt,
+            user_id: userId
+          };
+
+          const { error } = await supabase
+            .from('user_notes')
+            .upsert(noteData, { onConflict: 'id' });
+
+          if (error) {
+            console.error("Error saving note to Supabase:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Error syncing with Supabase:", error);
+      }
+    }
+  };
 
   // Auto-save functionality
   useEffect(() => {
@@ -104,18 +174,23 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     }
   };
 
-  const createNewNote = () => {
+  const createNewNote = async () => {
     const newNote: NoteItem = {
       id: Date.now().toString(),
       title: `Nueva nota ${notes.length + 1}`,
       content: '',
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      user_id: userId || undefined
     };
     
-    setNotes([...notes, newNote]);
+    const updatedNotes = [...notes, newNote];
+    setNotes(updatedNotes);
     setSelectedNoteId(newNote.id);
     setCurrentNote(newNote);
     setHasUnsavedChanges(false);
+    
+    // Save immediately
+    await saveNotes(updatedNotes);
     
     toast({
       title: "Nueva nota creada",
@@ -123,19 +198,24 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     });
   };
 
-  const saveCurrentNote = (showToast: boolean = true) => {
+  const saveCurrentNote = async (showToast: boolean = true) => {
     if (!selectedNoteId) return;
     
     const updatedNote = {
       ...currentNote,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      user_id: userId || undefined
     };
     
-    setNotes(notes.map(note => 
+    const updatedNotes = notes.map(note => 
       note.id === selectedNoteId ? updatedNote : note
-    ));
+    );
     
+    setNotes(updatedNotes);
     setHasUnsavedChanges(false);
+    
+    // Save to both localStorage and Supabase
+    await saveNotes(updatedNotes);
     
     if (showToast) {
       toast({
@@ -145,14 +225,30 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     }
   };
 
-  const deleteNote = (id: string) => {
-    setNotes(notes.filter(note => note.id !== id));
+  const deleteNote = async (id: string) => {
+    const updatedNotes = notes.filter(note => note.id !== id);
+    setNotes(updatedNotes);
+    
+    // Delete from Supabase if user is authenticated
+    if (userId) {
+      try {
+        await supabase
+          .from('user_notes')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+      } catch (error) {
+        console.error("Error deleting from Supabase:", error);
+      }
+    }
+    
+    // Save updated list
+    await saveNotes(updatedNotes);
     
     // If we're deleting the currently selected note, select another or clear
     if (id === selectedNoteId) {
-      const remainingNotes = notes.filter(note => note.id !== id);
-      if (remainingNotes.length > 0) {
-        const newSelectedNote = remainingNotes[0];
+      if (updatedNotes.length > 0) {
+        const newSelectedNote = updatedNotes[0];
         setSelectedNoteId(newSelectedNote.id);
         setCurrentNote(newSelectedNote);
       } else {
@@ -172,10 +268,10 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
     });
   };
 
-  const selectNote = (id: string) => {
+  const selectNote = async (id: string) => {
     // Save current note before switching if there are unsaved changes
     if (hasUnsavedChanges && selectedNoteId) {
-      saveCurrentNote(false);
+      await saveCurrentNote(false);
     }
 
     const selectedNote = notes.find(note => note.id === id);
@@ -207,7 +303,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="bg-background flex flex-col h-full w-full rounded-lg">
+    <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Notas</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>

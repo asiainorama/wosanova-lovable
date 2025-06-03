@@ -102,32 +102,35 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ id, type, position, zIn
     }
   };
 
-  // Ensure widgets are always above the sidebar (z-index 40)
-  const baseZIndex = Math.max(zIndex, 50);
+  // Ensure widgets are always above everything (including sidebar which is z-40)
+  const baseZIndex = Math.max(zIndex, 10000);
   
   const mobileStyles = isMobile ? {
     left: 0,
     top: 0,
     width: '100vw',
     height: '100vh',
-    zIndex: 9999,
+    zIndex: baseZIndex,
+    position: 'fixed' as const,
   } : {
     left: position.x,
     top: position.y,
     width: '350px',
     height: '400px',
     zIndex: baseZIndex,
+    position: 'fixed' as const,
   };
 
   return (
     <div
       ref={widgetRef}
-      className={`fixed bg-background rounded-lg shadow-2xl border border-border ${
+      className={`bg-background rounded-lg shadow-2xl border border-border ${
         isNew ? 'animate-pulse' : ''
       } ${isMobile ? 'rounded-none' : ''}`}
       style={{
         ...mobileStyles,
-        cursor: isDragging ? 'grabbing' : 'auto'
+        cursor: isDragging ? 'grabbing' : 'auto',
+        pointerEvents: 'auto', // Ensure widgets capture all pointer events
       }}
       onMouseDown={handleMouseDown}
       onClick={() => bringToFront(id)}

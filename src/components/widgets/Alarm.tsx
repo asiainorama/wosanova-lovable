@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, Bell, Trash2 } from 'lucide-react';
+import { X, Plus, Bell, Trash2, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AlarmProps {
   onClose?: () => void;
@@ -30,8 +31,10 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const [alarms, setAlarms] = useState<AlarmItem[]>([]);
   const [newAlarmTime, setNewAlarmTime] = useState('08:00');
   const [notificationsPermission, setNotificationsPermission] = useState<NotificationPermission>('default');
+  const [isCheckingAlarms, setIsCheckingAlarms] = useState(false);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isMobile = useIsMobile();
   
   // Request notification permissions on component mount
   useEffect(() => {
@@ -42,9 +45,20 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
       setAlarms(JSON.parse(savedAlarms));
     }
     
-    // Create audio element for alarm sound
-    audioRef.current = new Audio('/alarm-sound.mp3');
-    audioRef.current.loop = true;
+    // Create audio element for alarm sound with fallback
+    const audio = new Audio();
+    
+    // Try to use the alarm sound file, with fallback to a beep
+    audio.src = '/alarm-sound.mp3';
+    audio.loop = true;
+    audio.volume = 0.7;
+    
+    // Handle errors by creating a synthetic beep
+    audio.onerror = () => {
+      console.log('Alarm sound file not found, using synthetic sound');
+    };
+    
+    audioRef.current = audio;
     
     return () => {
       if (audioRef.current) {
@@ -61,14 +75,21 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
       
       if (permission === 'default') {
         // Show toast asking for permission
-        toast({
-          title: "Permisos de notificación",
-          description: "Permite las notificaciones para recibir alertas de alarma",
-          duration: 5000,
-        });
+        setTimeout(() => {
+          toast({
+            title: "Permisos de notificación",
+            description: "Permite las notificaciones para recibir alertas de alarma",
+            duration: 5000,
+          });
+        }, 1000);
       }
     } else {
       console.log('Este navegador no soporta notificaciones');
+      toast({
+        title: "Notificaciones no soportadas",
+        description: "Tu navegador no soporta notificaciones",
+        variant: "destructive",
+      });
     }
   };
 
@@ -92,6 +113,11 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
+        toast({
+          title: "Error",
+          description: "No se pudieron solicitar los permisos",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -103,9 +129,32 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
 
   // Check for alarms that need to trigger every minute
   useEffect(() => {
+    if (alarms.length === 0) return;
+    
+    const checkAlarms = () => {
+      setIsCheckingAlarms(true);
+      const now = new Date();
+      const currentHour = now.getHours().toString().padStart(2, '0');
+      const currentMinute = now.getMinutes().toString().padStart(2, '0');
+      const currentTime = `${currentHour}:${currentMinute}`;
+      const currentDay = getDayOfWeek();
+      
+      console.log(`Checking alarms at ${currentTime} on ${currentDay}`);
+      
+      alarms.forEach(alarm => {
+        if (alarm.enabled && alarm.time === currentTime && alarm.days[currentDay]) {
+          console.log(`Alarm triggered: ${alarm.time}`);
+          triggerAlarm(alarm);
+        }
+      });
+      setIsCheckingAlarms(false);
+    };
+    
+    // Check immediately
     checkAlarms();
     
-    const intervalId = setInterval(checkAlarms, 30000); // Check every 30 seconds
+    // Then check every 30 seconds
+    const intervalId = setInterval(checkAlarms, 30000);
     
     return () => clearInterval(intervalId);
   }, [alarms]);
@@ -116,61 +165,91 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     return days[dayIndex] as keyof AlarmItem['days'];
   };
   
-  const checkAlarms = () => {
-    const now = new Date();
-    const currentHour = now.getHours().toString().padStart(2, '0');
-    const currentMinute = now.getMinutes().toString().padStart(2, '0');
-    const currentTime = `${currentHour}:${currentMinute}`;
-    const currentDay = getDayOfWeek();
-    
-    console.log(`Checking alarms at ${currentTime} on ${currentDay}`);
-    
-    alarms.forEach(alarm => {
-      if (alarm.enabled && alarm.time === currentTime && alarm.days[currentDay]) {
-        console.log(`Alarm triggered: ${alarm.time}`);
-        triggerAlarm(alarm);
-      }
-    });
+  const playAlarmSound = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(error => {
+        console.log('Error playing alarm sound:', error);
+        // Fallback: create synthetic beep
+        createSyntheticBeep();
+      });
+    } else {
+      createSyntheticBeep();
+    }
+  };
+
+  const createSyntheticBeep = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1);
+      
+      // Repeat beep 3 times
+      setTimeout(() => createSyntheticBeep(), 1200);
+    } catch (error) {
+      console.log('Cannot create synthetic beep:', error);
+    }
   };
 
   const triggerAlarm = (alarm: AlarmItem) => {
+    console.log('Triggering alarm:', alarm);
+    
     // Play alarm sound
-    if (audioRef.current) {
-      audioRef.current.play().catch(error => console.error('Error playing sound:', error));
-    }
+    playAlarmSound();
     
     // Show browser notification
     if (notificationsPermission === 'granted') {
-      const notification = new Notification('¡Alarma!', {
-        body: `Es hora: ${alarm.time}`,
-        icon: '/icons/icon-192x192.png',
-        requireInteraction: true,
-        tag: `alarm-${alarm.id}`,
-      });
-      
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-        stopAlarm();
-      };
-      
-      // Auto close notification after 30 seconds
-      setTimeout(() => {
-        notification.close();
-      }, 30000);
+      try {
+        const notification = new Notification('🔔 ¡Alarma!', {
+          body: `Es hora: ${alarm.time}`,
+          icon: '/icons/icon-192x192.png',
+          requireInteraction: true,
+          tag: `alarm-${alarm.id}`,
+          silent: false,
+        });
+        
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+          stopAlarm();
+        };
+        
+        // Auto close notification after 30 seconds
+        setTimeout(() => {
+          notification.close();
+        }, 30000);
+      } catch (error) {
+        console.error('Error showing notification:', error);
+      }
+    } else {
+      // Request permission if not granted
+      if (notificationsPermission === 'default') {
+        requestNotificationPermission();
+      }
     }
     
     // Show toast notification
     toast({
-      title: "¡Alarma!",
+      title: "🔔 ¡Alarma!",
       description: `Es hora: ${alarm.time}`,
-      duration: 10000,
+      duration: 15000,
     });
     
     // Also show a sonner toast for redundancy
-    sonnerToast("¡Alarma activada!", {
+    sonnerToast("🔔 ¡Alarma activada!", {
       description: `Es hora: ${alarm.time}`,
-      duration: 15000,
+      duration: 20000,
       action: {
         label: "Detener",
         onClick: stopAlarm
@@ -182,6 +261,15 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+    }
+    
+    // Dismiss all notifications with our tag
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.getNotifications({ tag: 'alarm' }).then(notifications => {
+          notifications.forEach(notification => notification.close());
+        });
+      });
     }
   };
 
@@ -265,12 +353,17 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="bg-background flex flex-col h-full w-full rounded-lg">
+    <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Alarmas</h2>
-        <Button variant="ghost" size="icon" onClick={handleClose}>
-          <X className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {isCheckingAlarms && (
+            <Bell className="h-4 w-4 animate-pulse text-green-500" />
+          )}
+          <Button variant="ghost" size="icon" onClick={handleClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       
       {/* Notification permission banner */}
@@ -302,7 +395,8 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         <Button onClick={addAlarm} variant="outline" size="icon">
           <Plus className="h-4 w-4" />
         </Button>
-        <Button onClick={testAlarm} variant="outline" size="sm">
+        <Button onClick={testAlarm} variant="outline" size="sm" className="gap-1">
+          <Volume2 className="h-4 w-4" />
           Probar
         </Button>
       </div>

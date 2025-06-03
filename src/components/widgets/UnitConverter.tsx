@@ -181,7 +181,7 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
   };
 
   return (
-    <div className={`bg-background flex flex-col h-full w-full rounded-lg relative z-50`}>
+    <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
         <h2 className="text-xl font-bold">Conversor</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
@@ -189,29 +189,27 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
         </Button>
       </div>
       
-      <div className="p-4 flex-1 flex flex-col relative z-50">
+      <div className="p-4 flex-1 flex flex-col">
         {/* Conversion Type Selector */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
             Tipo de conversión
           </label>
-          <div className="relative z-[60]">
-            <Select 
-              value={conversionType} 
-              onValueChange={(value) => setConversionType(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar tipo" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border border-border shadow-lg z-[70]">
-                {conversionTypes.map((type) => (
-                  <SelectItem key={type.name} value={type.name}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select 
+            value={conversionType} 
+            onValueChange={(value) => setConversionType(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Seleccionar tipo" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
+              {conversionTypes.map((type) => (
+                <SelectItem key={type.name} value={type.name}>
+                  {type.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         {/* From Unit */}
@@ -229,12 +227,12 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
                 inputMode="decimal"
               />
             </div>
-            <div className="flex-1 relative z-[60]">
+            <div className="flex-1">
               <Select value={fromUnit} onValueChange={(value) => setFromUnit(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Unidad" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border border-border shadow-lg z-[70]">
+                <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
                   {activeUnits.map((unit) => (
                     <SelectItem key={unit.value} value={unit.value}>
                       {unit.label}
@@ -272,12 +270,12 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
                 className="w-full bg-gray-100 dark:bg-gray-800"
               />
             </div>
-            <div className="flex-1 relative z-[60]">
+            <div className="flex-1">
               <Select value={toUnit} onValueChange={(value) => setToUnit(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Unidad" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border border-border shadow-lg z-[70]">
+                <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
                   {activeUnits.map((unit) => (
                     <SelectItem key={unit.value} value={unit.value}>
                       {unit.label}
