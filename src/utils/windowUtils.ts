@@ -1,10 +1,14 @@
 
 import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
 
-// Enhanced window opening function with error handling
+// Enhanced window opening function with error handling and PWA detection
 export const safeOpenWindow = (url: string) => {
   try {
+    // Check if we're running as a PWA
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                  (window.navigator as any).standalone || 
+                  document.referrer.includes('android-app://');
+    
     // Check if we're on the home page
     const isHomePage = window.location.pathname === '/';
     
@@ -41,8 +45,44 @@ export const safeOpenWindow = (url: string) => {
       }
     }
     
+    // Special handling for PWA mode - force new windows for external URLs
+    if (isPWA && (url.startsWith('http') || url.startsWith('https'))) {
+      // For PWAs, we need to be more aggressive about opening new windows
+      const newWindow = window.open(
+        url,
+        '_blank',
+        'noopener,noreferrer,width=1200,height=800,menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes,resizable=yes'
+      );
+      
+      if (newWindow) {
+        newWindow.focus();
+        return;
+      } else {
+        // If window.open fails in PWA, try alternative approaches
+        try {
+          // Create a temporary link and click it
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          return;
+        } catch (linkError) {
+          console.warn('Link click method failed:', linkError);
+        }
+        
+        // Last resort for PWA
+        toast.error('No se pudo abrir la aplicación. Intenta abrir el enlace manualmente.', {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : ''
+        });
+        return;
+      }
+    }
+    
     // On mobile, just navigate to the URL in the same window
-    if (isMobile) {
+    if (isMobile && !isPWA) {
       window.location.href = url;
       return;
     }
