@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
@@ -77,8 +78,8 @@ const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
     if (onSidebarOpen) {
       onSidebarOpen();
     } else {
-      // Dispatch a custom event that the App component can listen to
-      window.dispatchEvent(new CustomEvent('openSidebar'));
+      // Dispatch the correct event name that App.tsx is listening for
+      window.dispatchEvent(new CustomEvent('sidebarOpenRequested'));
     }
   };
 
