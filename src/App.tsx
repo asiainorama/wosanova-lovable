@@ -5,6 +5,7 @@ import { AppProvider } from "./contexts/AppContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { BackgroundProvider } from "./contexts/BackgroundContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { FloatingWidgetsProvider } from "./contexts/FloatingWidgetsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
@@ -17,6 +18,8 @@ import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import Admin from "./pages/admin";
 import InstallAppPrompt from './components/InstallAppPrompt';
+import SidebarMenu from './components/SidebarMenu';
+import FloatingWidgetsContainer from './components/FloatingWidgetsContainer';
 
 // Importar el script de sincronización para que esté disponible globalmente
 import "./scripts/syncAppsToSupabase";
@@ -28,10 +31,66 @@ const queryClient = new QueryClient();
 
 // Create a wrapper component that uses AppContextUpdater safely
 const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Touch event handlers for swipe detection
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      startTime = Date.now();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      const endX = touch.clientX;
+      const endY = touch.clientY;
+      const endTime = Date.now();
+
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+      const deltaTime = endTime - startTime;
+
+      // Only trigger if swipe starts from the left edge of the screen (first 100px)
+      if (startX <= 100) {
+        // Check if it's a right swipe (positive deltaX) with sufficient distance and speed
+        if (deltaX > 50 && Math.abs(deltaY) < 100 && deltaTime < 500) {
+          setIsSidebarOpen(true);
+        }
+      }
+    };
+
+    // Listen for custom sidebar open events from Header
+    const handleSidebarOpenEvent = () => {
+      setIsSidebarOpen(true);
+    };
+
+    // Add event listeners to the document
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('sidebarOpenRequested', handleSidebarOpenEvent);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('sidebarOpenRequested', handleSidebarOpenEvent);
+    };
+  }, []);
+
   return (
     <>
       <AppContextUpdater />
       {children}
+      <SidebarMenu 
+        isOpen={isSidebarOpen} 
+        onOpenChange={setIsSidebarOpen} 
+      />
+      <FloatingWidgetsContainer />
     </>
   );
 };
@@ -95,60 +154,67 @@ const App = () => {
         <BackgroundProvider>
           <LanguageProvider>
             <AppProvider>
-              <TooltipProvider>
-                <BrowserRouter>
-                  <div style={{ background: 'transparent', minHeight: '100vh' }}>
-                    <InstallAppPrompt />
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={session ? 
-                          <AppWithContextUpdater>
-                            <Index />
-                          </AppWithContextUpdater> : 
-                          <Navigate to="/auth" />
-                        }
-                      />
-                      <Route
-                        path="/catalog"
-                        element={session ? 
-                          <AppWithContextUpdater>
-                            <Catalog />
-                          </AppWithContextUpdater> : 
-                          <Navigate to="/auth" />
-                        }
-                      />
-                      <Route
-                        path="/manage"
-                        element={session ? 
-                          <AppWithContextUpdater>
-                            <Manage />
-                          </AppWithContextUpdater> : 
-                          <Navigate to="/auth" />
-                        }
-                      />
-                      <Route
-                        path="/profile"
-                        element={session ? 
-                          <AppWithContextUpdater>
-                            <Profile />
-                          </AppWithContextUpdater> : 
-                          <Navigate to="/auth" />
-                        }
-                      />
-                      <Route
-                        path="/admin"
-                        element={session ? <Admin /> : <Navigate to="/auth" />}
-                      />
-                      <Route
-                        path="/auth"
-                        element={!session ? <Auth /> : <Navigate to="/" />}
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </div>
-                </BrowserRouter>
-              </TooltipProvider>
+              <FloatingWidgetsProvider>
+                <TooltipProvider>
+                  <BrowserRouter>
+                    <div style={{ background: 'transparent', minHeight: '100vh' }}>
+                      <InstallAppPrompt />
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={session ? 
+                            <AppWithContextUpdater>
+                              <Index />
+                            </AppWithContextUpdater> : 
+                            <Navigate to="/auth" />
+                          }
+                        />
+                        <Route
+                          path="/catalog"
+                          element={session ? 
+                            <AppWithContextUpdater>
+                              <Catalog />
+                            </AppWithContextUpdater> : 
+                            <Navigate to="/auth" />
+                          }
+                        />
+                        <Route
+                          path="/manage"
+                          element={session ? 
+                            <AppWithContextUpdater>
+                              <Manage />
+                            </AppWithContextUpdater> : 
+                            <Navigate to="/auth" />
+                          }
+                        />
+                        <Route
+                          path="/profile"
+                          element={session ? 
+                            <AppWithContextUpdater>
+                              <Profile />
+                            </AppWithContextUpdater> : 
+                            <Navigate to="/auth" />
+                          }
+                        />
+                        <Route
+                          path="/admin"
+                          element={session ? 
+                            <AppWithContextUpdater>
+                              <Admin />
+                            </AppWithContextUpdater> : 
+                            <Navigate to="/auth" />
+                          }
+                        />
+                        <Route
+                          path="/auth"
+                          element={!session ? <Auth /> : <Navigate to="/" />}
+                        />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </div>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </FloatingWidgetsProvider>
             </AppProvider>
           </LanguageProvider>
         </BackgroundProvider>

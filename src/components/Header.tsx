@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SidebarMenu from './SidebarMenu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   title: string;
+  onSidebarOpen?: () => void;
 }
 
 // Helper function to get icon by name
@@ -30,7 +29,7 @@ const getIconByName = (name: string) => {
   }
 };
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -73,6 +72,16 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const activePage = determineActivePage();
   const navigationLinks = getNavigationLinks();
 
+  // Get sidebar open function from parent or create a default one
+  const handleSidebarOpen = () => {
+    if (onSidebarOpen) {
+      onSidebarOpen();
+    } else {
+      // Dispatch a custom event that the App component can listen to
+      window.dispatchEvent(new CustomEvent('openSidebar'));
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* We keep the title hidden but in the DOM for functionality */}
@@ -93,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 variant="ghost" 
                 size="icon" 
                 className="dark:text-white dark:hover:bg-white/10 hover:bg-black/5 transition-colors"
-                onClick={() => setSidebarOpen(true)}
+                onClick={handleSidebarOpen}
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -121,8 +130,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           </div>
         </div>
       </div>
-
-      <SidebarMenu isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
     </header>
   );
 };
