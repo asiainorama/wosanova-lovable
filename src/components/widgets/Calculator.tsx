@@ -139,8 +139,8 @@ const Calculator = ({ onClose }: CalculatorProps) => {
       </div>
       
       <div className={`p-3 flex-1 flex flex-col ${isMobile ? 'min-h-0' : ''}`}>
-        {/* Display area with fixed height */}
-        <div className={`bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right flex flex-col justify-center ${isMobile ? 'h-24' : 'h-20'}`}>
+        {/* Display area with increased height for mobile */}
+        <div className={`bg-gray-100 dark:bg-gray-800 p-5 rounded-lg mb-3 text-right flex flex-col justify-center ${isMobile ? 'h-32' : 'h-20'}`}>
           <div className={`font-medium truncate flex items-center justify-end ${isMobile ? 'text-4xl min-h-[3rem]' : 'text-3xl min-h-[2.25rem]'}`}>
             {input}
           </div>
