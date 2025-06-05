@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -56,12 +55,19 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
       const deltaY = endY - startY;
       const deltaTime = endTime - startTime;
 
-      // Only trigger if swipe starts from the left edge of the screen (first 100px)
-      if (startX <= 100) {
-        // Check if it's a right swipe (positive deltaX) with sufficient distance and speed
-        if (deltaX > 50 && Math.abs(deltaY) < 100 && deltaTime < 500) {
-          setIsSidebarOpen(true);
-        }
+      // Check if it's a swipe with sufficient distance and speed, and not too much vertical movement
+      const isValidSwipe = Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100 && deltaTime < 500;
+
+      if (!isValidSwipe) return;
+
+      // Right swipe from left edge to open sidebar
+      if (startX <= 100 && deltaX > 0) {
+        setIsSidebarOpen(true);
+      }
+      
+      // Left swipe from right edge to close sidebar (when sidebar is open)
+      if (isSidebarOpen && startX >= window.innerWidth - 100 && deltaX < 0) {
+        setIsSidebarOpen(false);
       }
     };
 
@@ -80,7 +86,7 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
       document.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('sidebarOpenRequested', handleSidebarOpenEvent);
     };
-  }, []);
+  }, [isSidebarOpen]);
 
   return (
     <>

@@ -107,7 +107,10 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 border-r-0 flex flex-col h-full overflow-hidden
                    backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
                    shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/10 dark:border-gray-800/20"
+                   border-white/10 dark:border-gray-800/20
+                   transition-transform duration-200 ease-out
+                   data-[state=open]:animate-in data-[state=open]:slide-in-from-left
+                   data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left"
       >
         {/* Header - Fixed height exactly matching main app header */}
         <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
