@@ -18,6 +18,7 @@ interface AppCardProps {
   isLarge?: boolean;
   listView?: boolean;
   smallerIcons?: boolean;
+  index?: number;
 }
 
 const AppCard: React.FC<AppCardProps> = ({ 
@@ -27,7 +28,8 @@ const AppCard: React.FC<AppCardProps> = ({
   onShowDetails,
   isLarge = false,
   listView = false,
-  smallerIcons = false
+  smallerIcons = false,
+  index = 0
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const favorite = isFavorite(app.id);
@@ -84,6 +86,7 @@ const AppCard: React.FC<AppCardProps> = ({
         showManage={showManage}
         onShowDetails={onShowDetails}
         smallerIcons={smallerIcons}
+        index={index}
       />
     );
   }

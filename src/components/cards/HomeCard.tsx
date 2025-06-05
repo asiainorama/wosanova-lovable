@@ -16,6 +16,7 @@ interface HomeCardProps {
   showManage?: boolean;
   onShowDetails?: (app: AppData) => void;
   smallerIcons?: boolean;
+  index?: number;
 }
 
 const HomeCard: React.FC<HomeCardProps> = ({ 
@@ -25,7 +26,8 @@ const HomeCard: React.FC<HomeCardProps> = ({
   handleClick,
   showManage = false,
   onShowDetails,
-  smallerIcons = false
+  smallerIcons = false,
+  index = 0
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   const { isLightBackground } = useBackground();
@@ -50,30 +52,39 @@ const HomeCard: React.FC<HomeCardProps> = ({
     ? "text-gray-800" 
     : "text-white dark:text-white";
 
+  // Animation delay based on index for staggered effect
+  const animationDelay = `${index * 100}ms`;
+
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer"
+      className="flex flex-col items-center gap-1 p-1 cursor-pointer opacity-0 animate-fade-in"
       onClick={handleClick}
+      style={{ 
+        animationDelay,
+        animationFillMode: 'forwards'
+      }}
     >
       <div className="relative">
         {imageLoading && (
-          <Skeleton className={`${iconSize} rounded-full`} />
+          <div className={`${iconSize} rounded-full overflow-hidden flex items-center justify-center`}>
+            <Skeleton className={`${iconSize} rounded-full animate-pulse`} />
+          </div>
         )}
         
         {!imageError ? (
-          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600`}>
+          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-300 ${imageLoading ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}`}>
             <img 
               ref={imageRef}
               src={iconUrl} 
               alt={`${app.name} icon`}
-              className="w-full h-full object-cover dark:brightness-110 p-0"
+              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
               onLoad={handleImageLoad}
               loading="lazy"
             />
           </div>
         ) : (
-          <div className={`${iconSize} rounded-full overflow-hidden`}>
+          <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-300 scale-100 opacity-100`}>
             <AppAvatarFallback
               appName={app.name}
               className={`${iconSize} rounded-full`}
@@ -85,17 +96,26 @@ const HomeCard: React.FC<HomeCardProps> = ({
           <Button 
             size="sm"
             variant="outline"
-            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90`}
+            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 transition-all duration-200 opacity-0 animate-fade-in`}
             onClick={handleAction}
+            style={{ 
+              animationDelay: `${index * 100 + 200}ms`,
+              animationFillMode: 'forwards'
+            }}
           >
             <Heart 
-              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} transition-colors duration-200`} 
             />
           </Button>
         )}
       </div>
       
-      <h3 className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 ${textColorClass}`}>
+      <h3 
+        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 ${textColorClass} transition-opacity duration-300`}
+        style={{ 
+          opacity: imageLoading ? 0.7 : 1
+        }}
+      >
         {app.name}
       </h3>
     </div>

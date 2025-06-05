@@ -140,7 +140,7 @@ const AppGrid: React.FC<AppGridProps> = ({
               ? "grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-9 gap-4" 
               : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
       }>
-        {apps.map((app) => (
+        {apps.map((app, index) => (
           <AppCard 
             key={app.id} 
             app={app} 
@@ -149,6 +149,7 @@ const AppGrid: React.FC<AppGridProps> = ({
             onShowDetails={onShowDetails}
             isLarge={isLarge}
             smallerIcons={smallerIcons}
+            index={index}
           />
         ))}
       </div>

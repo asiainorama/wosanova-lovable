@@ -26,6 +26,9 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   smallerIcons = false,
   cellHeight
 }) => {
+  // Calculate the global index for staggered animation
+  const globalIndex = pageIndex * rows + index;
+
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
@@ -43,6 +46,7 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
           onShowDetails={onShowDetails}
           isLarge={false}
           smallerIcons={smallerIcons}
+          index={globalIndex}
         />
       ) : (
         <div className="empty-slot w-full h-full opacity-0"></div>
