@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -19,6 +20,7 @@ import Admin from "./pages/admin";
 import InstallAppPrompt from './components/InstallAppPrompt';
 import SidebarMenu from './components/SidebarMenu';
 import FloatingWidgetsContainer from './components/FloatingWidgetsContainer';
+import { shouldSkipAuth } from './utils/environmentUtils';
 
 // Importar el script de sincronización para que esté disponible globalmente
 import "./scripts/syncAppsToSupabase";
@@ -104,8 +106,19 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [skipAuthCheck, setSkipAuthCheck] = useState<boolean>(false);
 
   useEffect(() => {
+    // Check if we're in the preview environment
+    const skipAuth = shouldSkipAuth();
+    setSkipAuthCheck(skipAuth);
+    
+    if (skipAuth) {
+      console.log("Running in Lovable preview mode - Bypassing auth checks");
+      setIsLoading(false);
+      return;
+    }
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -168,7 +181,7 @@ const App = () => {
                       <Routes>
                         <Route
                           path="/"
-                          element={session ? 
+                          element={session || skipAuthCheck ? 
                             <AppWithContextUpdater>
                               <Index />
                             </AppWithContextUpdater> : 
@@ -177,7 +190,7 @@ const App = () => {
                         />
                         <Route
                           path="/catalog"
-                          element={session ? 
+                          element={session || skipAuthCheck ? 
                             <AppWithContextUpdater>
                               <Catalog />
                             </AppWithContextUpdater> : 
@@ -186,7 +199,7 @@ const App = () => {
                         />
                         <Route
                           path="/manage"
-                          element={session ? 
+                          element={session || skipAuthCheck ? 
                             <AppWithContextUpdater>
                               <Manage />
                             </AppWithContextUpdater> : 
@@ -195,7 +208,7 @@ const App = () => {
                         />
                         <Route
                           path="/profile"
-                          element={session ? 
+                          element={session || skipAuthCheck ? 
                             <AppWithContextUpdater>
                               <Profile />
                             </AppWithContextUpdater> : 
@@ -204,7 +217,7 @@ const App = () => {
                         />
                         <Route
                           path="/admin"
-                          element={session ? 
+                          element={session || skipAuthCheck ? 
                             <AppWithContextUpdater>
                               <Admin />
                             </AppWithContextUpdater> : 
@@ -213,7 +226,7 @@ const App = () => {
                         />
                         <Route
                           path="/auth"
-                          element={!session ? <Auth /> : <Navigate to="/" />}
+                          element={!session && !skipAuthCheck ? <Auth /> : <Navigate to="/" />}
                         />
                         <Route path="*" element={<NotFound />} />
                       </Routes>

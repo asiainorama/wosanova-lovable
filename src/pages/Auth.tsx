@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,12 +6,14 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import SpaceBackground from '@/components/SpaceBackground';
 import { useTheme } from '@/contexts/ThemeContext';
+import { shouldSkipAuth } from '@/utils/environmentUtils';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [inDevMode, setInDevMode] = useState(false);
   const {
     mode
   } = useTheme();
@@ -22,9 +23,24 @@ const Auth = () => {
 
   // Check for existing session and query params on component mount
   useEffect(() => {
-    const checkSession = async () => {
+    const checkEnvironmentAndSession = async () => {
       try {
-        // Check URL for auth callback
+        // Check if we're in the Lovable preview environment
+        const skipAuth = shouldSkipAuth();
+        setInDevMode(skipAuth);
+        
+        if (skipAuth) {
+          console.log("Running in Lovable preview mode - Bypassing authentication");
+          toast.info('Modo de desarrollo detectado - Autenticación desactivada', {
+            duration: 3000
+          });
+          
+          // Auto-navigate to home page in dev mode, bypassing authentication
+          setTimeout(() => navigate('/'), 1500);
+          return;
+        }
+
+        // Standard authentication flow
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const queryParams = new URLSearchParams(window.location.search);
 
@@ -71,7 +87,7 @@ const Auth = () => {
         setIsAuthenticating(false);
       }
     };
-    checkSession();
+    checkEnvironmentAndSession();
   }, [navigate]);
 
   // Effect to update the theme when mode changes
@@ -80,6 +96,15 @@ const Auth = () => {
   }, [mode]);
   
   const handleGoogleSignIn = async () => {
+    if (inDevMode) {
+      // En modo desarrollo, simplemente navegar a la página principal
+      toast.success('Modo de desarrollo - Simulando inicio de sesión exitoso', {
+        duration: 2000
+      });
+      navigate('/');
+      return;
+    }
+    
     try {
       setIsLoading(true);
       setAuthError(null);
@@ -124,6 +149,18 @@ const Auth = () => {
     }
   };
 
+  // Show dev mode message when in Lovable preview
+  if (inDevMode && isAuthenticating) {
+    return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <SpaceBackground />
+        <div className="z-10 flex flex-col items-center justify-center">
+          <Loader2 size={48} className="text-primary animate-spin mb-4" />
+          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>Modo de desarrollo detectado</p>
+          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-md`}>Omitiendo autenticación...</p>
+        </div>
+      </div>;
+  }
+
   // Show loading when checking authentication
   if (isAuthenticating) {
     return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -162,12 +199,18 @@ const Auth = () => {
             {authError}
           </div>}
         
-        <Button onClick={handleGoogleSignIn} disabled={isLoading} className={`w-full flex items-center justify-center gap-2 
-            ${isDarkMode ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50'} 
-            h-12 text-base`}>
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />}
-          {isLoading ? 'Conectando...' : 'Continuar con Google'}
-        </Button>
+        {inDevMode ? (
+          <Button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white h-12 text-base">
+            Entrar en modo desarrollo
+          </Button>
+        ) : (
+          <Button onClick={handleGoogleSignIn} disabled={isLoading} className={`w-full flex items-center justify-center gap-2 
+              ${isDarkMode ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50'} 
+              h-12 text-base`}>
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />}
+            {isLoading ? 'Conectando...' : 'Continuar con Google'}
+          </Button>
+        )}
       </div>
     </div>;
 };

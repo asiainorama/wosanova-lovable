@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { shouldSkipAuth } from "@/utils/environmentUtils";
 
 const useAdminSession = () => {
   const [session, setSession] = useState<any>(null);
@@ -11,6 +12,15 @@ const useAdminSession = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Check if we should bypass authentication in development mode
+        if (shouldSkipAuth()) {
+          console.log("Running in Lovable preview mode - Granting admin access");
+          setIsAdmin(true); // Auto grant admin privileges in dev mode
+          setSession({ user: { email: "development@wosanova.com" } }); // Mock session
+          setLoading(false);
+          return;
+        }
+
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
 
