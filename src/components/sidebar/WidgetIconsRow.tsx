@@ -30,9 +30,9 @@ const WidgetButton: React.FC<WidgetProps & { onWidgetOpen?: () => void }> = ({ i
       onClick={handleClick}
       variant="ghost" 
       size="icon"
-      className="rounded-full h-10 w-10 flex items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700 flex-1 max-w-[60px]"
+      className="rounded-full h-12 w-12 flex items-center justify-center bg-primary/10 hover:bg-primary/20 dark:bg-gray-800 dark:hover:bg-gray-700 flex-1"
     >
-      {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+      {React.cloneElement(icon as React.ReactElement, { size: 22 })}
       <span className="sr-only">{name}</span>
     </Button>
   );
@@ -63,7 +63,7 @@ const WidgetIconsRow: React.FC<WidgetIconsRowProps> = ({ onWidgetOpen }) => {
   ];
 
   return (
-    <div className="flex justify-between items-center p-3 gap-2">
+    <div className="flex justify-between items-center px-3 py-4 gap-4 w-full">
       {widgets.map((widget) => (
         <WidgetButton 
           key={widget.name}
