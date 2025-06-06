@@ -11,21 +11,42 @@ export const isLovablePreview = (): boolean => {
     // Check if we're in an iframe
     const inIframe = window.self !== window.top;
     
-    // Check if the parent URL contains lovable.dev
-    let isLovableEnvironment = false;
+    // Check if the current URL contains lovable.dev
+    const currentUrl = window.location.href;
+    const isLovableUrl = currentUrl.includes('lovable.dev');
+    
+    // Check if the hostname is a Lovable preview domain
+    const hostname = window.location.hostname;
+    const isLovableHostname = hostname.includes('lovable.dev') || hostname.includes('lovable.app');
+    
+    // Additional check for Lovable's specific iframe context
+    let parentIsLovable = false;
     try {
-      isLovableEnvironment = window.location.href.includes('lovable.dev') || 
-                            (inIframe && window.top?.location.hostname.includes('lovable.dev'));
+      if (inIframe && window.top) {
+        parentIsLovable = window.top.location.hostname.includes('lovable.dev');
+      }
     } catch (e) {
-      // If we can't access parent due to cross-origin, check our own URL
-      isLovableEnvironment = window.location.href.includes('lovable.dev');
+      // Cross-origin restriction means we're likely in Lovable's iframe
+      if (inIframe) {
+        parentIsLovable = true;
+      }
     }
     
-    return inIframe && isLovableEnvironment;
+    // Debug logging
+    console.log('Environment check:', {
+      inIframe,
+      currentUrl,
+      hostname,
+      isLovableUrl,
+      isLovableHostname,
+      parentIsLovable
+    });
+    
+    return isLovableUrl || isLovableHostname || parentIsLovable;
   } catch (error) {
-    // In case of any error, default to false
-    console.log('Error detecting environment:', error);
-    return false;
+    // In case of any error, default to true to be safe in development
+    console.log('Error detecting environment, defaulting to development mode:', error);
+    return true;
   }
 };
 
@@ -33,5 +54,7 @@ export const isLovablePreview = (): boolean => {
  * Returns true if authentication should be skipped (in Lovable preview environment)
  */
 export const shouldSkipAuth = (): boolean => {
-  return isLovablePreview();
+  const skipAuth = isLovablePreview();
+  console.log('Should skip auth:', skipAuth);
+  return skipAuth;
 };

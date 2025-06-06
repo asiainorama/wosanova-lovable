@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,20 +28,21 @@ const Auth = () => {
       try {
         // Check if we're in the Lovable preview environment
         const skipAuth = shouldSkipAuth();
+        console.log('Auth page - skipAuth result:', skipAuth);
         setInDevMode(skipAuth);
         
         if (skipAuth) {
           console.log("Running in Lovable preview mode - Bypassing authentication");
-          toast.info('Modo de desarrollo detectado - Autenticación desactivada', {
+          toast.success('Modo de desarrollo detectado - Saltando autenticación', {
             duration: 3000
           });
           
-          // Auto-navigate to home page in dev mode, bypassing authentication
-          setTimeout(() => navigate('/'), 1500);
+          // Immediately navigate to home page in dev mode
+          navigate('/');
           return;
         }
 
-        // Standard authentication flow
+        // Standard authentication flow only if not in dev mode
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const queryParams = new URLSearchParams(window.location.search);
 
@@ -65,6 +67,7 @@ const Auth = () => {
           setAuthError(`Error de autenticación: ${errorDescription || errorMsg}`);
           toast.error(`Error de autenticación: ${errorDescription || errorMsg}`);
         }
+        
         const {
           data: {
             session
@@ -149,28 +152,19 @@ const Auth = () => {
     }
   };
 
-  // Show dev mode message when in Lovable preview
-  if (inDevMode && isAuthenticating) {
-    return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <SpaceBackground />
-        <div className="z-10 flex flex-col items-center justify-center">
-          <Loader2 size={48} className="text-primary animate-spin mb-4" />
-          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>Modo de desarrollo detectado</p>
-          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-md`}>Omitiendo autenticación...</p>
-        </div>
-      </div>;
-  }
-
   // Show loading when checking authentication
   if (isAuthenticating) {
     return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <SpaceBackground />
         <div className="z-10 flex flex-col items-center justify-center">
           <Loader2 size={48} className="text-primary animate-spin mb-4" />
-          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>Verificando sesión...</p>
+          <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>
+            {inDevMode ? 'Modo de desarrollo detectado...' : 'Verificando sesión...'}
+          </p>
         </div>
       </div>;
   }
+
   return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <SpaceBackground />
       <div className="max-w-md w-full px-6 py-10 z-10">
@@ -200,9 +194,12 @@ const Auth = () => {
           </div>}
         
         {inDevMode ? (
-          <Button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white h-12 text-base">
-            Entrar en modo desarrollo
-          </Button>
+          <div className="text-center">
+            <p className="text-green-500 mb-4">Modo de desarrollo activado</p>
+            <Button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white h-12 text-base">
+              Entrar en modo desarrollo
+            </Button>
+          </div>
         ) : (
           <Button onClick={handleGoogleSignIn} disabled={isLoading} className={`w-full flex items-center justify-center gap-2 
               ${isDarkMode ? 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700' : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50'} 
@@ -214,4 +211,5 @@ const Auth = () => {
       </div>
     </div>;
 };
+
 export default Auth;
