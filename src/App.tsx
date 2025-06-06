@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -33,16 +34,13 @@ const queryClient = new QueryClient();
 const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Touch event handlers for swipe detection - only for opening sidebar
+  // Touch event handlers for swipe detection
   useEffect(() => {
     let startX = 0;
     let startY = 0;
     let startTime = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // Solo detectar gestos para abrir el sidebar, no para cerrarlo
-      if (isSidebarOpen) return;
-      
       const touch = e.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
@@ -50,9 +48,6 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      // Solo detectar gestos para abrir el sidebar, no para cerrarlo
-      if (isSidebarOpen) return;
-      
       const touch = e.changedTouches[0];
       const endX = touch.clientX;
       const endY = touch.clientY;
@@ -62,14 +57,19 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
       const deltaY = endY - startY;
       const deltaTime = endTime - startTime;
 
-      // Check if it's a valid right swipe from left edge to open sidebar
+      // Check if it's a swipe with sufficient distance and speed, and not too much vertical movement
       const isValidSwipe = Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100 && deltaTime < 500;
 
       if (!isValidSwipe) return;
 
       // Right swipe from left edge to open sidebar
-      if (startX <= 50 && deltaX > 0) {
+      if (startX <= 100 && deltaX > 0) {
         setIsSidebarOpen(true);
+      }
+      
+      // Left swipe from right edge to close sidebar (when sidebar is open)
+      if (isSidebarOpen && startX >= window.innerWidth - 100 && deltaX < 0) {
+        setIsSidebarOpen(false);
       }
     };
 
@@ -78,28 +78,15 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
       setIsSidebarOpen(true);
     };
 
-    // Solo agregar listeners si el sidebar está cerrado
-    if (!isSidebarOpen) {
-      document.addEventListener('touchstart', handleTouchStart, { passive: true });
-      document.addEventListener('touchend', handleTouchEnd, { passive: true });
-    }
-    
+    // Add event listeners to the document
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
     window.addEventListener('sidebarOpenRequested', handleSidebarOpenEvent);
 
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('sidebarOpenRequested', handleSidebarOpenEvent);
-    };
-  }, [isSidebarOpen]);
-
-  // No bloquear el scroll del body cuando el sidebar esté abierto
-  useEffect(() => {
-    // Permitir scroll normal en todo momento
-    document.body.style.overflow = 'auto';
-    
-    return () => {
-      document.body.style.overflow = 'auto';
     };
   }, [isSidebarOpen]);
 
