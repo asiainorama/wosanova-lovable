@@ -108,9 +108,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                    backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
                    shadow-2xl shadow-black/10 dark:shadow-black/30
                    border-white/10 dark:border-gray-800/20
-                   transition-transform duration-200 ease-out
-                   data-[state=open]:animate-in data-[state=open]:slide-in-from-left
-                   data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left"
+                   transition-transform duration-100 ease-out
+                   data-[state=open]:animate-in data-[state=open]:slide-in-from-left-0 data-[state=open]:duration-100
+                   data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left-0 data-[state=closed]:duration-100"
       >
         {/* Header - Fixed height exactly matching main app header */}
         <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
