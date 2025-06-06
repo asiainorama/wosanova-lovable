@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,8 +101,52 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     onOpenChange(false);
   };
 
+  // Handle swipe to close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let startX = 0;
+    let currentX = 0;
+    let startTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      currentX = startX;
+      startTime = Date.now();
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      currentX = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const endX = currentX;
+      const endTime = Date.now();
+      const deltaX = endX - startX;
+      const deltaTime = endTime - startTime;
+
+      // Only close if swiping left from within the sidebar area and with sufficient speed
+      if (startX < window.innerWidth * 0.8 && deltaX < -100 && deltaTime < 500) {
+        onOpenChange(false);
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isOpen, onOpenChange]);
+
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+    <Sheet 
+      open={isOpen} 
+      onOpenChange={() => {}} // Desactivar el cierre automático
+    >
       <SheetContent
         side="left"
         className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 border-r-0 flex flex-col h-full overflow-hidden
@@ -111,6 +156,14 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
                    transition-transform duration-200 ease-out
                    data-[state=open]:animate-in data-[state=open]:slide-in-from-left
                    data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left"
+        onPointerDownOutside={(e) => {
+          // Prevenir el cierre al hacer clic fuera
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Permitir cerrar con Escape
+          onOpenChange(false);
+        }}
       >
         {/* Header - Fixed height exactly matching main app header */}
         <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
