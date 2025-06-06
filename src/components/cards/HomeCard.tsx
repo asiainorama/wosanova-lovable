@@ -53,7 +53,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
     : "text-white dark:text-white";
 
   // Much faster animation delay
-  const animationDelay = `${index * 30}ms`;
+  const animationDelay = `${index * 15}ms`;
 
   return (
     <div 
@@ -69,12 +69,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
         )}
         
         {!imageError ? (
-          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-150`}>
+          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-100`}>
             <img 
               ref={imageRef}
               src={iconUrl} 
               alt={`${app.name} icon`}
-              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-150 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-100 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
               onLoad={handleImageLoad}
               loading="lazy"
@@ -82,7 +82,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
             />
           </div>
         ) : (
-          <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-150`}>
+          <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-100`}>
             <AppAvatarFallback
               appName={app.name}
               className={`${iconSize} rounded-full`}
@@ -94,23 +94,23 @@ const HomeCard: React.FC<HomeCardProps> = ({
           <Button 
             size="sm"
             variant="outline"
-            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 transition-all duration-150 opacity-0 animate-fade-in`}
+            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 transition-all duration-100 opacity-0 animate-fade-in`}
             onClick={handleAction}
             style={{ 
-              animationDelay: `${index * 30 + 100}ms`,
+              animationDelay: `${index * 15 + 50}ms`,
               animationFillMode: 'forwards',
-              animationDuration: '150ms'
+              animationDuration: '120ms'
             }}
           >
             <Heart 
-              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} transition-colors duration-150`} 
+              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} transition-colors duration-100`} 
             />
           </Button>
         )}
       </div>
       
       <h3 
-        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 ${textColorClass} transition-opacity duration-150`}
+        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 ${textColorClass} transition-opacity duration-100`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1
         }}

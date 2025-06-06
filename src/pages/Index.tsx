@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import AppGrid from '@/components/AppGrid';
@@ -33,7 +32,7 @@ const Index = () => {
       // Very short delay to prevent flash
       setTimeout(() => {
         setIsLoading(false);
-      }, 100);
+      }, 50); // Reduced from 100ms to 50ms
     };
 
     initializeHome();
@@ -74,7 +73,7 @@ const Index = () => {
             </div>
           </div>
         ) : sortedFavorites.length > 0 ? (
-          <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in" style={{ animationDuration: '200ms', animationFillMode: 'forwards' }}>
+          <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in" style={{ animationDuration: '150ms', animationFillMode: 'forwards' }}>
             <AppGrid 
               apps={sortedFavorites}
               useCarousel={true}
@@ -83,7 +82,7 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30 opacity-0 animate-fade-in" style={{ animationDuration: '200ms', animationFillMode: 'forwards' }}>
+          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30 opacity-0 animate-fade-in" style={{ animationDuration: '150ms', animationFillMode: 'forwards' }}>
             <div className="flex justify-center mb-4">
               <span className="inline-block p-4 rounded-full bg-primary/10">
                 <Store size={48} className="text-primary" />
