@@ -26,16 +26,19 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   smallerIcons = false,
   cellHeight
 }) => {
-  // Calculate the global index for staggered animation
+  // Calculate the global index for staggered animation (faster)
   const globalIndex = pageIndex * rows + index;
 
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item flex flex-col justify-start items-center"
+      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in"
       style={{
         height: cellHeight || 'auto',
-        minHeight: cellHeight || `${100/rows}%`
+        minHeight: cellHeight || `${100/rows}%`,
+        animationDelay: `${globalIndex * 30}ms`, // Much faster stagger (was 100ms)
+        animationFillMode: 'forwards',
+        animationDuration: '200ms' // Faster fade-in
       }}
     >
       {app ? (

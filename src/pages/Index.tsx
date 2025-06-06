@@ -15,6 +15,7 @@ const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
   const { background } = useBackground();
+  const [isLoading, setIsLoading] = useState(true);
   useScrollBehavior();
 
   // Sort favorites alphabetically
@@ -22,11 +23,20 @@ const Index = () => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Prefetch logos for favorite apps as soon as home page loads (without toast)
+  // Prefetch logos and set loading state
   useEffect(() => {
-    if (favorites.length > 0) {
-      prefetchAppLogos(favorites);
-    }
+    const initializeHome = async () => {
+      if (favorites.length > 0) {
+        await prefetchAppLogos(favorites);
+      }
+      
+      // Very short delay to prevent flash
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
+    };
+
+    initializeHome();
     
     document.body.style.overflowY = 'hidden';
     document.body.style.overflowX = 'auto';
@@ -55,8 +65,16 @@ const Index = () => {
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-1 py-1 flex-1 flex flex-col" style={{ background: 'transparent' }}>
-        {sortedFavorites.length > 0 ? (
-          <div className="flex-grow flex flex-col h-full">
+        {/* Show loading state initially to prevent flash */}
+        {isLoading ? (
+          <div className="flex-grow flex items-center justify-center">
+            <div className="animate-pulse text-center">
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mx-auto"></div>
+            </div>
+          </div>
+        ) : sortedFavorites.length > 0 ? (
+          <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in" style={{ animationDuration: '200ms', animationFillMode: 'forwards' }}>
             <AppGrid 
               apps={sortedFavorites}
               useCarousel={true}
@@ -65,7 +83,7 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30">
+          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30 opacity-0 animate-fade-in" style={{ animationDuration: '200ms', animationFillMode: 'forwards' }}>
             <div className="flex justify-center mb-4">
               <span className="inline-block p-4 rounded-full bg-primary/10">
                 <Store size={48} className="text-primary" />
