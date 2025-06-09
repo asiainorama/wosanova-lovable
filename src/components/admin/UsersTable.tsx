@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,17 +25,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-interface AuthUser {
-  id: string;
-  app_metadata: {
-    login_count?: number;
-  };
-}
-
-interface AuthUsersResponse {
-  users: AuthUser[];
-}
-
 interface UserData {
   id: string;
   username?: string;
@@ -43,7 +33,7 @@ interface UserData {
   avatar_url?: string;
   theme_mode?: string;
   language?: string;
-  login_count?: number;
+  login_count: number;
 }
 
 interface UsersTableProps {
@@ -81,22 +71,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     try {
       setRefreshing(true);
       
-      // Get auth users to get login count data
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        console.error("Error fetching auth users:", authError);
-      }
-      
-      // Map of user ID to login count
-      const userLoginCounts = new Map();
-      if (authData) {
-        const authUsers = (authData as unknown as AuthUsersResponse).users;
-        authUsers.forEach(user => {
-          userLoginCounts.set(user.id, user.app_metadata.login_count || 0);
-        });
-      }
-      
       // Get user profiles
       const { data, error } = await supabase
         .from('user_profiles')
@@ -112,13 +86,19 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       if (data) {
         console.log("Fetched users:", data.length);
         
-        // Combine data with login counts
-        const usersWithLoginCount = data.map((user: UserData) => ({
-          ...user,
-          login_count: userLoginCounts.get(user.id) || 0
+        // Map data to UserData interface
+        const usersData = data.map((user: any) => ({
+          id: user.id,
+          username: user.username,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          avatar_url: user.avatar_url,
+          theme_mode: user.theme_mode,
+          language: user.language,
+          login_count: user.login_count || 0
         }));
         
-        setUsers(usersWithLoginCount);
+        setUsers(usersData);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -282,7 +262,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 3 : 5} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 4 : 5} className="h-24 text-center">
                   <div className="flex justify-center">
                     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                   </div>
@@ -290,7 +270,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
               </TableRow>
             ) : paginatedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 3 : 5} className="h-24 text-center">
+                <TableCell colSpan={isMobile ? 4 : 5} className="h-24 text-center">
                   No se encontraron usuarios.
                 </TableCell>
               </TableRow>
@@ -304,7 +284,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                     </TableCell>
                   )}
                   <TableCell className="text-center">
-                    {user.login_count || 0}
+                    {user.login_count}
                   </TableCell>
                   <TableCell>
                     {user.updated_at 

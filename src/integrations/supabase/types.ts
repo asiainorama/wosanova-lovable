@@ -133,6 +133,7 @@ export type Database = {
           created_at: string | null
           id: string
           language: string | null
+          login_count: number | null
           theme_mode: string | null
           updated_at: string | null
           username: string | null
@@ -143,6 +144,7 @@ export type Database = {
           created_at?: string | null
           id: string
           language?: string | null
+          login_count?: number | null
           theme_mode?: string | null
           updated_at?: string | null
           username?: string | null
@@ -153,6 +155,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           language?: string | null
+          login_count?: number | null
           theme_mode?: string | null
           updated_at?: string | null
           username?: string | null
