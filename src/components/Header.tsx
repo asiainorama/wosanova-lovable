@@ -1,10 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Home, Search, Trash2, Settings } from 'lucide-react';
+import { Menu, Home, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   title: string;
@@ -22,9 +20,6 @@ const getIconByName = (name: string) => {
     case 'manage':
     case 'trash':
       return <Trash2 className="h-5 w-5" />;
-    case 'admin':
-    case 'settings':
-      return <Settings className="h-5 w-5" />;
     default:
       return <Home className="h-5 w-5" />;
   }
@@ -33,23 +28,6 @@ const getIconByName = (name: string) => {
 const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { t } = useLanguage();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // Check if user is admin
-  useEffect(() => {
-    const checkIfAdmin = async () => {
-      const { data } = await supabase.auth.getSession();
-      const session = data.session;
-      
-      if (session?.user?.email) {
-        const isAdminUser = session.user.email.endsWith("@wosanova.com") || 
-                          session.user.email === "asiainorama@gmail.com";
-        setIsAdmin(isAdminUser);
-      }
-    };
-    
-    checkIfAdmin();
-  }, []);
 
   // Determine active page from title
   const determineActivePage = () => {
@@ -59,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
     return "home";
   };
 
-  // Create links array without admin link (moved to sidebar)
+  // Create links array without admin link (admin access is handled in sidebar)
   const getNavigationLinks = () => {
     const links = [
       { text: 'Home', href: '/', icon: null },

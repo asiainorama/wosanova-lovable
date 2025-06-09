@@ -3,19 +3,21 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import useAdminSession from '@/hooks/useAdminSession';
 
 interface SidebarFooterProps {
-  isAdmin?: boolean;
   onClose?: () => void;
 }
 
-const SidebarFooter = ({ isAdmin = false, onClose }: SidebarFooterProps) => {
+const SidebarFooter = ({ onClose }: SidebarFooterProps) => {
+  const { isAdmin, loading } = useAdminSession();
+
   return (
     <div className="flex items-center justify-center w-full px-4 text-xs text-muted-foreground relative">
       <div>© {new Date().getFullYear()} WosaNova</div>
       
-      {/* Admin icon in the right corner */}
-      {isAdmin && (
+      {/* Admin icon in the right corner - SOLO para admins verificados */}
+      {!loading && isAdmin && (
         <div className="absolute right-4">
           <Link to="/admin" onClick={onClose}>
             <Button

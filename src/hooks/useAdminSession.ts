@@ -24,6 +24,7 @@ const useAdminSession = () => {
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
 
+        // Solo verificar admin si hay sesión válida
         if (data.session?.user?.email) {
           const isAdminUser =
             data.session.user.email.endsWith("@wosanova.com") ||
@@ -31,17 +32,39 @@ const useAdminSession = () => {
           setIsAdmin(isAdminUser);
 
           if (!isAdminUser) {
-            toast.error("Acceso restringido a administradores");
+            console.log("Non-admin user detected:", data.session.user.email);
           }
+        } else {
+          // Sin sesión válida, definitivamente no es admin
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error("Error checking session:", error);
+        setIsAdmin(false); // Por seguridad, nunca admin en caso de error
       } finally {
         setLoading(false);
       }
     };
 
     checkSession();
+
+    // Escuchar cambios en la autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      
+      if (session?.user?.email) {
+        const isAdminUser =
+          session.user.email.endsWith("@wosanova.com") ||
+          session.user.email === "asiainorama@gmail.com";
+        setIsAdmin(isAdminUser);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { session, isAdmin, loading };
