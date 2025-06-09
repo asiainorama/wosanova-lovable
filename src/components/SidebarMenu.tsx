@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,7 +30,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
     const fetchUserData = async () => {
@@ -38,13 +38,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         
         if (session?.user) {
           setUserId(session.user.id);
-          
-          // Check if user is admin
-          if (session.user.email) {
-            const isAdminUser = session.user.email.endsWith("@wosanova.com") || 
-                              session.user.email === "asiainorama@gmail.com";
-            setIsAdmin(isAdminUser);
-          }
           
           // Try to get user profile data
           try {
@@ -84,7 +77,6 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         setUserId(null);
         setUsername('');
         setAvatarUrl('');
-        setIsAdmin(false);
         localStorage.removeItem('username');
         localStorage.removeItem('avatarUrl');
       }
@@ -147,7 +139,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
 
         {/* Footer - Fixed height exactly matching header */}
         <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
-          <SidebarFooter isAdmin={isAdmin} onClose={() => onOpenChange(false)} />
+          <SidebarFooter onClose={() => onOpenChange(false)} />
         </div>
       </SheetContent>
     </Sheet>
