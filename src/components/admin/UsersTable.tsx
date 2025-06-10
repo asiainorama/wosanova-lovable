@@ -52,24 +52,22 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
-      console.log("Fetching all users from user_profiles...");
+      console.log("Fetching all users using admin function...");
       
-      const { data: userProfiles, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Usar la función RPC que permite a los administradores ver todos los usuarios
+      const { data: allUsers, error } = await supabase.rpc('get_all_users_for_admin');
 
       if (error) {
-        console.error("Error fetching user profiles:", error);
+        console.error("Error fetching users:", error);
         toast.error(`Error al cargar usuarios: ${error.message}`);
         setUsers([]);
         return;
       }
 
-      if (userProfiles && userProfiles.length > 0) {
-        console.log("Successfully fetched user profiles:", userProfiles.length);
+      if (allUsers && allUsers.length > 0) {
+        console.log("Successfully fetched all users:", allUsers.length);
         
-        const usersData = userProfiles.map((user: any) => ({
+        const usersData = allUsers.map((user: any) => ({
           id: user.id,
           username: user.username || 'Usuario sin nombre',
           created_at: user.created_at,
@@ -84,9 +82,9 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         setUsers(usersData);
         toast.success(`${usersData.length} usuarios cargados correctamente`);
       } else {
-        console.log("No user profiles found");
+        console.log("No users found or not authorized");
         setUsers([]);
-        toast.info("No se encontraron usuarios");
+        toast.info("No se encontraron usuarios o no tienes permisos de administrador");
       }
     } catch (error) {
       console.error("Unexpected error fetching users:", error);
