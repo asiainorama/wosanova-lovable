@@ -34,7 +34,7 @@ interface UserData {
   theme_mode?: string;
   language?: string;
   login_count: number;
-  email?: string; // Add email from auth.users
+  email?: string;
 }
 
 interface UsersTableProps {
@@ -44,108 +44,43 @@ interface UsersTableProps {
 const UsersTable = ({ onEdit }: UsersTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLandscape, setIsLandscape] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const itemsPerPage = 10;
   const isMobile = useIsMobile();
 
-  // Detect landscape orientation on mobile devices
-  useEffect(() => {
-    const checkOrientation = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight);
-    };
-
-    checkOrientation();
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
-
-    return () => {
-      window.removeEventListener("resize", checkOrientation);
-      window.removeEventListener("orientationchange", checkOrientation);
-    };
-  }, []);
-
-  // Enhanced fetch function that gets ALL user data including auth info
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
-      console.log("Fetching users with enhanced query...");
+      console.log("Fetching user profiles...");
       
-      // Get all users from auth.users and join with user_profiles
+      // Consulta simple a user_profiles
       const { data, error } = await supabase
         .from('user_profiles')
-        .select(`
-          *,
-          email:id(*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error fetching user profiles:", error);
-        toast.error(`Error al cargar perfiles de usuario: ${error.message}`);
-        
-        // Fallback: try to fetch auth users directly (this requires admin privileges)
-        console.log("Trying fallback method...");
-        try {
-          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-          if (authError) {
-            console.error("Auth admin error:", authError);
-          } else {
-            console.log("Auth users found:", authData?.users?.length || 0);
-            // Create profiles for missing users
-            if (authData?.users) {
-              for (const authUser of authData.users) {
-                const { error: insertError } = await supabase
-                  .from('user_profiles')
-                  .upsert({
-                    id: authUser.id,
-                    username: authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'Usuario',
-                    login_count: 0,
-                    created_at: authUser.created_at,
-                    updated_at: authUser.updated_at || authUser.created_at
-                  }, { onConflict: 'id' });
-                
-                if (insertError) {
-                  console.error("Error creating profile for user:", authUser.id, insertError);
-                }
-              }
-              // Retry the original query
-              return fetchUsers();
-            }
-          }
-        } catch (adminError) {
-          console.error("Admin listUsers not available:", adminError);
-        }
+        toast.error(`Error al cargar usuarios: ${error.message}`);
         return;
       }
 
       if (data) {
         console.log("Successfully fetched user profiles:", data.length);
         
-        // Get additional email data from auth users via RPC or direct query if available
-        const usersData = await Promise.all(data.map(async (user: any) => {
-          let email = '';
-          try {
-            // Try to get email from auth metadata or make a separate call
-            const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
-            email = authUser?.user?.email || '';
-          } catch (e) {
-            console.log("Could not fetch email for user:", user.id);
-          }
-
-          return {
-            id: user.id,
-            username: user.username || email?.split('@')[0] || 'Usuario sin nombre',
-            created_at: user.created_at,
-            updated_at: user.updated_at,
-            avatar_url: user.avatar_url,
-            theme_mode: user.theme_mode,
-            language: user.language,
-            login_count: user.login_count || 0,
-            email: email
-          };
+        // Mapear los datos sin complicaciones
+        const usersData = data.map((user: any) => ({
+          id: user.id,
+          username: user.username || 'Usuario sin nombre',
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          avatar_url: user.avatar_url,
+          theme_mode: user.theme_mode,
+          language: user.language,
+          login_count: user.login_count || 0,
+          email: user.email || user.id // Usar ID como fallback para email
         }));
         
         setUsers(usersData);
@@ -153,62 +88,52 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       } else {
         console.log("No user profiles found");
         setUsers([]);
+        toast.info("No se encontraron usuarios");
       }
     } catch (error) {
       console.error("Unexpected error fetching users:", error);
       toast.error("Error inesperado al cargar usuarios");
+      setUsers([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // Enhanced initialization with better error handling
   useEffect(() => {
-    const initializeUsers = async () => {
-      console.log("Initializing users table...");
-      await fetchUsers();
-      
-      // Set up real-time subscription for user_profiles changes
-      const channel = supabase
-        .channel('admin-users-realtime')
-        .on(
-          'postgres_changes',
-          { 
-            event: '*', 
-            schema: 'public',
-            table: 'user_profiles' 
-          },
-          (payload) => {
-            console.log('Real-time user profile update:', payload);
-            // Refresh the data when changes occur
-            fetchUsers();
-          }
-        )
-        .subscribe((status) => {
-          console.log('Real-time subscription status:', status);
-        });
+    fetchUsers();
 
-      return () => {
-        console.log("Cleaning up real-time subscription");
-        supabase.removeChannel(channel);
-      };
+    // Configurar suscripción en tiempo real
+    const channel = supabase
+      .channel('users-realtime')
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public',
+          table: 'user_profiles' 
+        },
+        (payload) => {
+          console.log('Real-time user profile update:', payload);
+          fetchUsers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-
-    initializeUsers();
   }, []);
 
   const handleRefresh = async () => {
     console.log("Manual refresh triggered");
     await fetchUsers();
-    toast.info("Lista de usuarios actualizada");
   };
 
   const handleDeleteUser = async (userId: string) => {
     try {
       console.log("Deleting user:", userId);
       
-      // Delete from user_profiles table
       const { error } = await supabase
         .from('user_profiles')
         .delete()
@@ -216,11 +141,10 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       
       if (error) {
         console.error("Error deleting user profile:", error);
-        toast.error(`Error al eliminar perfil de usuario: ${error.message}`);
+        toast.error(`Error al eliminar usuario: ${error.message}`);
         return;
       }
       
-      // Remove from local state
       setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
       toast.success("Usuario eliminado correctamente");
       
@@ -230,7 +154,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     }
   };
 
-  // Enhanced filtering that includes email
   const filteredUsers = users.filter(
     (user) =>
       user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -242,24 +165,10 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
   
-  // Reset to first page when search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Function to go to first page
-  const goToFirstPage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-  
-  // Function to go to last page
-  const goToLastPage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrentPage(totalPages);
-  };
-
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = isMobile ? 3 : 5;
@@ -313,7 +222,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
             <Input
               type="text"
-              placeholder="Buscar usuarios por nombre, ID o email..."
+              placeholder="Buscar usuarios..."
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -324,8 +233,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
             size="icon" 
             onClick={handleRefresh}
             disabled={refreshing}
-            className="relative"
-            title="Actualizar lista de usuarios"
+            title="Actualizar lista"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
@@ -340,7 +248,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px]">Usuario</TableHead>
-              {!isMobile && <TableHead className="w-[180px]">Email</TableHead>}
+              {!isMobile && <TableHead className="w-[180px]">ID</TableHead>}
               {!isMobile && <TableHead className="w-[130px]">Creado</TableHead>}
               <TableHead className="w-[80px] text-center">Accesos</TableHead>
               <TableHead className="w-[130px]">Último acceso</TableHead>
@@ -369,20 +277,14 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                   <TableCell className="font-medium">
                     <div>
                       <div>{user.username}</div>
-                      {isMobile && user.email && (
-                        <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                      {isMobile && (
+                        <div className="text-xs text-gray-500 truncate">{user.id.substring(0, 8)}...</div>
                       )}
                     </div>
                   </TableCell>
                   {!isMobile && (
                     <TableCell className="text-sm">
-                      {user.email ? (
-                        <span className="truncate block max-w-[160px]" title={user.email}>
-                          {user.email}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">Sin email</span>
-                      )}
+                      <span className="font-mono text-xs">{user.id.substring(0, 8)}...</span>
                     </TableCell>
                   )}
                   {!isMobile && (
@@ -424,7 +326,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                           <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
                           <AlertDialogDescription>
                             Esta acción eliminará permanentemente el perfil del usuario "{user.username}" 
-                            ({user.email || user.id}) y no se puede deshacer.
+                            y no se puede deshacer.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -454,18 +356,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
           </div>
           <Pagination className="w-full sm:w-auto">
             <PaginationContent className="flex-wrap justify-center">
-              {!isMobile && (
-                <PaginationItem>
-                  <PaginationLink
-                    href="#"
-                    onClick={goToFirstPage}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  >
-                    Primera
-                  </PaginationLink>
-                </PaginationItem>
-              )}
-              
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
@@ -514,18 +404,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
                   className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
-              
-              {!isMobile && (
-                <PaginationItem>
-                  <PaginationLink
-                    href="#"
-                    onClick={goToLastPage}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  >
-                    Última
-                  </PaginationLink>
-                </PaginationItem>
-              )}
             </PaginationContent>
           </Pagination>
         </div>
