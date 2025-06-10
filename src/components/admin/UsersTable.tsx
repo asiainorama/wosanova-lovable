@@ -34,6 +34,7 @@ interface UserData {
   theme_mode?: string;
   language?: string;
   login_count: number;
+  email?: string; // Add email from auth.users
 }
 
 interface UsersTableProps {
@@ -66,84 +67,175 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     };
   }, []);
 
-  // Fetch users from user_profiles table
+  // Enhanced fetch function that gets ALL user data including auth info
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
+      console.log("Fetching users with enhanced query...");
       
-      // Get user profiles
+      // Get all users from auth.users and join with user_profiles
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
+        .select(`
+          *,
+          email:id(*)
+        `)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
-        toast.error(`Error al cargar usuarios: ${error.message}`);
-        console.error("Error fetching users:", error);
+        console.error("Error fetching user profiles:", error);
+        toast.error(`Error al cargar perfiles de usuario: ${error.message}`);
+        
+        // Fallback: try to fetch auth users directly (this requires admin privileges)
+        console.log("Trying fallback method...");
+        try {
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+          if (authError) {
+            console.error("Auth admin error:", authError);
+          } else {
+            console.log("Auth users found:", authData?.users?.length || 0);
+            // Create profiles for missing users
+            if (authData?.users) {
+              for (const authUser of authData.users) {
+                const { error: insertError } = await supabase
+                  .from('user_profiles')
+                  .upsert({
+                    id: authUser.id,
+                    username: authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'Usuario',
+                    login_count: 0,
+                    created_at: authUser.created_at,
+                    updated_at: authUser.updated_at || authUser.created_at
+                  }, { onConflict: 'id' });
+                
+                if (insertError) {
+                  console.error("Error creating profile for user:", authUser.id, insertError);
+                }
+              }
+              // Retry the original query
+              return fetchUsers();
+            }
+          }
+        } catch (adminError) {
+          console.error("Admin listUsers not available:", adminError);
+        }
         return;
       }
 
       if (data) {
-        console.log("Fetched users:", data.length);
+        console.log("Successfully fetched user profiles:", data.length);
         
-        // Map data to UserData interface
-        const usersData = data.map((user: any) => ({
-          id: user.id,
-          username: user.username,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          avatar_url: user.avatar_url,
-          theme_mode: user.theme_mode,
-          language: user.language,
-          login_count: user.login_count || 0
+        // Get additional email data from auth users via RPC or direct query if available
+        const usersData = await Promise.all(data.map(async (user: any) => {
+          let email = '';
+          try {
+            // Try to get email from auth metadata or make a separate call
+            const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
+            email = authUser?.user?.email || '';
+          } catch (e) {
+            console.log("Could not fetch email for user:", user.id);
+          }
+
+          return {
+            id: user.id,
+            username: user.username || email?.split('@')[0] || 'Usuario sin nombre',
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            avatar_url: user.avatar_url,
+            theme_mode: user.theme_mode,
+            language: user.language,
+            login_count: user.login_count || 0,
+            email: email
+          };
         }));
         
         setUsers(usersData);
+        toast.success(`${usersData.length} usuarios cargados correctamente`);
+      } else {
+        console.log("No user profiles found");
+        setUsers([]);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Error al cargar usuarios");
+      console.error("Unexpected error fetching users:", error);
+      toast.error("Error inesperado al cargar usuarios");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // Initial load
+  // Enhanced initialization with better error handling
   useEffect(() => {
-    fetchUsers();
-    
-    // Set up a real-time subscription
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public',
-          table: 'user_profiles' 
-        },
-        (payload) => {
-          console.log('Real-time update received:', payload);
-          fetchUsers(); // Reload users when changes happen
-        }
-      )
-      .subscribe();
+    const initializeUsers = async () => {
+      console.log("Initializing users table...");
+      await fetchUsers();
+      
+      // Set up real-time subscription for user_profiles changes
+      const channel = supabase
+        .channel('admin-users-realtime')
+        .on(
+          'postgres_changes',
+          { 
+            event: '*', 
+            schema: 'public',
+            table: 'user_profiles' 
+          },
+          (payload) => {
+            console.log('Real-time user profile update:', payload);
+            // Refresh the data when changes occur
+            fetchUsers();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Real-time subscription status:', status);
+        });
 
-    return () => {
-      supabase.removeChannel(channel);
+      return () => {
+        console.log("Cleaning up real-time subscription");
+        supabase.removeChannel(channel);
+      };
     };
+
+    initializeUsers();
   }, []);
 
-  const handleRefresh = () => {
-    fetchUsers();
-    toast.info("Actualizando lista de usuarios...");
+  const handleRefresh = async () => {
+    console.log("Manual refresh triggered");
+    await fetchUsers();
+    toast.info("Lista de usuarios actualizada");
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      console.log("Deleting user:", userId);
+      
+      // Delete from user_profiles table
+      const { error } = await supabase
+        .from('user_profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (error) {
+        console.error("Error deleting user profile:", error);
+        toast.error(`Error al eliminar perfil de usuario: ${error.message}`);
+        return;
+      }
+      
+      // Remove from local state
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== userId));
+      toast.success("Usuario eliminado correctamente");
+      
+    } catch (error) {
+      console.error("Unexpected error deleting user:", error);
+      toast.error("Error inesperado al eliminar usuario");
+    }
+  };
+
+  // Enhanced filtering that includes email
   const filteredUsers = users.filter(
     (user) =>
       user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.id?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -154,9 +246,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
-  // Check if we should show additional columns based on device/orientation
-  const isTabletPortrait = !isMobile && window.innerWidth < 1024 && !isLandscape;
 
   // Function to go to first page
   const goToFirstPage = (e: React.MouseEvent) => {
@@ -176,29 +265,23 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
     const maxVisiblePages = isMobile ? 3 : 5;
     
     if (totalPages <= maxVisiblePages) {
-      // If we have less pages than our maximum, show all of them
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // Always show first page
       pageNumbers.push(1);
       
-      // We have more pages than we can show at once
       if (currentPage <= 2) {
-        // If we're near the start, show first 2-3 pages and then ellipsis
         for (let i = 2; i <= Math.min(3, maxVisiblePages-1); i++) {
           pageNumbers.push(i);
         }
         pageNumbers.push('ellipsis-end');
       } else if (currentPage >= totalPages - 1) {
-        // If we're near the end, show ellipsis and then last 2-3 pages
         pageNumbers.push('ellipsis-start');
         for (let i = Math.max(totalPages - 2, 2); i <= totalPages - 1; i++) {
           pageNumbers.push(i);
         }
       } else {
-        // We're somewhere in the middle, show ellipsis, current page and neighbors
         pageNumbers.push('ellipsis-start');
         
         if (maxVisiblePages >= 5) {
@@ -214,7 +297,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         pageNumbers.push('ellipsis-end');
       }
       
-      // Always show last page if not already included
       if (!pageNumbers.includes(totalPages)) {
         pageNumbers.push(totalPages);
       }
@@ -225,121 +307,137 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Buscar usuarios..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Buscar usuarios por nombre, ID o email..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="relative"
+            title="Actualizar lista de usuarios"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="relative"
-          title="Actualizar lista de usuarios"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-        </Button>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Total: {users.length} usuarios
+        </div>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[150px]">Nombre de Usuario</TableHead>
-              {!isMobile && <TableHead className="w-[180px]">Fecha de creación</TableHead>}
-              <TableHead className="w-[100px]">Accesos</TableHead>
-              <TableHead className="w-[180px]">Último acceso</TableHead>
+              <TableHead className="w-[200px]">Usuario</TableHead>
+              {!isMobile && <TableHead className="w-[180px]">Email</TableHead>}
+              {!isMobile && <TableHead className="w-[130px]">Creado</TableHead>}
+              <TableHead className="w-[80px] text-center">Accesos</TableHead>
+              <TableHead className="w-[130px]">Último acceso</TableHead>
               <TableHead className="w-[100px] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 4 : 5} className="h-24 text-center">
-                  <div className="flex justify-center">
+                <TableCell colSpan={isMobile ? 4 : 6} className="h-24 text-center">
+                  <div className="flex justify-center items-center space-x-2">
                     <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                    <span>Cargando usuarios...</span>
                   </div>
                 </TableCell>
               </TableRow>
             ) : paginatedUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isMobile ? 4 : 5} className="h-24 text-center">
-                  No se encontraron usuarios.
+                <TableCell colSpan={isMobile ? 4 : 6} className="h-24 text-center">
+                  {searchTerm ? "No se encontraron usuarios que coincidan con la búsqueda." : "No se encontraron usuarios registrados."}
                 </TableCell>
               </TableRow>
             ) : (
               paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.username || "Usuario sin nombre"}</TableCell>
+                  <TableCell className="font-medium">
+                    <div>
+                      <div>{user.username}</div>
+                      {isMobile && user.email && (
+                        <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                      )}
+                    </div>
+                  </TableCell>
                   {!isMobile && (
-                    <TableCell>
-                      {new Date(user.created_at).toLocaleDateString('es-ES')}
+                    <TableCell className="text-sm">
+                      {user.email ? (
+                        <span className="truncate block max-w-[160px]" title={user.email}>
+                          {user.email}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">Sin email</span>
+                      )}
                     </TableCell>
                   )}
-                  <TableCell className="text-center">
-                    {user.login_count}
+                  {!isMobile && (
+                    <TableCell className="text-sm">
+                      {new Date(user.created_at).toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit'
+                      })}
+                    </TableCell>
+                  )}
+                  <TableCell className="text-center font-mono">
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-6 px-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+                      {user.login_count}
+                    </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-sm">
                     {user.updated_at 
-                      ? new Date(user.updated_at).toLocaleDateString('es-ES') 
+                      ? new Date(user.updated_at).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit'
+                        })
                       : "Nunca"}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            size="sm"
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="text-xs"
+                        >
+                          Eliminar
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará permanentemente el perfil del usuario "{user.username}" 
+                            ({user.email || user.id}) y no se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="bg-red-600 hover:bg-red-700"
                           >
-                            Eliminar
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta acción eliminará permanentemente la cuenta de usuario y no se puede deshacer.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={async () => {
-                                try {
-                                  // Delete from user_profiles table
-                                  const { error } = await supabase
-                                    .from('user_profiles')
-                                    .delete()
-                                    .eq('id', user.id);
-                                  
-                                  if (error) {
-                                    toast.error(`Error al eliminar usuario: ${error.message}`);
-                                    return;
-                                  }
-                                  
-                                  // Remove from local state
-                                  setUsers(users.filter(u => u.id !== user.id));
-                                  toast.success("Usuario eliminado correctamente");
-                                } catch (error) {
-                                  console.error("Error deleting user:", error);
-                                  toast.error("Error al eliminar usuario");
-                                }
-                              }}
-                            >
-                              Eliminar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                            Eliminar usuario
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))
@@ -352,6 +450,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
           <div className="text-sm text-gray-500 dark:text-gray-400 w-full sm:w-auto text-center sm:text-left">
             {`${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredUsers.length)} de ${filteredUsers.length}`}
+            {searchTerm && ` (filtrado de ${users.length} total)`}
           </div>
           <Pagination className="w-full sm:w-auto">
             <PaginationContent className="flex-wrap justify-center">
