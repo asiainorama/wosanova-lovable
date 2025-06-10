@@ -69,7 +69,10 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
       console.log("Fetching all users using admin function...");
       
       // Usar la función RPC que permite a los administradores ver todos los usuarios
-      const { data: allUsers, error } = await supabase.rpc('get_all_users_for_admin');
+      const { data: allUsers, error } = await supabase.rpc('get_all_users_for_admin') as {
+        data: AdminUserData[] | null;
+        error: any;
+      };
 
       if (error) {
         console.error("Error fetching users:", error);
