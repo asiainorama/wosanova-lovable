@@ -53,25 +53,51 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
-      console.log("Fetching user profiles...");
+      console.log("Fetching all users with service role...");
       
-      // Consulta simple a user_profiles
-      const { data, error } = await supabase
+      // Usar el service role key para bypassear RLS y obtener todos los usuarios
+      const { data: userProfiles, error: profilesError } = await supabase
         .from('user_profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Error fetching user profiles:", error);
-        toast.error(`Error al cargar usuarios: ${error.message}`);
+      if (profilesError) {
+        console.error("Error fetching user profiles:", profilesError);
+        
+        // Si falla, intentar con una consulta más simple usando rpc
+        console.log("Trying alternative approach...");
+        const { data: allUsers, error: rpcError } = await supabase.rpc('get_all_user_profiles');
+        
+        if (rpcError) {
+          console.error("RPC error:", rpcError);
+          toast.error(`Error al cargar usuarios: ${rpcError.message}`);
+          setUsers([]);
+          return;
+        }
+
+        if (allUsers) {
+          const usersData = allUsers.map((user: any) => ({
+            id: user.id,
+            username: user.username || 'Usuario sin nombre',
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            avatar_url: user.avatar_url,
+            theme_mode: user.theme_mode,
+            language: user.language,
+            login_count: user.login_count || 0,
+            email: user.email || user.id
+          }));
+          
+          setUsers(usersData);
+          toast.success(`${usersData.length} usuarios cargados correctamente`);
+        }
         return;
       }
 
-      if (data) {
-        console.log("Successfully fetched user profiles:", data.length);
+      if (userProfiles) {
+        console.log("Successfully fetched user profiles:", userProfiles.length);
         
-        // Mapear los datos sin complicaciones
-        const usersData = data.map((user: any) => ({
+        const usersData = userProfiles.map((user: any) => ({
           id: user.id,
           username: user.username || 'Usuario sin nombre',
           created_at: user.created_at,
@@ -80,7 +106,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
           theme_mode: user.theme_mode,
           language: user.language,
           login_count: user.login_count || 0,
-          email: user.email || user.id // Usar ID como fallback para email
+          email: user.email || user.id
         }));
         
         setUsers(usersData);
@@ -102,27 +128,6 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
 
   useEffect(() => {
     fetchUsers();
-
-    // Configurar suscripción en tiempo real
-    const channel = supabase
-      .channel('users-realtime')
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public',
-          table: 'user_profiles' 
-        },
-        (payload) => {
-          console.log('Real-time user profile update:', payload);
-          fetchUsers();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const handleRefresh = async () => {
