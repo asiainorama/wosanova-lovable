@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,48 +52,21 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
-      console.log("Fetching all users with service role...");
+      console.log("Fetching all users from user_profiles...");
       
-      // Usar el service role key para bypassear RLS y obtener todos los usuarios
-      const { data: userProfiles, error: profilesError } = await supabase
+      const { data: userProfiles, error } = await supabase
         .from('user_profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profilesError) {
-        console.error("Error fetching user profiles:", profilesError);
-        
-        // Si falla, intentar con una consulta más simple usando rpc
-        console.log("Trying alternative approach...");
-        const { data: allUsers, error: rpcError } = await supabase.rpc('get_all_user_profiles');
-        
-        if (rpcError) {
-          console.error("RPC error:", rpcError);
-          toast.error(`Error al cargar usuarios: ${rpcError.message}`);
-          setUsers([]);
-          return;
-        }
-
-        if (allUsers) {
-          const usersData = allUsers.map((user: any) => ({
-            id: user.id,
-            username: user.username || 'Usuario sin nombre',
-            created_at: user.created_at,
-            updated_at: user.updated_at,
-            avatar_url: user.avatar_url,
-            theme_mode: user.theme_mode,
-            language: user.language,
-            login_count: user.login_count || 0,
-            email: user.email || user.id
-          }));
-          
-          setUsers(usersData);
-          toast.success(`${usersData.length} usuarios cargados correctamente`);
-        }
+      if (error) {
+        console.error("Error fetching user profiles:", error);
+        toast.error(`Error al cargar usuarios: ${error.message}`);
+        setUsers([]);
         return;
       }
 
-      if (userProfiles) {
+      if (userProfiles && userProfiles.length > 0) {
         console.log("Successfully fetched user profiles:", userProfiles.length);
         
         const usersData = userProfiles.map((user: any) => ({
