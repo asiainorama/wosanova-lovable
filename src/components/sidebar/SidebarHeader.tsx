@@ -25,6 +25,7 @@ const SidebarHeaderComponent: React.FC<SidebarHeaderProps> = ({
           username={username} 
           avatarUrl={avatarUrl} 
           userId={userId}
+          onClose={onClose}
         />
       </div>
       
