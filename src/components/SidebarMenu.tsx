@@ -1,11 +1,15 @@
 
 import React, { useEffect, useState } from 'react';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
-import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
-import { Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarFooter,
+  SidebarProvider,
+  useSidebar 
+} from '@/components/ui/sidebar';
 
 // Import our components
 import TimeWidget from './sidebar/TimeWidget';
@@ -26,7 +30,7 @@ interface UserProfile {
   avatar_url?: string;
 }
 
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
+const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -93,56 +97,59 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="left"
-        className="w-full sm:w-[85%] md:w-[70%] lg:w-[50%] xl:w-[40%] p-0 border-r-0 flex flex-col h-full overflow-hidden
-                   backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
-                   shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/10 dark:border-gray-800/20
-                   transition-transform duration-100 ease-out
-                   data-[state=open]:animate-in data-[state=open]:slide-in-from-left-0 data-[state=open]:duration-100
-                   data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left-0 data-[state=closed]:duration-100"
-      >
-        {/* Header - Fixed height exactly matching main app header */}
-        <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
-          <SidebarHeader 
-            username={username} 
-            avatarUrl={avatarUrl} 
-            userId={userId} 
-            onClose={() => onOpenChange(false)}
-          />
+    <Sidebar 
+      side="left" 
+      className="backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
+                 shadow-2xl shadow-black/10 dark:shadow-black/30
+                 border-white/10 dark:border-gray-800/20"
+    >
+      {/* Header - Fixed height exactly matching main app header */}
+      <SidebarHeader className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
+        <SidebarHeader 
+          username={username} 
+          avatarUrl={avatarUrl} 
+          userId={userId} 
+          onClose={() => onOpenChange(false)}
+        />
+      </SidebarHeader>
+
+      {/* Content area - Using flexbox for better distribution */}
+      <SidebarContent className="flex flex-col justify-between overflow-y-auto overflow-x-hidden">
+        
+        {/* Top section with Time and Weather - takes natural space */}
+        <div className="flex-shrink-0 space-y-2 px-3 py-2">
+          <TimeWidget onWidgetOpen={handleWidgetOpen} />
+          <WeatherWidget />
         </div>
 
-        {/* Content area - Using flexbox for better distribution */}
-        <div className="flex-1 flex flex-col justify-between overflow-y-auto overflow-x-hidden">
-          
-          {/* Top section with Time and Weather - takes natural space */}
-          <div className="flex-shrink-0 space-y-2 px-3 py-2">
-            <TimeWidget onWidgetOpen={handleWidgetOpen} />
-            <WeatherWidget />
-          </div>
-
-          {/* Center section with Widget Icons - centered in available space */}
-          <div className="flex-1 flex items-center justify-center px-2">
-            <WidgetIconsRow onWidgetOpen={handleWidgetOpen} />
-          </div>
-          
-          {/* Bottom section with Calendar - takes natural space at bottom */}
-          <div className="flex-shrink-0 px-3 pb-2">
-            <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
-            <div className="w-full">
-              <CalendarWidget />
-            </div>
+        {/* Center section with Widget Icons - centered in available space */}
+        <div className="flex-1 flex items-center justify-center px-2">
+          <WidgetIconsRow onWidgetOpen={handleWidgetOpen} />
+        </div>
+        
+        {/* Bottom section with Calendar - takes natural space at bottom */}
+        <div className="flex-shrink-0 px-3 pb-2">
+          <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
+          <div className="w-full">
+            <CalendarWidget />
           </div>
         </div>
+      </SidebarContent>
 
-        {/* Footer - Fixed height exactly matching header */}
-        <div className="flex-shrink-0 h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
-          <SidebarFooter onClose={() => onOpenChange(false)} />
-        </div>
-      </SheetContent>
-    </Sheet>
+      {/* Footer - Fixed height exactly matching header */}
+      <SidebarFooter className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+        <SidebarFooter onClose={() => onOpenChange(false)} />
+      </SidebarFooter>
+    </Sidebar>
+  );
+};
+
+// Wrapper component that provides the SidebarProvider
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
+  return (
+    <SidebarProvider open={isOpen} onOpenChange={onOpenChange}>
+      <SidebarMenuContent isOpen={isOpen} onOpenChange={onOpenChange} />
+    </SidebarProvider>
   );
 };
 

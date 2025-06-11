@@ -7,6 +7,7 @@ import { BackgroundProvider } from "./contexts/BackgroundContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { FloatingWidgetsProvider } from "./contexts/FloatingWidgetsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import Manage from "./pages/Manage";
@@ -91,15 +92,19 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
   }, [isSidebarOpen]);
 
   return (
-    <>
-      <AppContextUpdater />
-      {children}
-      <SidebarMenu 
-        isOpen={isSidebarOpen} 
-        onOpenChange={setIsSidebarOpen} 
-      />
-      <FloatingWidgetsContainer />
-    </>
+    <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+      <div className="flex min-h-screen w-full">
+        <SidebarMenu 
+          isOpen={isSidebarOpen} 
+          onOpenChange={setIsSidebarOpen} 
+        />
+        <div className="flex-1">
+          <AppContextUpdater />
+          {children}
+          <FloatingWidgetsContainer />
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
