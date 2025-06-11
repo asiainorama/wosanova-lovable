@@ -87,9 +87,9 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   // Widgets will now open without closing the sidebar
 
   return (
-    <div className={`fixed top-0 left-0 h-screen w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
+    <div className={`fixed top-0 left-0 h-screen w-full md:w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
                    shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/10 dark:border-gray-800/20 border-r z-[9999]
+                   border-white/10 dark:border-gray-800/20 border-r z-[99999]
                    transition-transform duration-300 ease-in-out ${
                      isOpen ? 'translate-x-0' : '-translate-x-full'
                    }`}>
