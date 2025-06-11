@@ -87,50 +87,61 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   // Widgets will now open without closing the sidebar
 
   return (
-    <div className={`fixed top-0 left-0 h-screen w-full md:w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
-                   shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/10 dark:border-gray-800/20 border-r z-[99999]
-                   transition-transform duration-300 ease-in-out ${
-                     isOpen ? 'translate-x-0' : '-translate-x-full'
-                   }`}>
-      {/* Header - Fixed height exactly matching main app header */}
-      <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
-        <SidebarHeaderComponent 
-          username={username} 
-          avatarUrl={avatarUrl} 
-          userId={userId} 
-          onClose={() => onOpenChange(false)}
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] md:hidden"
+          onClick={() => onOpenChange(false)}
         />
-      </div>
-
-      {/* Content area - Using flexbox for better distribution */}
-      <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
-        
-        {/* Top section with Time and Weather - takes natural space */}
-        <div className="flex-shrink-0 space-y-2 px-3 py-2">
-          <TimeWidget />
-          <WeatherWidget />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`fixed top-0 left-0 h-screen w-full md:w-72 flex flex-col backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 
+                     shadow-2xl shadow-black/10 dark:shadow-black/30
+                     border-white/10 dark:border-gray-800/20 border-r z-[101]
+                     transition-transform duration-300 ease-in-out ${
+                       isOpen ? 'translate-x-0' : '-translate-x-full'
+                     }`}>
+        {/* Header - Fixed height exactly matching main app header */}
+        <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/40 dark:bg-gray-800/40 border-b border-white/10 dark:border-gray-700/20">
+          <SidebarHeaderComponent 
+            username={username} 
+            avatarUrl={avatarUrl} 
+            userId={userId} 
+            onClose={() => onOpenChange(false)}
+          />
         </div>
 
-        {/* Center section with Widget Icons - centered in available space */}
-        <div className="flex-1 flex items-center justify-center px-2">
-          <WidgetIconsRow />
-        </div>
-        
-        {/* Bottom section with Calendar - takes natural space at bottom */}
-        <div className="flex-shrink-0 px-3 pb-2">
-          <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
-          <div className="w-full">
-            <CalendarWidget />
+        {/* Content area - Using flexbox for better distribution */}
+        <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
+          
+          {/* Top section with Time and Weather - takes natural space */}
+          <div className="flex-shrink-0 space-y-2 px-3 py-2">
+            <TimeWidget />
+            <WeatherWidget />
+          </div>
+
+          {/* Center section with Widget Icons - centered in available space */}
+          <div className="flex-1 flex items-center justify-center px-2">
+            <WidgetIconsRow />
+          </div>
+          
+          {/* Bottom section with Calendar - takes natural space at bottom */}
+          <div className="flex-shrink-0 px-3 pb-2">
+            <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
+            <div className="w-full">
+              <CalendarWidget />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Footer - Fixed height exactly matching header */}
-      <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
-        <SidebarFooterComponent onClose={() => onOpenChange(false)} />
+        {/* Footer - Fixed height exactly matching header */}
+        <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/40 dark:bg-gray-800/40 border-t border-white/10 dark:border-gray-700/20">
+          <SidebarFooterComponent onClose={() => onOpenChange(false)} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

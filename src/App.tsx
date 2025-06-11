@@ -91,15 +91,11 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="relative min-h-screen w-full">
-      {/* Sidebar - positioned absolutely to not affect main content layout */}
-      <div className={`fixed top-0 left-0 z-50 transition-transform duration-300 ease-in-out ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <SidebarMenu 
-          isOpen={isSidebarOpen} 
-          onOpenChange={setIsSidebarOpen} 
-        />
-      </div>
+      {/* Sidebar - positioned absolutely with higher z-index than header */}
+      <SidebarMenu 
+        isOpen={isSidebarOpen} 
+        onOpenChange={setIsSidebarOpen} 
+      />
       
       {/* Main content - full width, not affected by sidebar */}
       <div className="w-full min-h-screen">

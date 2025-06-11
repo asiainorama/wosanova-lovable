@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="sticky top-0 z-40 w-full">
       {/* We keep the title hidden but in the DOM for functionality */}
       <span className="sr-only">{title}</span>
       
