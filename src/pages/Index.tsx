@@ -7,12 +7,14 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
+  const { getBackgroundStyle } = useBackground();
   const [isLoading, setIsLoading] = useState(true);
   useScrollBehavior();
 
@@ -54,7 +56,10 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div 
+      className="min-h-screen flex flex-col relative w-full"
+      style={getBackgroundStyle()}
+    >
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">

@@ -49,37 +49,6 @@ export const useBackground = () => {
   return context;
 };
 
-// Función mejorada para aplicar el fondo con !important para sobrescribir Tailwind
-const applyBackgroundToBody = (backgroundType: BackgroundType) => {
-  const style = backgroundStyles[backgroundType];
-  const body = document.body;
-  
-  console.log('Applying background:', backgroundType, style);
-  
-  // Limpiar todos los estilos de fondo anteriores
-  body.style.removeProperty('background-image');
-  body.style.removeProperty('background');
-  body.style.removeProperty('background-color');
-  body.style.removeProperty('background-size');
-  body.style.removeProperty('background-position');
-  body.style.removeProperty('background-repeat');
-  body.style.removeProperty('background-attachment');
-  
-  // Aplicar nuevo estilo con !important para sobrescribir Tailwind
-  if (style.backgroundImage) {
-    body.style.setProperty('background-image', style.backgroundImage as string, 'important');
-    body.style.setProperty('background-size', style.backgroundSize as string, 'important');
-    body.style.setProperty('background-position', style.backgroundPosition as string, 'important');
-    body.style.setProperty('background-repeat', style.backgroundRepeat as string, 'important');
-    body.style.setProperty('background-attachment', style.backgroundAttachment as string, 'important');
-  } else if (style.background) {
-    body.style.setProperty('background', style.background as string, 'important');
-  }
-  
-  // También eliminar cualquier background-color que pueda estar interfiriendo
-  body.style.setProperty('background-color', 'transparent', 'important');
-};
-
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [background, setBackgroundState] = useState<BackgroundType>('default');
 
@@ -115,11 +84,6 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     loadBackgroundPreference();
   }, []);
-
-  // Apply background whenever it changes
-  useEffect(() => {
-    applyBackgroundToBody(background);
-  }, [background]);
 
   const setBackground = async (newBackground: BackgroundType) => {
     console.log('Setting new background:', newBackground);
