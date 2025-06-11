@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -180,7 +181,7 @@ const App = () => {
               <FloatingWidgetsProvider>
                 <TooltipProvider>
                   <BrowserRouter>
-                    <div style={{ background: 'transparent', minHeight: '100vh' }}>
+                    <div className="min-h-screen">
                       <InstallAppPrompt />
                       <Routes>
                         <Route
