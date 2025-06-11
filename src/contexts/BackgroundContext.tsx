@@ -49,67 +49,43 @@ export const useBackground = () => {
   return context;
 };
 
-// Función para aplicar el fondo de manera más agresiva, incluyendo el elemento root
+// Función simplificada para aplicar el fondo
 const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
   const style = backgroundStyles[backgroundType];
-  const html = document.documentElement;
+  
+  // Aplicar solo al body
   const body = document.body;
-  const root = document.getElementById('root');
   
-  // Limpiar estilos anteriores de html, body y root
-  [html, body, root].forEach(element => {
-    if (!element) return;
-    element.style.backgroundImage = '';
-    element.style.background = '';
-    element.style.backgroundColor = '';
-    element.style.backgroundSize = '';
-    element.style.backgroundPosition = '';
-    element.style.backgroundRepeat = '';
-    element.style.backgroundAttachment = '';
-  });
+  // Limpiar estilos anteriores
+  body.style.backgroundImage = '';
+  body.style.background = '';
+  body.style.backgroundColor = '';
+  body.style.backgroundSize = '';
+  body.style.backgroundPosition = '';
+  body.style.backgroundRepeat = '';
+  body.style.backgroundAttachment = '';
   
-  // Aplicar nuevo estilo a todos los elementos
-  [html, body, root].forEach(element => {
-    if (!element) return;
-    if (style.backgroundImage) {
-      element.style.backgroundImage = style.backgroundImage as string;
-      element.style.backgroundSize = style.backgroundSize as string;
-      element.style.backgroundPosition = style.backgroundPosition as string;
-      element.style.backgroundRepeat = style.backgroundRepeat as string;
-      element.style.backgroundAttachment = style.backgroundAttachment as string;
-    } else if (style.background) {
-      element.style.background = style.background as string;
-    }
-  });
+  // Aplicar nuevo estilo
+  if (style.backgroundImage) {
+    body.style.backgroundImage = style.backgroundImage as string;
+    body.style.backgroundSize = style.backgroundSize as string;
+    body.style.backgroundPosition = style.backgroundPosition as string;
+    body.style.backgroundRepeat = style.backgroundRepeat as string;
+    body.style.backgroundAttachment = style.backgroundAttachment as string;
+  } else if (style.background) {
+    body.style.background = style.background as string;
+  }
   
-  // Asegurar que no hay backgroundColor gris que pueda interferir
-  if (body) body.style.backgroundColor = 'transparent';
-  if (html) html.style.backgroundColor = 'transparent';
-  if (root) root.style.backgroundColor = 'transparent';
-  
-  console.log('Background aplicado a html, body y root:', backgroundType, style);
+  console.log('Background aplicado:', backgroundType, style);
 };
 
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [background, setBackgroundState] = useState<BackgroundType>('default');
 
-  // Aplicar el fondo inmediatamente cuando cambie
+  // Aplicar el fondo cuando cambie
   useEffect(() => {
-    // Esperar un tick para asegurar que el DOM esté listo
-    requestAnimationFrame(() => {
-      applyBackgroundToDocument(background);
-    });
+    applyBackgroundToDocument(background);
   }, [background]);
-
-  // Aplicar fondo inicial cuando el componente se monta
-  useEffect(() => {
-    // Esperar un poco más para el montaje inicial
-    const timer = setTimeout(() => {
-      applyBackgroundToDocument(background);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   // Load background preference on mount
   useEffect(() => {

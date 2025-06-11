@@ -9,12 +9,10 @@ import { Store } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
-import { useBackground } from '@/contexts/BackgroundContext';
 
 const Index = () => {
   const { favorites } = useAppContext();
   const { t } = useLanguage();
-  const { background, getBackgroundStyle } = useBackground();
   const [isLoading, setIsLoading] = useState(true);
   useScrollBehavior();
 
@@ -33,7 +31,7 @@ const Index = () => {
       // Very short delay to prevent flash
       setTimeout(() => {
         setIsLoading(false);
-      }, 50); // Reduced from 100ms to 50ms
+      }, 50);
     };
 
     initializeHome();
@@ -41,43 +39,6 @@ const Index = () => {
     document.body.style.overflowY = 'hidden';
     document.body.style.overflowX = 'auto';
   }, [favorites]);
-
-  // Force background application when component mounts or background changes
-  useEffect(() => {
-    console.log('Index page - forcing background application:', background);
-    
-    // Aplicar el fondo inmediatamente
-    const style = getBackgroundStyle();
-    const applyStyles = (element: HTMLElement | null) => {
-      if (!element) return;
-      
-      // Limpiar estilos anteriores
-      element.style.backgroundImage = '';
-      element.style.background = '';
-      element.style.backgroundColor = '';
-      element.style.backgroundSize = '';
-      element.style.backgroundPosition = '';
-      element.style.backgroundRepeat = '';
-      element.style.backgroundAttachment = '';
-      
-      // Aplicar nuevo estilo
-      if (style.backgroundImage) {
-        element.style.backgroundImage = style.backgroundImage as string;
-        element.style.backgroundSize = style.backgroundSize as string;
-        element.style.backgroundPosition = style.backgroundPosition as string;
-        element.style.backgroundRepeat = style.backgroundRepeat as string;
-        element.style.backgroundAttachment = style.backgroundAttachment as string;
-      } else if (style.background) {
-        element.style.background = style.background as string;
-      }
-    };
-    
-    // Aplicar a html, body y root
-    applyStyles(document.documentElement);
-    applyStyles(document.body);
-    applyStyles(document.getElementById('root'));
-    
-  }, [background, getBackgroundStyle]);
 
   // Listen for custom sidebar open event
   const [, setSidebarOpen] = useState(false);
