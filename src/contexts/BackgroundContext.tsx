@@ -49,7 +49,7 @@ export const useBackground = () => {
   return context;
 };
 
-// Función simplificada para aplicar el fondo directamente al body
+// Función mejorada para aplicar el fondo con !important para sobrescribir Tailwind
 const applyBackgroundToBody = (backgroundType: BackgroundType) => {
   const style = backgroundStyles[backgroundType];
   const body = document.body;
@@ -65,16 +65,19 @@ const applyBackgroundToBody = (backgroundType: BackgroundType) => {
   body.style.removeProperty('background-repeat');
   body.style.removeProperty('background-attachment');
   
-  // Aplicar nuevo estilo
+  // Aplicar nuevo estilo con !important para sobrescribir Tailwind
   if (style.backgroundImage) {
-    body.style.backgroundImage = style.backgroundImage as string;
-    body.style.backgroundSize = style.backgroundSize as string;
-    body.style.backgroundPosition = style.backgroundPosition as string;
-    body.style.backgroundRepeat = style.backgroundRepeat as string;
-    body.style.backgroundAttachment = style.backgroundAttachment as string;
+    body.style.setProperty('background-image', style.backgroundImage as string, 'important');
+    body.style.setProperty('background-size', style.backgroundSize as string, 'important');
+    body.style.setProperty('background-position', style.backgroundPosition as string, 'important');
+    body.style.setProperty('background-repeat', style.backgroundRepeat as string, 'important');
+    body.style.setProperty('background-attachment', style.backgroundAttachment as string, 'important');
   } else if (style.background) {
-    body.style.background = style.background as string;
+    body.style.setProperty('background', style.background as string, 'important');
   }
+  
+  // También eliminar cualquier background-color que pueda estar interfiriendo
+  body.style.setProperty('background-color', 'transparent', 'important');
 };
 
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
