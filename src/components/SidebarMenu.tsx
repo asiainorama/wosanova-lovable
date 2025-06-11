@@ -2,14 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarHeader as SidebarHeaderUI, 
-  SidebarFooter as SidebarFooterUI,
-  SidebarProvider,
-  useSidebar 
-} from '@/components/ui/sidebar';
 
 // Import our custom components
 import TimeWidget from './sidebar/TimeWidget';
@@ -30,7 +22,7 @@ interface UserProfile {
   avatar_url?: string;
 }
 
-const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -96,25 +88,27 @@ const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }
     onOpenChange(false);
   };
 
+  // Don't render anything if sidebar is closed
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <Sidebar 
-      side="left" 
-      className="backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
-                 shadow-2xl shadow-black/10 dark:shadow-black/30
-                 border-white/10 dark:border-gray-800/20"
-    >
+    <div className="h-full w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
+                   shadow-2xl shadow-black/10 dark:shadow-black/30
+                   border-white/10 dark:border-gray-800/20 border-r">
       {/* Header - Fixed height exactly matching main app header */}
-      <SidebarHeaderUI className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
+      <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
         <SidebarHeaderComponent 
           username={username} 
           avatarUrl={avatarUrl} 
           userId={userId} 
           onClose={() => onOpenChange(false)}
         />
-      </SidebarHeaderUI>
+      </div>
 
       {/* Content area - Using flexbox for better distribution */}
-      <SidebarContent className="flex flex-col justify-between overflow-y-auto overflow-x-hidden">
+      <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
         
         {/* Top section with Time and Weather - takes natural space */}
         <div className="flex-shrink-0 space-y-2 px-3 py-2">
@@ -134,22 +128,13 @@ const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }
             <CalendarWidget />
           </div>
         </div>
-      </SidebarContent>
+      </div>
 
       {/* Footer - Fixed height exactly matching header */}
-      <SidebarFooterUI className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+      <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
         <SidebarFooterComponent onClose={() => onOpenChange(false)} />
-      </SidebarFooterUI>
-    </Sidebar>
-  );
-};
-
-// Wrapper component that provides the SidebarProvider
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
-  return (
-    <SidebarProvider open={isOpen} onOpenChange={onOpenChange}>
-      <SidebarMenuContent isOpen={isOpen} onOpenChange={onOpenChange} />
-    </SidebarProvider>
+      </div>
+    </div>
   );
 };
 
