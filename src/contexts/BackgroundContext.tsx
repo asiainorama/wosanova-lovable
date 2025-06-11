@@ -49,14 +49,16 @@ export const useBackground = () => {
   return context;
 };
 
-// Función para aplicar el fondo de manera más agresiva
+// Función para aplicar el fondo de manera más agresiva, incluyendo el elemento root
 const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
   const style = backgroundStyles[backgroundType];
   const html = document.documentElement;
   const body = document.body;
+  const root = document.getElementById('root');
   
-  // Limpiar estilos anteriores de html y body
-  [html, body].forEach(element => {
+  // Limpiar estilos anteriores de html, body y root
+  [html, body, root].forEach(element => {
+    if (!element) return;
     element.style.backgroundImage = '';
     element.style.background = '';
     element.style.backgroundColor = '';
@@ -66,8 +68,9 @@ const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
     element.style.backgroundAttachment = '';
   });
   
-  // Aplicar nuevo estilo a ambos elementos
-  [html, body].forEach(element => {
+  // Aplicar nuevo estilo a todos los elementos
+  [html, body, root].forEach(element => {
+    if (!element) return;
     if (style.backgroundImage) {
       element.style.backgroundImage = style.backgroundImage as string;
       element.style.backgroundSize = style.backgroundSize as string;
@@ -79,11 +82,12 @@ const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
     }
   });
   
-  // Asegurar que no hay backgroundColor gris
-  body.style.backgroundColor = 'transparent';
-  html.style.backgroundColor = 'transparent';
+  // Asegurar que no hay backgroundColor gris que pueda interferir
+  if (body) body.style.backgroundColor = 'transparent';
+  if (html) html.style.backgroundColor = 'transparent';
+  if (root) root.style.backgroundColor = 'transparent';
   
-  console.log('Background aplicado a html y body:', backgroundType, style);
+  console.log('Background aplicado a html, body y root:', backgroundType, style);
 };
 
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -91,12 +95,20 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Aplicar el fondo inmediatamente cuando cambie
   useEffect(() => {
-    applyBackgroundToDocument(background);
+    // Esperar un tick para asegurar que el DOM esté listo
+    requestAnimationFrame(() => {
+      applyBackgroundToDocument(background);
+    });
   }, [background]);
 
   // Aplicar fondo inicial cuando el componente se monta
   useEffect(() => {
-    applyBackgroundToDocument(background);
+    // Esperar un poco más para el montaje inicial
+    const timer = setTimeout(() => {
+      applyBackgroundToDocument(background);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Load background preference on mount
