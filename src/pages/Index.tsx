@@ -54,10 +54,10 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: 'transparent' }}>
+    <div className="min-h-screen flex flex-col relative">
       <Header title={t('home.title') || "Inicio"} />
       
-      <main className="container mx-auto px-1 py-1 flex-1 flex flex-col" style={{ background: 'transparent' }}>
+      <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">
         {/* Show loading state initially to prevent flash */}
         {isLoading ? (
           <div className="flex-grow flex items-center justify-center">

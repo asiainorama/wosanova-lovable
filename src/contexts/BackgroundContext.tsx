@@ -36,7 +36,7 @@ const backgroundStyles: Record<BackgroundType, React.CSSProperties> = {
   }
 };
 
-// Fondos que se consideran claros y necesitan texto oscuro (independientemente del modo)
+// Fondos que se consideran claros y necesitan texto oscuro
 const lightBackgrounds: BackgroundType[] = ['default', 'gradient-green', 'gradient-orange', 'gradient-pink'];
 
 const BackgroundContext = createContext<BackgroundContextType | undefined>(undefined);
@@ -49,21 +49,21 @@ export const useBackground = () => {
   return context;
 };
 
-// Función simplificada para aplicar el fondo
-const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
+// Función simplificada para aplicar el fondo directamente al body
+const applyBackgroundToBody = (backgroundType: BackgroundType) => {
   const style = backgroundStyles[backgroundType];
-  
-  // Aplicar solo al body
   const body = document.body;
   
-  // Limpiar estilos anteriores
-  body.style.backgroundImage = '';
-  body.style.background = '';
-  body.style.backgroundColor = '';
-  body.style.backgroundSize = '';
-  body.style.backgroundPosition = '';
-  body.style.backgroundRepeat = '';
-  body.style.backgroundAttachment = '';
+  console.log('Applying background:', backgroundType, style);
+  
+  // Limpiar todos los estilos de fondo anteriores
+  body.style.removeProperty('background-image');
+  body.style.removeProperty('background');
+  body.style.removeProperty('background-color');
+  body.style.removeProperty('background-size');
+  body.style.removeProperty('background-position');
+  body.style.removeProperty('background-repeat');
+  body.style.removeProperty('background-attachment');
   
   // Aplicar nuevo estilo
   if (style.backgroundImage) {
@@ -75,31 +75,23 @@ const applyBackgroundToDocument = (backgroundType: BackgroundType) => {
   } else if (style.background) {
     body.style.background = style.background as string;
   }
-  
-  console.log('Background aplicado:', backgroundType, style);
 };
 
 export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [background, setBackgroundState] = useState<BackgroundType>('default');
 
-  // Aplicar el fondo cuando cambie
-  useEffect(() => {
-    applyBackgroundToDocument(background);
-  }, [background]);
-
   // Load background preference on mount
   useEffect(() => {
     const loadBackgroundPreference = async () => {
       try {
-        // First try to get from localStorage
+        // First try localStorage
         const savedBackground = localStorage.getItem('backgroundPreference') as BackgroundType;
-        console.log('Saved background from localStorage:', savedBackground);
         if (savedBackground && savedBackground in backgroundStyles) {
           setBackgroundState(savedBackground);
           return;
         }
 
-        // Then try to get from Supabase
+        // Then try Supabase
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const { data, error } = await supabase
@@ -107,8 +99,6 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             .select('background_preference')
             .eq('id', session.user.id)
             .single();
-          
-          console.log('Background preference from Supabase:', data, error);
           
           if (!error && data?.background_preference && data.background_preference in backgroundStyles) {
             setBackgroundState(data.background_preference as BackgroundType);
@@ -122,6 +112,11 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     loadBackgroundPreference();
   }, []);
+
+  // Apply background whenever it changes
+  useEffect(() => {
+    applyBackgroundToBody(background);
+  }, [background]);
 
   const setBackground = async (newBackground: BackgroundType) => {
     console.log('Setting new background:', newBackground);
@@ -147,9 +142,7 @@ export const BackgroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const getBackgroundStyle = () => {
-    const style = backgroundStyles[background];
-    console.log('Current background:', background, 'Style:', style);
-    return style;
+    return backgroundStyles[background];
   };
 
   const isLightBackground = () => {
