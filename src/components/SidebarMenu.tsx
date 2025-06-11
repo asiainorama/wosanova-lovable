@@ -5,18 +5,18 @@ import { Link } from 'react-router-dom';
 import { 
   Sidebar, 
   SidebarContent, 
-  SidebarHeader, 
-  SidebarFooter,
+  SidebarHeader as SidebarHeaderUI, 
+  SidebarFooter as SidebarFooterUI,
   SidebarProvider,
   useSidebar 
 } from '@/components/ui/sidebar';
 
-// Import our components
+// Import our custom components
 import TimeWidget from './sidebar/TimeWidget';
 import WeatherWidget from './sidebar/WeatherWidget';
 import CalendarWidget from './sidebar/CalendarWidget';
-import SidebarHeader from './sidebar/SidebarHeader';
-import SidebarFooter from './sidebar/SidebarFooter';
+import SidebarHeaderComponent from './sidebar/SidebarHeader';
+import SidebarFooterComponent from './sidebar/SidebarFooter';
 import WidgetIconsRow from './sidebar/WidgetIconsRow';
 
 interface SidebarMenuProps {
@@ -104,14 +104,14 @@ const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }
                  border-white/10 dark:border-gray-800/20"
     >
       {/* Header - Fixed height exactly matching main app header */}
-      <SidebarHeader className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
-        <SidebarHeader 
+      <SidebarHeaderUI className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
+        <SidebarHeaderComponent 
           username={username} 
           avatarUrl={avatarUrl} 
           userId={userId} 
           onClose={() => onOpenChange(false)}
         />
-      </SidebarHeader>
+      </SidebarHeaderUI>
 
       {/* Content area - Using flexbox for better distribution */}
       <SidebarContent className="flex flex-col justify-between overflow-y-auto overflow-x-hidden">
@@ -137,9 +137,9 @@ const SidebarMenuContent: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }
       </SidebarContent>
 
       {/* Footer - Fixed height exactly matching header */}
-      <SidebarFooter className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
-        <SidebarFooter onClose={() => onOpenChange(false)} />
-      </SidebarFooter>
+      <SidebarFooterUI className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-t border-white/10 dark:border-gray-700/20">
+        <SidebarFooterComponent onClose={() => onOpenChange(false)} />
+      </SidebarFooterUI>
     </Sidebar>
   );
 };
