@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./contexts/AppContext";
@@ -7,7 +6,6 @@ import { BackgroundProvider } from "./contexts/BackgroundContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { FloatingWidgetsProvider } from "./contexts/FloatingWidgetsContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import Manage from "./pages/Manage";
@@ -92,19 +90,24 @@ const AppWithContextUpdater = ({ children }: { children: React.ReactNode }) => {
   }, [isSidebarOpen]);
 
   return (
-    <SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-      <div className="flex min-h-screen w-full">
+    <div className="relative min-h-screen w-full">
+      {/* Sidebar - positioned absolutely to not affect main content layout */}
+      <div className={`fixed top-0 left-0 z-50 transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
         <SidebarMenu 
           isOpen={isSidebarOpen} 
           onOpenChange={setIsSidebarOpen} 
         />
-        <div className="flex-1">
-          <AppContextUpdater />
-          {children}
-          <FloatingWidgetsContainer />
-        </div>
       </div>
-    </SidebarProvider>
+      
+      {/* Main content - full width, not affected by sidebar */}
+      <div className="w-full min-h-screen">
+        <AppContextUpdater />
+        {children}
+        <FloatingWidgetsContainer />
+      </div>
+    </div>
   );
 };
 
