@@ -83,20 +83,16 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
     };
   }, []);
 
-  const handleWidgetOpen = () => {
-    // Close sidebar when a widget is opened
-    onOpenChange(false);
-  };
-
-  // Don't render anything if sidebar is closed
-  if (!isOpen) {
-    return null;
-  }
+  // Remove the handleWidgetOpen function that was automatically closing the sidebar
+  // Widgets will now open without closing the sidebar
 
   return (
-    <div className="h-full w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
+    <div className={`fixed top-0 left-0 h-screen w-72 flex flex-col backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 
                    shadow-2xl shadow-black/10 dark:shadow-black/30
-                   border-white/10 dark:border-gray-800/20 border-r">
+                   border-white/10 dark:border-gray-800/20 border-r z-40
+                   transition-transform duration-300 ease-in-out ${
+                     isOpen ? 'translate-x-0' : '-translate-x-full'
+                   }`}>
       {/* Header - Fixed height exactly matching main app header */}
       <div className="h-[60px] flex items-center backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border-b border-white/10 dark:border-gray-700/20">
         <SidebarHeaderComponent 
@@ -112,13 +108,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
         
         {/* Top section with Time and Weather - takes natural space */}
         <div className="flex-shrink-0 space-y-2 px-3 py-2">
-          <TimeWidget onWidgetOpen={handleWidgetOpen} />
+          <TimeWidget />
           <WeatherWidget />
         </div>
 
         {/* Center section with Widget Icons - centered in available space */}
         <div className="flex-1 flex items-center justify-center px-2">
-          <WidgetIconsRow onWidgetOpen={handleWidgetOpen} />
+          <WidgetIconsRow />
         </div>
         
         {/* Bottom section with Calendar - takes natural space at bottom */}
