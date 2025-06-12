@@ -1,3 +1,4 @@
+
 /**
  * Calculate the minimum cell height based on viewport dimensions and grid configuration
  */
@@ -45,7 +46,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
     return { cols: 6, rows };
   }
   
-  // Mobile - optimizado para horizontal con 2 filas y 5 columnas
+  // Mobile - ahora con 2 filas en horizontal y 5 columnas
   const mobileRows = Math.min(maxRows, isLandscape ? 2 : 5);
   return isLandscape ? { cols: 5, rows: mobileRows } : { cols: 4, rows: mobileRows };
 }
