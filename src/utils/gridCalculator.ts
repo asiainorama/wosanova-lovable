@@ -32,7 +32,26 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   const baseCellHeight = smallerIcons ? 85 : 100;
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   
-  // iPad (768px - 1024px)
+  // MÓVIL: Detectar móvil primero, antes que tablet
+  // Móvil se define como width < 768px O height < 768px (para cubrir móvil rotado)
+  const isMobile = width < 768 || height < 768;
+  
+  if (isMobile) {
+    if (isLandscape) {
+      // Móvil horizontal: SIEMPRE 2 filas, 5 columnas
+      const config = { cols: 5, rows: 2 };
+      console.log("Mobile landscape config (forced 2 rows):", config);
+      return config;
+    } else {
+      // Móvil vertical: máximo 5 filas, 4 columnas
+      const mobileRows = Math.min(maxRows, 5);
+      const config = { cols: 4, rows: mobileRows };
+      console.log("Mobile portrait config:", config);
+      return config;
+    }
+  }
+  
+  // iPad (768px - 1024px) - solo si no es móvil
   if (width >= 768 && width <= 1024) {
     const rows = Math.min(maxRows, isLandscape ? 4 : 5);
     const config = isLandscape ? { cols: 6, rows } : { cols: 5, rows };
@@ -56,17 +75,10 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
     return config;
   }
   
-  // Mobile - FORZAR 2 filas en horizontal
-  if (isLandscape) {
-    const config = { cols: 5, rows: 2 };
-    console.log("Mobile landscape config (forced 2 rows):", config);
-    return config;
-  } else {
-    const mobileRows = Math.min(maxRows, 5);
-    const config = { cols: 4, rows: mobileRows };
-    console.log("Mobile portrait config:", config);
-    return config;
-  }
+  // Fallback (no debería llegar aquí)
+  const config = { cols: 4, rows: 3 };
+  console.log("Fallback config:", config);
+  return config;
 }
 
 /**
