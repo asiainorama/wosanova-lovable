@@ -20,7 +20,9 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   const height = window.innerHeight;
   const isLandscape = width > height;
   
-  // Calculate available height
+  console.log("calculateOptimalGrid - Width:", width, "Height:", height, "IsLandscape:", isLandscape);
+  
+  // Calculate available height considering header and pagination
   const headerHeight = 120;
   const paginationHeight = 60;
   const paddingBuffer = 40;
@@ -30,28 +32,40 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   const baseCellHeight = smallerIcons ? 85 : 100;
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   
-  // Return configuration based on screen size
+  // iPad (768px - 1024px)
   if (width >= 768 && width <= 1024) {
     const rows = Math.min(maxRows, isLandscape ? 4 : 5);
-    return isLandscape ? { cols: 6, rows } : { cols: 5, rows };
+    const config = isLandscape ? { cols: 6, rows } : { cols: 5, rows };
+    console.log("iPad config:", config);
+    return config;
   }
   
+  // Laptop (1024px - 1440px)
   if (width > 1024 && width <= 1440) {
     const rows = Math.min(maxRows, 5);
-    return { cols: 6, rows };
+    const config = { cols: 6, rows };
+    console.log("Laptop config:", config);
+    return config;
   }
   
+  // Large screens (>1440px)
   if (width > 1440) {
     const rows = Math.min(maxRows, 6);
-    return { cols: 6, rows };
+    const config = { cols: 6, rows };
+    console.log("Large screen config:", config);
+    return config;
   }
   
-  // Mobile - forzar 2 filas en horizontal
+  // Mobile - FORZAR 2 filas en horizontal
   if (isLandscape) {
-    return { cols: 5, rows: 2 };
+    const config = { cols: 5, rows: 2 };
+    console.log("Mobile landscape config (forced 2 rows):", config);
+    return config;
   } else {
     const mobileRows = Math.min(maxRows, 5);
-    return { cols: 4, rows: mobileRows };
+    const config = { cols: 4, rows: mobileRows };
+    console.log("Mobile portrait config:", config);
+    return config;
   }
 }
 

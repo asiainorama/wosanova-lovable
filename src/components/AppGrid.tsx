@@ -6,6 +6,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PaginationIndicator from './PaginationIndicator';
 import SwiperCarousel from './SwiperCarousel';
+import { calculateOptimalGrid } from '@/utils/gridCalculator';
 
 interface AppGridProps {
   apps: AppData[];
@@ -35,53 +36,26 @@ const AppGrid: React.FC<AppGridProps> = ({
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(0);
   
-  // Define grid sizes based on screen size and orientation with improved calculations
+  // Use the optimized grid calculator
   const getGridConfig = useCallback(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const isLandscape = width > height;
-    
-    // Calculate available height considering header and pagination
-    const headerHeight = 120; // Header + padding
-    const paginationHeight = 60; // Space for pagination dots
-    const paddingBuffer = 40; // Additional buffer
-    const availableHeight = height - headerHeight - paginationHeight - paddingBuffer;
-    
-    // Base cell height estimates (including icon + label)
-    const baseCellHeight = smallerIcons ? 85 : 100;
-    const maxRows = Math.floor(availableHeight / baseCellHeight);
-    
-    // iPad (768px - 1024px)
-    if (width >= 768 && width <= 1024) {
-      const rows = Math.min(maxRows, isLandscape ? 4 : 5);
-      return isLandscape ? { cols: 6, rows } : { cols: 5, rows };
-    }
-    
-    // Laptop (1024px - 1440px)
-    if (width > 1024 && width <= 1440) {
-      const rows = Math.min(maxRows, 5);
-      return { cols: 6, rows };
-    }
-    
-    // Large screens (>1440px)
-    if (width > 1440) {
-      const rows = Math.min(maxRows, 6);
-      return { cols: 6, rows };
-    }
-    
-    // Mobile (default) - be more conservative
-    const mobileRows = Math.min(maxRows, isLandscape ? 2 : 5);
-    return isLandscape ? { cols: 5, rows: mobileRows } : { cols: 4, rows: mobileRows };
+    return calculateOptimalGrid(smallerIcons);
   }, [smallerIcons]);
 
   const [gridConfig, setGridConfig] = useState(getGridConfig());
+  
+  // Debug log to see what configuration we're getting
+  useEffect(() => {
+    const config = getGridConfig();
+    console.log("Grid config:", config, "Screen size:", window.innerWidth, "x", window.innerHeight, "Landscape:", window.innerWidth > window.innerHeight);
+    setGridConfig(config);
+  }, [getGridConfig]);
   
   // Recalculate grid on window resize
   useEffect(() => {
     const handleResize = () => {
       const newConfig = getGridConfig();
       setGridConfig(newConfig);
-      console.log("Grid config updated:", newConfig, "Available space optimized for:", window.innerHeight);
+      console.log("Grid config updated:", newConfig, "Screen size:", window.innerWidth, "x", window.innerHeight);
     };
     
     window.addEventListener('resize', handleResize);
