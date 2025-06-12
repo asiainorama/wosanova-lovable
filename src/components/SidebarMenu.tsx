@@ -97,7 +97,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onOpenChange }) => {
       )}
       
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-screen w-full md:w-80 flex flex-col backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 
+      <div className={`fixed top-0 left-0 h-screen w-full md:w-[400px] flex flex-col backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 
                      shadow-2xl shadow-black/10 dark:shadow-black/30
                      border-white/10 dark:border-gray-800/20 border-r z-[101]
                      transition-transform duration-300 ease-in-out ${
