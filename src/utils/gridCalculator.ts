@@ -1,4 +1,3 @@
-
 /**
  * Calculate the minimum cell height based on viewport dimensions and grid configuration
  */
@@ -8,6 +7,11 @@ export function calculateMinCellHeight(rows: number): string {
   const paginationHeight = 60; // Space for pagination dots
   const containerPadding = 40; // Container padding top/bottom
   const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
+  
+  // Para móvil horizontal con 2 filas, dar más espacio
+  if (rows === 2 && window.innerWidth > window.innerHeight) {
+    return `${Math.floor(availableHeight / 2)}px`;
+  }
   
   return `${Math.floor(availableHeight / rows)}px`;
 }
@@ -28,7 +32,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   const paddingBuffer = 40;
   const availableHeight = height - headerHeight - paginationHeight - paddingBuffer;
   
-  // Base cell height estimates
+  // Base cell height estimates - más espacio para móvil horizontal
   const baseCellHeight = smallerIcons ? 85 : 100;
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   

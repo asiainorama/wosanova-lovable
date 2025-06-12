@@ -29,13 +29,17 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   // Calculate the global index for staggered animation (much faster)
   const globalIndex = pageIndex * rows + index;
 
+  // Ajustar altura mínima para móvil horizontal (2 filas)
+  const adjustedCellHeight = rows === 2 ? 'auto' : cellHeight;
+  const minHeight = rows === 2 ? 'calc(50vh - 80px)' : cellHeight || `${100/rows}%`;
+
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in"
+      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in px-1"
       style={{
-        height: cellHeight || 'auto',
-        minHeight: cellHeight || `${100/rows}%`,
+        height: adjustedCellHeight,
+        minHeight: minHeight,
         animationDelay: `${globalIndex * 15}ms`, // Much faster stagger (was 30ms)
         animationFillMode: 'forwards',
         animationDuration: '150ms' // Faster fade-in (was 200ms)
