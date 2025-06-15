@@ -59,8 +59,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full justify-between"
+      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full justify-start"
       onClick={handleClick}
+      style={{
+        minHeight: 'fit-content',
+        maxWidth: '100%'
+      }}
     >
       <div className="relative flex-shrink-0">
         {/* Enhanced skeleton with pulse animation */}
@@ -132,12 +136,21 @@ const HomeCard: React.FC<HomeCardProps> = ({
       </div>
       
       <h3 
-        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 leading-tight ${textColorClass} transition-all duration-300 flex-grow-0 opacity-0 animate-fade-in transform translate-y-1`}
+        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 leading-tight ${textColorClass} transition-all duration-300 flex-shrink-0 opacity-0 animate-fade-in transform translate-y-1`}
         style={{ 
-          lineHeight: '1.2',
+          lineHeight: '1.1',
           animationDelay: textAnimationDelay,
           animationFillMode: 'forwards',
-          animationDuration: '350ms'
+          animationDuration: '350ms',
+          wordBreak: 'break-word',
+          hyphens: 'auto',
+          maxWidth: '100%',
+          overflow: 'visible',
+          whiteSpace: 'normal',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          textOverflow: 'ellipsis'
         }}
       >
         {app.name}

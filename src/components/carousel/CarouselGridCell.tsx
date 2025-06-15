@@ -29,9 +29,11 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   // Calculate the global index for staggered animation
   const globalIndex = pageIndex * rows + index;
 
-  // Ajustar altura mínima para móvil horizontal (2 filas)
-  const adjustedCellHeight = rows === 2 ? 'auto' : cellHeight;
-  const minHeight = rows === 2 ? 'calc(50vh - 80px)' : cellHeight || `${100/rows}%`;
+  // Ajustar altura para asegurar espacio suficiente para nombres
+  const adjustedCellHeight = cellHeight || 'auto';
+  const minHeight = rows === 2 
+    ? 'calc(45vh - 80px)' // Móvil horizontal: menos altura pero suficiente
+    : `calc(${100/rows}vh - 40px)`; // Otros casos: altura proporcional menos margen
 
   return (
     <div 
@@ -40,10 +42,12 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
       style={{
         height: adjustedCellHeight,
         minHeight: minHeight,
-        animationDelay: `${globalIndex * 30}ms`, // Slightly slower for better visual impact
+        maxWidth: '100%',
+        animationDelay: `${globalIndex * 30}ms`,
         animationFillMode: 'forwards',
-        animationDuration: '450ms', // Longer duration for smoother animation
-        animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' // Bounce effect
+        animationDuration: '450ms',
+        animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        overflow: 'visible' // Permitir que el contenido sea visible
       }}
     >
       {app ? (
