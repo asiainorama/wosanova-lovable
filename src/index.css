@@ -1,295 +1,105 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 98%; /* Cambiado a blanco grisáceo */
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 322 100% 50%;
-    --primary-foreground: 0 0% 7%;
-    --primary-border: 322 100% 70%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --blue-400: 217 91% 70%;
-    --blue-500: 217 91% 50%;
-    --blue-700: 217 91% 40%;
-    
-    --gray-400: 220 13% 60%;
-    --gray-500: 220 13% 50%;
-    --gray-700: 220 13% 40%;
-    
-    --green-400: 142 71% 60%;
-    --green-500: 142 71% 50%;
-    --green-700: 142 71% 40%;
-    
-    --red-400: 0 84% 70%;
-    --red-500: 0 84% 60%;
-    --red-700: 0 84% 50%;
-    
-    --pink-400: 322 100% 60%;
-    --pink-500: 322 100% 50%;
-    --pink-700: 322 100% 40%;
-    
-    --orange-400: 24 95% 63%;
-    --orange-500: 24 95% 53%;
-    --orange-700: 24 95% 43%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 322 100% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    --theme-color: var(--primary);
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 322 100% 65%; /* Brighter primary in dark mode */
-    --primary-foreground: 0 0% 100%;
-    --primary-border: 322 100% 80%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-
-    /* Brighter colors in dark mode */
-    --blue-400: 217 91% 75%;
-    --blue-500: 217 91% 65%;
-    --blue-700: 217 91% 60%;
-    
-    --gray-400: 220 13% 75%;
-    --gray-500: 220 13% 65%;
-    --gray-700: 220 13% 60%;
-    
-    --green-400: 142 71% 75%;
-    --green-500: 142 71% 65%;
-    --green-700: 142 71% 60%;
-    
-    --red-400: 0 84% 75%;
-    --red-500: 0 84% 65%;
-    --red-700: 0 84% 60%;
-    
-    --pink-400: 322 100% 75%;
-    --pink-500: 322 100% 65%;
-    --pink-700: 322 100% 60%;
-    
-    --orange-400: 24 95% 75%;
-    --orange-500: 24 95% 65%;
-    --orange-700: 24 95% 60%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 322 100% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    --theme-color: var(--primary);
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-  }
-  
-  /* Theme text color classes for each color */
-  .theme-blue h1, .theme-blue h2, .theme-blue h3, 
-  .theme-blue .theme-text, 
-  .theme-blue .sidebar-menu-item.active {
-    color: hsl(var(--blue-500)) !important;
-  }
-  
-  .theme-gray h1, .theme-gray h2, .theme-gray h3, 
-  .theme-gray .theme-text, 
-  .theme-gray .sidebar-menu-item.active {
-    color: hsl(var(--gray-500)) !important;
-  }
-  
-  .theme-green h1, .theme-green h2, .theme-green h3, 
-  .theme-green .theme-text, 
-  .theme-green .sidebar-menu-item.active {
-    color: hsl(var(--green-500)) !important;
-  }
-  
-  .theme-red h1, .theme-red h2, .theme-red h3, 
-  .theme-red .theme-text, 
-  .theme-red .sidebar-menu-item.active {
-    color: hsl(var(--red-500)) !important;
-  }
-  
-  .theme-pink h1, .theme-pink h2, .theme-pink h3, 
-  .theme-pink .theme-text, 
-  .theme-pink .sidebar-menu-item.active {
-    color: hsl(var(--pink-500)) !important;
-  }
-  
-  .theme-orange h1, .theme-orange h2, .theme-orange h3, 
-  .theme-orange .theme-text, 
-  .theme-orange .sidebar-menu-item.active {
-    color: hsl(var(--orange-500)) !important;
-  }
-  
-  /* Fixes for dark mode UI elements */
-  .dark .bg-white {
-    @apply bg-gray-800;
-  }
-  
-  .dark .text-gray-600,
-  .dark .text-gray-500,
-  .dark .text-gray-400 {
-    @apply text-gray-300;
-  }
-  
-  .dark button[data-state="off"] {
-    @apply text-gray-300;
-  }
-  
-  .dark .bg-gray-100 {
-    @apply bg-gray-700;
-  }
-  
-  .dark .border-gray-200 {
-    @apply border-gray-700;
-  }
-  
-  /* Header fixes for dark mode */
-  .dark header svg {
-    @apply text-white;
-  }
-  
-  /* Color theme buttons in dark mode - this is crucial */
-  .dark button[style*="--blue-500"],
-  .dark button[style*="--gray-500"],
-  .dark button[style*="--green-500"],
-  .dark button[style*="--red-500"],
-  .dark button[style*="--pink-500"],
-  .dark button[style*="--orange-500"] {
-    color: white !important;
-  }
-  
-  /* Apply specific theme colors in dark mode to ensure they're visible */
-  .dark button[style*="backgroundColor"] {
-    border-color: white;
-  }
-  
-  .dark button[style*="--blue-500"] {
-    background-color: hsl(217, 91%, 65%) !important;
-  }
-  
-  .dark button[style*="--gray-500"] {
-    background-color: hsl(220, 13%, 65%) !important;
-  }
-  
-  .dark button[style*="--green-500"] {
-    background-color: hsl(142, 71%, 65%) !important;
-  }
-  
-  .dark button[style*="--red-500"] {
-    background-color: hsl(0, 84%, 65%) !important;
-  }
-  
-  .dark button[style*="--pink-500"] {
-    background-color: hsl(322, 100%, 65%) !important;
-  }
-  
-  .dark button[style*="--orange-500"] {
-    background-color: hsl(24, 95%, 65%) !important;
-  }
-  
-  /* Gradient text that works in both light and dark mode */
-  .text-gradient {
-    @apply bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent;
+    font-family: "Inter", sans-serif;
   }
 }
 
-@layer components {
-  .app-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
-  }
-
-  .app-icon {
-    @apply w-16 h-16 mx-auto mb-2 object-contain;
-  }
-
-  .app-card {
-    @apply flex flex-col items-center justify-center p-3 rounded-lg transition-all hover:scale-105;
-  }
-
-  .app-button {
-    @apply w-full bg-appgarden-primary text-white text-xs py-1 px-2 rounded-sm font-medium mt-1;
-  }
-
-  .app-button-added {
-    @apply w-full bg-green-600 text-white text-xs py-1 px-2 rounded-sm font-medium mt-1;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
   
-  /* New classes for the catalog grid view with wider tiles */
-  .catalog-grid-item {
-    @apply h-40 flex flex-col items-center justify-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all;
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent;
   }
   
-  .large-app-icon {
-    @apply w-full h-full object-contain absolute inset-0 p-4;
+  .glass-morphism {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
   }
+  
+  .dark-toast {
+    @apply bg-gray-800 text-white border-gray-700;
+  }
+}
 
-  .large-app-card {
-    @apply relative rounded-lg overflow-hidden aspect-[4/3] shadow-md;
+/* Enhanced animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
   }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(20px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translateY(-5px);
+  }
+  70% {
+    transform: scale(0.95) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer effect for loading states */
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Dark mode shimmer */
+.dark .shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
 }
