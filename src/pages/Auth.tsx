@@ -7,44 +7,7 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import SpaceBackground from '@/components/SpaceBackground';
 import { useTheme } from '@/contexts/ThemeContext';
-import { BackgroundType } from '@/contexts/BackgroundContext';
 import { shouldSkipAuth } from '@/utils/environmentUtils';
-
-// Background styles copied from BackgroundContext
-const backgroundStyles: Record<BackgroundType, React.CSSProperties> = {
-  default: {
-    backgroundImage: 'url(/lovable-uploads/6a5b9b5f-b488-4e38-9dc2-fc56fc85bfd9.png)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed'
-  },
-  'gradient-blue': {
-    background: 'linear-gradient(135deg, #667eea, #764ba2, #5a67d8, #667eea)',
-    backgroundSize: '300% 300%',
-    animation: 'gradientShift 12s ease infinite'
-  },
-  'gradient-purple': {
-    background: 'linear-gradient(135deg, #f093fb, #f5576c, #c084fc, #f093fb)',
-    backgroundSize: '300% 300%',
-    animation: 'gradientShift 15s ease infinite'
-  },
-  'gradient-green': {
-    background: 'linear-gradient(135deg, #4facfe, #00f2fe, #38bdf8, #4facfe)',
-    backgroundSize: '300% 300%',
-    animation: 'gradientShift 10s ease infinite'
-  },
-  'gradient-orange': {
-    background: 'linear-gradient(135deg, #fa709a, #fee140, #fb923c, #fa709a)',
-    backgroundSize: '300% 300%',
-    animation: 'gradientShift 14s ease infinite'
-  },
-  'gradient-pink': {
-    background: 'linear-gradient(135deg, #a8edea, #fed6e3, #fda4af, #a8edea)',
-    backgroundSize: '300% 300%',
-    animation: 'gradientShift 13s ease infinite'
-  }
-};
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -52,46 +15,12 @@ const Auth = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [inDevMode, setInDevMode] = useState(false);
-  const [randomBackground, setRandomBackground] = useState<BackgroundType>('default');
   const {
     mode
   } = useTheme();
 
   // Determine if we should use dark mode based on the theme context
   const isDarkMode = mode === 'dark' || mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  // Set random background on component mount
-  useEffect(() => {
-    const backgrounds: BackgroundType[] = ['default', 'gradient-blue', 'gradient-purple', 'gradient-green', 'gradient-orange', 'gradient-pink'];
-    const randomIndex = Math.floor(Math.random() * backgrounds.length);
-    setRandomBackground(backgrounds[randomIndex]);
-    
-    // Add gradient animations to document if not already present
-    if (!document.getElementById('gradient-animations')) {
-      const style = document.createElement('style');
-      style.id = 'gradient-animations';
-      style.textContent = `
-        @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-          }
-          25% {
-            background-position: 100% 50%;
-          }
-          50% {
-            background-position: 100% 100%;
-          }
-          75% {
-            background-position: 0% 100%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
 
   // Check for existing session and query params on component mount
   useEffect(() => {
@@ -225,8 +154,8 @@ const Auth = () => {
 
   // Show loading when checking authentication
   if (isAuthenticating) {
-    return <div className="min-h-screen flex flex-col items-center justify-center" style={backgroundStyles[randomBackground]}>
-        {randomBackground === 'default' && <SpaceBackground />}
+    return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <SpaceBackground />
         <div className="z-10 flex flex-col items-center justify-center">
           <Loader2 size={48} className="text-primary animate-spin mb-4" />
           <p className={`${isDarkMode ? 'text-white' : 'text-gray-800'} text-lg`}>
@@ -236,8 +165,8 @@ const Auth = () => {
       </div>;
   }
 
-  return <div className="min-h-screen flex flex-col items-center justify-center" style={backgroundStyles[randomBackground]}>
-      {randomBackground === 'default' && <SpaceBackground />}
+  return <div className={`min-h-screen flex flex-col items-center justify-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <SpaceBackground />
       <div className="max-w-md w-full px-6 py-10 z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">

@@ -26,28 +26,23 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   smallerIcons = false,
   cellHeight
 }) => {
-  // Calculate the global index for staggered animation
+  // Calculate the global index for staggered animation (much faster)
   const globalIndex = pageIndex * rows + index;
 
-  // Ajustar altura para asegurar espacio suficiente para nombres
-  const adjustedCellHeight = cellHeight || 'auto';
-  const minHeight = rows === 2 
-    ? 'calc(45vh - 80px)' // Móvil horizontal: menos altura pero suficiente
-    : `calc(${100/rows}vh - 40px)`; // Otros casos: altura proporcional menos margen
+  // Ajustar altura mínima para móvil horizontal (2 filas)
+  const adjustedCellHeight = rows === 2 ? 'auto' : cellHeight;
+  const minHeight = rows === 2 ? 'calc(50vh - 80px)' : cellHeight || `${100/rows}%`;
 
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in px-1 transform translate-y-3"
+      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in px-1"
       style={{
         height: adjustedCellHeight,
         minHeight: minHeight,
-        maxWidth: '100%',
-        animationDelay: `${globalIndex * 30}ms`,
+        animationDelay: `${globalIndex * 15}ms`, // Much faster stagger (was 30ms)
         animationFillMode: 'forwards',
-        animationDuration: '450ms',
-        animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        overflow: 'visible' // Permitir que el contenido sea visible
+        animationDuration: '150ms' // Faster fade-in (was 200ms)
       }}
     >
       {app ? (

@@ -1,4 +1,3 @@
-
 /**
  * Calculate the minimum cell height based on viewport dimensions and grid configuration
  */
@@ -7,17 +6,14 @@ export function calculateMinCellHeight(rows: number): string {
   const headerHeight = 120; // Header + padding
   const paginationHeight = 60; // Space for pagination dots
   const containerPadding = 40; // Container padding top/bottom
-  const textSpaceBuffer = 40; // Extra space for app names (increased)
-  const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding - textSpaceBuffer;
+  const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
   
-  // Para móvil horizontal con 2 filas, asegurar espacio suficiente para nombres
+  // Para móvil horizontal con 2 filas, dar más espacio
   if (rows === 2 && window.innerWidth > window.innerHeight) {
-    const cellHeight = Math.floor(availableHeight / 2);
-    return `${Math.max(cellHeight, 120)}px`; // Mínimo 120px por celda
+    return `${Math.floor(availableHeight / 2)}px`;
   }
   
-  const cellHeight = Math.floor(availableHeight / rows);
-  return `${Math.max(cellHeight, 100)}px`; // Mínimo 100px por celda
+  return `${Math.floor(availableHeight / rows)}px`;
 }
 
 /**
@@ -30,15 +26,14 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   console.log("calculateOptimalGrid - Width:", width, "Height:", height, "IsLandscape:", isLandscape);
   
-  // Calculate available height considering header, pagination, and text space
+  // Calculate available height considering header and pagination
   const headerHeight = 120;
   const paginationHeight = 60;
   const paddingBuffer = 40;
-  const textSpaceBuffer = 40; // Space for app names
-  const availableHeight = height - headerHeight - paginationHeight - paddingBuffer - textSpaceBuffer;
+  const availableHeight = height - headerHeight - paginationHeight - paddingBuffer;
   
-  // Base cell height estimates - más conservador para asegurar espacio para texto
-  const baseCellHeight = smallerIcons ? 100 : 120; // Increased base heights
+  // Base cell height estimates - más espacio para móvil horizontal
+  const baseCellHeight = smallerIcons ? 85 : 100;
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   
   // MÓVIL: Detectar móvil primero, antes que tablet
@@ -52,8 +47,8 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
       console.log("Mobile landscape config (forced 2 rows):", config);
       return config;
     } else {
-      // Móvil vertical: máximo 4 filas, 4 columnas
-      const mobileRows = Math.min(Math.max(maxRows, 3), 4); // Mínimo 3, máximo 4
+      // Móvil vertical: máximo 5 filas, 4 columnas
+      const mobileRows = Math.min(maxRows, 5);
       const config = { cols: 4, rows: mobileRows };
       console.log("Mobile portrait config:", config);
       return config;
@@ -62,7 +57,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // iPad (768px - 1024px) - solo si no es móvil
   if (width >= 768 && width <= 1024) {
-    const rows = Math.min(Math.max(maxRows, 3), isLandscape ? 4 : 5);
+    const rows = Math.min(maxRows, isLandscape ? 4 : 5);
     const config = isLandscape ? { cols: 6, rows } : { cols: 5, rows };
     console.log("iPad config:", config);
     return config;
@@ -70,7 +65,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Laptop (1024px - 1440px)
   if (width > 1024 && width <= 1440) {
-    const rows = Math.min(Math.max(maxRows, 3), 4); // Máximo 4 filas para laptop
+    const rows = Math.min(maxRows, 5);
     const config = { cols: 6, rows };
     console.log("Laptop config:", config);
     return config;
@@ -78,7 +73,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Large screens (>1440px)
   if (width > 1440) {
-    const rows = Math.min(Math.max(maxRows, 3), 5); // Máximo 5 filas
+    const rows = Math.min(maxRows, 6);
     const config = { cols: 6, rows };
     console.log("Large screen config:", config);
     return config;

@@ -1,9 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppData } from '@/data/apps';
 import AppCard from './AppCard';
+import useEmblaCarousel from 'embla-carousel-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import PaginationIndicator from './PaginationIndicator';
 import SwiperCarousel from './SwiperCarousel';
-import { useGridConfiguration } from '@/hooks/useGridConfiguration';
+import { calculateOptimalGrid } from '@/utils/gridCalculator';
 
 interface AppGridProps {
   apps: AppData[];
@@ -30,7 +33,66 @@ const AppGrid: React.FC<AppGridProps> = ({
   useCarousel = false,
   carouselKey = ''
 }) => {
-  const gridConfig = useGridConfiguration(smallerIcons);
+  const isMobile = useIsMobile();
+  const [currentPage, setCurrentPage] = useState(0);
+  
+  // Use the optimized grid calculator
+  const getGridConfig = useCallback(() => {
+    return calculateOptimalGrid(smallerIcons);
+  }, [smallerIcons]);
+
+  const [gridConfig, setGridConfig] = useState(getGridConfig());
+  
+  // Debug log to see what configuration we're getting
+  useEffect(() => {
+    const config = getGridConfig();
+    console.log("Grid config:", config, "Screen size:", window.innerWidth, "x", window.innerHeight, "Landscape:", window.innerWidth > window.innerHeight);
+    setGridConfig(config);
+  }, [getGridConfig]);
+  
+  // Recalculate grid on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const newConfig = getGridConfig();
+      setGridConfig(newConfig);
+      console.log("Grid config updated:", newConfig, "Screen size:", window.innerWidth, "x", window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [getGridConfig]);
+  
+  const appsPerPage = gridConfig.cols * gridConfig.rows;
+  const totalPages = Math.ceil(apps.length / appsPerPage);
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false,
+    align: 'start',
+    dragFree: false
+  });
+  
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrentPage(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Function to get apps for a specific page
+  const getAppsForPage = (pageIndex: number) => {
+    const startIndex = pageIndex * appsPerPage;
+    return apps.slice(startIndex, startIndex + appsPerPage);
+  };
   
   if (apps.length === 0) {
     return (

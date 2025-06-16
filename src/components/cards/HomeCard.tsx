@@ -32,7 +32,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   const { isLightBackground } = useBackground();
   
-  // Responsive icon sizes
+  // Responsive icon sizes: mobile (w-12 h-12), tablet (w-16 h-16), desktop (w-20 h-20)
   const iconSize = smallerIcons 
     ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
     : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:w-20";
@@ -47,68 +47,42 @@ const HomeCard: React.FC<HomeCardProps> = ({
     ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
     : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
 
-  // Determinar el color del texto según el fondo
+  // Determinar el color del texto según el fondo (fuerza texto oscuro para fondos claros)
   const textColorClass = isLightBackground() 
     ? "text-gray-800" 
     : "text-white dark:text-white";
 
-  // Improved staggered animation delays with smoother timing
-  const iconAnimationDelay = `${index * 25}ms`;
-  const textAnimationDelay = `${index * 25 + 100}ms`;
-  const buttonAnimationDelay = `${index * 25 + 150}ms`;
+  // Much faster animation delay
+  const animationDelay = `${index * 15}ms`;
 
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full justify-start"
+      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full justify-between"
       onClick={handleClick}
-      style={{
-        minHeight: 'fit-content',
-        maxWidth: '100%'
-      }}
     >
       <div className="relative flex-shrink-0">
-        {/* Enhanced skeleton with pulse animation */}
+        {/* Only show skeleton if actually loading, not on error */}
         {imageLoading && !imageError && (
           <div className={`${iconSize} rounded-full overflow-hidden flex items-center justify-center`}>
-            <Skeleton 
-              className={`${iconSize} rounded-full animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700`}
-              style={{
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 1.5s ease-in-out infinite'
-              }}
-            />
+            <Skeleton className={`${iconSize} rounded-full animate-pulse`} />
           </div>
         )}
         
         {!imageError ? (
-          <div 
-            className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-200 opacity-0 animate-fade-in transform translate-y-2`}
-            style={{
-              animationDelay: iconAnimationDelay,
-              animationFillMode: 'forwards',
-              animationDuration: '400ms'
-            }}
-          >
+          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-100`}>
             <img 
               ref={imageRef}
               src={iconUrl} 
               alt={`${app.name} icon`}
-              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-all duration-300 ${imageLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-100 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
               onError={handleImageError}
               onLoad={handleImageLoad}
               loading="lazy"
-              style={{ display: imageLoading ? 'none' : 'block' }}
+              style={{ display: imageLoading ? 'none' : 'block' }} // Prevent double image
             />
           </div>
         ) : (
-          <div 
-            className={`${iconSize} rounded-full overflow-hidden transition-all duration-200 opacity-0 animate-fade-in transform translate-y-2`}
-            style={{
-              animationDelay: iconAnimationDelay,
-              animationFillMode: 'forwards',
-              animationDuration: '400ms'
-            }}
-          >
+          <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-100`}>
             <AppAvatarFallback
               appName={app.name}
               className={`${iconSize} rounded-full`}
@@ -120,37 +94,26 @@ const HomeCard: React.FC<HomeCardProps> = ({
           <Button 
             size="sm"
             variant="outline"
-            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 transition-all duration-200 opacity-0 animate-fade-in transform scale-75 hover:scale-90`}
+            className={`${buttonSize} rounded-full p-0 absolute -top-1 -right-1 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 transition-all duration-100 opacity-0 animate-fade-in`}
             onClick={handleAction}
             style={{ 
-              animationDelay: buttonAnimationDelay,
+              animationDelay: `${index * 15 + 50}ms`,
               animationFillMode: 'forwards',
-              animationDuration: '300ms'
+              animationDuration: '120ms'
             }}
           >
             <Heart 
-              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} transition-all duration-200`} 
+              className={`${buttonIconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} transition-colors duration-100`} 
             />
           </Button>
         )}
       </div>
       
       <h3 
-        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 leading-tight ${textColorClass} transition-all duration-300 flex-shrink-0 opacity-0 animate-fade-in transform translate-y-1`}
+        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 flex-grow-0`}
         style={{ 
-          lineHeight: '1.1',
-          animationDelay: textAnimationDelay,
-          animationFillMode: 'forwards',
-          animationDuration: '350ms',
-          wordBreak: 'break-word',
-          hyphens: 'auto',
-          maxWidth: '100%',
-          overflow: 'visible',
-          whiteSpace: 'normal',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          textOverflow: 'ellipsis'
+          opacity: imageLoading && !imageError ? 0.7 : 1,
+          lineHeight: '1.2'
         }}
       >
         {app.name}

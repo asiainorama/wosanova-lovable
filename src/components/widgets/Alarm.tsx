@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Plus, Bell, Trash2, Volume2, Square } from 'lucide-react';
+import { X, Plus, Bell, Trash2, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -31,8 +32,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const [newAlarmTime, setNewAlarmTime] = useState('08:00');
   const [notificationsPermission, setNotificationsPermission] = useState<NotificationPermission>('default');
   const [isCheckingAlarms, setIsCheckingAlarms] = useState(false);
-  const [isAlarmRinging, setIsAlarmRinging] = useState(false);
-  const [currentRingingAlarm, setCurrentRingingAlarm] = useState<AlarmItem | null>(null);
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
@@ -206,10 +205,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const triggerAlarm = (alarm: AlarmItem) => {
     console.log('Triggering alarm:', alarm);
     
-    // Set alarm ringing state
-    setIsAlarmRinging(true);
-    setCurrentRingingAlarm(alarm);
-    
     // Play alarm sound
     playAlarmSound();
     
@@ -263,9 +258,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   };
 
   const stopAlarm = () => {
-    setIsAlarmRinging(false);
-    setCurrentRingingAlarm(null);
-    
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -279,11 +271,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         });
       });
     }
-    
-    toast({
-      title: "Alarma detenida",
-      description: "La alarma ha sido silenciada",
-    });
   };
 
   const handleClose = () => {
@@ -379,33 +366,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         </div>
       </div>
       
-      {/* Alarm ringing banner */}
-      {isAlarmRinging && currentRingingAlarm && (
-        <div className="p-4 bg-red-100 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800 animate-pulse">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Bell className="h-6 w-6 text-red-600 dark:text-red-400 animate-bounce" />
-              <div>
-                <p className="font-semibold text-red-800 dark:text-red-200">
-                  🔔 ¡Alarma sonando!
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {currentRingingAlarm.time}
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={stopAlarm}
-              className="bg-red-600 hover:bg-red-700 text-white gap-2"
-              size="lg"
-            >
-              <Square className="h-4 w-4" />
-              Detener
-            </Button>
-          </div>
-        </div>
-      )}
-      
       {/* Notification permission banner */}
       {notificationsPermission !== 'granted' && (
         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800">
@@ -439,12 +399,6 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
           <Volume2 className="h-4 w-4" />
           Probar
         </Button>
-        {isAlarmRinging && (
-          <Button onClick={stopAlarm} variant="destructive" size="sm" className="gap-1">
-            <Square className="h-4 w-4" />
-            Parar
-          </Button>
-        )}
       </div>
       
       <div className="p-2 flex-1 overflow-y-auto">

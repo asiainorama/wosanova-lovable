@@ -23,17 +23,17 @@ const Index = () => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Enhanced prefetch and loading state
+  // Prefetch logos and set loading state
   useEffect(() => {
     const initializeHome = async () => {
       if (favorites.length > 0) {
         await prefetchAppLogos(favorites);
       }
       
-      // Slightly longer delay to ensure smooth animations
+      // Very short delay to prevent flash
       setTimeout(() => {
         setIsLoading(false);
-      }, 150);
+      }, 50);
     };
 
     initializeHome();
@@ -63,16 +63,16 @@ const Index = () => {
       <Header title={t('home.title') || "Inicio"} />
       
       <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">
-        {/* Enhanced loading state with better animations */}
+        {/* Show loading state initially to prevent flash */}
         {isLoading ? (
           <div className="flex-grow flex items-center justify-center">
-            <div className="animate-pulse text-center opacity-0 animate-fade-in" style={{ animationDuration: '200ms', animationFillMode: 'forwards' }}>
-              <div className="w-16 h-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-full mx-auto mb-4 animate-pulse"></div>
-              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-32 mx-auto animate-pulse"></div>
+            <div className="animate-pulse text-center">
+              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mx-auto"></div>
             </div>
           </div>
         ) : sortedFavorites.length > 0 ? (
-          <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in transform translate-y-4" style={{ animationDuration: '500ms', animationFillMode: 'forwards', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}>
+          <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in" style={{ animationDuration: '150ms', animationFillMode: 'forwards' }}>
             <AppGrid 
               apps={sortedFavorites}
               useCarousel={true}
@@ -81,17 +81,17 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30 opacity-0 animate-fade-in transform translate-y-4" style={{ animationDuration: '400ms', animationFillMode: 'forwards', animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}>
+          <div className="text-center py-10 px-4 bg-white/80 dark:bg-gray-800/90 backdrop-blur-md shadow-sm rounded-lg border border-white/30 dark:border-gray-700/30 opacity-0 animate-fade-in" style={{ animationDuration: '150ms', animationFillMode: 'forwards' }}>
             <div className="flex justify-center mb-4">
-              <span className="inline-block p-4 rounded-full bg-primary/10 opacity-0 animate-fade-in transform scale-95" style={{ animationDelay: '100ms', animationDuration: '300ms', animationFillMode: 'forwards' }}>
+              <span className="inline-block p-4 rounded-full bg-primary/10">
                 <Store size={48} className="text-primary" />
               </span>
             </div>
-            <h3 className="text-lg font-medium mb-2 gradient-text opacity-0 animate-fade-in" style={{ animationDelay: '200ms', animationDuration: '300ms', animationFillMode: 'forwards' }}>{t('home.noApps') || "No tienes aplicaciones añadidas"}</h3>
-            <p className="text-gray-500 mb-4 dark:text-gray-400 opacity-0 animate-fade-in" style={{ animationDelay: '300ms', animationDuration: '300ms', animationFillMode: 'forwards' }}>{t('home.addFromCatalog') || "Agrega aplicaciones desde el catálogo para verlas aquí"}</p>
-            <div className="flex justify-center opacity-0 animate-fade-in transform translate-y-2" style={{ animationDelay: '400ms', animationDuration: '300ms', animationFillMode: 'forwards' }}>
+            <h3 className="text-lg font-medium mb-2 gradient-text">{t('home.noApps') || "No tienes aplicaciones añadidas"}</h3>
+            <p className="text-gray-500 mb-4 dark:text-gray-400">{t('home.addFromCatalog') || "Agrega aplicaciones desde el catálogo para verlas aquí"}</p>
+            <div className="flex justify-center">
               <Link to="/catalog">
-                <Button size="sm" className="flex items-center gap-2 hover:scale-105 transition-transform duration-200">
+                <Button size="sm" className="flex items-center gap-2">
                   <Store className="h-4 w-4" />
                   <span>{t('home.exploreCatalog') || "Explorar Catálogo"}</span>
                 </Button>
