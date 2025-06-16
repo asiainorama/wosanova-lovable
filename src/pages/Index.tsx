@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useBackground } from '@/contexts/BackgroundContext';
 import { prefetchAppLogos } from '@/services/LogoCacheService';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import HomeLoadingAnimation from '@/components/loading/HomeLoadingAnimation';
 
 const Index = () => {
   const { favorites } = useAppContext();
@@ -65,12 +66,7 @@ const Index = () => {
       <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">
         {/* Show loading state initially to prevent flash */}
         {isLoading ? (
-          <div className="flex-grow flex items-center justify-center">
-            <div className="animate-pulse text-center">
-              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mx-auto"></div>
-            </div>
-          </div>
+          <HomeLoadingAnimation apps={sortedFavorites} />
         ) : sortedFavorites.length > 0 ? (
           <div className="flex-grow flex flex-col h-full opacity-0 animate-fade-in" style={{ animationDuration: '150ms', animationFillMode: 'forwards' }}>
             <AppGrid 
