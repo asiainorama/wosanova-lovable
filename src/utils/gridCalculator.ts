@@ -1,3 +1,4 @@
+
 /**
  * Calculate the minimum cell height based on viewport dimensions and grid configuration
  */
@@ -6,14 +7,15 @@ export function calculateMinCellHeight(rows: number): string {
   const headerHeight = 120; // Header + padding
   const paginationHeight = 60; // Space for pagination dots
   const containerPadding = 40; // Container padding top/bottom
+  const textSpace = 40; // Space needed for app names (increased)
   const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
   
   // Para móvil horizontal con 2 filas, dar más espacio
   if (rows === 2 && window.innerWidth > window.innerHeight) {
-    return `${Math.floor(availableHeight / 2)}px`;
+    return `${Math.floor((availableHeight - textSpace) / 2)}px`;
   }
   
-  return `${Math.floor(availableHeight / rows)}px`;
+  return `${Math.floor((availableHeight - textSpace) / rows)}px`;
 }
 
 /**
@@ -26,14 +28,15 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   console.log("calculateOptimalGrid - Width:", width, "Height:", height, "IsLandscape:", isLandscape);
   
-  // Calculate available height considering header and pagination
+  // Calculate available height considering header, pagination, and text space
   const headerHeight = 120;
   const paginationHeight = 60;
   const paddingBuffer = 40;
-  const availableHeight = height - headerHeight - paginationHeight - paddingBuffer;
+  const textSpace = 50; // Increased space for text
+  const availableHeight = height - headerHeight - paginationHeight - paddingBuffer - textSpace;
   
   // Base cell height estimates - más espacio para móvil horizontal
-  const baseCellHeight = smallerIcons ? 85 : 100;
+  const baseCellHeight = smallerIcons ? 100 : 120; // Increased base height
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   
   // MÓVIL: Detectar móvil primero, antes que tablet
@@ -48,7 +51,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
       return config;
     } else {
       // Móvil vertical: máximo 5 filas, 4 columnas
-      const mobileRows = Math.min(maxRows, 5);
+      const mobileRows = Math.min(maxRows, 4); // Reduced from 5 to 4
       const config = { cols: 4, rows: mobileRows };
       console.log("Mobile portrait config:", config);
       return config;
@@ -65,7 +68,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Laptop (1024px - 1440px)
   if (width > 1024 && width <= 1440) {
-    const rows = Math.min(maxRows, 5);
+    const rows = Math.min(maxRows, 4); // Reduced from 5 to 4
     const config = { cols: 6, rows };
     console.log("Laptop config:", config);
     return config;
@@ -73,7 +76,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Large screens (>1440px)
   if (width > 1440) {
-    const rows = Math.min(maxRows, 6);
+    const rows = Math.min(maxRows, 5); // Reduced from 6 to 5
     const config = { cols: 6, rows };
     console.log("Large screen config:", config);
     return config;

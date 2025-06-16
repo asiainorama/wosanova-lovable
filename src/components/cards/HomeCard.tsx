@@ -35,7 +35,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   // Responsive icon sizes: mobile (w-12 h-12), tablet (w-16 h-16), desktop (w-20 h-20)
   const iconSize = smallerIcons 
     ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
-    : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:w-20";
+    : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20";
     
   // Responsive button sizes
   const buttonSize = smallerIcons 
@@ -57,7 +57,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full justify-between"
+      className="flex flex-col items-center gap-2 p-1 cursor-pointer h-full w-full"
       onClick={handleClick}
     >
       <div className="relative flex-shrink-0">
@@ -110,10 +110,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
       </div>
       
       <h3 
-        className={`text-xs md:text-sm lg:text-base font-medium text-center mt-1 line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 flex-grow-0`}
+        className={`text-xs md:text-sm lg:text-base font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
-          lineHeight: '1.2'
+          lineHeight: '1.2',
+          wordWrap: 'break-word',
+          hyphens: 'auto'
         }}
       >
         {app.name}

@@ -37,7 +37,7 @@ const CarouselGridPage: React.FC<CarouselGridPageProps> = ({
           justifyContent: 'space-evenly',
           padding: '1% 2%',
           width: '100%',
-          height: `calc(100vh - 180px)`, // Fixed height calculation
+          height: `calc(100vh - 200px)`, // Increased space for text
           margin: '0 auto',
           maxWidth: 'min(100%, 1200px)',
           gap: '8px'

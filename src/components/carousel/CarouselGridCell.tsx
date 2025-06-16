@@ -29,14 +29,14 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   // Calculate the global index for staggered animation (much faster)
   const globalIndex = pageIndex * rows + index;
 
-  // Ajustar altura mínima para móvil horizontal (2 filas)
+  // Ajustar altura para asegurar que los nombres se vean completos
   const adjustedCellHeight = rows === 2 ? 'auto' : cellHeight;
-  const minHeight = rows === 2 ? 'calc(50vh - 80px)' : cellHeight || `${100/rows}%`;
+  const minHeight = rows === 2 ? 'calc(50vh - 100px)' : cellHeight || `${100/rows}%`; // More space for 2 rows
 
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item flex flex-col justify-start items-center opacity-0 animate-fade-in px-1"
+      className="app-grid-item flex flex-col justify-center items-center opacity-0 animate-fade-in px-1"
       style={{
         height: adjustedCellHeight,
         minHeight: minHeight,
@@ -46,15 +46,17 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
       }}
     >
       {app ? (
-        <AppCard 
-          app={app} 
-          showRemove={showRemove}
-          showManage={showManage}
-          onShowDetails={onShowDetails}
-          isLarge={false}
-          smallerIcons={smallerIcons}
-          index={globalIndex}
-        />
+        <div className="flex flex-col items-center h-full justify-between py-1">
+          <AppCard 
+            app={app} 
+            showRemove={showRemove}
+            showManage={showManage}
+            onShowDetails={onShowDetails}
+            isLarge={false}
+            smallerIcons={smallerIcons}
+            index={globalIndex}
+          />
+        </div>
       ) : (
         <div className="empty-slot w-full h-full opacity-0"></div>
       )}
