@@ -1,14 +1,10 @@
 
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface App {
-  name: string;
-  logo: string;
-}
+import { AppData } from '@/data/types';
 
 interface HomeLoadingAnimationProps {
-  apps: App[];
+  apps: AppData[];
 }
 
 const HomeLoadingAnimation: React.FC<HomeLoadingAnimationProps> = ({ apps }) => {
