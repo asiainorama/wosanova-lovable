@@ -14,6 +14,13 @@ const CalendarWidget = () => {
       safeOpenWindow('https://calendar.google.com/');
     }
   };
+
+  // Nueva función para manejar clics en cualquier fecha, incluida la seleccionada
+  const handleDayClick = (clickedDate: Date) => {
+    // Siempre abrir el calendario, independientemente de si la fecha ya está seleccionada
+    safeOpenWindow('https://calendar.google.com/');
+    setDate(clickedDate);
+  };
   
   return (
     <div className="flex justify-center w-full">
@@ -22,6 +29,7 @@ const CalendarWidget = () => {
           mode="single"
           selected={date}
           onSelect={handleDateSelect}
+          onDayClick={handleDayClick}
           locale={es}
           weekStartsOn={1}
           className="rounded-md border-0 w-full text-xs [&_.rdp-cell]:text-center [&_.rdp-button]:mx-auto [&_.rdp-day]:flex [&_.rdp-day]:justify-center [&_.rdp-table]:w-full [&_.rdp-head_th]:text-center [&_.rdp-head_th]:text-xs [&_.rdp-day]:text-xs [&_.rdp-day]:h-7 [&_.rdp-button]:h-6 [&_.rdp-button]:w-6 [&_.rdp-button]:text-xs"
