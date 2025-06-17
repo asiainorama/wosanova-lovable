@@ -24,6 +24,7 @@ const CarouselGridPage: React.FC<CarouselGridPageProps> = ({
   smallerIcons = false,
 }) => {
   const cellHeight = calculateMinCellHeight(gridConfig.rows);
+  const isLandscapeMobile = gridConfig.rows === 2 && window.innerWidth > window.innerHeight && window.innerWidth < 768;
   
   return (
     <div className="h-full w-full px-1 flex items-center justify-center will-change-transform">
@@ -37,10 +38,11 @@ const CarouselGridPage: React.FC<CarouselGridPageProps> = ({
           justifyContent: 'space-evenly',
           padding: '1% 2%',
           width: '100%',
-          height: `calc(100vh - 200px)`, // Increased space for text
+          // Increased height for mobile landscape to accommodate text
+          height: isLandscapeMobile ? `calc(100vh - 180px)` : `calc(100vh - 200px)`,
           margin: '0 auto',
           maxWidth: 'min(100%, 1200px)',
-          gap: '8px'
+          gap: isLandscapeMobile ? '4px' : '8px' // Smaller gap for mobile landscape
         }}
       >
         {pageApps.map((app, index) => (

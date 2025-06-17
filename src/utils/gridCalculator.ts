@@ -7,12 +7,14 @@ export function calculateMinCellHeight(rows: number): string {
   const headerHeight = 120; // Header + padding
   const paginationHeight = 60; // Space for pagination dots
   const containerPadding = 40; // Container padding top/bottom
-  const textSpace = 40; // Space needed for app names (increased)
+  const textSpace = 60; // Increased space for app names (was 40)
   const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
   
-  // Para móvil horizontal con 2 filas, dar más espacio
+  // Para móvil horizontal con 2 filas, dar mucho más espacio para los nombres
   if (rows === 2 && window.innerWidth > window.innerHeight) {
-    return `${Math.floor((availableHeight - textSpace) / 2)}px`;
+    const cellHeight = Math.floor((availableHeight - textSpace) / 2);
+    // Asegurar altura mínima para móvil horizontal
+    return `${Math.max(cellHeight, 140)}px`; // Increased minimum from 120 to 140
   }
   
   return `${Math.floor((availableHeight - textSpace) / rows)}px`;

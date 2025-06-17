@@ -28,10 +28,15 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
 }) => {
   // Calculate the global index for staggered animation (much faster)
   const globalIndex = pageIndex * rows + index;
+  const isLandscapeMobile = rows === 2 && window.innerWidth > window.innerHeight && window.innerWidth < 768;
 
-  // Ajustar altura para asegurar que los nombres se vean completos
-  const adjustedCellHeight = rows === 2 ? 'auto' : cellHeight;
-  const minHeight = rows === 2 ? 'calc(50vh - 100px)' : cellHeight || `${100/rows}%`; // More space for 2 rows
+  // Ajustar altura específicamente para móvil horizontal
+  const adjustedCellHeight = isLandscapeMobile ? 'auto' : cellHeight;
+  const minHeight = isLandscapeMobile 
+    ? 'calc(45vh - 90px)' // Increased space for mobile landscape
+    : rows === 2 
+      ? 'calc(50vh - 100px)' 
+      : cellHeight || `${100/rows}%`;
 
   return (
     <div 

@@ -32,20 +32,29 @@ const HomeCard: React.FC<HomeCardProps> = ({
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
   const { isLightBackground } = useBackground();
   
-  // Responsive icon sizes: mobile (w-12 h-12), tablet (w-16 h-16), desktop (w-20 h-20)
-  const iconSize = smallerIcons 
-    ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
-    : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20";
+  // Detectar móvil horizontal
+  const isLandscapeMobile = window.innerWidth > window.innerHeight && window.innerWidth < 768;
+  
+  // Responsive icon sizes: móvil horizontal necesita iconos más pequeños
+  const iconSize = isLandscapeMobile
+    ? "w-8 h-8 md:w-10 md:h-10" // Smaller icons for landscape mobile
+    : smallerIcons 
+      ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
+      : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:w-20";
     
   // Responsive button sizes
-  const buttonSize = smallerIcons 
-    ? "h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:h-6" 
-    : "h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7";
+  const buttonSize = isLandscapeMobile
+    ? "h-3 w-3" // Smaller button for landscape mobile
+    : smallerIcons 
+      ? "h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:h-6" 
+      : "h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7";
     
   // Responsive button icon sizes  
-  const buttonIconSize = smallerIcons 
-    ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
-    : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
+  const buttonIconSize = isLandscapeMobile
+    ? "h-1.5 w-1.5" // Smaller icon for landscape mobile
+    : smallerIcons 
+      ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" 
+      : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5";
 
   // Determinar el color del texto según el fondo (fuerza texto oscuro para fondos claros)
   const textColorClass = isLightBackground() 
@@ -57,8 +66,11 @@ const HomeCard: React.FC<HomeCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center gap-2 p-1 cursor-pointer h-full w-full"
+      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full w-full"
       onClick={handleClick}
+      style={{
+        gap: isLandscapeMobile ? '0.25rem' : '0.5rem' // Smaller gap for landscape mobile
+      }}
     >
       <div className="relative flex-shrink-0">
         {/* Only show skeleton if actually loading, not on error */}
@@ -110,12 +122,14 @@ const HomeCard: React.FC<HomeCardProps> = ({
       </div>
       
       <h3 
-        className={`text-xs md:text-sm lg:text-base font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
+        className={`font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
-          lineHeight: '1.2',
+          lineHeight: '1.1',
           wordWrap: 'break-word',
-          hyphens: 'auto'
+          hyphens: 'auto',
+          fontSize: isLandscapeMobile ? '0.65rem' : smallerIcons ? '0.75rem' : '0.875rem', // Smaller text for landscape mobile
+          minHeight: isLandscapeMobile ? '1.3rem' : 'auto' // Ensure minimum height for text
         }}
       >
         {app.name}
