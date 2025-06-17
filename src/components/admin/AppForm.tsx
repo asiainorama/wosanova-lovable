@@ -13,6 +13,7 @@ import {
   DescriptionField 
 } from "./form/AppFormFields";
 import AppFormActions from "./form/AppFormActions";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AppFormProps {
   app: AppData | null;
@@ -96,80 +97,86 @@ const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center pb-4 border-b">
         <h2 className="text-2xl font-bold">
           {isEditing ? "Editar Aplicación" : "Añadir Nueva Aplicación"}
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Hidden ID field since it's auto-generated */}
-        <input
-          type="hidden"
-          name="id"
-          value={formData.id}
-        />
+      <ScrollArea className="flex-1 pr-4">
+        <form onSubmit={handleSubmit} className="space-y-6 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Hidden ID field since it's auto-generated */}
+            <input
+              type="hidden"
+              name="id"
+              value={formData.id}
+            />
 
-        <NameField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
+            <NameField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
 
-        <UrlField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling} 
-        />
+            <UrlField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling} 
+            />
 
-        <IconField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
+            <IconField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
 
-        <CategoryField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
+            <CategoryField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
 
-        <SubcategoryField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
+            <SubcategoryField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
 
-        <AIToggleField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
+            <AIToggleField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
 
-        <DescriptionField 
-          formData={formData} 
-          errors={errors} 
-          handleChange={handleChange} 
-          handleSwitchChange={handleSwitchChange}
-          isAutofilling={isAutofilling}
-        />
-      </div>
+            <DescriptionField 
+              formData={formData} 
+              errors={errors} 
+              handleChange={handleChange} 
+              handleSwitchChange={handleSwitchChange}
+              isAutofilling={isAutofilling}
+            />
+          </div>
 
-      <AppFormActions onCancel={onCancel} isLoading={isLoading} />
-    </form>
+          <div className="pt-4 border-t">
+            <AppFormActions onCancel={onCancel} isLoading={isLoading} />
+          </div>
+        </form>
+      </ScrollArea>
+    </div>
   );
 };
 

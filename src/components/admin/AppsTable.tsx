@@ -25,9 +25,11 @@ interface AppsTableProps {
 const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Cambiado de 10 a 5 apps por página
   const isMobile = useIsMobile();
   const [isLandscape, setIsLandscape] = useState(false);
+
+  // Ajustar items por página según dispositivo
+  const itemsPerPage = isMobile ? 4 : 5; // 4 apps en móvil, 5 en desktop
 
   // Effect to detect landscape orientation
   useEffect(() => {
@@ -82,8 +84,8 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[60px]">Logo</TableHead>
-              <TableHead className="w-[220px]">Nombre</TableHead> {/* Aumentado de 180px a 220px */}
+              <TableHead className="w-[50px]">Logo</TableHead>
+              <TableHead className={isMobile ? "w-[140px]" : "w-[220px]"}>Nombre</TableHead>
               {showDetails && (
                 <>
                   <TableHead className="w-[300px]">Descripción</TableHead>
@@ -91,7 +93,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                   <TableHead className="w-[150px]">URL</TableHead>
                 </>
               )}
-              <TableHead className="w-[100px] text-right">Acciones</TableHead>
+              <TableHead className="w-[80px] text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -106,7 +108,7 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                 <TableRow key={app.id}>
                   <TableCell>
                     <div 
-                      className="w-10 h-10 overflow-hidden rounded-md cursor-pointer transition-all hover:opacity-80"
+                      className="w-8 h-8 overflow-hidden rounded-md cursor-pointer transition-all hover:opacity-80"
                       onClick={() => onEdit(app)}
                     >
                       <AspectRatio ratio={1 / 1}>
@@ -122,10 +124,13 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell 
-                    className="font-medium cursor-pointer hover:text-primary transition-colors max-w-[220px] truncate"
+                    className="font-medium cursor-pointer hover:text-primary transition-colors truncate"
                     onClick={() => onEdit(app)}
+                    style={{ maxWidth: isMobile ? '140px' : '220px' }}
                   >
-                    {app.name}
+                    <div className="truncate">
+                      {app.name}
+                    </div>
                   </TableCell>
                   
                   {showDetails && (
@@ -154,9 +159,9 @@ const AppsTable = ({ apps, onEdit, onDelete }: AppsTableProps) => {
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
