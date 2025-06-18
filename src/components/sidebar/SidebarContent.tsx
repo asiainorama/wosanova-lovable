@@ -1,0 +1,33 @@
+
+import React from 'react';
+import TimeWidget from './TimeWidget';
+import WeatherWidget from './WeatherWidget';
+import CalendarWidget from './CalendarWidget';
+import WidgetIconsRow from './WidgetIconsRow';
+
+const SidebarContent: React.FC = () => {
+  return (
+    <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
+      {/* Top section with Time and Weather - takes natural space */}
+      <div className="flex-shrink-0 space-y-2 px-3 py-2">
+        <TimeWidget />
+        <WeatherWidget />
+      </div>
+
+      {/* Center section with Widget Icons - centered in available space */}
+      <div className="flex-1 flex items-center justify-center px-2">
+        <WidgetIconsRow />
+      </div>
+      
+      {/* Bottom section with Calendar - takes natural space at bottom */}
+      <div className="flex-shrink-0 px-3 pb-2">
+        <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
+        <div className="w-full">
+          <CalendarWidget />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SidebarContent;
