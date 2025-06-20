@@ -40,25 +40,27 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
     }
   };
 
+  const handleProfileClick = () => {
+    onClose();
+    navigate('/profile');
+  };
+
   return (
     <div className="flex items-center justify-between w-full px-4">
       <div className="flex items-center space-x-3">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={avatarUrl || undefined} alt={username || 'Usuario'} />
-          <AvatarFallback className="bg-primary/10 text-primary font-medium">
-            {username ? username.charAt(0).toUpperCase() : 'U'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-foreground truncate">
-            {username || 'Usuario'}
-          </span>
-          {userId && (
-            <span className="text-xs text-muted-foreground truncate">
-              {userId.substring(0, 8)}...
+        <button onClick={handleProfileClick} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={avatarUrl || undefined} alt={username || 'Usuario'} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {username ? username.charAt(0).toUpperCase() : 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-foreground truncate">
+              {username || 'Usuario'}
             </span>
-          )}
-        </div>
+          </div>
+        </button>
       </div>
       
       <div className="flex items-center space-x-2">
