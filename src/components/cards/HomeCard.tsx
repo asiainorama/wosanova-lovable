@@ -73,33 +73,37 @@ const HomeCard: React.FC<HomeCardProps> = ({
       }}
     >
       <div className="relative flex-shrink-0">
-        {/* Only show skeleton if actually loading, not on error */}
+        {/* Show skeleton only while loading and no error */}
         {imageLoading && !imageError && (
           <div className={`${iconSize} rounded-full overflow-hidden flex items-center justify-center`}>
             <Skeleton className={`${iconSize} rounded-full animate-pulse`} />
           </div>
         )}
         
-        {!imageError ? (
-          <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-100`}>
-            <img 
-              ref={imageRef}
-              src={iconUrl} 
-              alt={`${app.name} icon`}
-              className={`w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-100 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              loading="lazy"
-              style={{ display: imageLoading ? 'none' : 'block' }} // Prevent double image
-            />
-          </div>
-        ) : (
-          <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-100`}>
-            <AppAvatarFallback
-              appName={app.name}
-              className={`${iconSize} rounded-full`}
-            />
-          </div>
+        {/* Show image only when not loading or when there's an error (fallback) */}
+        {(!imageLoading || imageError) && (
+          <>
+            {!imageError ? (
+              <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-100`}>
+                <img 
+                  ref={imageRef}
+                  src={iconUrl} 
+                  alt={`${app.name} icon`}
+                  className="w-full h-full object-cover dark:brightness-110 p-0 transition-opacity duration-100"
+                  onError={handleImageError}
+                  onLoad={handleImageLoad}
+                  loading="lazy"
+                />
+              </div>
+            ) : (
+              <div className={`${iconSize} rounded-full overflow-hidden transition-all duration-100`}>
+                <AppAvatarFallback
+                  appName={app.name}
+                  className={`${iconSize} rounded-full`}
+                />
+              </div>
+            )}
+          </>
         )}
         
         {(showManage || onShowDetails) && (
