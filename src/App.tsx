@@ -12,11 +12,11 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center">
+      <div className="flex h-screen w-screen items-center justify-center bg-white">
         <img 
           src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
           alt="WosaNova Logo" 
-          className="w-24 h-24"
+          className="w-16 h-16 sm:w-20 sm:h-20"
         />
       </div>
     );

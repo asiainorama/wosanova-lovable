@@ -3,7 +3,7 @@ import React from 'react';
 
 const AppLogoLoader: React.FC = () => {
   return (
-    <div className="flex items-center justify-center h-full w-full">
+    <div className="fixed inset-0 flex items-center justify-center h-full w-full bg-transparent">
       <div className="relative">
         {/* Logo SVG con animación de relleno */}
         <svg
