@@ -37,7 +37,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
   
   // Responsive icon sizes: móvil horizontal necesita iconos más pequeños
   const iconSize = isLandscapeMobile
-    ? "w-8 h-8 md:w-10 md:h-10" // Smaller icons for landscape mobile
+    ? "w-7 h-7 md:w-10 md:h-10" // Even smaller icons for landscape mobile
     : smallerIcons 
       ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" 
       : "w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:w-20";
@@ -66,10 +66,11 @@ const HomeCard: React.FC<HomeCardProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center gap-1 p-1 cursor-pointer h-full w-full"
+      className="flex flex-col items-center cursor-pointer h-full w-full"
       onClick={handleClick}
       style={{
-        gap: isLandscapeMobile ? '0.25rem' : '0.5rem' // Smaller gap for landscape mobile
+        gap: isLandscapeMobile ? '0.125rem' : '0.25rem', // Even smaller gap for landscape mobile
+        padding: isLandscapeMobile ? '0.125rem' : '0.25rem'
       }}
     >
       <div className="relative flex-shrink-0">
@@ -129,11 +130,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
         className={`font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
-          lineHeight: '1.1',
+          lineHeight: isLandscapeMobile ? '0.9' : '1.1',
           wordWrap: 'break-word',
           hyphens: 'auto',
-          fontSize: isLandscapeMobile ? '0.65rem' : smallerIcons ? '0.75rem' : '0.875rem', // Smaller text for landscape mobile
-          minHeight: isLandscapeMobile ? '1.3rem' : 'auto' // Ensure minimum height for text
+          fontSize: isLandscapeMobile ? '0.6rem' : smallerIcons ? '0.75rem' : '0.875rem', // Much smaller text for landscape mobile
+          minHeight: isLandscapeMobile ? '1.2rem' : 'auto', // Ensure minimum height for text
+          maxHeight: isLandscapeMobile ? '1.8rem' : '2.4rem' // Limit max height to prevent overflow
         }}
       >
         {app.name}

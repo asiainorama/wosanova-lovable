@@ -30,10 +30,10 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   const globalIndex = pageIndex * rows + index;
   const isLandscapeMobile = rows === 2 && window.innerWidth > window.innerHeight && window.innerWidth < 768;
 
-  // Ajustar altura específicamente para móvil horizontal
+  // Ajustar altura específicamente para móvil horizontal - dar más espacio para el texto
   const adjustedCellHeight = isLandscapeMobile ? 'auto' : cellHeight;
   const minHeight = isLandscapeMobile 
-    ? 'calc(45vh - 90px)' // Increased space for mobile landscape
+    ? 'calc(50vh - 60px)' // More space for mobile landscape text
     : rows === 2 
       ? 'calc(50vh - 100px)' 
       : cellHeight || `${100/rows}%`;
@@ -41,17 +41,20 @@ const CarouselGridCell: React.FC<CarouselGridCellProps> = ({
   return (
     <div 
       key={`${pageIndex}-${app ? app.id : `empty-${index}`}`} 
-      className="app-grid-item flex flex-col justify-center items-center opacity-0 animate-fade-in px-1"
+      className="app-grid-item flex flex-col justify-center items-center opacity-0 animate-fade-in"
       style={{
         height: adjustedCellHeight,
         minHeight: minHeight,
         animationDelay: `${globalIndex * 15}ms`, // Much faster stagger (was 30ms)
         animationFillMode: 'forwards',
-        animationDuration: '150ms' // Faster fade-in (was 200ms)
+        animationDuration: '150ms', // Faster fade-in (was 200ms)
+        padding: isLandscapeMobile ? '0.25rem' : '0.5rem' // Smaller padding for landscape mobile
       }}
     >
       {app ? (
-        <div className="flex flex-col items-center h-full justify-between py-1">
+        <div className="flex flex-col items-center h-full justify-center" style={{
+          gap: isLandscapeMobile ? '0.125rem' : '0.25rem' // Smaller gap for landscape mobile
+        }}>
           <AppCard 
             app={app} 
             showRemove={showRemove}
