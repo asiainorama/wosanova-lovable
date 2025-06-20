@@ -4,7 +4,7 @@ import React from 'react';
 const AppLogoLoader: React.FC = () => {
   return (
     <div className="fixed inset-0 flex items-center justify-center h-full w-full bg-transparent">
-      <div className="relative">
+      <div className="relative flex justify-center">
         {/* Logo SVG con animación de relleno */}
         <svg
           width="80"
@@ -37,13 +37,6 @@ const AppLogoLoader: React.FC = () => {
             <rect x="65" y="65" width="15" height="15" rx="3" fill="currentColor" className="animate-fill-9" />
           </g>
         </svg>
-        
-        {/* Texto de carga */}
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">
-            Cargando aplicaciones...
-          </p>
-        </div>
       </div>
     </div>
   );

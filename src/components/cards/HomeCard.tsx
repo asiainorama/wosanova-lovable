@@ -85,7 +85,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
         {(!imageLoading || imageError) && (
           <>
             {!imageError ? (
-              <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600 transition-all duration-100`}>
+              <div className={`${iconSize} rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center transition-all duration-100`}>
                 <img 
                   ref={imageRef}
                   src={iconUrl} 
