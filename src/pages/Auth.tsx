@@ -26,21 +26,44 @@ const Auth = () => {
     console.log("Auth page - current theme mode:", mode);
   }, [mode]);
 
+  // Fix viewport height on mobile to ensure background is visible
+  useEffect(() => {
+    const setVhProperty = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVhProperty();
+    window.addEventListener('resize', setVhProperty);
+    window.addEventListener('orientationchange', setVhProperty);
+
+    return () => {
+      window.removeEventListener('resize', setVhProperty);
+      window.removeEventListener('orientationchange', setVhProperty);
+    };
+  }, []);
+
   return (
-    <AuthBackground background={randomBackground}>
-      {isAuthenticating ? (
-        <AuthLoadingScreen background={randomBackground} inDevMode={inDevMode} />
-      ) : (
-        <AuthForm
-          background={randomBackground}
-          authError={authError}
-          inDevMode={inDevMode}
-          isLoading={isLoading}
-          onGoogleSignIn={handleGoogleSignIn}
-          onDevModeEnter={handleDevModeEnter}
-        />
-      )}
-    </AuthBackground>
+    <div style={{ 
+      minHeight: 'calc(var(--vh, 1vh) * 100)',
+      width: '100vw',
+      overflow: 'hidden'
+    }}>
+      <AuthBackground background={randomBackground}>
+        {isAuthenticating ? (
+          <AuthLoadingScreen background={randomBackground} inDevMode={inDevMode} />
+        ) : (
+          <AuthForm
+            background={randomBackground}
+            authError={authError}
+            inDevMode={inDevMode}
+            isLoading={isLoading}
+            onGoogleSignIn={handleGoogleSignIn}
+            onDevModeEnter={handleDevModeEnter}
+          />
+        )}
+      </AuthBackground>
+    </div>
   );
 };
 

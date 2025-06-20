@@ -77,8 +77,15 @@ export const AuthBackground: React.FC<AuthBackgroundProps> = ({ background, chil
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center"
-      style={getBackgroundStyle()}
+      className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+      style={{
+        ...getBackgroundStyle(),
+        // Ensure the background covers the entire viewport on mobile
+        minHeight: '100vh',
+        minWidth: '100vw',
+        // Fix for mobile browsers where 100vh doesn't work correctly
+        height: window.innerHeight ? `${window.innerHeight}px` : '100vh'
+      }}
     >
       {children}
     </div>

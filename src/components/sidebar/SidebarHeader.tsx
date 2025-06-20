@@ -1,50 +1,84 @@
 
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import UserProfileSection from './UserProfileSection';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarHeaderProps {
-  username: string;
-  avatarUrl: string;
+  username: string | null;
+  avatarUrl: string | null;
   userId: string | null;
   onClose: () => void;
 }
 
-const SidebarHeaderComponent: React.FC<SidebarHeaderProps> = ({ 
-  username, 
-  avatarUrl, 
-  userId, 
-  onClose 
-}) => {
+const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderProps) => {
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      console.log('Attempting to sign out...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        toast.error('Error al cerrar sesión');
+        return;
+      }
+
+      console.log('Sign out successful');
+      toast.success('Sesión cerrada correctamente');
+      
+      // Close sidebar and navigate to auth page
+      onClose();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Unexpected error during sign out:', error);
+      toast.error('Error inesperado al cerrar sesión');
+    }
+  };
+
   return (
-    <div className="w-full flex items-center justify-between px-4">
-      {/* User avatar on the left */}
-      <div className="flex-shrink-0">
-        <UserProfileSection 
-          username={username} 
-          avatarUrl={avatarUrl} 
-          userId={userId}
-          onClose={onClose}
-          avatarOnly={true}
-        />
+    <div className="flex items-center justify-between w-full px-4">
+      <div className="flex items-center space-x-3">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={avatarUrl || undefined} alt={username || 'Usuario'} />
+          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+            {username ? username.charAt(0).toUpperCase() : 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-foreground truncate">
+            {username || 'Usuario'}
+          </span>
+          {userId && (
+            <span className="text-xs text-muted-foreground truncate">
+              {userId.substring(0, 8)}...
+            </span>
+          )}
+        </div>
       </div>
       
-      {/* Username in the center */}
-      <div className="flex-1 text-center">
-        <span className="font-medium dark:text-white truncate theme-text">
-          {username || 'Usuario'}
-        </span>
-      </div>
-      
-      {/* Close button on the right */}
-      <div className="flex-shrink-0">
-        <Button 
-          variant="ghost" 
-          size="icon"
+      <div className="flex items-center space-x-2">
+        {/* Logout button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut}
+          className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20"
+          title="Cerrar sesión"
+        >
+          <LogOut className="h-4 w-4 text-red-600 dark:text-red-400" />
+        </Button>
+        
+        {/* Close sidebar button */}
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onClose}
-          className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-          aria-label="Cerrar menú"
+          className="h-8 w-8 p-0 hover:bg-white/20 dark:hover:bg-gray-700/50"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -53,4 +87,4 @@ const SidebarHeaderComponent: React.FC<SidebarHeaderProps> = ({
   );
 };
 
-export default SidebarHeaderComponent;
+export default SidebarHeader;
