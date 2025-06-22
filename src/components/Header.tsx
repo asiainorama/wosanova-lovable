@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, Home, Search, Trash2 } from 'lucide-react';
@@ -58,17 +59,23 @@ const Header: React.FC<HeaderProps> = ({
     return "home";
   };
 
-  // Create links array without admin link (admin access is handled in sidebar)
+  // Create links array with smart filtering
   const getNavigationLinks = () => {
     const activePage = determineActivePage();
     const links = [
-      { text: 'Home', href: '/', icon: null },
       { text: 'Catalog', href: '/catalog', icon: null },
       { text: 'Manage', href: '/manage', icon: null },
     ];
     
-    // Filter out the current active page link to save space
-    return links.filter(link => link.text.toLowerCase() !== activePage);
+    // Filter out current page and apply specific rules
+    let filteredLinks = links.filter(link => link.text.toLowerCase() !== activePage);
+    
+    // Remove trash icon from catalog page
+    if (isCatalogPage) {
+      filteredLinks = filteredLinks.filter(link => link.text.toLowerCase() !== 'manage');
+    }
+    
+    return filteredLinks;
   };
 
   const navigationLinks = getNavigationLinks();
@@ -92,13 +99,15 @@ const Header: React.FC<HeaderProps> = ({
       <div className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 w-full border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="w-full px-4 py-2">
           <div className="flex items-center justify-between gap-4">
-            {/* Left side - app logo and hamburger menu */}
+            {/* Left side - clickeable app logo and hamburger menu */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <img 
-                src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
-                alt="WosaNova Logo" 
-                className="w-8 h-8"
-              />
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
+                  alt="WosaNova Logo" 
+                  className="w-8 h-8 hover:scale-110 transition-transform cursor-pointer"
+                />
+              </Link>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -122,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({
               </div>
             )}
             
-            {/* Right side - navigation icons (excluding current page) */}
+            {/* Right side - navigation icons (filtered smartly) */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {navigationLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
