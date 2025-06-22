@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
-import { prefetchAppLogos } from '@/services/LogoCacheService';
+import { fastImagePreloader } from '@/services/FastImagePreloader';
 
 export const useHomePageLogic = () => {
   const { favorites } = useAppContext();
@@ -12,21 +12,21 @@ export const useHomePageLogic = () => {
     return [...favorites].sort((a, b) => a.name.localeCompare(b.name));
   }, [favorites]);
 
-  // Prefetch logos and set loading state
+  // Inicialización ultrarrápida
   useEffect(() => {
     const initializeHome = async () => {
       if (favorites.length > 0) {
-        await prefetchAppLogos(favorites);
+        // Precarga inmediata de imágenes críticas
+        await fastImagePreloader.preloadCriticalImages(favorites);
       }
       
-      // Very short delay to prevent flash
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 50);
+      // Carga inmediata sin demora
+      setIsLoading(false);
     };
 
     initializeHome();
     
+    // Configurar comportamiento de scroll
     document.body.style.overflowY = 'hidden';
     document.body.style.overflowX = 'auto';
   }, [favorites]);

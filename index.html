@@ -13,11 +13,22 @@
     <meta name="screen-orientation" content="portrait">
     <meta name="orientation" content="portrait">
     
-    <!-- Force cache refresh and prevent caching -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <!-- Aggressive cache control for faster loading -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <meta name="apple-mobile-web-app-cache" content="no" />
+    
+    <!-- DNS prefetch for faster image loading -->
+    <link rel="dns-prefetch" href="//www.google.com">
+    <link rel="dns-prefetch" href="//api.faviconkit.com">
+    <link rel="dns-prefetch" href="//logo.clearbit.com">
+    <link rel="dns-prefetch" href="//cdn-1.webcatalog.io">
+    <link rel="dns-prefetch" href="//cpjnuasoahkwcirpssxt.supabase.co">
+    
+    <!-- Preconnect to critical domains for fastest loading -->
+    <link rel="preconnect" href="https://www.google.com" crossorigin>
+    <link rel="preconnect" href="https://cpjnuasoahkwcirpssxt.supabase.co" crossorigin>
     
     <title>WosaNova</title>
     <meta name="description" content="La mayor colección de WebApps del mundo" />
@@ -54,16 +65,14 @@
     <!-- iPhone 8 Plus, 7 Plus, 6s Plus, 6 Plus (1242px x 2208px) -->
     <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2208.png" />
     
-    <!-- iOS PWA Standalone Mode Detection -->
+    <!-- Aggressive image preloading script -->
     <script type="text/javascript">
+      // Force portrait orientation and cache clearing
       if (("standalone" in window.navigator) && window.navigator.standalone) {
-        // If in standalone mode, prevent default behavior of links
         document.addEventListener('click', function(e) {
-          // Only run this script in standalone mode
           var curNode = e.target;
           var isLink = false;
           
-          // Traverse up from the clicked element to find if it's within an anchor tag
           while (curNode && !isLink) {
             if (curNode.nodeName.toUpperCase() === 'A' && curNode.getAttribute('href')) {
               e.preventDefault();
@@ -75,7 +84,7 @@
         }, false);
       }
       
-      // Force cache refresh on mobile devices
+      // Ultra-aggressive cache clearing for immediate updates
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) {
@@ -84,7 +93,7 @@
         });
       }
       
-      // Clear all caches
+      // Clear all browser caches
       if ('caches' in window) {
         caches.keys().then(function(names) {
           for (let name of names) {
@@ -92,12 +101,32 @@
           }
         });
       }
+      
+      // Force reload from server on page visibility change
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+          // Clear session storage to force fresh data
+          const keysToKeep = ['favorites', 'theme', 'background'];
+          const sessionData = {};
+          keysToKeep.forEach(key => {
+            if (sessionStorage.getItem(key)) {
+              sessionData[key] = sessionStorage.getItem(key);
+            }
+          });
+          
+          sessionStorage.clear();
+          
+          Object.keys(sessionData).forEach(key => {
+            sessionStorage.setItem(key, sessionData[key]);
+          });
+        }
+      });
     </script>
     
     <!-- Web app manifest -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Disable pull to refresh and force portrait orientation -->
+    <!-- Optimized CSS for fastest loading -->
     <style>
       html, body {
         overscroll-behavior-y: none;
@@ -110,6 +139,13 @@
       #root {
         height: 100%;
         background-color: #ffffff;
+      }
+
+      /* Optimized image loading */
+      img {
+        image-rendering: auto;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
       }
 
       /* Force portrait orientation on mobile devices */

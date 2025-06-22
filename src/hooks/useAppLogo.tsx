@@ -3,13 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { getCachedLogo, registerSuccessfulLogo } from '@/services/LogoCacheService';
 import { AppData } from '@/data/apps';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  isIOSOrMacOS,
-  storeSuccessfulIcon,
-  handleImageLoadError,
-  preloadImageForIOSMacOS,
-  checkImagePreloaded
-} from './iconLoading';
 
 interface UseAppLogoResult {
   iconUrl: string;
@@ -21,157 +14,144 @@ interface UseAppLogoResult {
 }
 
 /**
- * Hook to handle app logo loading, caching, and fallbacks with Supabase storage
+ * Hook optimizado para carga ultrarrápida de logos
  */
 export const useAppLogo = (app: AppData): UseAppLogoResult => {
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 2; // Reduced retries for faster loading
+  const [imageLoading, setImageLoading] = useState(false); // Cambio: empezamos con false para carga más rápida
   const imageRef = useRef<HTMLImageElement>(null);
-  const [iconUrl, setIconUrl] = useState<string>(getCachedLogo(app));
-  const [fetchedFromSupabase, setFetchedFromSupabase] = useState(false);
+  const [iconUrl, setIconUrl] = useState<string>(() => {
+    // Obtener URL inmediatamente desde caché o fuente
+    return getCachedLogo(app);
+  });
   
-  // First check Supabase for icon, then fallback to cache
   useEffect(() => {
     let isMounted = true;
     
-    const fetchIconFromSupabase = async () => {
+    const loadIconOptimized = async () => {
       try {
         if (!isMounted) return;
         
-        // Check if we have this icon already in browser cache via sessionStorage
+        // 1. Verificar caché de sesión primero (más rápido)
         const cachedIconKey = `icon_${app.id}`;
         const cachedIcon = sessionStorage.getItem(cachedIconKey);
         
-        if (cachedIcon) {
+        if (cachedIcon && cachedIcon !== iconUrl) {
           setIconUrl(cachedIcon);
-          setImageLoading(false);
-          setFetchedFromSupabase(true);
-          console.log(`Using cached icon for ${app.name} from session storage`);
+          console.log(`Using session cached icon for ${app.name}`);
           return;
         }
         
-        // Add a cache-busting timestamp parameter for the database query
-        const timestamp = Date.now();
+        // 2. Verificar si la imagen ya está precargada en el navegador
+        if (iconUrl && await isImagePreloaded(iconUrl)) {
+          console.log(`Image already preloaded for ${app.name}`);
+          return;
+        }
         
-        // Check if we have this icon in the database
-        const { data: iconData, error: iconError } = await supabase
-          .from('app_icons')
-          .select('icon_url, storage_path')
-          .eq('app_id', app.id)
-          .maybeSingle();
+        // 3. Buscar en Supabase solo si no hay caché
+        const { data: iconData } = await Promise.race([
+          supabase
+            .from('app_icons')
+            .select('icon_url')
+            .eq('app_id', app.id)
+            .maybeSingle(),
+          new Promise(resolve => setTimeout(() => resolve({ data: null }), 300)) // Timeout de 300ms
+        ]) as any;
 
         if (!isMounted) return;
 
-        if (iconData && iconData.icon_url) {
-          // We found the icon in the database, use it with cache busting
-          let url = iconData.icon_url;
-          if (!url.includes('?')) {
-            url = `${url}?t=${timestamp}`;
-          }
-          
-          setIconUrl(url);
-          setImageLoading(false);
-          storeSuccessfulIcon(app, url, false);
-          setFetchedFromSupabase(true);
-          
-          // Store in session storage for faster subsequent loads
-          sessionStorage.setItem(cachedIconKey, url);
-          
-          return;
+        if (iconData?.icon_url && iconData.icon_url !== iconUrl) {
+          const optimizedUrl = `${iconData.icon_url}?t=${Date.now()}`;
+          setIconUrl(optimizedUrl);
+          sessionStorage.setItem(cachedIconKey, optimizedUrl);
+          console.log(`Updated icon from Supabase for ${app.name}`);
         }
-
-        // No icon in database yet, continue with the cached image
-        setFetchedFromSupabase(false);
         
       } catch (err) {
-        console.error('Error fetching app icon from Supabase:', err);
-        // Continue with normal flow
-        setFetchedFromSupabase(false);
+        console.warn('Error in optimized icon loading:', err);
       }
     };
 
-    // Use Promise.race to set a timeout for icon fetching
-    const fetchWithTimeout = async () => {
-      const timeoutPromise = new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-          console.log(`Fetch timeout for ${app.name} icon`);
-        }, 500); // 500ms timeout for faster perceived loading
-      });
-      
-      await Promise.race([fetchIconFromSupabase(), timeoutPromise]);
-    };
+    // Precargar imagen inmediatamente
+    if (iconUrl && !iconUrl.includes('placeholder')) {
+      preloadImage(iconUrl);
+    }
 
-    fetchWithTimeout();
-    
-    // Preload icons for iOS/macOS
-    if (!fetchedFromSupabase) {
-      preloadImageForIOSMacOS(
-        iconUrl,
-        () => {
-          if (isMounted) {
-            setImageLoading(false);
-            storeSuccessfulIcon(app, iconUrl, imageError);
-          }
-        },
-        () => {
-          if (isMounted) {
-            handleImageError();
-          }
-        }
-      );
-    }
-    
-    // Check if image is already loaded from cache
-    if (imageRef.current && imageRef.current.complete) {
-      setImageLoading(false);
-      storeSuccessfulIcon(app, iconUrl, imageError);
-    }
+    loadIconOptimized();
     
     return () => {
       isMounted = false;
     };
   }, [app.id]);
 
-  // Function to handle image error
-  const handleImageError = () => {
-    if (retryCount >= maxRetries) {
-      setImageError(true);
-      setImageLoading(false);
-      return;
-    }
-    
-    console.log(`Error loading icon for ${app.name}, retry ${retryCount + 1} of ${maxRetries}`);
-    
-    handleImageLoadError(
-      app,
-      iconUrl,
-      retryCount,
-      maxRetries,
-      imageRef,
-      (newUrl) => {
-        setRetryCount(retryCount + 1);
-        setIconUrl(newUrl);
-      },
-      () => {
-        setImageError(true);
-        setImageLoading(false);
-      }
-    );
+  // Función optimizada para verificar si una imagen está precargada
+  const isImagePreloaded = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      
+      // Timeout muy corto para no bloquear
+      setTimeout(() => resolve(false), 50);
+      
+      img.src = url;
+    });
   };
 
-  // Function to handle image load
+  // Función para precargar imagen de forma agresiva
+  const preloadImage = (url: string) => {
+    if (typeof window !== 'undefined') {
+      const img = new Image();
+      img.src = url;
+      
+      // Añadir a caché del navegador
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      link.as = 'image';
+      document.head.appendChild(link);
+      
+      // Limpiar después de 5 segundos
+      setTimeout(() => {
+        document.head.removeChild(link);
+      }, 5000);
+    }
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+    
+    // Intentar URL de Google como fallback inmediato
+    try {
+      const domain = new URL(app.url).hostname;
+      const fallbackUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      
+      if (fallbackUrl !== iconUrl) {
+        setIconUrl(fallbackUrl);
+        setImageError(false);
+        preloadImage(fallbackUrl);
+      }
+    } catch (e) {
+      console.warn('Error creating fallback URL:', e);
+    }
+  };
+
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
     
-    // Store in session storage for faster subsequent loads
+    // Almacenar en caché de sesión inmediatamente
     const cachedIconKey = `icon_${app.id}`;
     sessionStorage.setItem(cachedIconKey, iconUrl);
     
-    storeSuccessfulIcon(app, iconUrl, false);
+    // Registrar éxito en segundo plano
+    try {
+      const domain = new URL(app.url).hostname;
+      registerSuccessfulLogo(app.id, iconUrl, domain, 'fast-load');
+    } catch (e) {
+      console.warn('Error registering successful logo:', e);
+    }
   };
   
   return {
