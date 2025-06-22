@@ -9,6 +9,10 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: dark)" />
     
+    <!-- Force portrait orientation on mobile devices -->
+    <meta name="screen-orientation" content="portrait">
+    <meta name="orientation" content="portrait">
+    
     <title>WosaNova</title>
     <meta name="description" content="La mayor colección de WebApps del mundo" />
     <meta name="author" content="WosaNova" />
@@ -69,7 +73,7 @@
     <!-- Web app manifest -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Disable pull to refresh -->
+    <!-- Disable pull to refresh and force portrait orientation -->
     <style>
       html, body {
         overscroll-behavior-y: none;
@@ -82,6 +86,20 @@
       #root {
         height: 100%;
         background-color: #ffffff;
+      }
+
+      /* Force portrait orientation on mobile devices */
+      @media screen and (orientation: landscape) and (max-width: 768px) {
+        html {
+          transform: rotate(90deg);
+          transform-origin: left top;
+          width: 100vh;
+          height: 100vw;
+          overflow-x: hidden;
+          position: absolute;
+          top: 100%;
+          left: 0;
+        }
       }
     </style>
   </head>

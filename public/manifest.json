@@ -39,7 +39,7 @@
     {
       "name": "Favoritos",
       "short_name": "Favoritos",
-      "description": "Ver tus aplicaciones favoritas",
+      "description": "Ver tus aplicaciones favoritas",  
       "url": "/",
       "icons": [{ "src": "/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png", "sizes": "192x192" }]
     }
@@ -61,7 +61,7 @@
     }
   ],
   "categories": ["productivity", "utilities", "tools"],
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "lang": "es",
   "id": "new.wosanova.com",
   "capture_links": "existing-client-navigate",
