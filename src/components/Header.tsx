@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, Home, Search, Trash2 } from 'lucide-react';
@@ -61,16 +60,17 @@ const Header: React.FC<HeaderProps> = ({
 
   // Create links array without admin link (admin access is handled in sidebar)
   const getNavigationLinks = () => {
+    const activePage = determineActivePage();
     const links = [
       { text: 'Home', href: '/', icon: null },
       { text: 'Catalog', href: '/catalog', icon: null },
       { text: 'Manage', href: '/manage', icon: null },
     ];
     
-    return links;
+    // Filter out the current active page link to save space
+    return links.filter(link => link.text.toLowerCase() !== activePage);
   };
 
-  const activePage = determineActivePage();
   const navigationLinks = getNavigationLinks();
 
   // Get sidebar open function from parent or create a default one
@@ -122,18 +122,14 @@ const Header: React.FC<HeaderProps> = ({
               </div>
             )}
             
-            {/* Right side - navigation icons */}
+            {/* Right side - navigation icons (excluding current page) */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {navigationLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Button
-                    variant={activePage === link.text.toLowerCase() ? "default" : "ghost"}
+                    variant="ghost"
                     size="icon"
-                    className={`rounded-full transition-all ${
-                      activePage === link.text.toLowerCase()
-                        ? "bg-primary/90 text-white shadow-lg backdrop-blur-sm"
-                        : "text-gray-500 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10"
-                    }`}
+                    className="text-gray-500 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all"
                     aria-label={link.text}
                   >
                     {link.icon || getIconByName(link.text)}
