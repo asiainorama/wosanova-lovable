@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import UnifiedSearchBar from "@/components/UnifiedSearchBar";
 import AppGrid from "@/components/AppGrid";
 import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
@@ -121,8 +120,6 @@ const Catalog = () => {
     groupedApps[category].sort((a, b) => a.name.localeCompare(b.name));
   });
 
-  const categories = [...new Set(allApps.map(app => app.category))].sort();
-
   const totalPages = Math.ceil(Object.keys(groupedApps).length / itemsPerPage);
   const visibleCategories = sortedCategories.slice(
     (currentPage - 1) * itemsPerPage,
@@ -131,22 +128,15 @@ const Catalog = () => {
 
   return (
     <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto flex flex-col">
-      {/* Header fijo */}
+      {/* Header with integrated search */}
       <div className="sticky top-0 z-50">
-        <Header title="Catálogo" />
-      </div>
-
-      {/* Barra de búsqueda fija */}
-      <div className="sticky top-[60px] z-40 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4 pt-4">
-        <div className="container max-w-7xl mx-auto px-4">
-          <UnifiedSearchBar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            categories={categories}
-          />
-        </div>
+        <Header 
+          title="Catálogo"
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
       </div>
 
       {/* Contenido scrolleable */}

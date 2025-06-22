@@ -1,12 +1,19 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, Home, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAppContext } from '@/contexts/AppContext';
+import UnifiedSearchBar from '@/components/UnifiedSearchBar';
 
 interface HeaderProps {
   title: string;
   onSidebarOpen?: () => void;
+  searchTerm?: string;
+  onSearchChange?: (term: string) => void;
+  selectedCategory?: string | null;
+  onCategoryChange?: (category: string | null) => void;
 }
 
 // Helper function to get icon by name
@@ -25,9 +32,24 @@ const getIconByName = (name: string) => {
   }
 };
 
-const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  title, 
+  onSidebarOpen,
+  searchTerm = '',
+  onSearchChange,
+  selectedCategory = null,
+  onCategoryChange
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { t } = useLanguage();
+  const { allApps } = useAppContext();
+  const location = useLocation();
+
+  // Determine if we're on catalog page to show search
+  const isCatalogPage = location.pathname === '/catalog';
+
+  // Get unique categories from all apps
+  const categories = [...new Set(allApps.map(app => app.category))].sort();
 
   // Determine active page from title
   const determineActivePage = () => {
@@ -69,9 +91,9 @@ const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
       {/* Glassmorphism effect with backdrop blur and translucent background */}
       <div className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 w-full border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="w-full px-4 py-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Left side - app logo and hamburger menu */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <img 
                 src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
                 alt="WosaNova Logo" 
@@ -87,8 +109,21 @@ const Header: React.FC<HeaderProps> = ({ title, onSidebarOpen }) => {
               </Button>
             </div>
             
+            {/* Center - Search Bar (only on catalog page) */}
+            {isCatalogPage && onSearchChange && onCategoryChange && (
+              <div className="flex-1 max-w-md mx-4">
+                <UnifiedSearchBar
+                  searchTerm={searchTerm}
+                  onSearchChange={onSearchChange}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={onCategoryChange}
+                  categories={categories}
+                />
+              </div>
+            )}
+            
             {/* Right side - navigation icons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {navigationLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Button
