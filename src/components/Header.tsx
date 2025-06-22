@@ -98,9 +98,9 @@ const Header: React.FC<HeaderProps> = ({
       {/* Glassmorphism effect with backdrop blur and translucent background */}
       <div className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 w-full border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="w-full px-4 py-2">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-2">
             {/* Left side - clickeable app logo and hamburger menu */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Link to="/" className="flex items-center">
                 <img 
                   src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
@@ -120,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({
             
             {/* Center - Search Bar (only on catalog page) */}
             {isCatalogPage && onSearchChange && onCategoryChange && (
-              <div className="flex-1 max-w-md mx-4">
+              <div className="flex-1 mx-2 max-w-none">
                 <UnifiedSearchBar
                   searchTerm={searchTerm}
                   onSearchChange={onSearchChange}
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({
             )}
             
             {/* Right side - navigation icons (filtered smartly) */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 flex-shrink-0">
               {navigationLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Button
