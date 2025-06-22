@@ -102,7 +102,90 @@ const Catalog = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Group apps by category
+  // If no category is selected, show all apps sorted A-Z without grouping
+  if (!selectedCategory) {
+    const sortedApps = [...filteredApps].sort((a, b) => a.name.localeCompare(b.name));
+    const totalPages = Math.ceil(sortedApps.length / itemsPerPage);
+    const visibleApps = sortedApps.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+    return (
+      <div id="catalog-container" className="min-h-screen bg-white dark:bg-gray-900 overflow-y-auto flex flex-col">
+        {/* Header with integrated search */}
+        <div className="sticky top-0 z-50">
+          <Header 
+            title="Catálogo"
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+
+        {/* Contenido scrolleable */}
+        <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
+          {loading ? (
+            <LoadingIndicator />
+          ) : visibleApps.length > 0 ? (
+            <>
+              <AppGrid 
+                apps={visibleApps}
+                showRemove={false}
+                showManage={false}
+                onShowDetails={undefined}
+              />
+
+              {totalPages > 1 && (
+                <div className="mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          className={cn(currentPage === 1 ? "pointer-events-none opacity-50" : "")}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={page === currentPage}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          className={cn(currentPage === totalPages ? "pointer-events-none opacity-50" : "")}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-gray-500 dark:text-gray-400">
+                {searchTerm.trim() 
+                  ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
+                  : "No hay aplicaciones que coincidan con los criterios de búsqueda"
+                }
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Group apps by category when a specific category is selected
   const groupedApps: Record<string, AppData[]> = {};
   
   filteredApps.forEach(app => {
@@ -127,7 +210,7 @@ const Catalog = () => {
   );
 
   return (
-    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto flex flex-col">
+    <div id="catalog-container" className="min-h-screen bg-white dark:bg-gray-900 overflow-y-auto flex flex-col">
       {/* Header with integrated search */}
       <div className="sticky top-0 z-50">
         <Header 
