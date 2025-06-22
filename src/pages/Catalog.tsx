@@ -6,17 +6,8 @@ import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 // Utility functions
 const mapAppData = (data: any[]): AppData[] => 
@@ -61,8 +52,6 @@ const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
   useScrollBehavior(); // Aplicar comportamiento de scroll adecuado
 
   // Forzar comportamiento vertical para esta página específica
@@ -87,11 +76,6 @@ const Catalog = () => {
     fetchApps(setAllApps, setLoading);
   }, [setAllApps]);
 
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory]);
-
   // Filter apps by search term and category
   const filteredApps = allApps.filter(app => {
     const matchesSearch = searchTerm.trim() 
@@ -105,14 +89,9 @@ const Catalog = () => {
   // If no category is selected, show all apps sorted A-Z without grouping
   if (!selectedCategory) {
     const sortedApps = [...filteredApps].sort((a, b) => a.name.localeCompare(b.name));
-    const totalPages = Math.ceil(sortedApps.length / itemsPerPage);
-    const visibleApps = sortedApps.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
 
     return (
-      <div id="catalog-container" className="min-h-screen bg-white dark:bg-gray-900 overflow-y-auto flex flex-col">
+      <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col">
         {/* Header with integrated search */}
         <div className="sticky top-0 z-50">
           <Header 
@@ -128,48 +107,13 @@ const Catalog = () => {
         <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
           {loading ? (
             <LoadingIndicator />
-          ) : visibleApps.length > 0 ? (
-            <>
-              <AppGrid 
-                apps={visibleApps}
-                showRemove={false}
-                showManage={false}
-                onShowDetails={undefined}
-              />
-
-              {totalPages > 1 && (
-                <div className="mt-8">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                          className={cn(currentPage === 1 ? "pointer-events-none opacity-50" : "")}
-                        />
-                      </PaginationItem>
-                      
-                      {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={page === currentPage}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                          className={cn(currentPage === totalPages ? "pointer-events-none opacity-50" : "")}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
-            </>
+          ) : sortedApps.length > 0 ? (
+            <AppGrid 
+              apps={sortedApps}
+              showRemove={false}
+              showManage={false}
+              onShowDetails={undefined}
+            />
           ) : (
             <div className="text-center py-10">
               <p className="text-gray-500 dark:text-gray-400">
@@ -203,14 +147,8 @@ const Catalog = () => {
     groupedApps[category].sort((a, b) => a.name.localeCompare(b.name));
   });
 
-  const totalPages = Math.ceil(Object.keys(groupedApps).length / itemsPerPage);
-  const visibleCategories = sortedCategories.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   return (
-    <div id="catalog-container" className="min-h-screen bg-white dark:bg-gray-900 overflow-y-auto flex flex-col">
+    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col">
       {/* Header with integrated search */}
       <div className="sticky top-0 z-50">
         <Header 
@@ -226,9 +164,9 @@ const Catalog = () => {
       <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <LoadingIndicator />
-        ) : visibleCategories.length > 0 ? (
+        ) : sortedCategories.length > 0 ? (
           <>
-            {visibleCategories.map(category => (
+            {sortedCategories.map(category => (
               <div key={category} className="mb-8">
                 <h2 className="text-xl font-semibold mb-3 dark:text-white">{category}</h2>
                 <Separator className="mb-4" />
@@ -240,39 +178,6 @@ const Catalog = () => {
                 />
               </div>
             ))}
-
-            {totalPages > 1 && (
-              <div className="mt-8">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        className={cn(currentPage === 1 ? "pointer-events-none opacity-50" : "")}
-                      />
-                    </PaginationItem>
-                    
-                    {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={page === currentPage}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        className={cn(currentPage === totalPages ? "pointer-events-none opacity-50" : "")}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
           </>
         ) : (
           <div className="text-center py-10">
