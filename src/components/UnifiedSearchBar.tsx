@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -56,7 +57,6 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Manejar teclas
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen) return;
@@ -130,7 +130,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
 
   const getPlaceholder = () => {
     if (selectedCategory) {
-      return `Filtrando por: ${translateCategory(selectedCategory)}`;
+      return translateCategory(selectedCategory);
     }
     return 'Buscar y Filtrar';
   };

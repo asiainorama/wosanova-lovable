@@ -38,7 +38,7 @@ const GridCard: React.FC<GridCardProps> = ({
       className={`relative overflow-hidden transition-all duration-300 backdrop-blur-lg bg-gray-800/70 border-gray-600/30 shadow-xl shadow-black/20 rounded-3xl ${handleClick ? 'hover:shadow-2xl hover:scale-[1.02] cursor-pointer hover:bg-gray-800/80' : ''}`}
       onClick={handleClick ? handleClick : undefined}
     >
-      <div className="p-5 flex flex-col">
+      <div className="p-5 flex flex-col h-full">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
             {imageLoading && (
@@ -69,11 +69,11 @@ const GridCard: React.FC<GridCardProps> = ({
           </div>
 
           {app.isAI && (
-            <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20 rounded-full">AI</Badge>
+            <Badge variant="outline" className="ml-2 bg-white text-primary border-primary/20 rounded-full font-medium">AI</Badge>
           )}
         </div>
         
-        <p className="text-sm text-gray-200 line-clamp-2 mb-3 flex-grow">
+        <p className="text-sm text-gray-200 line-clamp-2 mb-4 flex-grow">
           {app.description}
         </p>
         

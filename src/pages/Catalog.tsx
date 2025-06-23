@@ -6,7 +6,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { AppData } from "@/data/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
+import GradientSeparator from "@/components/ui/GradientSeparator";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 
 // Utility functions
@@ -107,22 +107,28 @@ const Catalog = () => {
         <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
           {loading ? (
             <LoadingIndicator />
-          ) : sortedApps.length > 0 ? (
-            <AppGrid 
-              apps={sortedApps}
-              showRemove={false}
-              showManage={false}
-              onShowDetails={undefined}
-            />
           ) : (
-            <div className="text-center py-10">
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm.trim() 
-                  ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
-                  : "No hay aplicaciones que coincidan con los criterios de búsqueda"
-                }
-              </p>
-            </div>
+            <>
+              <h2 className="text-xl font-semibold mb-3 dark:text-white">Todas las categorías</h2>
+              <GradientSeparator />
+              {sortedApps.length > 0 ? (
+                <AppGrid 
+                  apps={sortedApps}
+                  showRemove={false}
+                  showManage={false}
+                  onShowDetails={undefined}
+                />
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {searchTerm.trim() 
+                      ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
+                      : "No hay aplicaciones que coincidan con los criterios de búsqueda"
+                    }
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -169,7 +175,7 @@ const Catalog = () => {
             {sortedCategories.map(category => (
               <div key={category} className="mb-8">
                 <h2 className="text-xl font-semibold mb-3 dark:text-white">{category}</h2>
-                <Separator className="mb-4" />
+                <GradientSeparator />
                 <AppGrid 
                   apps={groupedApps[category]}
                   showRemove={false}
@@ -196,9 +202,9 @@ const Catalog = () => {
   );
 };
 
-// Extracted Component
+// Extracted Component - Centered loading indicator
 const LoadingIndicator = () => (
-  <div className="flex justify-center items-center h-64">
+  <div className="flex justify-center items-center h-full min-h-[60vh]">
     <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
   </div>
 );
