@@ -36,13 +36,13 @@ const CarouselGridPage: React.FC<CarouselGridPageProps> = ({
           gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
           alignContent: 'space-evenly',
           justifyContent: 'space-evenly',
-          padding: isLandscapeMobile ? '0.5% 1%' : '0.5% 1%', // Reduced padding for more space
+          padding: isLandscapeMobile ? '0.25% 1%' : '0.25% 1%', // Reducido solo verticalmente
           width: '100%',
-          // Reduced height offset to fit more content
-          height: isLandscapeMobile ? `calc(100vh - 120px)` : `calc(100vh - 160px)`, // Reduced from 140px/200px
+          // Reducir aún más la altura para conseguir espacio para filas adicionales
+          height: isLandscapeMobile ? `calc(100vh - 100px)` : `calc(100vh - 130px)`, // Reducido más agresivamente
           margin: '0 auto',
           maxWidth: 'min(100%, 1200px)',
-          gap: isLandscapeMobile ? '1px' : '4px' // Reduced gap from 2px/8px to 1px/4px
+          gap: isLandscapeMobile ? '0.5px' : '2px' // Gap muy reducido para ganar espacio vertical
         }}
       >
         {pageApps.map((app, index) => (

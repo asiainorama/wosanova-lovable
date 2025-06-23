@@ -35,26 +35,26 @@ const HomeCard: React.FC<HomeCardProps> = ({
   // Detectar móvil horizontal
   const isLandscapeMobile = window.innerWidth > window.innerHeight && window.innerWidth < 768;
   
-  // Responsive icon sizes: reduced for better fit
+  // Responsive icon sizes: tamaños originales restaurados
   const iconSize = isLandscapeMobile
-    ? "w-6 h-6 md:w-8 md:h-8" // Reduced from w-7 h-7
+    ? "w-8 h-8 md:w-10 md:h-10" // Restaurado tamaño original
     : smallerIcons 
-      ? "w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" // Reduced sizes
-      : "w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:w-16"; // Reduced sizes
+      ? "w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14" // Restaurado tamaño original
+      : "w-12 h-12 md:w-16 md:h-16 lg:w-18 lg:h-18"; // Restaurado tamaño original
     
-  // Responsive button sizes
+  // Responsive button sizes: tamaños originales restaurados
   const buttonSize = isLandscapeMobile
-    ? "h-2.5 w-2.5" // Reduced from h-3 w-3
+    ? "h-3 w-3" // Restaurado tamaño original
     : smallerIcons 
-      ? "h-3.5 w-3.5 md:h-4 md:w-4 lg:h-5 lg:h-5" // Reduced sizes
-      : "h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6"; // Reduced sizes
+      ? "h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6" // Restaurado tamaño original
+      : "h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7"; // Restaurado tamaño original
     
-  // Responsive button icon sizes  
+  // Responsive button icon sizes: tamaños originales restaurados
   const buttonIconSize = isLandscapeMobile
-    ? "h-1 w-1" // Reduced from h-1.5 w-1.5
+    ? "h-1.5 w-1.5" // Restaurado tamaño original
     : smallerIcons 
-      ? "h-1.5 w-1.5 md:h-2 md:w-2 lg:h-2.5 lg:w-2.5" // Reduced sizes
-      : "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3"; // Reduced sizes
+      ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" // Restaurado tamaño original
+      : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5"; // Restaurado tamaño original
 
   // Determinar el color del texto según el fondo (fuerza texto oscuro para fondos claros)
   const textColorClass = isLightBackground() 
@@ -69,8 +69,8 @@ const HomeCard: React.FC<HomeCardProps> = ({
       className="flex flex-col items-center cursor-pointer h-full w-full"
       onClick={handleClick}
       style={{
-        gap: isLandscapeMobile ? '0.1rem' : '0.15rem', // Reduced gap even more
-        padding: isLandscapeMobile ? '0.1rem' : '0.15rem' // Reduced padding
+        gap: isLandscapeMobile ? '0.05rem' : '0.1rem', // Reducido solo el gap vertical
+        padding: isLandscapeMobile ? '0.05rem' : '0.1rem' // Reducido solo el padding
       }}
     >
       <div className="relative flex-shrink-0">
@@ -130,12 +130,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
         className={`font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
-          lineHeight: isLandscapeMobile ? '0.8' : '1.0', // Reduced line height
+          lineHeight: isLandscapeMobile ? '0.9' : '1.1', // Ligeramente reducido
           wordWrap: 'break-word',
           hyphens: 'auto',
-          fontSize: isLandscapeMobile ? '0.55rem' : smallerIcons ? '0.65rem' : '0.75rem', // Reduced font sizes
-          minHeight: isLandscapeMobile ? '1.0rem' : 'auto', // Reduced minimum height
-          maxHeight: isLandscapeMobile ? '1.6rem' : '2.0rem' // Reduced max height
+          fontSize: isLandscapeMobile ? '0.6rem' : smallerIcons ? '0.7rem' : '0.8rem', // Tamaños originales restaurados
+          minHeight: isLandscapeMobile ? '1.1rem' : 'auto', // Ligeramente reducido
+          maxHeight: isLandscapeMobile ? '1.8rem' : '2.2rem' // Ligeramente reducido
         }}
       >
         {app.name}

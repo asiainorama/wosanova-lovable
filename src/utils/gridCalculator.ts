@@ -6,15 +6,15 @@ export function calculateMinCellHeight(rows: number): string {
   const viewportHeight = window.innerHeight;
   const headerHeight = 120; // Header + padding
   const paginationHeight = 60; // Space for pagination dots
-  const containerPadding = 40; // Container padding top/bottom
-  const textSpace = 40; // Reduced from 60 to 40 to save space
+  const containerPadding = 30; // Reducido para ganar espacio
+  const textSpace = 25; // Reducido aún más para ganar espacio vertical
   const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
   
   // Para móvil horizontal con 2 filas, optimizar espacio
   if (rows === 2 && window.innerWidth > window.innerHeight) {
     const cellHeight = Math.floor((availableHeight - textSpace) / 2);
     // Altura mínima reducida para móvil horizontal
-    return `${Math.max(cellHeight, 120)}px`; // Reduced from 140 to 120
+    return `${Math.max(cellHeight, 110)}px`; // Reducido aún más
   }
   
   return `${Math.floor((availableHeight - textSpace) / rows)}px`;
@@ -33,12 +33,12 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   // Calculate available height considering header, pagination, and text space
   const headerHeight = 120;
   const paginationHeight = 60;
-  const paddingBuffer = 40;
-  const textSpace = 30; // Reduced from 50 to 30 for more space
+  const paddingBuffer = 30; // Reducido para ganar espacio
+  const textSpace = 20; // Reducido aún más para conseguir espacio para más filas
   const availableHeight = height - headerHeight - paginationHeight - paddingBuffer - textSpace;
   
   // Base cell height estimates - reducidos para conseguir más filas
-  const baseCellHeight = smallerIcons ? 80 : 100; // Reduced from 100/120 to 80/100
+  const baseCellHeight = smallerIcons ? 70 : 85; // Reducido aún más para conseguir más filas
   const maxRows = Math.floor(availableHeight / baseCellHeight);
   
   // MÓVIL: Detectar móvil primero, antes que tablet
@@ -52,8 +52,8 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
       console.log("Mobile landscape config (forced 2 rows):", config);
       return config;
     } else {
-      // Móvil vertical: aumentar a 5 filas máximo
-      const mobileRows = Math.min(maxRows, 5); // Increased from 4 to 5
+      // Móvil vertical: aumentar a 6 filas máximo
+      const mobileRows = Math.min(maxRows, 6); // Increased from 5 to 6
       const config = { cols: 4, rows: mobileRows };
       console.log("Mobile portrait config:", config);
       return config;
@@ -62,7 +62,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // iPad (768px - 1024px) - solo si no es móvil
   if (width >= 768 && width <= 1024) {
-    const rows = Math.min(maxRows, isLandscape ? 5 : 6); // Increased from 4/5 to 5/6
+    const rows = Math.min(maxRows, isLandscape ? 6 : 7); // Increased from 5/6 to 6/7
     const config = isLandscape ? { cols: 6, rows } : { cols: 5, rows };
     console.log("iPad config:", config);
     return config;
@@ -70,7 +70,7 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Laptop (1024px - 1440px)
   if (width > 1024 && width <= 1440) {
-    const rows = Math.min(maxRows, 5); // Increased from 4 to 5
+    const rows = Math.min(maxRows, 6); // Increased from 5 to 6
     const config = { cols: 6, rows };
     console.log("Laptop config:", config);
     return config;
@@ -78,14 +78,14 @@ export function calculateOptimalGrid(smallerIcons: boolean = false) {
   
   // Large screens (>1440px)
   if (width > 1440) {
-    const rows = Math.min(maxRows, 6); // Increased from 5 to 6
+    const rows = Math.min(maxRows, 7); // Increased from 6 to 7
     const config = { cols: 6, rows };
     console.log("Large screen config:", config);
     return config;
   }
   
   // Fallback (no debería llegar aquí)
-  const config = { cols: 4, rows: 4 }; // Increased from 3 to 4
+  const config = { cols: 4, rows: 5 }; // Increased from 4 to 5
   console.log("Fallback config:", config);
   return config;
 }
