@@ -35,7 +35,7 @@ const GridCard: React.FC<GridCardProps> = ({
   
   return (
     <Card 
-      className={`relative overflow-hidden transition-all duration-300 backdrop-blur-md bg-gray-100/80 dark:bg-gray-800/80 border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-black/5 dark:shadow-black/20 rounded-2xl ${handleClick ? 'hover:shadow-xl hover:scale-[1.02] cursor-pointer' : ''}`}
+      className={`relative overflow-hidden transition-all duration-300 backdrop-blur-md bg-gray-700/90 dark:bg-gray-700/90 border-gray-600/50 dark:border-gray-600/50 shadow-lg shadow-black/10 dark:shadow-black/30 rounded-2xl ${handleClick ? 'hover:shadow-xl hover:scale-[1.02] cursor-pointer' : ''}`}
       onClick={handleClick ? handleClick : undefined}
     >
       <div className="p-5 flex flex-col">
@@ -63,8 +63,8 @@ const GridCard: React.FC<GridCardProps> = ({
             )}
             
             <div className="ml-3 flex-grow">
-              <h3 className="font-semibold line-clamp-1 dark:text-white text-gray-900">{app.name}</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">{app.category}</p>
+              <h3 className="font-semibold line-clamp-1 text-white">{app.name}</h3>
+              <p className="text-xs text-gray-300">{app.category}</p>
             </div>
           </div>
 
@@ -73,7 +73,7 @@ const GridCard: React.FC<GridCardProps> = ({
           )}
         </div>
         
-        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-3 flex-grow">
+        <p className="text-sm text-gray-200 line-clamp-2 mb-3 flex-grow">
           {app.description}
         </p>
         
@@ -81,7 +81,7 @@ const GridCard: React.FC<GridCardProps> = ({
           <Button 
             size="sm" 
             variant="outline"
-            className="text-xs bg-gray-800 hover:bg-gray-900 text-white border-gray-700 hover:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600 dark:hover:border-gray-500 rounded-lg"
+            className="text-xs bg-gray-900 hover:bg-black text-white border-gray-800 hover:border-gray-700 rounded-lg"
             onClick={(e) => {
               e.stopPropagation();
               window.open(app.url, "_blank");

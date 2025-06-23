@@ -91,7 +91,7 @@ const Catalog = () => {
     const sortedApps = [...filteredApps].sort((a, b) => a.name.localeCompare(b.name));
 
     return (
-      <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col">
+      <div id="catalog-container" className="min-h-screen bg-gray-100 dark:bg-gray-950 overflow-y-auto flex flex-col">
         {/* Header with integrated search */}
         <div className="sticky top-0 z-50">
           <Header 
@@ -148,7 +148,7 @@ const Catalog = () => {
   });
 
   return (
-    <div id="catalog-container" className="min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto flex flex-col">
+    <div id="catalog-container" className="min-h-screen bg-gray-100 dark:bg-gray-950 overflow-y-auto flex flex-col">
       {/* Header with integrated search */}
       <div className="sticky top-0 z-50">
         <Header 
