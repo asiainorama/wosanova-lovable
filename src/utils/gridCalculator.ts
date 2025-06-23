@@ -6,15 +6,16 @@ export function calculateMinCellHeight(rows: number): string {
   const viewportHeight = window.innerHeight;
   const headerHeight = 120; // Header + padding
   const paginationHeight = 60; // Space for pagination dots
-  const containerPadding = 30; // Reducido para ganar espacio
-  const textSpace = 25; // Reducido aún más para ganar espacio vertical
-  const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding;
+  const containerPadding = 30;
+  const textSpace = 20;
+  const topMargin = 30; // Nuevo margen superior
+  const bottomMargin = 15; // Nuevo margen inferior
+  const availableHeight = viewportHeight - headerHeight - paginationHeight - containerPadding - topMargin - bottomMargin;
   
   // Para móvil horizontal con 2 filas, optimizar espacio
   if (rows === 2 && window.innerWidth > window.innerHeight) {
     const cellHeight = Math.floor((availableHeight - textSpace) / 2);
-    // Altura mínima reducida para móvil horizontal
-    return `${Math.max(cellHeight, 110)}px`; // Reducido aún más
+    return `${Math.max(cellHeight, 110)}px`;
   }
   
   return `${Math.floor((availableHeight - textSpace) / rows)}px`;
