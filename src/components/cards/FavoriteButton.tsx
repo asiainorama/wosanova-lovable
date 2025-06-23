@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 
 interface FavoriteButtonProps {
@@ -18,14 +17,11 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   className = '',
   size = 'normal'
 }) => {
-  const buttonSize = size === 'small' ? 'h-5 w-5' : 'h-6 w-6';
-  const iconSize = size === 'small' ? 'h-2.5 w-2.5' : 'h-3 w-3';
+  const iconSize = size === 'small' ? 'h-4 w-4' : 'h-5 w-5';
   
   return (
-    <Button 
-      size="sm"
-      variant="outline"
-      className={`${buttonSize} rounded-full p-0 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90 ${className}`}
+    <button 
+      className={`p-1 rounded-md transition-all duration-200 hover:bg-white/10 ${className}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick(e);
@@ -34,9 +30,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       title={favorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
     >
       <Heart 
-        className={`${iconSize} ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+        className={`${iconSize} transition-colors duration-200 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-gray-300'}`} 
       />
-    </Button>
+    </button>
   );
 };
 

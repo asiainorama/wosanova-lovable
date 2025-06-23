@@ -35,7 +35,7 @@ const GridCard: React.FC<GridCardProps> = ({
   
   return (
     <Card 
-      className={`relative overflow-hidden transition-all duration-300 backdrop-blur-md bg-gray-700/90 dark:bg-gray-700/90 border-gray-600/50 dark:border-gray-600/50 shadow-lg shadow-black/10 dark:shadow-black/30 rounded-2xl ${handleClick ? 'hover:shadow-xl hover:scale-[1.02] cursor-pointer' : ''}`}
+      className={`relative overflow-hidden transition-all duration-300 backdrop-blur-lg bg-gray-800/70 border-gray-600/30 shadow-xl shadow-black/20 rounded-3xl ${handleClick ? 'hover:shadow-2xl hover:scale-[1.02] cursor-pointer hover:bg-gray-800/80' : ''}`}
       onClick={handleClick ? handleClick : undefined}
     >
       <div className="p-5 flex flex-col">
