@@ -68,7 +68,7 @@ const WebappSuggestionsTable: React.FC = () => {
           loadSuggestions();
         }, 1000);
       } else {
-        toast.error(`Error en el proceso: ${result.error}`);
+        toast.error('Error en el proceso de sugerencias');
       }
     } catch (error) {
       console.error('Error running process:', error);
@@ -170,7 +170,9 @@ const WebappSuggestionsTable: React.FC = () => {
                     Procesados: {processResult.processed} | Guardados: {processResult.saved}
                   </p>
                 ) : (
-                  <p className="text-sm text-red-600">{processResult.error}</p>
+                  <p className="text-sm text-red-600">
+                    {processResult.error || 'Error desconocido en el proceso'}
+                  </p>
                 )}
                 {processResult.debug && (
                   <details className="mt-2">
