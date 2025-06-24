@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,13 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { 
-  fetchWebappSuggestions, 
   updateWebappSuggestion, 
   publishWebappSuggestion, 
   discardWebappSuggestion,
   runWebappSuggestionsProcess,
   WebappSuggestion 
 } from '@/services/WebappSuggestionsService';
+import { useWebappSuggestions } from '@/hooks/useWebappSuggestions';
 import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle } from 'lucide-react';
 
 const CATEGORIAS = [
@@ -23,56 +23,11 @@ const CATEGORIAS = [
 ];
 
 const WebappSuggestionsTable: React.FC = () => {
-  const [suggestions, setSuggestions] = useState<WebappSuggestion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { suggestions, loading, error, refetch } = useWebappSuggestions();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<WebappSuggestion>>({});
   const [processing, setProcessing] = useState(false);
   const [processResult, setProcessResult] = useState<any>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-
-  useEffect(() => {
-    console.log('WebappSuggestionsTable: Component mounted, starting initial load');
-    loadSuggestions();
-  }, []);
-
-  const loadSuggestions = async () => {
-    try {
-      console.log('=== LOADING SUGGESTIONS START ===');
-      setLoading(true);
-      setDebugInfo(null);
-      
-      const data = await fetchWebappSuggestions();
-      console.log('Suggestions loaded successfully:', data);
-      setSuggestions(data);
-      
-      // Guardar info de debug
-      setDebugInfo({
-        timestamp: new Date().toISOString(),
-        suggestionsCount: data.length,
-        suggestions: data.map(s => ({ id: s.id, nombre: s.nombre, estado: s.estado }))
-      });
-      
-      if (data.length === 0) {
-        console.log('No suggestions found - checking if table has any data at all...');
-        toast.info('No se encontraron sugerencias pendientes');
-      } else {
-        toast.success(`${data.length} sugerencias cargadas`);
-      }
-      console.log('=== LOADING SUGGESTIONS END ===');
-    } catch (error) {
-      console.error('=== ERROR LOADING SUGGESTIONS ===');
-      console.error('Error details:', error);
-      setDebugInfo({
-        timestamp: new Date().toISOString(),
-        error: error.message,
-        errorDetails: error
-      });
-      toast.error(`Error al cargar sugerencias: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRunProcess = async () => {
     try {
@@ -91,7 +46,7 @@ const WebappSuggestionsTable: React.FC = () => {
         
         // Recargar sugerencias después de un breve delay
         setTimeout(() => {
-          loadSuggestions();
+          refetch();
         }, 1000);
       } else {
         toast.error('Error en el proceso de sugerencias');
@@ -125,7 +80,7 @@ const WebappSuggestionsTable: React.FC = () => {
       toast.success('Sugerencia actualizada');
       setEditingId(null);
       setEditForm({});
-      await loadSuggestions();
+      await refetch();
     } catch (error) {
       toast.error('Error al actualizar sugerencia');
     }
@@ -135,7 +90,7 @@ const WebappSuggestionsTable: React.FC = () => {
     try {
       await publishWebappSuggestion(suggestion);
       toast.success(`"${suggestion.nombre}" publicada en el catálogo`);
-      await loadSuggestions();
+      await refetch();
     } catch (error) {
       toast.error('Error al publicar sugerencia');
     }
@@ -145,7 +100,7 @@ const WebappSuggestionsTable: React.FC = () => {
     try {
       await discardWebappSuggestion(id);
       toast.success('Sugerencia descartada');
-      await loadSuggestions();
+      await refetch();
     } catch (error) {
       toast.error('Error al descartar sugerencia');
     }
@@ -163,22 +118,33 @@ const WebappSuggestionsTable: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <div>
+              <p className="font-medium text-red-800">Error al cargar sugerencias</p>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={refetch}
+                className="mt-3"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reintentar
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Debug info card */}
-      {debugInfo && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="text-sm">
-              <h4 className="font-medium mb-2">Debug Info:</h4>
-              <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-32">
-                {JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-semibold">Sugerencias de Webapps</h2>
@@ -189,7 +155,7 @@ const WebappSuggestionsTable: React.FC = () => {
         <div className="flex gap-2">
           <Button 
             variant="outline"
-            onClick={loadSuggestions}
+            onClick={refetch}
             disabled={loading}
             size="sm"
           >
@@ -232,14 +198,6 @@ const WebappSuggestionsTable: React.FC = () => {
                   <p className="text-sm text-red-600">
                     {processResult.error || 'Error desconocido en el proceso'}
                   </p>
-                )}
-                {processResult.debug && (
-                  <details className="mt-2">
-                    <summary className="text-sm cursor-pointer">Ver detalles</summary>
-                    <pre className="text-xs mt-1 p-2 bg-gray-100 rounded">
-                      {JSON.stringify(processResult.debug, null, 2)}
-                    </pre>
-                  </details>
                 )}
               </div>
             </div>

@@ -6,14 +6,17 @@ import { fetchWebappSuggestions, WebappSuggestion } from '@/services/WebappSugge
 export const useWebappSuggestions = () => {
   const [suggestions, setSuggestions] = useState<WebappSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadSuggestions = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await fetchWebappSuggestions();
       setSuggestions(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading suggestions:', error);
+      setError(error.message || 'Error al cargar sugerencias');
     } finally {
       setLoading(false);
     }
@@ -47,6 +50,7 @@ export const useWebappSuggestions = () => {
   return {
     suggestions,
     loading,
+    error,
     refetch: loadSuggestions
   };
 };

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WebappSuggestion {
@@ -27,7 +28,7 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
       console.error('Session error:', sessionError);
     }
 
-    // Intentar la consulta con logging detallado
+    // Intentar la consulta directamente - la función is_admin_user() maneja la verificación
     console.log('Attempting to fetch from webapp_suggestions table...');
     const { data, error, count } = await supabase
       .from('webapp_suggestions')
