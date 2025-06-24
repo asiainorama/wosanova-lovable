@@ -1,43 +1,37 @@
 
-import { ReactNode } from "react";
+import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AdminLayoutProps {
-  children: ReactNode;
-  activeTab?: string;
-  onTabChange?: (value: string) => void;
+  activeTab: string;
+  onTabChange: (value: string) => void;
+  children: React.ReactNode;
 }
 
-const AdminLayout = ({ children, activeTab = "apps", onTabChange }: AdminLayoutProps) => {
-  const handleTabChange = (value: string) => {
-    if (onTabChange) {
-      onTabChange(value);
-    }
-  };
+const TABS = {
+  APPS: "apps",
+  USERS: "users",
+  SUGGESTIONS: "suggestions",
+};
 
+const AdminLayout: React.FC<AdminLayoutProps> = ({
+  activeTab,
+  onTabChange,
+  children,
+}) => {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          {/* Admin Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="apps">Aplicaciones</TabsTrigger>
-              <TabsTrigger value="users">Usuarios</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
+    <div className="w-full">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value={TABS.APPS}>Apps</TabsTrigger>
+          <TabsTrigger value={TABS.USERS}>Usuarios</TabsTrigger>
+          <TabsTrigger value={TABS.SUGGESTIONS}>Sugerencias</TabsTrigger>
+        </TabsList>
+        
+        <div className="mt-6">
           {children}
         </div>
-      </main>
-
-      {/* Admin Footer */}
-      <footer className="bg-white dark:bg-gray-800 shadow-inner mt-8">
-        <div className="container mx-auto px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-          Panel de Administración WosaNova &copy; {new Date().getFullYear()}
-        </div>
-      </footer>
+      </Tabs>
     </div>
   );
 };

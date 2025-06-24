@@ -162,6 +162,48 @@ export type Database = {
         }
         Relationships: []
       }
+      webapp_suggestions: {
+        Row: {
+          categoria: string
+          created_at: string
+          descripcion: string
+          estado: string
+          etiquetas: string[] | null
+          icono_url: string | null
+          id: string
+          nombre: string
+          updated_at: string
+          url: string
+          usa_ia: boolean | null
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          descripcion: string
+          estado?: string
+          etiquetas?: string[] | null
+          icono_url?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string
+          url: string
+          usa_ia?: boolean | null
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          descripcion?: string
+          estado?: string
+          etiquetas?: string[] | null
+          icono_url?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string
+          url?: string
+          usa_ia?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

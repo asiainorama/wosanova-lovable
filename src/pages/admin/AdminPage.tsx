@@ -13,6 +13,7 @@ import AdminContent from "./components/AdminContent";
 const TABS = {
   APPS: "apps",
   USERS: "users",
+  SUGGESTIONS: "suggestions",
 };
 
 const AdminPage = () => {
@@ -47,7 +48,7 @@ const AdminPage = () => {
     }
   };
 
-  const handleEditApp = (app: AppData) => {
+  const handleEdit = (app: AppData) => {
     setEditingApp(app);
     setShowForm(true);
   };
@@ -102,7 +103,7 @@ const AdminPage = () => {
               activeTab={activeTab}
               apps={apps}
               onAdd={handleAddApp}
-              onEdit={handleEditApp}
+              onEdit={handleEdit}
               onDelete={handleDeleteApp}
               onReloadApps={loadApps}
             />
