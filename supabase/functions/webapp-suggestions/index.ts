@@ -38,45 +38,99 @@ serve(async (req) => {
     console.log('Starting webapp suggestions process...')
 
     // 1. Fetch Product Hunt RSS feed
+    console.log('Fetching Product Hunt RSS feed...')
     const rssResponse = await fetch('https://www.producthunt.com/feed')
-    const rssText = await rssResponse.text()
     
-    // Parse RSS manually (basic XML parsing)
+    if (!rssResponse.ok) {
+      throw new Error(`Failed to fetch RSS: ${rssResponse.status} ${rssResponse.statusText}`)
+    }
+    
+    const rssText = await rssResponse.text()
+    console.log('RSS response length:', rssText.length)
+    
+    // Parse RSS with improved parsing
     const items = parseRSS(rssText)
     console.log(`Found ${items.length} items from RSS feed`)
 
-    // 2. Filter items with valid URLs
-    const validItems = items.filter(item => 
-      item.link && 
-      item.link.startsWith('http') && 
-      !item.link.includes('producthunt.com')
-    ).slice(0, 10) // Limit to 10 items per run
+    if (items.length === 0) {
+      console.log('No items found in RSS feed, checking feed content sample:', rssText.substring(0, 500))
+    }
+
+    // 2. Filter items with valid URLs - less restrictive filtering
+    const validItems = items.filter(item => {
+      const hasValidUrl = item.link && item.link.startsWith('http')
+      const isNotProductHunt = !item.link.includes('producthunt.com')
+      const hasTitle = item.title && item.title.trim().length > 0
+      const hasDescription = item.description && item.description.trim().length > 0
+      
+      if (!hasValidUrl) console.log('Invalid URL:', item.link)
+      if (!isNotProductHunt) console.log('ProductHunt URL filtered:', item.link)
+      if (!hasTitle) console.log('No title:', item.title)
+      if (!hasDescription) console.log('No description:', item.description)
+      
+      return hasValidUrl && isNotProductHunt && hasTitle && hasDescription
+    }).slice(0, 5) // Reduce to 5 items for testing
 
     console.log(`Processing ${validItems.length} valid items`)
+    
+    if (validItems.length === 0) {
+      console.log('No valid items after filtering. Sample of all items:')
+      items.slice(0, 3).forEach((item, i) => {
+        console.log(`Item ${i + 1}:`, {
+          title: item.title?.substring(0, 50),
+          link: item.link?.substring(0, 100),
+          description: item.description?.substring(0, 50)
+        })
+      })
+    }
 
     const suggestions: any[] = []
 
     // 3. Process each item with Groq API
-    for (const item of validItems) {
+    for (const [index, item] of validItems.entries()) {
+      console.log(`Processing item ${index + 1}/${validItems.length}: ${item.title}`)
+      
       try {
+        // Check if URL is accessible with timeout
+        console.log(`Checking URL accessibility: ${item.link}`)
+        const urlCheckController = new AbortController()
+        const timeoutId = setTimeout(() => urlCheckController.abort(), 5000) // 5 second timeout
+        
+        try {
+          const urlCheck = await fetch(item.link, { 
+            method: 'HEAD',
+            signal: urlCheckController.signal
+          })
+          clearTimeout(timeoutId)
+          
+          if (!urlCheck.ok) {
+            console.log(`URL not accessible: ${item.link} - Status: ${urlCheck.status}`)
+            continue
+          }
+        } catch (urlError) {
+          clearTimeout(timeoutId)
+          console.log(`URL check failed for ${item.link}:`, urlError.message)
+          continue
+        }
+
         const suggestion = await processWithGroq(item)
         if (suggestion) {
           // Get icon from Clearbit
           const domain = new URL(suggestion.url).hostname
           const iconUrl = `https://logo.clearbit.com/${domain}`
           
-          // Check if URL is accessible
-          const urlCheck = await fetch(suggestion.url, { method: 'HEAD' })
-          if (urlCheck.ok) {
-            suggestions.push({
-              ...suggestion,
-              icono_url: iconUrl,
-              estado: 'borrador'
-            })
-          }
+          suggestions.push({
+            ...suggestion,
+            icono_url: iconUrl,
+            estado: 'borrador'
+          })
+          
+          console.log(`Successfully processed: ${suggestion.nombre}`)
+        } else {
+          console.log(`Failed to process with Groq: ${item.title}`)
         }
       } catch (error) {
-        console.error('Error processing item:', error)
+        console.error(`Error processing item "${item.title}":`, error.message)
       }
     }
 
@@ -84,6 +138,7 @@ serve(async (req) => {
 
     // 4. Save to Supabase
     if (suggestions.length > 0) {
+      console.log('Saving suggestions to database...')
       const { data, error } = await supabase
         .from('webapp_suggestions')
         .insert(suggestions)
@@ -93,14 +148,20 @@ serve(async (req) => {
         throw error
       }
 
-      console.log(`Saved ${suggestions.length} suggestions to database`)
+      console.log(`Successfully saved ${suggestions.length} suggestions to database`)
+    } else {
+      console.log('No suggestions to save')
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         processed: validItems.length,
-        saved: suggestions.length 
+        saved: suggestions.length,
+        debug: {
+          rssItemsFound: items.length,
+          validItemsAfterFilter: validItems.length
+        }
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -110,7 +171,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in webapp-suggestions function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Check function logs for more information'
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
@@ -122,26 +186,112 @@ serve(async (req) => {
 function parseRSS(rssText: string): ProductHuntItem[] {
   const items: ProductHuntItem[] = []
   
-  // Simple regex-based RSS parsing
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g
-  let match
-  
-  while ((match = itemRegex.exec(rssText)) !== null) {
-    const itemContent = match[1]
+  try {
+    console.log('Starting RSS parsing...')
     
-    const titleMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/.exec(itemContent)
-    const descMatch = /<description><!\[CDATA\[(.*?)\]\]><\/description>/.exec(itemContent)
-    const linkMatch = /<link>(.*?)<\/link>/.exec(itemContent)
+    // Improved RSS parsing with multiple approaches
     
-    if (titleMatch && descMatch && linkMatch) {
-      items.push({
-        title: titleMatch[1].trim(),
-        description: descMatch[1].trim(),
-        link: linkMatch[1].trim()
-      })
+    // Method 1: Try standard RSS item parsing
+    const itemRegex = /<item[^>]*>([\s\S]*?)<\/item>/gi
+    let match
+    let itemCount = 0
+    
+    while ((match = itemRegex.exec(rssText)) !== null && itemCount < 20) {
+      const itemContent = match[1]
+      itemCount++
+      
+      // Extract title - try multiple patterns
+      let title = ''
+      const titlePatterns = [
+        /<title><!\[CDATA\[(.*?)\]\]><\/title>/i,
+        /<title>(.*?)<\/title>/i
+      ]
+      
+      for (const pattern of titlePatterns) {
+        const titleMatch = pattern.exec(itemContent)
+        if (titleMatch) {
+          title = titleMatch[1].trim()
+          break
+        }
+      }
+      
+      // Extract description - try multiple patterns
+      let description = ''
+      const descPatterns = [
+        /<description><!\[CDATA\[(.*?)\]\]><\/description>/i,
+        /<description>(.*?)<\/description>/i
+      ]
+      
+      for (const pattern of descPatterns) {
+        const descMatch = pattern.exec(itemContent)
+        if (descMatch) {
+          description = descMatch[1].trim()
+          // Clean HTML tags from description
+          description = description.replace(/<[^>]*>/g, '').trim()
+          break
+        }
+      }
+      
+      // Extract link - try multiple patterns
+      let link = ''
+      const linkPatterns = [
+        /<link><!\[CDATA\[(.*?)\]\]><\/link>/i,
+        /<link>(.*?)<\/link>/i,
+        /<guid[^>]*>(.*?)<\/guid>/i
+      ]
+      
+      for (const pattern of linkPatterns) {
+        const linkMatch = pattern.exec(itemContent)
+        if (linkMatch) {
+          link = linkMatch[1].trim()
+          break
+        }
+      }
+      
+      // Only add if we have minimum required data
+      if (title && link) {
+        items.push({
+          title: title.substring(0, 200), // Limit title length
+          description: description.substring(0, 500), // Limit description length
+          link: link
+        })
+      }
     }
+    
+    console.log(`Parsed ${items.length} items using standard RSS parsing`)
+    
+    // Method 2: If no items found, try alternative parsing
+    if (items.length === 0) {
+      console.log('Trying alternative RSS parsing methods...')
+      
+      // Look for entry elements (Atom format)
+      const entryRegex = /<entry[^>]*>([\s\S]*?)<\/entry>/gi
+      let entryMatch
+      
+      while ((entryMatch = entryRegex.exec(rssText)) !== null && items.length < 20) {
+        const entryContent = entryMatch[1]
+        
+        const titleMatch = /<title[^>]*>(.*?)<\/title>/i.exec(entryContent)
+        const linkMatch = /<link[^>]*href=["'](.*?)["'][^>]*>/i.exec(entryContent)
+        const summaryMatch = /<summary[^>]*>(.*?)<\/summary>/i.exec(entryContent)
+        
+        if (titleMatch && linkMatch) {
+          items.push({
+            title: titleMatch[1].trim().substring(0, 200),
+            description: summaryMatch ? summaryMatch[1].trim().replace(/<[^>]*>/g, '').substring(0, 500) : '',
+            link: linkMatch[1].trim()
+          })
+        }
+      }
+      
+      console.log(`Found ${items.length} items using Atom parsing`)
+    }
+    
+  } catch (error) {
+    console.error('Error parsing RSS:', error)
   }
   
+  console.log(`Total items parsed: ${items.length}`)
   return items
 }
 
@@ -152,6 +302,8 @@ async function processWithGroq(item: ProductHuntItem): Promise<WebappSuggestion 
       console.error('GROQ_API_KEY not found')
       return null
     }
+
+    console.log(`Processing with Groq: ${item.title}`)
 
     const prompt = `Actúa como un clasificador de webapps. Te pasaré el título, descripción y URL de una app de Product Hunt. Devuélveme SOLO un JSON válido con los siguientes campos exactos:
 
@@ -190,7 +342,7 @@ Responde SOLO con el JSON, sin texto adicional:`
     })
 
     if (!response.ok) {
-      console.error('Groq API error:', response.status)
+      console.error('Groq API error:', response.status, await response.text())
       return null
     }
 
@@ -202,12 +354,14 @@ Responde SOLO con el JSON, sin texto adicional:`
       return null
     }
 
+    console.log('Groq response:', content)
+
     // Parse JSON from response
     const jsonStart = content.indexOf('{')
     const jsonEnd = content.lastIndexOf('}') + 1
     
     if (jsonStart === -1 || jsonEnd === 0) {
-      console.error('No valid JSON found in response')
+      console.error('No valid JSON found in response:', content)
       return null
     }
 
@@ -216,9 +370,12 @@ Responde SOLO con el JSON, sin texto adicional:`
 
     // Validate required fields
     if (!suggestion.nombre || !suggestion.url || !suggestion.descripcion || !suggestion.categoria) {
-      console.error('Missing required fields in suggestion')
+      console.error('Missing required fields in suggestion:', suggestion)
       return null
     }
+
+    // Ensure URL is the original one
+    suggestion.url = item.link
 
     return suggestion
 
