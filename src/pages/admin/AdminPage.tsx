@@ -9,6 +9,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import useAdminSession from "@/hooks/useAdminSession";
 import AppFormContainer from "./components/AppFormContainer";
 import AdminContent from "./components/AdminContent";
+import { shouldSkipAuth } from "@/utils/environmentUtils";
 
 const TABS = {
   APPS: "apps",
@@ -29,20 +30,19 @@ const AdminPage = () => {
     console.log("AdminPage - Session check:", { session, isAdmin, sessionLoading });
     
     if (!sessionLoading) {
-      if (isAdmin) {
-        console.log("User is admin, loading apps...");
+      // Permitir acceso en modo desarrollo/preview de Lovable
+      const skipAuth = shouldSkipAuth();
+      
+      if (isAdmin || skipAuth) {
+        console.log("User has admin access, loading apps...");
+        if (skipAuth) {
+          toast.info("Modo desarrollo: Acceso de administrador concedido", { duration: 3000 });
+        }
         loadApps();
       } else {
-        console.log("User is not admin, checking environment...");
-        // En lugar de redirigir inmediatamente, mostrar advertencia pero permitir acceso en desarrollo
-        if (window.location.hostname.includes('lovable.dev') || window.location.hostname === 'localhost') {
-          console.log("Development environment detected, allowing admin access");
-          toast.info("Modo desarrollo: Acceso de administrador concedido", { duration: 3000 });
-          loadApps();
-        } else {
-          toast.error("Acceso restringido a administradores");
-          navigate("/");
-        }
+        console.log("User is not admin, redirecting...");
+        toast.error("Acceso restringido a administradores");
+        navigate("/");
       }
     }
   }, [session, isAdmin, sessionLoading, navigate]);
@@ -98,9 +98,9 @@ const AdminPage = () => {
     );
   }
 
-  // En desarrollo, permitir acceso incluso sin sesión de admin
-  const isDevelopment = window.location.hostname.includes('lovable.dev') || window.location.hostname === 'localhost';
-  if (!isDevelopment && (!session || !isAdmin)) {
+  // Permitir acceso en desarrollo o si es admin real
+  const skipAuth = shouldSkipAuth();
+  if (!skipAuth && (!session || !isAdmin)) {
     return null; // Redirect handled in useEffect
   }
 

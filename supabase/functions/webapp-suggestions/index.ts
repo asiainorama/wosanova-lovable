@@ -19,7 +19,6 @@ interface WebappSuggestion {
 interface ProductItem {
   title: string;
   description: string;
-  productHuntUrl?: string;
   websiteUrl: string;
 }
 
@@ -38,19 +37,36 @@ serve(async (req) => {
 
     console.log('🚀 Starting webapp suggestions process...')
 
-    // Usar productos de ejemplo que sabemos que funcionan
+    // Check for Groq API key
+    const groqApiKey = Deno.env.get('GROQ_API_KEY')
+    if (!groqApiKey) {
+      console.error('❌ GROQ_API_KEY not found in environment variables')
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'GROQ_API_KEY no configurada',
+          processed: 0,
+          saved: 0
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
+    }
+
+    console.log('✅ Groq API key found, length:', groqApiKey.length)
+
+    // Use example products
     const products = getExampleProducts()
     console.log(`📋 Using ${products.length} example products`)
 
     const suggestions: any[] = []
 
-    // Procesar cada producto con Groq API
+    // Process each product with Groq API
     console.log('🤖 Processing products with Groq API...')
     for (const [index, product] of products.entries()) {
       console.log(`🔄 Processing product ${index + 1}/${products.length}: "${product.title}"`)
       
       try {
-        const suggestion = await processWithGroq(product)
+        const suggestion = await processWithGroq(product, groqApiKey)
         if (suggestion) {
           // Get icon from Clearbit
           const domain = extractDomain(suggestion.url)
@@ -73,7 +89,7 @@ serve(async (req) => {
 
     console.log(`📊 Generated ${suggestions.length} suggestions total`)
 
-    // Guardar en Supabase
+    // Save to Supabase
     if (suggestions.length > 0) {
       console.log('💾 Saving suggestions to database...')
       const { data, error } = await supabase
@@ -98,7 +114,8 @@ serve(async (req) => {
         debug: {
           productsUsed: products.length,
           suggestionsGenerated: suggestions.length,
-          groqApiKey: Deno.env.get('GROQ_API_KEY') ? 'Present' : 'Missing'
+          groqApiKey: groqApiKey ? 'Present' : 'Missing',
+          groqKeyLength: groqApiKey?.length || 0
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -110,7 +127,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false,
         error: error.message,
-        details: 'Check function logs for more information'
+        processed: 0,
+        saved: 0
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -141,26 +159,6 @@ function getExampleProducts(): ProductItem[] {
       title: "Vercel",
       description: "Frontend cloud platform for building and deploying modern web applications",
       websiteUrl: "https://vercel.com"
-    },
-    {
-      title: "Supabase",
-      description: "Open-source Firebase alternative with authentication, real-time database, and more",
-      websiteUrl: "https://supabase.io"
-    },
-    {
-      title: "ChatGPT",
-      description: "Advanced AI chatbot for conversations, writing assistance, and problem-solving",
-      websiteUrl: "https://chat.openai.com"
-    },
-    {
-      title: "Claude",
-      description: "AI assistant by Anthropic for helpful, harmless, and honest conversations",
-      websiteUrl: "https://claude.ai"
-    },
-    {
-      title: "GitHub Copilot",
-      description: "AI programming assistant that helps write code faster and more efficiently",
-      websiteUrl: "https://github.com/features/copilot"
     }
   ]
 }
@@ -173,14 +171,8 @@ function extractDomain(url: string): string {
   }
 }
 
-async function processWithGroq(product: ProductItem): Promise<WebappSuggestion | null> {
+async function processWithGroq(product: ProductItem, apiKey: string): Promise<WebappSuggestion | null> {
   try {
-    const groqApiKey = Deno.env.get('GROQ_API_KEY')
-    if (!groqApiKey) {
-      console.error('❌ GROQ_API_KEY not found')
-      return null
-    }
-
     console.log(`🤖 Processing with Groq: "${product.title}"`)
 
     const prompt = `Analiza esta aplicación web y devuelve SOLO un JSON válido con la información solicitada.
@@ -208,10 +200,12 @@ REGLAS IMPORTANTES:
 - Usa exactamente una de las categorías listadas
 - Máximo 3 etiquetas relevantes en español`
 
+    console.log('🔑 Making request to Groq API...')
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -229,7 +223,7 @@ REGLAS IMPORTANTES:
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Groq API error:', response.status, errorText)
+      console.error('❌ Groq API error:', response.status, response.statusText, errorText)
       return null
     }
 
@@ -243,7 +237,7 @@ REGLAS IMPORTANTES:
 
     console.log(`🤖 Groq response: ${content}`)
 
-    // Extraer JSON de la respuesta
+    // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       console.error('❌ No valid JSON found in response')
@@ -252,29 +246,29 @@ REGLAS IMPORTANTES:
 
     const suggestion = JSON.parse(jsonMatch[0])
 
-    // Validar campos requeridos
+    // Validate required fields
     if (!suggestion.nombre || !suggestion.url || !suggestion.descripcion || !suggestion.categoria) {
       console.error('❌ Missing required fields in suggestion:', suggestion)
       return null
     }
 
-    // Validar categoría
+    // Validate category
     const validCategories = ['productividad', 'creatividad', 'educacion', 'entretenimiento', 'herramientas dev', 'negocio', 'otras']
     if (!validCategories.includes(suggestion.categoria)) {
       suggestion.categoria = 'otras'
     }
 
-    // Asegurar que etiquetas es un array
+    // Ensure etiquetas is an array
     if (!Array.isArray(suggestion.etiquetas)) {
       suggestion.etiquetas = []
     }
 
-    // Asegurar que usa_ia es boolean
+    // Ensure usa_ia is boolean
     if (typeof suggestion.usa_ia !== 'boolean') {
       suggestion.usa_ia = false
     }
 
-    // Asegurar URL correcta
+    // Ensure correct URL
     suggestion.url = product.websiteUrl
 
     return suggestion
