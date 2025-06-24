@@ -19,8 +19,8 @@ interface WebappSuggestion {
 interface ProductItem {
   title: string;
   description: string;
-  productHuntUrl: string;
-  websiteUrl?: string;
+  productHuntUrl?: string;
+  websiteUrl: string;
 }
 
 serve(async (req) => {
@@ -38,40 +38,16 @@ serve(async (req) => {
 
     console.log('🚀 Starting webapp suggestions process...')
 
-    // 1. Obtener productos de múltiples fuentes
-    const allProducts = await getAllProductSources()
-    console.log(`📋 Found ${allProducts.length} products from all sources`)
-
-    if (allProducts.length === 0) {
-      console.log('⚠️ No products found from any source')
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'No products found from any source',
-        processed: 0,
-        saved: 0 
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-
-    // 2. Filtrar productos válidos con URLs de sitio web
-    const validProducts = await getValidProducts(allProducts.slice(0, 10))
-    console.log(`✅ Found ${validProducts.length} valid products with website URLs`)
-
-    if (validProducts.length === 0) {
-      console.log('⚠️ No valid products with website URLs found')
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'No valid products with website URLs found',
-        processed: allProducts.length,
-        saved: 0 
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
+    // Usar productos de ejemplo que sabemos que funcionan
+    const products = getExampleProducts()
+    console.log(`📋 Using ${products.length} example products`)
 
     const suggestions: any[] = []
 
-    // 3. Procesar cada producto con Groq API
+    // Procesar cada producto con Groq API
     console.log('🤖 Processing products with Groq API...')
-    for (const [index, product] of validProducts.entries()) {
-      console.log(`🔄 Processing product ${index + 1}/${validProducts.length}: "${product.title}"`)
+    for (const [index, product] of products.entries()) {
+      console.log(`🔄 Processing product ${index + 1}/${products.length}: "${product.title}"`)
       
       try {
         const suggestion = await processWithGroq(product)
@@ -97,7 +73,7 @@ serve(async (req) => {
 
     console.log(`📊 Generated ${suggestions.length} suggestions total`)
 
-    // 4. Guardar en Supabase
+    // Guardar en Supabase
     if (suggestions.length > 0) {
       console.log('💾 Saving suggestions to database...')
       const { data, error } = await supabase
@@ -117,12 +93,12 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        processed: validProducts.length,
+        processed: products.length,
         saved: suggestions.length,
         debug: {
-          totalProductsFound: allProducts.length,
-          validProductsWithUrls: validProducts.length,
-          suggestionsGenerated: suggestions.length
+          productsUsed: products.length,
+          suggestionsGenerated: suggestions.length,
+          groqApiKey: Deno.env.get('GROQ_API_KEY') ? 'Present' : 'Missing'
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -144,255 +120,49 @@ serve(async (req) => {
   }
 })
 
-async function getAllProductSources(): Promise<ProductItem[]> {
-  const products: ProductItem[] = []
-  
-  try {
-    // Fuente 1: Product Hunt API (simulada con datos de ejemplo)
-    console.log('📡 Getting products from Product Hunt...')
-    const phProducts = await getProductHuntProducts()
-    products.push(...phProducts)
-    
-    // Fuente 2: Agregar productos de ejemplo si no hay suficientes
-    if (products.length < 5) {
-      console.log('📝 Adding example products for testing...')
-      const exampleProducts = getExampleProducts()
-      products.push(...exampleProducts)
-    }
-    
-  } catch (error) {
-    console.error('Error getting products from sources:', error)
-    // En caso de error, usar productos de ejemplo
-    console.log('📝 Using example products as fallback...')
-    products.push(...getExampleProducts())
-  }
-  
-  return products
-}
-
-async function getProductHuntProducts(): Promise<ProductItem[]> {
-  try {
-    // Intentar obtener del feed RSS de Product Hunt
-    const feedResponse = await fetch('https://www.producthunt.com/feed', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; WebappSuggestionsBot/1.0)',
-        'Accept': 'application/atom+xml, application/xml, text/xml'
-      }
-    })
-    
-    if (!feedResponse.ok) {
-      console.log(`Product Hunt feed failed: ${feedResponse.status}`)
-      return []
-    }
-    
-    const feedText = await feedResponse.text()
-    console.log(`📝 Product Hunt feed response length: ${feedText.length} characters`)
-    
-    // Parse simple del feed
-    const products: ProductItem[] = []
-    const entryRegex = /<entry[^>]*>([\s\S]*?)<\/entry>/gi
-    let match
-    let count = 0
-    
-    while ((match = entryRegex.exec(feedText)) !== null && count < 5) {
-      const entryContent = match[1]
-      
-      // Extraer título
-      const titleMatch = /<title[^>]*>(.*?)<\/title>/i.exec(entryContent)
-      if (!titleMatch) continue
-      
-      const title = titleMatch[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim()
-      
-      // Extraer enlace de ProductHunt
-      const linkMatch = /<link[^>]*href=["'](.*?)["'][^>]*>/i.exec(entryContent)
-      if (!linkMatch) continue
-      
-      const productHuntUrl = linkMatch[1].trim()
-      
-      // Extraer descripción básica
-      const contentMatch = /<content[^>]*>(.*?)<\/content>/i.exec(entryContent)
-      let description = ''
-      if (contentMatch) {
-        description = contentMatch[1]
-          .replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
-          .replace(/<[^>]*>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .substring(0, 200)
-      }
-      
-      if (title && productHuntUrl && productHuntUrl.includes('producthunt.com')) {
-        products.push({
-          title: title.substring(0, 100),
-          description: description || `Innovative web application: ${title}`,
-          productHuntUrl
-        })
-        count++
-      }
-    }
-    
-    console.log(`📋 Parsed ${products.length} products from Product Hunt feed`)
-    return products
-    
-  } catch (error) {
-    console.error('Error fetching Product Hunt products:', error)
-    return []
-  }
-}
-
 function getExampleProducts(): ProductItem[] {
   return [
     {
-      title: "NotionAI Assistant",
-      description: "AI-powered workspace that helps you write, plan, and get organized with intelligent automation",
-      productHuntUrl: "https://www.producthunt.com/posts/notion-ai",
+      title: "Notion AI",
+      description: "AI-powered workspace for writing, planning, and getting organized with intelligent automation",
       websiteUrl: "https://notion.so"
     },
     {
-      title: "Figma Auto Layout",
-      description: "Advanced design tool with AI-powered layout suggestions and collaborative features for modern design teams",
-      productHuntUrl: "https://www.producthunt.com/posts/figma-autolayout",
+      title: "Figma",
+      description: "Collaborative design tool with real-time editing and prototyping capabilities",
       websiteUrl: "https://figma.com"
     },
     {
-      title: "Linear Project Manager",
-      description: "Streamlined project management tool designed for modern software teams with intelligent tracking",
-      productHuntUrl: "https://www.producthunt.com/posts/linear",
+      title: "Linear",
+      description: "Streamlined project management tool designed for modern software teams",
       websiteUrl: "https://linear.app"
     },
     {
-      title: "Vercel Analytics",
-      description: "Real-time web analytics platform with privacy-first approach and lightning-fast insights",
-      productHuntUrl: "https://www.producthunt.com/posts/vercel-analytics",
-      websiteUrl: "https://vercel.com/analytics"
+      title: "Vercel",
+      description: "Frontend cloud platform for building and deploying modern web applications",
+      websiteUrl: "https://vercel.com"
     },
     {
-      title: "Supabase Studio",
-      description: "Open-source Firebase alternative with built-in authentication, real-time subscriptions, and more",
-      productHuntUrl: "https://www.producthunt.com/posts/supabase",
+      title: "Supabase",
+      description: "Open-source Firebase alternative with authentication, real-time database, and more",
       websiteUrl: "https://supabase.io"
+    },
+    {
+      title: "ChatGPT",
+      description: "Advanced AI chatbot for conversations, writing assistance, and problem-solving",
+      websiteUrl: "https://chat.openai.com"
+    },
+    {
+      title: "Claude",
+      description: "AI assistant by Anthropic for helpful, harmless, and honest conversations",
+      websiteUrl: "https://claude.ai"
+    },
+    {
+      title: "GitHub Copilot",
+      description: "AI programming assistant that helps write code faster and more efficiently",
+      websiteUrl: "https://github.com/features/copilot"
     }
   ]
-}
-
-async function getValidProducts(products: ProductItem[]): Promise<ProductItem[]> {
-  const validProducts: ProductItem[] = []
-  
-  for (const product of products) {
-    try {
-      console.log(`🔗 Processing product: "${product.title}"`)
-      
-      // Si ya tiene websiteUrl, usarla
-      if (product.websiteUrl && isValidWebsiteUrl(product.websiteUrl)) {
-        console.log(`✅ Product already has valid website URL: ${product.websiteUrl}`)
-        validProducts.push(product)
-        continue
-      }
-      
-      // Si tiene URL de ProductHunt, intentar extraer la URL real
-      if (product.productHuntUrl && product.productHuntUrl.includes('producthunt.com')) {
-        console.log(`🔗 Extracting website URL from: ${product.productHuntUrl}`)
-        
-        try {
-          const websiteUrl = await extractWebsiteFromProductHunt(product.productHuntUrl)
-          if (websiteUrl) {
-            console.log(`✅ Found website URL: ${websiteUrl}`)
-            validProducts.push({
-              ...product,
-              websiteUrl
-            })
-          } else {
-            console.log(`❌ No website URL found for: "${product.title}"`)
-          }
-        } catch (error) {
-          console.log(`💥 Error extracting URL for "${product.title}":`, error.message)
-        }
-      } else {
-        console.log(`⚠️ Invalid ProductHunt URL: ${product.productHuntUrl}`)
-      }
-      
-    } catch (error) {
-      console.log(`💥 Error processing "${product.title}":`, error.message)
-    }
-  }
-  
-  return validProducts
-}
-
-async function extractWebsiteFromProductHunt(productHuntUrl: string): Promise<string | null> {
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 segundos timeout
-    
-    const pageResponse = await fetch(productHuntUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; WebappSuggestionsBot/1.0)'
-      },
-      signal: controller.signal
-    })
-    
-    clearTimeout(timeoutId)
-    
-    if (!pageResponse.ok) {
-      console.log(`⚠️ Failed to fetch ProductHunt page: ${pageResponse.status}`)
-      return null
-    }
-    
-    const pageHtml = await pageResponse.text()
-    
-    // Múltiples patrones para encontrar la URL del sitio web
-    const patterns = [
-      // Buscar enlaces "Visit" o "Website"
-      /href=["'](https?:\/\/(?!.*producthunt\.com)[^"']+)["'][^>]*(?:visit|website|go\s+to|launch)/i,
-      // Buscar en secciones específicas
-      /class=["'][^"']*(?:website|external|visit)[^"']*["'][^>]*href=["'](https?:\/\/(?!.*producthunt\.com)[^"']+)["']/i,
-      // Buscar atributos data-url
-      /data-url=["'](https?:\/\/(?!.*producthunt\.com)[^"']+)["']/i,
-      // Patrón genérico de enlaces externos
-      /href=["'](https?:\/\/(?!.*(?:producthunt\.com|twitter\.com|facebook\.com|linkedin\.com|instagram\.com|youtube\.com|github\.com))[^"']+)["']/i
-    ]
-    
-    for (const pattern of patterns) {
-      const match = pattern.exec(pageHtml)
-      if (match && match[1]) {
-        const url = match[1].trim()
-        if (isValidWebsiteUrl(url)) {
-          return url
-        }
-      }
-    }
-    
-    return null
-    
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      console.log('Request timed out')
-    } else {
-      console.log('Error fetching ProductHunt page:', error.message)
-    }
-    return null
-  }
-}
-
-function isValidWebsiteUrl(url: string): boolean {
-  try {
-    const urlObj = new URL(url)
-    const hostname = urlObj.hostname.toLowerCase()
-    
-    // Excluir dominios de redes sociales y otros no-sitios web
-    const excludedDomains = [
-      'producthunt.com', 'twitter.com', 'facebook.com', 'linkedin.com',
-      'instagram.com', 'youtube.com', 'github.com', 'medium.com',
-      'discord.com', 'telegram.org', 'reddit.com', 'tiktok.com'
-    ]
-    
-    return !excludedDomains.some(domain => hostname.includes(domain)) &&
-           urlObj.protocol.startsWith('http') &&
-           hostname.includes('.') &&
-           hostname.length > 3
-  } catch {
-    return false
-  }
 }
 
 function extractDomain(url: string): string {

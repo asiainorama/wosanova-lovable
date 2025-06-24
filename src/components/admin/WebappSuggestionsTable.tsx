@@ -15,7 +15,7 @@ import {
   runWebappSuggestionsProcess,
   WebappSuggestion 
 } from '@/services/WebappSuggestionsService';
-import { CheckCircle, XCircle, Edit2, Play, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle } from 'lucide-react';
 
 const CATEGORIAS = [
   'productividad', 'creatividad', 'educacion', 'entretenimiento', 
@@ -28,6 +28,7 @@ const WebappSuggestionsTable: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<WebappSuggestion>>({});
   const [processing, setProcessing] = useState(false);
+  const [processResult, setProcessResult] = useState<any>(null);
 
   useEffect(() => {
     loadSuggestions();
@@ -38,7 +39,9 @@ const WebappSuggestionsTable: React.FC = () => {
       setLoading(true);
       const data = await fetchWebappSuggestions();
       setSuggestions(data);
+      console.log('Loaded suggestions:', data);
     } catch (error) {
+      console.error('Error loading suggestions:', error);
       toast.error('Error al cargar sugerencias');
     } finally {
       setLoading(false);
@@ -48,16 +51,29 @@ const WebappSuggestionsTable: React.FC = () => {
   const handleRunProcess = async () => {
     try {
       setProcessing(true);
-      toast.info('Iniciando proceso de sugerencias automáticas...');
+      setProcessResult(null);
+      console.log('Starting webapp suggestions process...');
+      
+      toast.info('Iniciando proceso de sugerencias automáticas...', { duration: 3000 });
       
       const result = await runWebappSuggestionsProcess();
+      console.log('Process result:', result);
+      setProcessResult(result);
       
-      toast.success(`Proceso completado: ${result.processed} elementos procesados, ${result.saved} sugerencias guardadas`);
-      
-      // Recargar sugerencias
-      await loadSuggestions();
+      if (result.success) {
+        toast.success(`Proceso completado: ${result.processed} elementos procesados, ${result.saved} sugerencias guardadas`);
+        
+        // Recargar sugerencias después de un breve delay
+        setTimeout(() => {
+          loadSuggestions();
+        }, 1000);
+      } else {
+        toast.error(`Error en el proceso: ${result.error}`);
+      }
     } catch (error) {
+      console.error('Error running process:', error);
       toast.error('Error al ejecutar el proceso de sugerencias');
+      setProcessResult({ success: false, error: error.message });
     } finally {
       setProcessing(false);
     }
@@ -134,6 +150,41 @@ const WebappSuggestionsTable: React.FC = () => {
           {processing ? 'Procesando...' : 'Ejecutar Proceso'}
         </Button>
       </div>
+
+      {/* Mostrar resultado del proceso */}
+      {processResult && (
+        <Card className={`border ${processResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              {processResult.success ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-600" />
+              )}
+              <div>
+                <p className="font-medium">
+                  {processResult.success ? 'Proceso completado exitosamente' : 'Error en el proceso'}
+                </p>
+                {processResult.success ? (
+                  <p className="text-sm text-gray-600">
+                    Procesados: {processResult.processed} | Guardados: {processResult.saved}
+                  </p>
+                ) : (
+                  <p className="text-sm text-red-600">{processResult.error}</p>
+                )}
+                {processResult.debug && (
+                  <details className="mt-2">
+                    <summary className="text-sm cursor-pointer">Ver detalles</summary>
+                    <pre className="text-xs mt-1 p-2 bg-gray-100 rounded">
+                      {JSON.stringify(processResult.debug, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {suggestions.length === 0 ? (
         <Card>
