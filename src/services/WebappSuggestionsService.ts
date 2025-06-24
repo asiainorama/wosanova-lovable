@@ -26,7 +26,7 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     
     if (error) throw error;
     
-    return data || [];
+    return (data || []) as WebappSuggestion[];
   } catch (error) {
     console.error('Error fetching webapp suggestions:', error);
     throw error;
