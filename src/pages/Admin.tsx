@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import AppsTable from "@/components/admin/AppsTable";
 import UsersTable from "@/components/admin/UsersTable";
+import WebappSuggestionsTable from "@/components/admin/WebappSuggestionsTable";
 import AppForm from "@/components/admin/AppForm";
 import { AppData } from "@/data/types";
 import {
@@ -24,6 +25,7 @@ import AlertDialogComponent from "@/components/ui/AlertDialogComponent";
 const TABS = {
   APPS: "apps",
   USERS: "users",
+  SUGGESTIONS: "suggestions",
 };
 
 const Admin = () => {
@@ -205,6 +207,10 @@ const Admin = () => {
               <TabsContent value={TABS.USERS}>
                 <UserManagement />
               </TabsContent>
+
+              <TabsContent value={TABS.SUGGESTIONS}>
+                <SuggestionsManagement />
+              </TabsContent>
             </Tabs>
           )}
         </AdminLayout>
@@ -301,6 +307,12 @@ const UserManagement = () => (
   <div>
     <h1 className="text-2xl font-bold">Usuarios</h1>
     <UsersTable />
+  </div>
+);
+
+const SuggestionsManagement = () => (
+  <div>
+    <WebappSuggestionsTable />
   </div>
 );
 
