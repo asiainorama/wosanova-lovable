@@ -31,15 +31,21 @@ const WebappSuggestionsTable: React.FC = () => {
   const [processResult, setProcessResult] = useState<any>(null);
 
   useEffect(() => {
+    console.log('WebappSuggestionsTable: Initial load');
     loadSuggestions();
   }, []);
 
   const loadSuggestions = async () => {
     try {
+      console.log('Loading webapp suggestions...');
       setLoading(true);
       const data = await fetchWebappSuggestions();
-      setSuggestions(data);
       console.log('Loaded suggestions:', data);
+      setSuggestions(data);
+      
+      if (data.length === 0) {
+        console.log('No suggestions found in database');
+      }
     } catch (error) {
       console.error('Error loading suggestions:', error);
       toast.error('Error al cargar sugerencias');
@@ -128,7 +134,10 @@ const WebappSuggestionsTable: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <RefreshCw className="h-6 w-6 animate-spin" />
+        <div className="text-center">
+          <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
+          <p>Cargando sugerencias...</p>
+        </div>
       </div>
     );
   }
@@ -136,19 +145,34 @@ const WebappSuggestionsTable: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Sugerencias de Webapps</h2>
-        <Button 
-          onClick={handleRunProcess} 
-          disabled={processing}
-          className="flex items-center gap-2"
-        >
-          {processing ? (
-            <RefreshCw className="h-4 w-4 animate-spin" />
-          ) : (
-            <Play className="h-4 w-4" />
-          )}
-          {processing ? 'Procesando...' : 'Ejecutar Proceso'}
-        </Button>
+        <div>
+          <h2 className="text-xl font-semibold">Sugerencias de Webapps</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {suggestions.length} sugerencias pendientes
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={loadSuggestions}
+            disabled={loading}
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button 
+            onClick={handleRunProcess} 
+            disabled={processing}
+            className="flex items-center gap-2"
+          >
+            {processing ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
+            {processing ? 'Procesando...' : 'Ejecutar Proceso'}
+          </Button>
+        </div>
       </div>
 
       {/* Mostrar resultado del proceso */}
@@ -195,6 +219,19 @@ const WebappSuggestionsTable: React.FC = () => {
             <p className="text-sm text-gray-400 mt-2">
               Ejecuta el proceso automático para generar nuevas sugerencias
             </p>
+            <Button 
+              onClick={handleRunProcess} 
+              disabled={processing}
+              className="mt-4"
+              variant="outline"
+            >
+              {processing ? (
+                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Play className="h-4 w-4 mr-2" />
+              )}
+              {processing ? 'Procesando...' : 'Generar Sugerencias'}
+            </Button>
           </CardContent>
         </Card>
       ) : (
