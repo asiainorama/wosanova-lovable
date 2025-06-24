@@ -20,6 +20,7 @@ interface ProductHuntItem {
   title: string;
   description: string;
   link: string;
+  websiteUrl?: string;
 }
 
 serve(async (req) => {
@@ -53,33 +54,31 @@ serve(async (req) => {
     console.log(`Found ${items.length} items from RSS feed`)
 
     if (items.length === 0) {
-      console.log('No items found in RSS feed, checking feed content sample:', rssText.substring(0, 500))
+      console.log('No items found in RSS feed, checking feed content sample:', rssText.substring(0, 1000))
     }
 
-    // 2. Filter items with valid URLs - less restrictive filtering
+    // 2. Filter items and extract real website URLs
     const validItems = items.filter(item => {
-      const hasValidUrl = item.link && item.link.startsWith('http')
-      const isNotProductHunt = !item.link.includes('producthunt.com')
       const hasTitle = item.title && item.title.trim().length > 0
       const hasDescription = item.description && item.description.trim().length > 0
+      const hasWebsiteUrl = item.websiteUrl && item.websiteUrl.startsWith('http') && !item.websiteUrl.includes('producthunt.com')
       
-      if (!hasValidUrl) console.log('Invalid URL:', item.link)
-      if (!isNotProductHunt) console.log('ProductHunt URL filtered:', item.link)
       if (!hasTitle) console.log('No title:', item.title)
-      if (!hasDescription) console.log('No description:', item.description)
+      if (!hasDescription) console.log('No description for:', item.title)
+      if (!hasWebsiteUrl) console.log('No valid website URL for:', item.title, 'URL:', item.websiteUrl)
       
-      return hasValidUrl && isNotProductHunt && hasTitle && hasDescription
-    }).slice(0, 5) // Reduce to 5 items for testing
+      return hasTitle && hasDescription && hasWebsiteUrl
+    }).slice(0, 10) // Process more items for better results
 
     console.log(`Processing ${validItems.length} valid items`)
     
     if (validItems.length === 0) {
       console.log('No valid items after filtering. Sample of all items:')
-      items.slice(0, 3).forEach((item, i) => {
+      items.slice(0, 5).forEach((item, i) => {
         console.log(`Item ${i + 1}:`, {
           title: item.title?.substring(0, 50),
-          link: item.link?.substring(0, 100),
-          description: item.description?.substring(0, 50)
+          description: item.description?.substring(0, 100),
+          websiteUrl: item.websiteUrl?.substring(0, 100)
         })
       })
     }
@@ -91,31 +90,37 @@ serve(async (req) => {
       console.log(`Processing item ${index + 1}/${validItems.length}: ${item.title}`)
       
       try {
+        // Use the website URL instead of ProductHunt URL
+        const websiteUrl = item.websiteUrl!
+        
         // Check if URL is accessible with timeout
-        console.log(`Checking URL accessibility: ${item.link}`)
+        console.log(`Checking URL accessibility: ${websiteUrl}`)
         const urlCheckController = new AbortController()
-        const timeoutId = setTimeout(() => urlCheckController.abort(), 5000) // 5 second timeout
+        const timeoutId = setTimeout(() => urlCheckController.abort(), 8000) // 8 second timeout
         
         try {
-          const urlCheck = await fetch(item.link, { 
+          const urlCheck = await fetch(websiteUrl, { 
             method: 'HEAD',
-            signal: urlCheckController.signal
+            signal: urlCheckController.signal,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; WebappSuggestionsBot/1.0)'
+            }
           })
           clearTimeout(timeoutId)
           
-          if (!urlCheck.ok) {
-            console.log(`URL not accessible: ${item.link} - Status: ${urlCheck.status}`)
+          if (!urlCheck.ok && urlCheck.status !== 403) { // 403 might be ok for some sites
+            console.log(`URL not accessible: ${websiteUrl} - Status: ${urlCheck.status}`)
             continue
           }
         } catch (urlError) {
           clearTimeout(timeoutId)
-          console.log(`URL check failed for ${item.link}:`, urlError.message)
+          console.log(`URL check failed for ${websiteUrl}:`, urlError.message)
           continue
         }
 
         const suggestion = await processWithGroq(item)
         if (suggestion) {
-          // Get icon from Clearbit
+          // Get icon from Clearbit using the website domain
           const domain = new URL(suggestion.url).hostname
           const iconUrl = `https://logo.clearbit.com/${domain}`
           
@@ -187,111 +192,92 @@ function parseRSS(rssText: string): ProductHuntItem[] {
   const items: ProductHuntItem[] = []
   
   try {
-    console.log('Starting RSS parsing...')
+    console.log('Starting improved RSS parsing...')
     
-    // Improved RSS parsing with multiple approaches
-    
-    // Method 1: Try standard RSS item parsing
+    // Use DOMParser-like approach for better parsing
     const itemRegex = /<item[^>]*>([\s\S]*?)<\/item>/gi
     let match
     let itemCount = 0
     
-    while ((match = itemRegex.exec(rssText)) !== null && itemCount < 20) {
+    while ((match = itemRegex.exec(rssText)) !== null && itemCount < 50) {
       const itemContent = match[1]
       itemCount++
       
-      // Extract title - try multiple patterns
+      // Extract title
       let title = ''
-      const titlePatterns = [
-        /<title><!\[CDATA\[(.*?)\]\]><\/title>/i,
-        /<title>(.*?)<\/title>/i
-      ]
-      
-      for (const pattern of titlePatterns) {
-        const titleMatch = pattern.exec(itemContent)
-        if (titleMatch) {
-          title = titleMatch[1].trim()
-          break
-        }
+      const titleMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/i.exec(itemContent) ||
+                        /<title>(.*?)<\/title>/i.exec(itemContent)
+      if (titleMatch) {
+        title = titleMatch[1].trim()
       }
       
-      // Extract description - try multiple patterns
+      // Extract description - try multiple approaches
       let description = ''
-      const descPatterns = [
-        /<description><!\[CDATA\[(.*?)\]\]><\/description>/i,
-        /<description>(.*?)<\/description>/i
-      ]
-      
-      for (const pattern of descPatterns) {
-        const descMatch = pattern.exec(itemContent)
-        if (descMatch) {
-          description = descMatch[1].trim()
-          // Clean HTML tags from description
-          description = description.replace(/<[^>]*>/g, '').trim()
-          break
-        }
+      const descMatch = /<description><!\[CDATA\[(.*?)\]\]><\/description>/i.exec(itemContent) ||
+                       /<description>(.*?)<\/description>/i.exec(itemContent)
+      if (descMatch) {
+        description = descMatch[1].trim()
+        // Clean HTML tags and get meaningful text
+        description = description.replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
       }
       
-      // Extract link - try multiple patterns
-      let link = ''
-      const linkPatterns = [
-        /<link><!\[CDATA\[(.*?)\]\]><\/link>/i,
-        /<link>(.*?)<\/link>/i,
-        /<guid[^>]*>(.*?)<\/guid>/i
-      ]
-      
-      for (const pattern of linkPatterns) {
-        const linkMatch = pattern.exec(itemContent)
-        if (linkMatch) {
-          link = linkMatch[1].trim()
-          break
-        }
+      // Extract ProductHunt link
+      let productHuntLink = ''
+      const linkMatch = /<link><!\[CDATA\[(.*?)\]\]><\/link>/i.exec(itemContent) ||
+                       /<link>(.*?)<\/link>/i.exec(itemContent) ||
+                       /<guid[^>]*>(.*?)<\/guid>/i.exec(itemContent)
+      if (linkMatch) {
+        productHuntLink = linkMatch[1].trim()
       }
       
-      // Only add if we have minimum required data
-      if (title && link) {
+      // Try to extract the actual website URL from the description or content
+      let websiteUrl = ''
+      
+      // Look for URL patterns in the description
+      const urlPatterns = [
+        /https?:\/\/(?!www\.producthunt\.com)[^\s<>"']+/gi,
+        /(?:Visit|Website|Link|URL):\s*(https?:\/\/[^\s<>"']+)/gi,
+        /href=["'](https?:\/\/(?!www\.producthunt\.com)[^"']+)["']/gi
+      ]
+      
+      for (const pattern of urlPatterns) {
+        const urlMatches = [...itemContent.matchAll(pattern)]
+        for (const urlMatch of urlMatches) {
+          const foundUrl = urlMatch[1] || urlMatch[0]
+          if (foundUrl && !foundUrl.includes('producthunt.com') && foundUrl.includes('.')) {
+            websiteUrl = foundUrl.trim()
+            break
+          }
+        }
+        if (websiteUrl) break
+      }
+      
+      // If no website URL found, try to fetch it from ProductHunt page (fallback)
+      if (!websiteUrl && productHuntLink) {
+        // For now, skip items without direct website URLs
+        // In a production system, you might scrape the ProductHunt page
+        continue
+      }
+      
+      // Only add if we have minimum required data including website URL
+      if (title && description && websiteUrl) {
         items.push({
-          title: title.substring(0, 200), // Limit title length
-          description: description.substring(0, 500), // Limit description length
-          link: link
+          title: title.substring(0, 200),
+          description: description.substring(0, 1000),
+          link: productHuntLink,
+          websiteUrl: websiteUrl
         })
       }
     }
     
-    console.log(`Parsed ${items.length} items using standard RSS parsing`)
-    
-    // Method 2: If no items found, try alternative parsing
-    if (items.length === 0) {
-      console.log('Trying alternative RSS parsing methods...')
-      
-      // Look for entry elements (Atom format)
-      const entryRegex = /<entry[^>]*>([\s\S]*?)<\/entry>/gi
-      let entryMatch
-      
-      while ((entryMatch = entryRegex.exec(rssText)) !== null && items.length < 20) {
-        const entryContent = entryMatch[1]
-        
-        const titleMatch = /<title[^>]*>(.*?)<\/title>/i.exec(entryContent)
-        const linkMatch = /<link[^>]*href=["'](.*?)["'][^>]*>/i.exec(entryContent)
-        const summaryMatch = /<summary[^>]*>(.*?)<\/summary>/i.exec(entryContent)
-        
-        if (titleMatch && linkMatch) {
-          items.push({
-            title: titleMatch[1].trim().substring(0, 200),
-            description: summaryMatch ? summaryMatch[1].trim().replace(/<[^>]*>/g, '').substring(0, 500) : '',
-            link: linkMatch[1].trim()
-          })
-        }
-      }
-      
-      console.log(`Found ${items.length} items using Atom parsing`)
-    }
+    console.log(`Successfully parsed ${items.length} items with website URLs`)
     
   } catch (error) {
     console.error('Error parsing RSS:', error)
   }
   
-  console.log(`Total items parsed: ${items.length}`)
   return items
 }
 
@@ -305,20 +291,27 @@ async function processWithGroq(item: ProductHuntItem): Promise<WebappSuggestion 
 
     console.log(`Processing with Groq: ${item.title}`)
 
-    const prompt = `Actúa como un clasificador de webapps. Te pasaré el título, descripción y URL de una app de Product Hunt. Devuélveme SOLO un JSON válido con los siguientes campos exactos:
+    const prompt = `Actúa como un clasificador de webapps. Te pasaré el título, descripción y URL de una app. Devuélveme SOLO un JSON válido con los siguientes campos exactos:
 
 {
-  "nombre": "nombre corto de la webapp",
-  "url": "URL original",
-  "descripcion": "descripción en español máximo 200 caracteres",
-  "usa_ia": true o false,
+  "nombre": "nombre corto y descriptivo de la webapp en español",
+  "url": "URL original de la webapp",
+  "descripcion": "descripción clara y útil en español, máximo 200 caracteres",
+  "usa_ia": true o false (determina si la app usa inteligencia artificial),
   "categoria": "una de: productividad, creatividad, educacion, entretenimiento, herramientas dev, negocio, otras",
-  "etiquetas": ["etiqueta1", "etiqueta2", "etiqueta3"]
+  "etiquetas": ["etiqueta1", "etiqueta2", "etiqueta3"] (máximo 3 etiquetas relevantes en español)
 }
 
+Información de la app:
 Título: ${item.title}
 Descripción: ${item.description}
-URL: ${item.link}
+URL: ${item.websiteUrl}
+
+IMPORTANTE: 
+- Usa la URL de la webapp, no la de ProductHunt
+- La descripción debe ser clara y útil para usuarios españoles
+- Determina correctamente si usa IA basándote en el título y descripción
+- Clasifica en la categoría más apropiada
 
 Responde SOLO con el JSON, sin texto adicional:`
 
@@ -336,13 +329,14 @@ Responde SOLO con el JSON, sin texto adicional:`
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 500
+        temperature: 0.2,
+        max_tokens: 800
       })
     })
 
     if (!response.ok) {
-      console.error('Groq API error:', response.status, await response.text())
+      const errorText = await response.text()
+      console.error('Groq API error:', response.status, errorText)
       return null
     }
 
@@ -374,8 +368,19 @@ Responde SOLO con el JSON, sin texto adicional:`
       return null
     }
 
-    // Ensure URL is the original one
-    suggestion.url = item.link
+    // Ensure URL is the website URL, not ProductHunt URL
+    suggestion.url = item.websiteUrl
+
+    // Validate categoria
+    const validCategories = ['productividad', 'creatividad', 'educacion', 'entretenimiento', 'herramientas dev', 'negocio', 'otras']
+    if (!validCategories.includes(suggestion.categoria)) {
+      suggestion.categoria = 'otras'
+    }
+
+    // Ensure etiquetas is an array
+    if (!Array.isArray(suggestion.etiquetas)) {
+      suggestion.etiquetas = []
+    }
 
     return suggestion
 
