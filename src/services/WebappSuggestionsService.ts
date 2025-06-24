@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WebappSuggestion {
@@ -18,17 +17,40 @@ export interface WebappSuggestion {
 // Obtener todas las sugerencias en borrador
 export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
   try {
-    const { data, error } = await supabase
+    console.log('fetchWebappSuggestions: Starting request...');
+    
+    // Verificar sesión actual
+    const { data: session, error: sessionError } = await supabase.auth.getSession();
+    console.log('Current session:', session?.session?.user?.email);
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+    }
+
+    // Intentar la consulta con logging detallado
+    console.log('Attempting to fetch from webapp_suggestions table...');
+    const { data, error, count } = await supabase
       .from('webapp_suggestions')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('estado', 'borrador')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    console.log('Query result:', { data, error, count });
     
+    if (error) {
+      console.error('Supabase error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      throw error;
+    }
+    
+    console.log(`Successfully fetched ${data?.length || 0} suggestions`);
     return (data || []) as WebappSuggestion[];
   } catch (error) {
-    console.error('Error fetching webapp suggestions:', error);
+    console.error('Error in fetchWebappSuggestions:', error);
     throw error;
   }
 };

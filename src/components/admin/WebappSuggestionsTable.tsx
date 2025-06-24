@@ -29,26 +29,46 @@ const WebappSuggestionsTable: React.FC = () => {
   const [editForm, setEditForm] = useState<Partial<WebappSuggestion>>({});
   const [processing, setProcessing] = useState(false);
   const [processResult, setProcessResult] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
-    console.log('WebappSuggestionsTable: Initial load');
+    console.log('WebappSuggestionsTable: Component mounted, starting initial load');
     loadSuggestions();
   }, []);
 
   const loadSuggestions = async () => {
     try {
-      console.log('Loading webapp suggestions...');
+      console.log('=== LOADING SUGGESTIONS START ===');
       setLoading(true);
+      setDebugInfo(null);
+      
       const data = await fetchWebappSuggestions();
-      console.log('Loaded suggestions:', data);
+      console.log('Suggestions loaded successfully:', data);
       setSuggestions(data);
       
+      // Guardar info de debug
+      setDebugInfo({
+        timestamp: new Date().toISOString(),
+        suggestionsCount: data.length,
+        suggestions: data.map(s => ({ id: s.id, nombre: s.nombre, estado: s.estado }))
+      });
+      
       if (data.length === 0) {
-        console.log('No suggestions found in database');
+        console.log('No suggestions found - checking if table has any data at all...');
+        toast.info('No se encontraron sugerencias pendientes');
+      } else {
+        toast.success(`${data.length} sugerencias cargadas`);
       }
+      console.log('=== LOADING SUGGESTIONS END ===');
     } catch (error) {
-      console.error('Error loading suggestions:', error);
-      toast.error('Error al cargar sugerencias');
+      console.error('=== ERROR LOADING SUGGESTIONS ===');
+      console.error('Error details:', error);
+      setDebugInfo({
+        timestamp: new Date().toISOString(),
+        error: error.message,
+        errorDetails: error
+      });
+      toast.error(`Error al cargar sugerencias: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -137,6 +157,7 @@ const WebappSuggestionsTable: React.FC = () => {
         <div className="text-center">
           <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
           <p>Cargando sugerencias...</p>
+          <p className="text-xs text-gray-500 mt-2">Verificando permisos y datos...</p>
         </div>
       </div>
     );
@@ -144,6 +165,20 @@ const WebappSuggestionsTable: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Debug info card */}
+      {debugInfo && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="text-sm">
+              <h4 className="font-medium mb-2">Debug Info:</h4>
+              <pre className="text-xs bg-white p-2 rounded overflow-auto max-h-32">
+                {JSON.stringify(debugInfo, null, 2)}
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-semibold">Sugerencias de Webapps</h2>
