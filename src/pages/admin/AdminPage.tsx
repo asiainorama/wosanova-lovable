@@ -26,10 +26,15 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState<string>(TABS.APPS);
 
   useEffect(() => {
+    console.log("AdminPage - Session check:", { session, isAdmin, sessionLoading });
+    
     if (!sessionLoading) {
-      if (session && isAdmin) {
+      if (isAdmin) {
+        console.log("User is admin, loading apps...");
         loadApps();
-      } else if (!sessionLoading && !isAdmin) {
+      } else {
+        console.log("User is not admin, redirecting to home");
+        toast.error("Acceso restringido a administradores");
         navigate("/");
       }
     }
@@ -74,16 +79,33 @@ const AdminPage = () => {
 
   const handleTabChange = (value: string) => setActiveTab(value);
 
-  if (sessionLoading || (loading && !showForm)) {
+  // Mostrar loader mientras se verifica la sesión
+  if (sessionLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Verificando permisos de administrador...</p>
+        </div>
       </div>
     );
   }
 
+  // Si no hay sesión o no es admin, no renderizar nada (el redirect ya se manejó)
   if (!session || !isAdmin) {
-    return null; // Redirect handled in useEffect
+    return null;
+  }
+
+  // Mostrar loader mientras cargan las apps
+  if (loading && !showForm) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Cargando panel de administración...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
