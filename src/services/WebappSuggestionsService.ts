@@ -20,32 +20,6 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
   try {
     console.log('fetchWebappSuggestions: Starting request...');
     
-    // En modo desarrollo de Lovable, usar el service role key para bypass RLS completamente
-    const isDevelopment = window.location.hostname.includes('lovable') || 
-                         window.location.hostname === 'localhost' ||
-                         process.env.NODE_ENV === 'development';
-    
-    if (isDevelopment) {
-      console.log('Development mode detected, using service role access');
-      
-      // Usar una consulta directa sin RLS en desarrollo
-      const { data, error } = await supabase
-        .from('webapp_suggestions')
-        .select('*')
-        .eq('estado', 'borrador')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching suggestions:', error);
-        // En desarrollo, devolver array vacío si hay error
-        return [];
-      }
-      
-      console.log(`Successfully fetched ${data?.length || 0} suggestions`);
-      return (data || []) as WebappSuggestion[];
-    }
-    
-    // En producción, usar método normal
     const { data, error } = await supabase
       .from('webapp_suggestions')
       .select('*')
@@ -53,10 +27,15 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Production error fetching suggestions:', error);
+      console.error('Error fetching suggestions:', error);
+      // En desarrollo, devolver array vacío si hay error
+      if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
+        return [];
+      }
       throw error;
     }
     
+    console.log(`Successfully fetched ${data?.length || 0} suggestions`);
     return (data || []) as WebappSuggestion[];
   } catch (error) {
     console.error('Error in fetchWebappSuggestions:', error);
@@ -90,11 +69,16 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
 // Publicar una sugerencia (convertirla en app real)
 export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Promise<void> => {
   try {
+    console.log('Publishing suggestion:', suggestion.nombre);
+    
+    // Generate a unique ID for the new app
+    const appId = crypto.randomUUID();
+    
     // 1. Crear la app en la tabla apps
     const { error: appError } = await supabase
       .from('apps')
       .insert({
-        id: crypto.randomUUID(),
+        id: appId,
         name: suggestion.nombre,
         url: suggestion.url,
         description: suggestion.descripcion,
@@ -104,12 +88,29 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
         is_ai: suggestion.usa_ia || false
       });
 
-    if (appError && !window.location.hostname.includes('lovable')) {
-      throw appError;
+    if (appError) {
+      console.error('Error creating app:', appError);
+      if (!window.location.hostname.includes('lovable')) {
+        throw appError;
+      }
+    } else {
+      console.log('App created successfully with ID:', appId);
     }
 
     // 2. Marcar la sugerencia como publicada
-    await updateWebappSuggestion(suggestion.id, { estado: 'publicado' });
+    const { error: updateError } = await supabase
+      .from('webapp_suggestions')
+      .update({ estado: 'publicado' })
+      .eq('id', suggestion.id);
+
+    if (updateError) {
+      console.error('Error updating suggestion status:', updateError);
+      if (!window.location.hostname.includes('lovable')) {
+        throw updateError;
+      }
+    } else {
+      console.log('Suggestion marked as published');
+    }
 
   } catch (error) {
     console.error('Error publishing webapp suggestion:', error);
@@ -132,7 +133,7 @@ export const discardWebappSuggestion = async (id: string): Promise<void> => {
 };
 
 // Ejecutar el proceso de sugerencias automáticas
-export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean; processed: number; saved: number }> => {
+export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean; processed: number; saved: number; filtered?: number }> => {
   try {
     const response = await supabase.functions.invoke('webapp-suggestions', {
       body: {}

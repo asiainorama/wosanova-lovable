@@ -54,9 +54,24 @@ serve(async (req) => {
 
     console.log('✅ Groq API key found, length:', groqApiKey.length)
 
-    // Use example products
-    const products = getExampleProducts()
-    console.log(`📋 Using ${products.length} example products`)
+    // Get existing apps to avoid duplicates
+    const { data: existingApps, error: appsError } = await supabase
+      .from('apps')
+      .select('url, name')
+
+    if (appsError) {
+      console.error('❌ Error fetching existing apps:', appsError)
+      throw appsError
+    }
+
+    const existingUrls = new Set(existingApps?.map(app => new URL(app.url).hostname.replace('www.', '')) || [])
+    const existingNames = new Set(existingApps?.map(app => app.name.toLowerCase()) || [])
+    
+    console.log(`📋 Found ${existingUrls.size} existing apps to filter out`)
+
+    // Use dynamic products with more variety
+    const products = getDynamicProducts()
+    console.log(`📋 Using ${products.length} dynamic products`)
 
     const suggestions: any[] = []
 
@@ -68,6 +83,15 @@ serve(async (req) => {
       try {
         const suggestion = await processWithGroq(product, groqApiKey)
         if (suggestion) {
+          // Check if this app already exists
+          const suggestionDomain = extractDomain(suggestion.url).replace('www.', '')
+          const suggestionName = suggestion.nombre.toLowerCase()
+          
+          if (existingUrls.has(suggestionDomain) || existingNames.has(suggestionName)) {
+            console.log(`⚠️ Skipping duplicate: "${suggestion.nombre}" (already exists)`)
+            continue
+          }
+
           // Get icon from Clearbit
           const domain = extractDomain(suggestion.url)
           const iconUrl = `https://logo.clearbit.com/${domain}`
@@ -87,7 +111,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`📊 Generated ${suggestions.length} suggestions total`)
+    console.log(`📊 Generated ${suggestions.length} unique suggestions total`)
 
     // Save to Supabase
     if (suggestions.length > 0) {
@@ -103,7 +127,7 @@ serve(async (req) => {
 
       console.log(`🎉 Successfully saved ${suggestions.length} suggestions to database`)
     } else {
-      console.log('📝 No suggestions to save')
+      console.log('📝 No new suggestions to save (all were duplicates or failed)')
     }
 
     return new Response(
@@ -111,9 +135,11 @@ serve(async (req) => {
         success: true, 
         processed: products.length,
         saved: suggestions.length,
+        filtered: products.length - suggestions.length,
         debug: {
           productsUsed: products.length,
           suggestionsGenerated: suggestions.length,
+          existingAppsCount: existingUrls.size,
           groqApiKey: groqApiKey ? 'Present' : 'Missing',
           groqKeyLength: groqApiKey?.length || 0
         }
@@ -138,29 +164,102 @@ serve(async (req) => {
   }
 })
 
-function getExampleProducts(): ProductItem[] {
-  return [
+function getDynamicProducts(): ProductItem[] {
+  // Create pools of different types of products for variety
+  const aiTools = [
     {
-      title: "Notion AI",
-      description: "AI-powered workspace for writing, planning, and getting organized with intelligent automation",
-      websiteUrl: "https://notion.so"
+      title: "Claude AI",
+      description: "Advanced conversational AI assistant for complex reasoning and creative tasks",
+      websiteUrl: "https://claude.ai"
     },
     {
-      title: "Figma",
-      description: "Collaborative design tool with real-time editing and prototyping capabilities",
-      websiteUrl: "https://figma.com"
+      title: "Perplexity AI",
+      description: "AI-powered search engine that provides accurate, real-time answers with sources",
+      websiteUrl: "https://perplexity.ai"
     },
     {
-      title: "Linear",
-      description: "Streamlined project management tool designed for modern software teams",
-      websiteUrl: "https://linear.app"
+      title: "Runway ML",
+      description: "AI-powered creative tools for video generation, image editing, and more",
+      websiteUrl: "https://runwayml.com"
     },
     {
-      title: "Vercel",
-      description: "Frontend cloud platform for building and deploying modern web applications",
-      websiteUrl: "https://vercel.com"
+      title: "Midjourney",
+      description: "AI image generation tool that creates stunning artwork from text prompts",
+      websiteUrl: "https://midjourney.com"
     }
   ]
+
+  const devTools = [
+    {
+      title: "Supabase",
+      description: "Open source Firebase alternative with PostgreSQL database and real-time features",
+      websiteUrl: "https://supabase.com"
+    },
+    {
+      title: "Railway",
+      description: "Modern deployment platform for developers to build and ship applications easily",
+      websiteUrl: "https://railway.app"
+    },
+    {
+      title: "PlanetScale",
+      description: "Serverless MySQL database platform with branching and scaling capabilities",
+      websiteUrl: "https://planetscale.com"
+    },
+    {
+      title: "Neon",
+      description: "Serverless PostgreSQL with branching, autoscaling, and modern developer experience",
+      websiteUrl: "https://neon.tech"
+    }
+  ]
+
+  const designTools = [
+    {
+      title: "Framer",
+      description: "Advanced design and prototyping tool with powerful animation capabilities",
+      websiteUrl: "https://framer.com"
+    },
+    {
+      title: "Webflow",
+      description: "Visual web development platform that generates clean, semantic code",
+      websiteUrl: "https://webflow.com"
+    },
+    {
+      title: "Spline",
+      description: "3D design tool for creating interactive web experiences and animations",
+      websiteUrl: "https://spline.design"
+    }
+  ]
+
+  const productivityTools = [
+    {
+      title: "Arc Browser",
+      description: "Modern web browser with innovative tab management and productivity features",
+      websiteUrl: "https://arc.net"
+    },
+    {
+      title: "Raycast",
+      description: "Extensible launcher and productivity tool for macOS power users",
+      websiteUrl: "https://raycast.com"
+    },
+    {
+      title: "Codeshot",
+      description: "Beautiful code screenshot generator with customizable themes and styles",
+      websiteUrl: "https://codeshot.app"
+    }
+  ]
+
+  // Randomly select from different categories to ensure variety
+  const allCategories = [aiTools, devTools, designTools, productivityTools]
+  const selectedProducts: ProductItem[] = []
+  
+  // Select 2 random products from each category
+  allCategories.forEach(category => {
+    const shuffled = category.sort(() => 0.5 - Math.random())
+    selectedProducts.push(...shuffled.slice(0, 2))
+  })
+
+  // Shuffle the final selection
+  return selectedProducts.sort(() => 0.5 - Math.random()).slice(0, 6)
 }
 
 function extractDomain(url: string): string {
