@@ -28,7 +28,6 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     
     if (error) {
       console.error('Error fetching suggestions:', error);
-      // En desarrollo, devolver array vacío si hay error
       if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
         return [];
       }
@@ -39,7 +38,6 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     return (data || []) as WebappSuggestion[];
   } catch (error) {
     console.error('Error in fetchWebappSuggestions:', error);
-    // En desarrollo, devolver array vacío para evitar crashes
     if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
       return [];
     }
@@ -54,22 +52,21 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     
     const { error } = await supabase
       .from('webapp_suggestions')
-      .update({...updates, updated_at: new Date().toISOString()})
+      .update({
+        ...updates, 
+        updated_at: new Date().toISOString()
+      })
       .eq('id', id);
     
     if (error) {
       console.error('Error updating webapp suggestion:', error);
-      if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
-        throw error;
-      }
-    } else {
-      console.log('Webapp suggestion updated successfully');
-    }
-  } catch (error) {
-    console.error('Error updating webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
       throw error;
     }
+    
+    console.log('Webapp suggestion updated successfully');
+  } catch (error) {
+    console.error('Error updating webapp suggestion:', error);
+    throw error;
   }
 };
 
@@ -89,8 +86,8 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
       description: suggestion.descripcion,
       icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
       category: suggestion.categoria,
-      subcategory: suggestion.etiquetas?.[0] || null, // Use null instead of empty string
-      is_ai: suggestion.usa_ia || false, // Correct field name for database
+      subcategory: suggestion.etiquetas?.[0] || null,
+      is_ai: suggestion.usa_ia || false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -104,7 +101,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 
     if (appError) {
       console.error('Error creating app:', appError);
-      throw appError;
+      throw new Error(`Error al crear la aplicación: ${appError.message}`);
     }
 
     console.log('App created successfully with ID:', appId);
@@ -120,7 +117,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 
     if (updateError) {
       console.error('Error updating suggestion status:', updateError);
-      throw updateError;
+      throw new Error(`Error al actualizar el estado de la sugerencia: ${updateError.message}`);
     }
 
     console.log('Suggestion marked as published');
@@ -139,9 +136,7 @@ export const discardWebappSuggestion = async (id: string): Promise<void> => {
     console.log('Webapp suggestion discarded successfully');
   } catch (error) {
     console.error('Error discarding webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
-      throw error;
-    }
+    throw error;
   }
 };
 
@@ -166,7 +161,6 @@ export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean;
     return response.data || { success: true, processed: 0, saved: 0 };
   } catch (error) {
     console.error('Error running webapp suggestions process:', error);
-    // En desarrollo, devolver respuesta mock
     if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
       return { success: true, processed: 0, saved: 0 };
     }

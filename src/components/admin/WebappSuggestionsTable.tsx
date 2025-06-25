@@ -15,7 +15,7 @@ import {
   WebappSuggestion 
 } from '@/services/WebappSuggestionsService';
 import { useWebappSuggestions } from '@/hooks/useWebappSuggestions';
-import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle, Save, X } from 'lucide-react';
 import { mainCategories } from '@/data/mainCategories';
 
 const WebappSuggestionsTable: React.FC = () => {
@@ -25,6 +25,7 @@ const WebappSuggestionsTable: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [processResult, setProcessResult] = useState<any>(null);
   const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   const handleRunProcess = async () => {
     try {
@@ -40,8 +41,6 @@ const WebappSuggestionsTable: React.FC = () => {
       
       if (result.success) {
         toast.success(`Proceso completado: ${result.processed} elementos procesados, ${result.saved} sugerencias guardadas`);
-        
-        // Recargar sugerencias después de un breve delay
         setTimeout(() => {
           refetch();
         }, 1000);
@@ -74,17 +73,35 @@ const WebappSuggestionsTable: React.FC = () => {
     if (!editingId) return;
 
     try {
+      setSavingIds(prev => new Set(prev).add(editingId));
+      console.log('Saving edit form:', editForm);
+      
       await updateWebappSuggestion(editingId, editForm);
-      toast.success('Sugerencia actualizada');
+      toast.success('Sugerencia actualizada exitosamente');
+      
       setEditingId(null);
       setEditForm({});
-      await refetch();
+      
+      // Recargar sugerencias
+      setTimeout(() => {
+        refetch();
+      }, 500);
+      
     } catch (error) {
       console.error('Error updating suggestion:', error);
       toast.error('Error al actualizar la sugerencia');
-      setEditingId(null);
-      setEditForm({});
+    } finally {
+      setSavingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(editingId);
+        return newSet;
+      });
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
   };
 
   const handlePublish = async (suggestion: WebappSuggestion) => {
@@ -97,7 +114,6 @@ const WebappSuggestionsTable: React.FC = () => {
       await publishWebappSuggestion(suggestion);
       toast.success(`"${suggestion.nombre}" añadida al catálogo exitosamente`);
       
-      // Esperar un momento y recargar las sugerencias
       setTimeout(async () => {
         await refetch();
         setPublishingIds(prev => {
@@ -115,9 +131,8 @@ const WebappSuggestionsTable: React.FC = () => {
         return newSet;
       });
       
-      // Mostrar error específico
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      toast.error(`Error al publicar la sugerencia: ${errorMessage}`);
+      toast.error(`Error al publicar: ${errorMessage}`);
     }
   };
 
@@ -201,7 +216,6 @@ const WebappSuggestionsTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Mostrar resultado del proceso */}
       {processResult && (
         <Card className={`border ${processResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
           <CardContent className="p-4">
@@ -258,54 +272,42 @@ const WebappSuggestionsTable: React.FC = () => {
             <Card key={suggestion.id} className="relative">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {editingId === suggestion.id ? (
-                      <div className="flex flex-col gap-2">
-                        <Input
-                          value={editForm.icono_url || ''}
-                          onChange={(e) => setEditForm({...editForm, icono_url: e.target.value})}
-                          placeholder="URL del icono"
-                          className="w-40 text-xs"
-                        />
-                        {editForm.icono_url && (
-                          <img 
-                            src={editForm.icono_url} 
-                            alt="Preview"
-                            className="w-10 h-10 rounded"
-                            onError={(e) => { e.currentTarget.style.display = 'none' }}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      suggestion.icono_url && (
-                        <img 
-                          src={suggestion.icono_url} 
-                          alt={suggestion.nombre}
-                          className="w-10 h-10 rounded"
-                          onError={(e) => { e.currentTarget.style.display = 'none' }}
-                        />
-                      )
+                  <div className="flex items-center gap-3 flex-1">
+                    {suggestion.icono_url && (
+                      <img 
+                        src={suggestion.icono_url} 
+                        alt={suggestion.nombre}
+                        className="w-12 h-12 rounded object-contain flex-shrink-0"
+                        onError={(e) => { e.currentTarget.style.display = 'none' }}
+                      />
                     )}
-                    <div>
-                      {editingId === suggestion.id ? (
-                        <Input
-                          value={editForm.nombre || ''}
-                          onChange={(e) => setEditForm({...editForm, nombre: e.target.value})}
-                          className="font-semibold"
-                        />
-                      ) : (
-                        <CardTitle className="text-lg">{suggestion.nombre}</CardTitle>
-                      )}
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{suggestion.nombre}</CardTitle>
+                      <p className="text-sm text-gray-600 mt-1">{suggestion.descripcion}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     {editingId === suggestion.id ? (
                       <>
-                        <Button size="sm" onClick={handleSaveEdit}>
-                          Guardar
+                        <Button 
+                          size="sm" 
+                          onClick={handleSaveEdit}
+                          disabled={savingIds.has(suggestion.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {savingIds.has(suggestion.id) ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4" />
+                          )}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
-                          Cancelar
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={handleCancelEdit}
+                          disabled={savingIds.has(suggestion.id)}
+                        >
+                          <X className="h-4 w-4" />
                         </Button>
                       </>
                     ) : (
@@ -344,33 +346,25 @@ const WebappSuggestionsTable: React.FC = () => {
               
               <CardContent className="space-y-4">
                 {editingId === suggestion.id ? (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium">URL</label>
-                      <Input
-                        value={editForm.url || ''}
-                        onChange={(e) => setEditForm({...editForm, url: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium">Descripción</label>
-                      <Textarea
-                        value={editForm.descripcion || ''}
-                        onChange={(e) => setEditForm({...editForm, descripcion: e.target.value})}
-                        maxLength={200}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium">Categoría</label>
+                        <label className="text-sm font-medium mb-2 block">Nombre</label>
+                        <Input
+                          value={editForm.nombre || ''}
+                          onChange={(e) => setEditForm({...editForm, nombre: e.target.value})}
+                          placeholder="Nombre de la aplicación"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Categoría</label>
                         <Select 
                           value={editForm.categoria || ''} 
                           onValueChange={(value) => setEditForm({...editForm, categoria: value})}
                         >
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Seleccionar categoría" />
                           </SelectTrigger>
                           <SelectContent>
                             {mainCategories.map(cat => (
@@ -379,22 +373,52 @@ const WebappSuggestionsTable: React.FC = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      <div className="flex items-center gap-2 pt-6">
-                        <input
-                          type="checkbox"
-                          checked={editForm.usa_ia || false}
-                          onChange={(e) => setEditForm({...editForm, usa_ia: e.target.checked})}
-                          id={`ai-${suggestion.id}`}
-                        />
-                        <label htmlFor={`ai-${suggestion.id}`} className="text-sm">Usa IA</label>
-                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">URL</label>
+                      <Input
+                        value={editForm.url || ''}
+                        onChange={(e) => setEditForm({...editForm, url: e.target.value})}
+                        placeholder="https://ejemplo.com"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">URL del Icono</label>
+                      <Input
+                        value={editForm.icono_url || ''}
+                        onChange={(e) => setEditForm({...editForm, icono_url: e.target.value})}
+                        placeholder="https://ejemplo.com/icon.png"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Descripción</label>
+                      <Textarea
+                        value={editForm.descripcion || ''}
+                        onChange={(e) => setEditForm({...editForm, descripcion: e.target.value})}
+                        maxLength={200}
+                        rows={3}
+                        placeholder="Descripción de la aplicación"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editForm.usa_ia || false}
+                        onChange={(e) => setEditForm({...editForm, usa_ia: e.target.checked})}
+                        id={`ai-${suggestion.id}`}
+                        className="h-4 w-4"
+                      />
+                      <label htmlFor={`ai-${suggestion.id}`} className="text-sm font-medium">
+                        Usa Inteligencia Artificial
+                      </label>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-sm text-gray-600">{suggestion.descripcion}</p>
-                    
                     <div className="flex items-center gap-2 text-sm text-blue-600">
                       <span>🔗</span>
                       <a href={suggestion.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
