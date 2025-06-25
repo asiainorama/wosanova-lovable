@@ -51,11 +51,16 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const checked = 'checked' in e.target ? e.target.checked : false;
+    
+    // Handle checkbox inputs
+    let actualValue: string | boolean = value;
+    if (type === "checkbox" && 'checked' in e.target) {
+      actualValue = e.target.checked;
+    }
     
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: actualValue,
     }));
 
     // Trigger autofill for name and url changes
@@ -105,7 +110,11 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
           categories={mainCategories}
           isLoadingInfo={isLoadingInfo || isAutofilling}
         />
-        <AppFormActions onSave={handleSave} onCancel={onCancel} />
+        <AppFormActions 
+          onSave={handleSave} 
+          onCancel={onCancel}
+          isLoading={isLoadingInfo || isAutofilling}
+        />
       </CardContent>
     </Card>
   );

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WebappSuggestion {
@@ -49,17 +50,24 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
 // Actualizar una sugerencia
 export const updateWebappSuggestion = async (id: string, updates: Partial<WebappSuggestion>): Promise<void> => {
   try {
+    console.log('Updating webapp suggestion:', id, updates);
+    
     const { error } = await supabase
       .from('webapp_suggestions')
-      .update(updates)
+      .update({...updates, updated_at: new Date().toISOString()})
       .eq('id', id);
     
-    if (error && !window.location.hostname.includes('lovable')) {
-      throw error;
+    if (error) {
+      console.error('Error updating webapp suggestion:', error);
+      if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+        throw error;
+      }
+    } else {
+      console.log('Webapp suggestion updated successfully');
     }
   } catch (error) {
     console.error('Error updating webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable')) {
+    if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
       throw error;
     }
   }
@@ -73,19 +81,26 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
     // Generate a unique ID for the new app
     const appId = crypto.randomUUID();
     
+    // Prepare app data for insertion
+    const appData = {
+      id: appId,
+      name: suggestion.nombre,
+      url: suggestion.url,
+      description: suggestion.descripcion,
+      icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
+      category: suggestion.categoria,
+      subcategory: suggestion.etiquetas?.[0] || '',
+      is_ai: suggestion.usa_ia || false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    console.log('App data to insert:', appData);
+
     // 1. Crear la app en la tabla apps
     const { error: appError } = await supabase
       .from('apps')
-      .insert({
-        id: appId,
-        name: suggestion.nombre,
-        url: suggestion.url,
-        description: suggestion.descripcion,
-        icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
-        category: suggestion.categoria,
-        subcategory: suggestion.etiquetas?.[0] || '',
-        is_ai: suggestion.usa_ia || false
-      });
+      .insert(appData);
 
     if (appError) {
       console.error('Error creating app:', appError);
@@ -97,7 +112,10 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
     // 2. Marcar la sugerencia como publicada
     const { error: updateError } = await supabase
       .from('webapp_suggestions')
-      .update({ estado: 'publicado' })
+      .update({ 
+        estado: 'publicado',
+        updated_at: new Date().toISOString()
+      })
       .eq('id', suggestion.id);
 
     if (updateError) {
@@ -116,10 +134,12 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 // Descartar una sugerencia
 export const discardWebappSuggestion = async (id: string): Promise<void> => {
   try {
+    console.log('Discarding webapp suggestion:', id);
     await updateWebappSuggestion(id, { estado: 'descartado' });
+    console.log('Webapp suggestion discarded successfully');
   } catch (error) {
     console.error('Error discarding webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable')) {
+    if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
       throw error;
     }
   }
@@ -128,19 +148,26 @@ export const discardWebappSuggestion = async (id: string): Promise<void> => {
 // Ejecutar el proceso de sugerencias automáticas
 export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean; processed: number; saved: number; filtered?: number }> => {
   try {
+    console.log('Starting webapp suggestions process...');
+    
     const response = await supabase.functions.invoke('webapp-suggestions', {
       body: {}
     });
 
-    if (response.error && !window.location.hostname.includes('lovable')) {
-      throw response.error;
+    console.log('Webapp suggestions response:', response);
+
+    if (response.error) {
+      console.error('Error in webapp suggestions process:', response.error);
+      if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+        throw response.error;
+      }
     }
 
     return response.data || { success: true, processed: 0, saved: 0 };
   } catch (error) {
     console.error('Error running webapp suggestions process:', error);
     // En desarrollo, devolver respuesta mock
-    if (window.location.hostname.includes('lovable')) {
+    if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
       return { success: true, processed: 0, saved: 0 };
     }
     throw error;

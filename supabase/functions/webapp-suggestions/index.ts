@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -9,16 +8,16 @@ const corsHeaders = {
 
 // Categorías principales que usa el catálogo
 const MAIN_CATEGORIES = [
-  'Productividad',
-  'Entretenimiento', 
-  'Utilidades',
-  'Estilo de vida',
-  'Finanzas',
-  'Desarrollo',
-  'Diseño',
-  'Comunicación',
+  'Comercio electrónico',
+  'Comunicación', 
+  'Creatividad',
   'Educación',
-  'IA'
+  'Entretenimiento',
+  'Finanzas',
+  'Noticias e información',
+  'Productividad',
+  'Redes sociales',
+  'Utilidades'
 ];
 
 interface WebappSuggestion {
