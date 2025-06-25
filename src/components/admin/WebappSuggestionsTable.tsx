@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,7 +80,8 @@ const WebappSuggestionsTable: React.FC = () => {
       setEditForm({});
       await refetch();
     } catch (error) {
-      toast.success('Sugerencia actualizada (modo desarrollo)');
+      console.error('Error updating suggestion:', error);
+      toast.error('Error al actualizar la sugerencia');
       setEditingId(null);
       setEditForm({});
     }
@@ -113,15 +115,9 @@ const WebappSuggestionsTable: React.FC = () => {
         return newSet;
       });
       
-      // En desarrollo, simular éxito
-      if (window.location.hostname.includes('lovable')) {
-        toast.success(`"${suggestion.nombre}" añadida al catálogo (modo desarrollo)`);
-        setTimeout(async () => {
-          await refetch();
-        }, 1000);
-      } else {
-        toast.error('Error al publicar la sugerencia');
-      }
+      // Mostrar error específico
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error(`Error al publicar la sugerencia: ${errorMessage}`);
     }
   };
 
@@ -131,8 +127,8 @@ const WebappSuggestionsTable: React.FC = () => {
       toast.success('Sugerencia descartada');
       await refetch();
     } catch (error) {
-      toast.success('Sugerencia descartada (modo desarrollo)');
-      await refetch();
+      console.error('Error discarding suggestion:', error);
+      toast.error('Error al descartar la sugerencia');
     }
   };
 
@@ -142,15 +138,12 @@ const WebappSuggestionsTable: React.FC = () => {
         <div className="text-center">
           <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
           <p>Cargando sugerencias...</p>
-          <p className="text-xs text-gray-500 mt-2">Modo desarrollo activo</p>
         </div>
       </div>
     );
   }
 
-  // En desarrollo, no mostrar errores críticos
-  const isDevelopment = window.location.hostname.includes('lovable');
-  if (error && !isDevelopment) {
+  if (error) {
     return (
       <Card className="border-red-200 bg-red-50">
         <CardContent className="p-6">
@@ -181,7 +174,7 @@ const WebappSuggestionsTable: React.FC = () => {
         <div>
           <h2 className="text-xl font-semibold">Sugerencias de Webapps</h2>
           <p className="text-sm text-gray-600 mt-1">
-            {suggestions.length} sugerencias pendientes {isDevelopment && '(Modo desarrollo)'}
+            {suggestions.length} sugerencias pendientes
           </p>
         </div>
         <div className="flex gap-2">
@@ -242,7 +235,7 @@ const WebappSuggestionsTable: React.FC = () => {
           <CardContent className="p-8 text-center">
             <p className="text-gray-500">No hay sugerencias pendientes</p>
             <p className="text-sm text-gray-400 mt-2">
-              {isDevelopment ? 'Modo desarrollo activo - Funcionalidad limitada' : 'Ejecuta el proceso automático para generar nuevas sugerencias'}
+              Ejecuta el proceso automático para generar nuevas sugerencias
             </p>
             <Button 
               onClick={handleRunProcess} 

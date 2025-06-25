@@ -81,7 +81,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
     // Generate a unique ID for the new app
     const appId = crypto.randomUUID();
     
-    // Prepare app data for insertion
+    // Prepare app data for insertion - matching the exact database schema
     const appData = {
       id: appId,
       name: suggestion.nombre,
@@ -89,8 +89,8 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
       description: suggestion.descripcion,
       icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
       category: suggestion.categoria,
-      subcategory: suggestion.etiquetas?.[0] || '',
-      is_ai: suggestion.usa_ia || false,
+      subcategory: suggestion.etiquetas?.[0] || null, // Use null instead of empty string
+      is_ai: suggestion.usa_ia || false, // Correct field name for database
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
