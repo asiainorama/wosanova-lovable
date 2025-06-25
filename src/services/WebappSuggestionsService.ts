@@ -59,7 +59,7 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     
     if (error) {
       console.error('Error updating webapp suggestion:', error);
-      if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+      if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
         throw error;
       }
     } else {
@@ -67,7 +67,7 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     }
   } catch (error) {
     console.error('Error updating webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+    if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
       throw error;
     }
   }
@@ -139,7 +139,7 @@ export const discardWebappSuggestion = async (id: string): Promise<void> => {
     console.log('Webapp suggestion discarded successfully');
   } catch (error) {
     console.error('Error discarding webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+    if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
       throw error;
     }
   }
@@ -158,7 +158,7 @@ export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean;
 
     if (response.error) {
       console.error('Error in webapp suggestions process:', response.error);
-      if (!window.location.hostname.includes('lovable') && !window.location.hostname === 'localhost') {
+      if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
         throw response.error;
       }
     }
