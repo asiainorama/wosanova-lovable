@@ -64,6 +64,20 @@ serve(async (req) => {
       throw appsError
     }
 
+    // Get valid categories from existing apps
+    const { data: categoryData, error: categoryError } = await supabase
+      .from('apps')
+      .select('category')
+      .not('category', 'is', null)
+
+    if (categoryError) {
+      console.error('❌ Error fetching categories:', categoryError)
+      throw categoryError
+    }
+
+    const validCategories = [...new Set(categoryData?.map(item => item.category) || [])]
+    console.log('📋 Valid categories from catalog:', validCategories)
+
     const existingUrls = new Set(existingApps?.map(app => new URL(app.url).hostname.replace('www.', '')) || [])
     const existingNames = new Set(existingApps?.map(app => app.name.toLowerCase()) || [])
     
@@ -81,7 +95,7 @@ serve(async (req) => {
       console.log(`🔄 Processing product ${index + 1}/${products.length}: "${product.title}"`)
       
       try {
-        const suggestion = await processWithGroq(product, groqApiKey)
+        const suggestion = await processWithGroq(product, groqApiKey, validCategories)
         if (suggestion) {
           // Check if this app already exists
           const suggestionDomain = extractDomain(suggestion.url).replace('www.', '')
@@ -140,6 +154,7 @@ serve(async (req) => {
           productsUsed: products.length,
           suggestionsGenerated: suggestions.length,
           existingAppsCount: existingUrls.size,
+          validCategories: validCategories.length,
           groqApiKey: groqApiKey ? 'Present' : 'Missing',
           groqKeyLength: groqApiKey?.length || 0
         }
@@ -165,101 +180,70 @@ serve(async (req) => {
 })
 
 function getDynamicProducts(): ProductItem[] {
-  // Create pools of different types of products for variety
-  const aiTools = [
-    {
-      title: "Claude AI",
-      description: "Advanced conversational AI assistant for complex reasoning and creative tasks",
-      websiteUrl: "https://claude.ai"
-    },
-    {
-      title: "Perplexity AI",
-      description: "AI-powered search engine that provides accurate, real-time answers with sources",
-      websiteUrl: "https://perplexity.ai"
-    },
-    {
-      title: "Runway ML",
-      description: "AI-powered creative tools for video generation, image editing, and more",
-      websiteUrl: "https://runwayml.com"
-    },
-    {
-      title: "Midjourney",
-      description: "AI image generation tool that creates stunning artwork from text prompts",
-      websiteUrl: "https://midjourney.com"
-    }
+  // Crear pools de diferentes tipos de productos con más variedad
+  const currentTime = Date.now()
+  const pools = [
+    // Pool 1: AI y herramientas modernas
+    [
+      { title: "v0.dev", description: "AI-powered interface design tool by Vercel", websiteUrl: "https://v0.dev" },
+      { title: "Cursor", description: "AI-powered code editor", websiteUrl: "https://cursor.sh" },
+      { title: "Windsurf", description: "AI-powered development environment", websiteUrl: "https://codeium.com/windsurf" },
+      { title: "Bolt.new", description: "AI-powered web development platform", websiteUrl: "https://bolt.new" },
+      { title: "Replit Agent", description: "AI coding assistant for collaborative programming", websiteUrl: "https://replit.com/agent" },
+      { title: "Claude Computer Use", description: "AI assistant that can interact with computer interfaces", websiteUrl: "https://claude.ai" },
+    ],
+    
+    // Pool 2: Herramientas de desarrollo
+    [
+      { title: "Vercel", description: "Frontend cloud platform for static sites and serverless functions", websiteUrl: "https://vercel.com" },
+      { title: "Netlify", description: "Platform for automating modern web projects", websiteUrl: "https://netlify.com" },
+      { title: "Render", description: "Cloud platform for building and running apps", websiteUrl: "https://render.com" },
+      { title: "Fly.io", description: "Platform for running applications globally", websiteUrl: "https://fly.io" },
+      { title: "Upstash", description: "Serverless data platform", websiteUrl: "https://upstash.com" },
+      { title: "Convex", description: "Backend application platform with real-time sync", websiteUrl: "https://convex.dev" },
+    ],
+    
+    // Pool 3: Herramientas de diseño
+    [
+      { title: "Linear", description: "Issue tracking and project management for modern teams", websiteUrl: "https://linear.app" },
+      { title: "Notion", description: "All-in-one workspace for notes, tasks, wikis, and databases", websiteUrl: "https://notion.so" },
+      { title: "Obsidian", description: "Knowledge management app for networked thought", websiteUrl: "https://obsidian.md" },
+      { title: "Tldraw", description: "Collaborative digital whiteboard", websiteUrl: "https://tldraw.com" },
+      { title: "Excalidraw", description: "Virtual collaborative whiteboard for sketching hand-drawn diagrams", websiteUrl: "https://excalidraw.com" },
+      { title: "Rive", description: "Real-time interactive design and animation tool", websiteUrl: "https://rive.app" },
+    ],
+    
+    // Pool 4: Productividad y comunicación
+    [
+      { title: "Discord", description: "Voice, video and text communication platform", websiteUrl: "https://discord.com" },
+      { title: "Slack", description: "Business communication platform", websiteUrl: "https://slack.com" },
+      { title: "Telegram", description: "Cloud-based instant messaging service", websiteUrl: "https://telegram.org" },
+      { title: "Zoom", description: "Video conferencing and communication platform", websiteUrl: "https://zoom.us" },
+      { title: "Loom", description: "Screen recording and video messaging tool", websiteUrl: "https://loom.com" },
+      { title: "Cal.com", description: "Open source scheduling platform", websiteUrl: "https://cal.com" },
+    ]
   ]
 
-  const devTools = [
-    {
-      title: "Supabase",
-      description: "Open source Firebase alternative with PostgreSQL database and real-time features",
-      websiteUrl: "https://supabase.com"
-    },
-    {
-      title: "Railway",
-      description: "Modern deployment platform for developers to build and ship applications easily",
-      websiteUrl: "https://railway.app"
-    },
-    {
-      title: "PlanetScale",
-      description: "Serverless MySQL database platform with branching and scaling capabilities",
-      websiteUrl: "https://planetscale.com"
-    },
-    {
-      title: "Neon",
-      description: "Serverless PostgreSQL with branching, autoscaling, and modern developer experience",
-      websiteUrl: "https://neon.tech"
-    }
-  ]
-
-  const designTools = [
-    {
-      title: "Framer",
-      description: "Advanced design and prototyping tool with powerful animation capabilities",
-      websiteUrl: "https://framer.com"
-    },
-    {
-      title: "Webflow",
-      description: "Visual web development platform that generates clean, semantic code",
-      websiteUrl: "https://webflow.com"
-    },
-    {
-      title: "Spline",
-      description: "3D design tool for creating interactive web experiences and animations",
-      websiteUrl: "https://spline.design"
-    }
-  ]
-
-  const productivityTools = [
-    {
-      title: "Arc Browser",
-      description: "Modern web browser with innovative tab management and productivity features",
-      websiteUrl: "https://arc.net"
-    },
-    {
-      title: "Raycast",
-      description: "Extensible launcher and productivity tool for macOS power users",
-      websiteUrl: "https://raycast.com"
-    },
-    {
-      title: "Codeshot",
-      description: "Beautiful code screenshot generator with customizable themes and styles",
-      websiteUrl: "https://codeshot.app"
-    }
-  ]
-
-  // Randomly select from different categories to ensure variety
-  const allCategories = [aiTools, devTools, designTools, productivityTools]
+  // Seleccionar productos de forma más dinámica basada en el tiempo
   const selectedProducts: ProductItem[] = []
+  const timeBasedSeed = Math.floor(currentTime / (1000 * 60 * 30)) // Cambia cada 30 minutos
   
-  // Select 2 random products from each category
-  allCategories.forEach(category => {
-    const shuffled = category.sort(() => 0.5 - Math.random())
-    selectedProducts.push(...shuffled.slice(0, 2))
+  pools.forEach((pool, poolIndex) => {
+    // Mezclar cada pool usando el seed temporal
+    const shuffled = pool.sort(() => {
+      const seed = (timeBasedSeed + poolIndex) % 1000
+      return (seed % 2) - 0.5
+    })
+    // Tomar 1-2 elementos de cada pool
+    const count = 1 + (timeBasedSeed + poolIndex) % 2
+    selectedProducts.push(...shuffled.slice(0, count))
   })
 
-  // Shuffle the final selection
-  return selectedProducts.sort(() => 0.5 - Math.random()).slice(0, 6)
+  // Mezclar la selección final
+  return selectedProducts.sort(() => {
+    const seed = timeBasedSeed % 1000
+    return (seed % 2) - 0.5
+  }).slice(0, 8) // Aumentar a 8 productos para más variedad
 }
 
 function extractDomain(url: string): string {
@@ -270,10 +254,12 @@ function extractDomain(url: string): string {
   }
 }
 
-async function processWithGroq(product: ProductItem, apiKey: string): Promise<WebappSuggestion | null> {
+async function processWithGroq(product: ProductItem, apiKey: string, validCategories: string[]): Promise<WebappSuggestion | null> {
   try {
     console.log(`🤖 Processing with Groq: "${product.title}"`)
 
+    const categoriesStr = validCategories.join(', ')
+    
     const prompt = `Analiza esta aplicación web y devuelve SOLO un JSON válido con la información solicitada.
 
 INFORMACIÓN DE LA APP:
@@ -281,22 +267,25 @@ INFORMACIÓN DE LA APP:
 - Descripción: ${product.description}
 - URL del sitio web: ${product.websiteUrl}
 
+CATEGORÍAS VÁLIDAS: ${categoriesStr}
+
 RESPONDE SOLO CON ESTE JSON (sin texto adicional ni explicaciones):
 {
-  "nombre": "nombre descriptivo en español (máximo 50 caracteres)",
+  "nombre": "nombre comercial exacto de la aplicación (máximo 30 caracteres, NO descripción)",
   "url": "${product.websiteUrl}",
-  "descripcion": "descripción clara y útil en español que explique qué hace la app (máximo 200 caracteres)",
+  "descripcion": "descripción clara y útil en español que explique qué hace la app (máximo 150 caracteres)",
   "usa_ia": true o false (determina si la aplicación usa inteligencia artificial o machine learning),
-  "categoria": "una de estas opciones exactas: productividad, creatividad, educacion, entretenimiento, herramientas dev, negocio, otras",
+  "categoria": "una de las categorías válidas proporcionadas arriba",
   "etiquetas": ["máximo 3 etiquetas relevantes en español"]
 }
 
 REGLAS IMPORTANTES:
-- El nombre debe ser claro y en español
+- El nombre debe ser el nombre comercial exacto de la aplicación, NO una descripción
+- Ejemplo correcto: "Figma" no "Herramienta de diseño colaborativo"  
 - La descripción debe ser útil y explicar la funcionalidad principal
 - Usa exactamente la URL proporcionada
-- Solo marca usa_ia como true si realmente usa IA/ML
-- Usa exactamente una de las categorías listadas
+- Solo marca usa_ia como true si realmente usa IA/ML de forma prominente
+- Usa exactamente una de las categorías válidas proporcionadas
 - Máximo 3 etiquetas relevantes en español`
 
     console.log('🔑 Making request to Groq API...')
@@ -315,8 +304,8 @@ REGLAS IMPORTANTES:
             content: prompt
           }
         ],
-        temperature: 0.2,
-        max_tokens: 400
+        temperature: 0.1,
+        max_tokens: 300
       })
     })
 
@@ -351,10 +340,10 @@ REGLAS IMPORTANTES:
       return null
     }
 
-    // Validate category
-    const validCategories = ['productividad', 'creatividad', 'educacion', 'entretenimiento', 'herramientas dev', 'negocio', 'otras']
+    // Validate category against valid categories
     if (!validCategories.includes(suggestion.categoria)) {
-      suggestion.categoria = 'otras'
+      console.log(`⚠️ Invalid category "${suggestion.categoria}", using default`)
+      suggestion.categoria = validCategories[0] || 'Herramientas'
     }
 
     // Ensure etiquetas is an array

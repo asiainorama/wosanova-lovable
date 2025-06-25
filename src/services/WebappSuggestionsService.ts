@@ -82,7 +82,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
         name: suggestion.nombre,
         url: suggestion.url,
         description: suggestion.descripcion,
-        icon: suggestion.icono_url || '',
+        icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
         category: suggestion.categoria,
         subcategory: suggestion.etiquetas?.[0] || '',
         is_ai: suggestion.usa_ia || false
@@ -93,9 +93,10 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
       if (!window.location.hostname.includes('lovable')) {
         throw appError;
       }
-    } else {
-      console.log('App created successfully with ID:', appId);
+      return;
     }
+
+    console.log('App created successfully with ID:', appId);
 
     // 2. Marcar la sugerencia como publicada
     const { error: updateError } = await supabase
@@ -108,9 +109,10 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
       if (!window.location.hostname.includes('lovable')) {
         throw updateError;
       }
-    } else {
-      console.log('Suggestion marked as published');
+      return;
     }
+
+    console.log('Suggestion marked as published');
 
   } catch (error) {
     console.error('Error publishing webapp suggestion:', error);

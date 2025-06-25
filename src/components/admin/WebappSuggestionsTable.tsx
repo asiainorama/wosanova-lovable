@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,11 +16,7 @@ import {
 } from '@/services/WebappSuggestionsService';
 import { useWebappSuggestions } from '@/hooks/useWebappSuggestions';
 import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle } from 'lucide-react';
-
-const CATEGORIAS = [
-  'productividad', 'creatividad', 'educacion', 'entretenimiento', 
-  'herramientas dev', 'negocio', 'otras'
-];
+import { categories } from '@/data/apps';
 
 const WebappSuggestionsTable: React.FC = () => {
   const { suggestions, loading, error, refetch } = useWebappSuggestions();
@@ -67,7 +64,8 @@ const WebappSuggestionsTable: React.FC = () => {
       descripcion: suggestion.descripcion,
       categoria: suggestion.categoria,
       usa_ia: suggestion.usa_ia,
-      etiquetas: suggestion.etiquetas
+      etiquetas: suggestion.etiquetas,
+      icono_url: suggestion.icono_url
     });
   };
 
@@ -94,6 +92,7 @@ const WebappSuggestionsTable: React.FC = () => {
       await refetch();
     } catch (error) {
       toast.success(`"${suggestion.nombre}" publicada (modo desarrollo)`);
+      await refetch();
     }
   };
 
@@ -104,6 +103,7 @@ const WebappSuggestionsTable: React.FC = () => {
       await refetch();
     } catch (error) {
       toast.success('Sugerencia descartada (modo desarrollo)');
+      await refetch();
     }
   };
 
@@ -237,13 +237,32 @@ const WebappSuggestionsTable: React.FC = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    {suggestion.icono_url && (
-                      <img 
-                        src={suggestion.icono_url} 
-                        alt={suggestion.nombre}
-                        className="w-10 h-10 rounded"
-                        onError={(e) => { e.currentTarget.style.display = 'none' }}
-                      />
+                    {editingId === suggestion.id ? (
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          value={editForm.icono_url || ''}
+                          onChange={(e) => setEditForm({...editForm, icono_url: e.target.value})}
+                          placeholder="URL del icono"
+                          className="w-40 text-xs"
+                        />
+                        {editForm.icono_url && (
+                          <img 
+                            src={editForm.icono_url} 
+                            alt="Preview"
+                            className="w-10 h-10 rounded"
+                            onError={(e) => { e.currentTarget.style.display = 'none' }}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      suggestion.icono_url && (
+                        <img 
+                          src={suggestion.icono_url} 
+                          alt={suggestion.nombre}
+                          className="w-10 h-10 rounded"
+                          onError={(e) => { e.currentTarget.style.display = 'none' }}
+                        />
+                      )
                     )}
                     <div>
                       {editingId === suggestion.id ? (
@@ -327,7 +346,7 @@ const WebappSuggestionsTable: React.FC = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {CATEGORIAS.map(cat => (
+                            {categories.map(cat => (
                               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
                           </SelectContent>
