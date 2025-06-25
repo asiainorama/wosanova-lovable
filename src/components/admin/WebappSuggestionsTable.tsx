@@ -55,6 +55,7 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEdit = (suggestion: WebappSuggestion) => {
+    console.log('Starting edit for suggestion:', suggestion);
     setEditingId(suggestion.id);
     setEditForm({
       nombre: suggestion.nombre,
@@ -73,6 +74,12 @@ const WebappSuggestionsTable: React.FC = () => {
     try {
       setSavingIds(prev => new Set(prev).add(editingId));
       console.log('Saving edit form:', editForm);
+      
+      // Validar que la categoría esté presente
+      if (!editForm.categoria) {
+        toast.error('La categoría es obligatoria');
+        return;
+      }
       
       await updateWebappSuggestion(editingId, editForm);
       toast.success('Sugerencia actualizada exitosamente');
@@ -103,6 +110,12 @@ const WebappSuggestionsTable: React.FC = () => {
 
   const handlePublish = async (suggestion: WebappSuggestion) => {
     if (publishingIds.has(suggestion.id)) return;
+    
+    // Validar que la categoría esté presente
+    if (!suggestion.categoria) {
+      toast.error('La categoría es obligatoria para publicar. Por favor, edita la sugerencia primero.');
+      return;
+    }
     
     try {
       setPublishingIds(prev => new Set(prev).add(suggestion.id));
@@ -145,7 +158,8 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEditFormChange = (updates: Partial<WebappSuggestion>) => {
-    setEditForm(updates);
+    console.log('Form change:', updates);
+    setEditForm(prev => ({ ...prev, ...updates }));
   };
 
   if (loading) {

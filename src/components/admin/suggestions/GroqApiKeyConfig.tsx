@@ -18,33 +18,16 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
   const [keyStatus, setKeyStatus] = useState<'unknown' | 'valid' | 'invalid'>('unknown');
 
   useEffect(() => {
-    checkExistingKey();
-  }, []);
-
-  const checkExistingKey = async () => {
-    try {
-      setIsChecking(true);
-      // Intentar hacer una llamada de prueba para verificar si la key existe y funciona
-      const response = await fetch('/api/check-groq-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      
-      if (response.ok) {
-        setKeyStatus('valid');
-        onApiKeyChange(true);
-      } else {
-        setKeyStatus('invalid');
-        onApiKeyChange(false);
-      }
-    } catch (error) {
-      console.log('No se pudo verificar la API key existente');
+    // Verificar si ya hay una key configurada
+    const savedKey = localStorage.getItem('groq_api_key_configured');
+    if (savedKey === 'true') {
+      setKeyStatus('valid');
+      onApiKeyChange(true);
+    } else {
       setKeyStatus('unknown');
       onApiKeyChange(false);
-    } finally {
-      setIsChecking(false);
     }
-  };
+  }, [onApiKeyChange]);
 
   const testApiKey = async () => {
     if (!apiKey.trim()) {
@@ -54,6 +37,8 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
 
     setIsChecking(true);
     try {
+      console.log('Testing Groq API key...');
+      
       const response = await fetch('https://api.groq.com/openai/v1/models', {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -63,33 +48,28 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
 
       if (response.ok) {
         setKeyStatus('valid');
-        toast.success('API key válida');
+        toast.success('API key válida y configurada');
         onApiKeyChange(true);
         
-        // Enviar la key al backend para configurarla
-        await updateGroqSecret();
+        // Guardar la configuración localmente
+        localStorage.setItem('groq_api_key_configured', 'true');
+        localStorage.setItem('groq_api_key', apiKey);
+        
+        console.log('Groq API key configured successfully');
       } else {
         setKeyStatus('invalid');
-        toast.error('API key inválida');
+        toast.error('API key inválida o sin permisos');
         onApiKeyChange(false);
+        localStorage.removeItem('groq_api_key_configured');
       }
     } catch (error) {
+      console.error('Error testing API key:', error);
       setKeyStatus('invalid');
       toast.error('Error al verificar la API key');
       onApiKeyChange(false);
+      localStorage.removeItem('groq_api_key_configured');
     } finally {
       setIsChecking(false);
-    }
-  };
-
-  const updateGroqSecret = async () => {
-    try {
-      // Nota: En un entorno real, esto debería ir a través de Supabase Edge Functions
-      // Por ahora, solo simularemos que se guarda
-      localStorage.setItem('groq_api_key_configured', 'true');
-      toast.success('API key configurada correctamente');
-    } catch (error) {
-      toast.error('Error al guardar la API key');
     }
   };
 
@@ -121,6 +101,7 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
               placeholder="Ingresa tu API key de Groq"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && testApiKey()}
             />
             <Button
               type="button"
@@ -153,6 +134,11 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
               console.groq.com/keys
             </a>
           </p>
+          {keyStatus === 'valid' && (
+            <p className="mt-2 text-green-600 text-xs">
+              ✓ API key configurada correctamente. Ya puedes generar sugerencias automáticas.
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

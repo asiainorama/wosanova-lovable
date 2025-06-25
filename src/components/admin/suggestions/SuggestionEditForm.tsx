@@ -18,13 +18,13 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   suggestionId
 }) => {
   const handleCategoryChange = (value: string) => {
-    console.log('Changing category to:', value);
-    onFormChange({ ...editForm, categoria: value });
+    console.log('Category selected:', value);
+    onFormChange({ categoria: value });
   };
 
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
-    onFormChange({ ...editForm, etiquetas: tags });
+    onFormChange({ etiquetas: tags });
   };
 
   return (
@@ -34,7 +34,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
           <label className="text-sm font-medium mb-2 block">Nombre</label>
           <Input
             value={editForm.nombre || ''}
-            onChange={(e) => onFormChange({ ...editForm, nombre: e.target.value })}
+            onChange={(e) => onFormChange({ nombre: e.target.value })}
             placeholder="Nombre de la aplicación"
           />
         </div>
@@ -64,7 +64,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <label className="text-sm font-medium mb-2 block">URL</label>
         <Input
           value={editForm.url || ''}
-          onChange={(e) => onFormChange({ ...editForm, url: e.target.value })}
+          onChange={(e) => onFormChange({ url: e.target.value })}
           placeholder="https://ejemplo.com"
         />
       </div>
@@ -73,7 +73,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <label className="text-sm font-medium mb-2 block">URL del Icono</label>
         <Input
           value={editForm.icono_url || ''}
-          onChange={(e) => onFormChange({ ...editForm, icono_url: e.target.value })}
+          onChange={(e) => onFormChange({ icono_url: e.target.value })}
           placeholder="https://ejemplo.com/icon.png"
         />
       </div>
@@ -82,7 +82,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <label className="text-sm font-medium mb-2 block">Descripción</label>
         <Textarea
           value={editForm.descripcion || ''}
-          onChange={(e) => onFormChange({ ...editForm, descripcion: e.target.value })}
+          onChange={(e) => onFormChange({ descripcion: e.target.value })}
           maxLength={200}
           rows={3}
           placeholder="Descripción de la aplicación"
@@ -106,7 +106,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <input
           type="checkbox"
           checked={editForm.usa_ia || false}
-          onChange={(e) => onFormChange({ ...editForm, usa_ia: e.target.checked })}
+          onChange={(e) => onFormChange({ usa_ia: e.target.checked })}
           id={`ai-${suggestionId}`}
           className="h-4 w-4"
         />
