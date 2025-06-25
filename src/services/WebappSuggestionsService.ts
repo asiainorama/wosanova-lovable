@@ -50,17 +50,32 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
   try {
     console.log('Updating webapp suggestion:', id, updates);
     
+    // Preparar los datos para la actualización
+    const updateData: any = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    // Validar que la categoría esté presente si se está intentando actualizar
+    if (updateData.categoria && typeof updateData.categoria !== 'string') {
+      throw new Error('La categoría debe ser una cadena de texto');
+    }
+
+    // Validar etiquetas
+    if (updateData.etiquetas && !Array.isArray(updateData.etiquetas)) {
+      throw new Error('Las etiquetas deben ser un array');
+    }
+
+    console.log('Final update data:', updateData);
+    
     const { error } = await supabase
       .from('webapp_suggestions')
-      .update({
-        ...updates, 
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', id);
     
     if (error) {
       console.error('Error updating webapp suggestion:', error);
-      throw error;
+      throw new Error(`Error al actualizar la sugerencia: ${error.message}`);
     }
     
     console.log('Webapp suggestion updated successfully');
@@ -75,15 +90,24 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
   try {
     console.log('Publishing suggestion:', suggestion.nombre);
     
+    // Validar datos obligatorios
+    if (!suggestion.categoria) {
+      throw new Error('La categoría es obligatoria para publicar una sugerencia');
+    }
+
+    if (!suggestion.nombre || !suggestion.url || !suggestion.descripcion) {
+      throw new Error('Nombre, URL y descripción son obligatorios');
+    }
+    
     // Generate a unique ID for the new app
     const appId = crypto.randomUUID();
     
     // Prepare app data for insertion - matching the exact database schema
     const appData = {
       id: appId,
-      name: suggestion.nombre,
-      url: suggestion.url,
-      description: suggestion.descripcion,
+      name: suggestion.nombre.trim(),
+      url: suggestion.url.trim(),
+      description: suggestion.descripcion.trim(),
       icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
       category: suggestion.categoria,
       subcategory: suggestion.etiquetas?.[0] || null,

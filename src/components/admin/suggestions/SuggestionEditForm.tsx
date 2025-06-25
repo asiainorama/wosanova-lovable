@@ -17,6 +17,16 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   onFormChange,
   suggestionId
 }) => {
+  const handleCategoryChange = (value: string) => {
+    console.log('Changing category to:', value);
+    onFormChange({ ...editForm, categoria: value });
+  };
+
+  const handleTagsChange = (value: string) => {
+    const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
+    onFormChange({ ...editForm, etiquetas: tags });
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -30,10 +40,10 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         </div>
         
         <div>
-          <label className="text-sm font-medium mb-2 block">Categoría</label>
+          <label className="text-sm font-medium mb-2 block">Categoría *</label>
           <Select 
             value={editForm.categoria || ''} 
-            onValueChange={(value) => onFormChange({ ...editForm, categoria: value })}
+            onValueChange={handleCategoryChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar categoría" />
@@ -44,6 +54,9 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {!editForm.categoria && (
+            <p className="text-xs text-red-500 mt-1">La categoría es obligatoria para aprobar</p>
+          )}
         </div>
       </div>
       
@@ -74,6 +87,19 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
           rows={3}
           placeholder="Descripción de la aplicación"
         />
+        <div className="text-xs text-gray-400 text-right mt-1">
+          {(editForm.descripcion || '').length}/200
+        </div>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium mb-2 block">Etiquetas</label>
+        <Input
+          value={editForm.etiquetas?.join(', ') || ''}
+          onChange={(e) => handleTagsChange(e.target.value)}
+          placeholder="etiqueta1, etiqueta2, etiqueta3"
+        />
+        <p className="text-xs text-gray-500 mt-1">Separa las etiquetas con comas</p>
       </div>
       
       <div className="flex items-center gap-2">

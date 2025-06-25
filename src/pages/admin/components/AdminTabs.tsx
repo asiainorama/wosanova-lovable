@@ -4,7 +4,6 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AppData } from "@/data/types";
 import AppsManagement from "./AppsManagement";
 import UsersManagement from "./UsersManagement";
-import SuggestionsManagement from "./SuggestionsManagement";
 
 interface AdminTabsProps {
   activeTab: string;
@@ -22,7 +21,6 @@ interface AdminTabsProps {
 const TABS = {
   APPS: "apps",
   USERS: "users",
-  SUGGESTIONS: "suggestions",
 };
 
 const AdminTabs: React.FC<AdminTabsProps> = ({
@@ -55,10 +53,6 @@ const AdminTabs: React.FC<AdminTabsProps> = ({
 
       <TabsContent value={TABS.USERS}>
         <UsersManagement />
-      </TabsContent>
-
-      <TabsContent value={TABS.SUGGESTIONS}>
-        <SuggestionsManagement />
       </TabsContent>
     </Tabs>
   );
