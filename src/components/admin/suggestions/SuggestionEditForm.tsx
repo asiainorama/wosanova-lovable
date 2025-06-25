@@ -19,11 +19,13 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
 }) => {
   const handleCategoryChange = (value: string) => {
     console.log('Category selected:', value);
+    console.log('Available categories:', mainCategories);
     onFormChange({ categoria: value });
   };
 
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
+    console.log('Tags updated:', tags);
     onFormChange({ etiquetas: tags });
   };
 
@@ -56,6 +58,9 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
           </Select>
           {!editForm.categoria && (
             <p className="text-xs text-red-500 mt-1">La categoría es obligatoria para aprobar</p>
+          )}
+          {editForm.categoria && (
+            <p className="text-xs text-green-600 mt-1">Categoría seleccionada: {editForm.categoria}</p>
           )}
         </div>
       </div>

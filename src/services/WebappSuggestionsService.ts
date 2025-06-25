@@ -57,8 +57,11 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     };
 
     // Validar que la categoría esté presente si se está intentando actualizar
-    if (updateData.categoria && typeof updateData.categoria !== 'string') {
-      throw new Error('La categoría debe ser una cadena de texto');
+    if (updateData.categoria) {
+      if (typeof updateData.categoria !== 'string') {
+        throw new Error('La categoría debe ser una cadena de texto');
+      }
+      console.log('Updating with category:', updateData.categoria);
     }
 
     // Validar etiquetas
@@ -68,17 +71,18 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
 
     console.log('Final update data:', updateData);
     
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('webapp_suggestions')
       .update(updateData)
-      .eq('id', id);
+      .eq('id', id)
+      .select();
     
     if (error) {
       console.error('Error updating webapp suggestion:', error);
       throw new Error(`Error al actualizar la sugerencia: ${error.message}`);
     }
     
-    console.log('Webapp suggestion updated successfully');
+    console.log('Webapp suggestion updated successfully:', data);
   } catch (error) {
     console.error('Error updating webapp suggestion:', error);
     throw error;
@@ -88,10 +92,10 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
 // Publicar una sugerencia (convertirla en app real)
 export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Promise<void> => {
   try {
-    console.log('Publishing suggestion:', suggestion.nombre);
+    console.log('Publishing suggestion:', suggestion.nombre, 'with category:', suggestion.categoria);
     
-    // Validar datos obligatorios
-    if (!suggestion.categoria) {
+    // Validar datos obligatorios ANTES de continuar
+    if (!suggestion.categoria || suggestion.categoria.trim() === '') {
       throw new Error('La categoría es obligatoria para publicar una sugerencia');
     }
 
@@ -109,7 +113,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
       url: suggestion.url.trim(),
       description: suggestion.descripcion.trim(),
       icon: suggestion.icono_url || `https://logo.clearbit.com/${new URL(suggestion.url).hostname}`,
-      category: suggestion.categoria,
+      category: suggestion.categoria.trim(),
       subcategory: suggestion.etiquetas?.[0] || null,
       is_ai: suggestion.usa_ia || false,
       created_at: new Date().toISOString(),
@@ -168,6 +172,12 @@ export const discardWebappSuggestion = async (id: string): Promise<void> => {
 export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean; processed: number; saved: number; filtered?: number }> => {
   try {
     console.log('Starting webapp suggestions process...');
+    
+    // Verificar que tenemos la API key
+    const hasApiKey = localStorage.getItem('groq_api_key_configured') === 'true';
+    if (!hasApiKey) {
+      throw new Error('API key de Groq no configurada. Por favor configura tu API key primero.');
+    }
     
     const response = await supabase.functions.invoke('webapp-suggestions', {
       body: {}

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Key, Check, X, Eye, EyeOff } from 'lucide-react';
+import { Key, Check, X, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface GroqApiKeyConfigProps {
@@ -20,12 +20,21 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
   useEffect(() => {
     // Verificar si ya hay una key configurada
     const savedKey = localStorage.getItem('groq_api_key_configured');
-    if (savedKey === 'true') {
+    const actualKey = localStorage.getItem('groq_api_key');
+    
+    console.log('Checking saved API key status:', savedKey);
+    console.log('Has actual key:', !!actualKey);
+    
+    if (savedKey === 'true' && actualKey) {
       setKeyStatus('valid');
       onApiKeyChange(true);
+      setApiKey(actualKey);
     } else {
       setKeyStatus('unknown');
       onApiKeyChange(false);
+      // Limpiar localStorage si está inconsistente
+      localStorage.removeItem('groq_api_key_configured');
+      localStorage.removeItem('groq_api_key');
     }
   }, [onApiKeyChange]);
 
@@ -35,9 +44,14 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
       return;
     }
 
+    if (apiKey.length < 40) {
+      toast.error('La API key parece demasiado corta. Verifica que sea correcta.');
+      return;
+    }
+
     setIsChecking(true);
     try {
-      console.log('Testing Groq API key...');
+      console.log('Testing Groq API key with length:', apiKey.length);
       
       const response = await fetch('https://api.groq.com/openai/v1/models', {
         headers: {
@@ -46,9 +60,14 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
         },
       });
 
+      console.log('API test response status:', response.status);
+
       if (response.ok) {
+        const data = await response.json();
+        console.log('API test successful, models:', data.data?.length || 0);
+        
         setKeyStatus('valid');
-        toast.success('API key válida y configurada');
+        toast.success('API key válida y configurada correctamente');
         onApiKeyChange(true);
         
         // Guardar la configuración localmente
@@ -57,20 +76,34 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
         
         console.log('Groq API key configured successfully');
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API test failed:', response.status, errorData);
+        
         setKeyStatus('invalid');
-        toast.error('API key inválida o sin permisos');
+        toast.error('API key inválida o sin permisos. Verifica que sea correcta.');
         onApiKeyChange(false);
         localStorage.removeItem('groq_api_key_configured');
+        localStorage.removeItem('groq_api_key');
       }
     } catch (error) {
       console.error('Error testing API key:', error);
       setKeyStatus('invalid');
-      toast.error('Error al verificar la API key');
+      toast.error('Error al verificar la API key. Revisa tu conexión a internet.');
       onApiKeyChange(false);
       localStorage.removeItem('groq_api_key_configured');
+      localStorage.removeItem('groq_api_key');
     } finally {
       setIsChecking(false);
     }
+  };
+
+  const clearApiKey = () => {
+    setApiKey('');
+    setKeyStatus('unknown');
+    onApiKeyChange(false);
+    localStorage.removeItem('groq_api_key_configured');
+    localStorage.removeItem('groq_api_key');
+    toast.info('API key eliminada');
   };
 
   const getStatusBadge = () => {
@@ -80,7 +113,7 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
       case 'invalid':
         return <Badge variant="destructive"><X className="h-3 w-3 mr-1" />Inválida</Badge>;
       default:
-        return <Badge variant="secondary">No configurada</Badge>;
+        return <Badge variant="secondary"><AlertCircle className="h-3 w-3 mr-1" />No configurada</Badge>;
     }
   };
 
@@ -98,7 +131,7 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
           <div className="relative flex-1">
             <Input
               type={showKey ? 'text' : 'password'}
-              placeholder="Ingresa tu API key de Groq"
+              placeholder="Ingresa tu API key de Groq (gsk_...)"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && testApiKey()}
@@ -119,6 +152,14 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
           >
             {isChecking ? 'Verificando...' : 'Verificar'}
           </Button>
+          {keyStatus === 'valid' && (
+            <Button 
+              variant="outline"
+              onClick={clearApiKey}
+            >
+              Limpiar
+            </Button>
+          )}
         </div>
         
         <div className="text-sm text-gray-600">
@@ -137,6 +178,11 @@ const GroqApiKeyConfig: React.FC<GroqApiKeyConfigProps> = ({ onApiKeyChange }) =
           {keyStatus === 'valid' && (
             <p className="mt-2 text-green-600 text-xs">
               ✓ API key configurada correctamente. Ya puedes generar sugerencias automáticas.
+            </p>
+          )}
+          {keyStatus === 'invalid' && (
+            <p className="mt-2 text-red-600 text-xs">
+              ✗ API key inválida. Verifica que hayas copiado la key completa.
             </p>
           )}
         </div>
