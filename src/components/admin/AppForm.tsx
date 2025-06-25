@@ -1,184 +1,119 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { AppData } from "@/data/types";
-import { validateAppForm, ensureValidId } from "@/utils/formValidation";
-import useAppFormAutofill from "@/hooks/useAppFormAutofill";
-import { 
-  NameField, 
-  UrlField, 
-  IconField, 
-  CategoryField, 
-  SubcategoryField, 
-  AIToggleField, 
-  DescriptionField 
-} from "./form/AppFormFields";
+import { useAppFormAutofill } from "@/hooks/useAppFormAutofill";
+import { mainCategories } from "@/data/mainCategories";
+import AppFormFields from "./form/AppFormFields";
 import AppFormActions from "./form/AppFormActions";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AppFormProps {
-  app: AppData | null;
+  app?: AppData | null;
   onSave: (app: AppData) => void;
   onCancel: () => void;
 }
 
-const AppForm = ({ app, onSave, onCancel }: AppFormProps) => {
-  const initialFormState: AppData = {
-    id: "",
-    name: "",
-    icon: "",
-    url: "",
-    category: "Utilidades",
-    subcategory: "",
-    description: "",
-    isAI: false,
-  };
-  
-  const [formData, setFormData] = useState<AppData>(initialFormState);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const isEditing = !!app;
-  const { isAutofilling, handleAutofill } = useAppFormAutofill(formData, setFormData, isEditing);
+const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
+  const [formData, setFormData] = useState<AppData>({
+    id: app?.id || "",
+    name: app?.name || "",
+    description: app?.description || "",
+    url: app?.url || "",
+    icon: app?.icon || "",
+    category: app?.category || mainCategories[0] || "",
+    subcategory: app?.subcategory || "",
+    isAI: app?.isAI || false,
+    created_at: app?.created_at || new Date().toISOString(),
+    updated_at: app?.updated_at || new Date().toISOString(),
+  });
+
+  const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+  const { fetchAppInfo } = useAppFormAutofill();
 
   useEffect(() => {
     if (app) {
       setFormData(app);
+    } else {
+      setFormData({
+        id: "",
+        name: "",
+        description: "",
+        url: "",
+        icon: "",
+        category: mainCategories[0] || "",
+        subcategory: "",
+        isAI: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
     }
   }, [app]);
 
-  const handleChange = async (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    
-    // Update form data with the new value
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    // Clear error for this field if exists
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSave = () => {
+    // Validate form data before saving
+    if (!formData.name || !formData.description || !formData.url || !formData.category) {
+      alert("Por favor, complete todos los campos.");
+      return;
     }
-    
-    // Auto-generate ID from name
-    if (name === 'name' && !isEditing && value && !formData.id) {
-      const updatedFormData = ensureValidId({ ...formData, name: value }, isEditing);
-      setFormData(updatedFormData);
-    }
-    
-    // Try to autofill fields based on URL or name
-    await handleAutofill(name, value);
+
+    onSave(formData);
   };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, isAI: checked }));
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors = validateAppForm(formData);
-    
-    // Generate ID from name if empty (ensure valid ID)
-    const updatedFormData = ensureValidId(formData, isEditing);
-    setFormData(updatedFormData);
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      setIsLoading(true);
+  const handleUrlBlur = async () => {
+    if (formData.url && !formData.icon) {
+      setIsLoadingInfo(true);
       try {
-        await onSave(formData);
+        const newInfo = await fetchAppInfo(formData.url);
+        if (newInfo) {
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || newInfo.name,
+            description: prev.description || newInfo.description,
+            icon: prev.icon || newInfo.icon,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching app info:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingInfo(false);
       }
     }
   };
 
+  const handleIconError = () => {
+    setFormData((prev) => ({ ...prev, icon: "" }));
+  };
+
   return (
-    <div className="h-full max-h-[80vh] flex flex-col">
-      <div className="flex justify-between items-center pb-4 border-b flex-shrink-0">
-        <h2 className="text-2xl font-bold">
-          {isEditing ? "Editar Aplicación" : "Añadir Nueva Aplicación"}
-        </h2>
-      </div>
-
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <form onSubmit={handleSubmit} className="space-y-6 py-6 pr-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Hidden ID field since it's auto-generated */}
-              <input
-                type="hidden"
-                name="id"
-                value={formData.id}
-              />
-
-              <NameField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-
-              <UrlField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling} 
-              />
-
-              <IconField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-
-              <CategoryField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-
-              <SubcategoryField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-
-              <AIToggleField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-
-              <DescriptionField 
-                formData={formData} 
-                errors={errors} 
-                handleChange={handleChange} 
-                handleSwitchChange={handleSwitchChange}
-                isAutofilling={isAutofilling}
-              />
-            </div>
-
-            <div className="pt-4 border-t">
-              <AppFormActions onCancel={onCancel} isLoading={isLoading} />
-            </div>
-          </form>
-        </ScrollArea>
-      </div>
-    </div>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>{app ? "Editar Aplicación" : "Nueva Aplicación"}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <AppFormFields
+          formData={formData}
+          onChange={handleChange}
+          onUrlBlur={handleUrlBlur}
+          onIconError={handleIconError}
+          categories={mainCategories}
+          isLoadingInfo={isLoadingInfo}
+        />
+        <AppFormActions onSave={handleSave} onCancel={onCancel} />
+      </CardContent>
+    </Card>
   );
 };
 

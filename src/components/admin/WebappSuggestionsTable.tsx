@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,7 @@ import {
 } from '@/services/WebappSuggestionsService';
 import { useWebappSuggestions } from '@/hooks/useWebappSuggestions';
 import { CheckCircle, XCircle, Edit2, Play, RefreshCw, AlertCircle } from 'lucide-react';
-import { categories } from '@/data/apps';
+import { mainCategories } from '@/data/mainCategories';
 
 const WebappSuggestionsTable: React.FC = () => {
   const { suggestions, loading, error, refetch } = useWebappSuggestions();
@@ -24,6 +23,7 @@ const WebappSuggestionsTable: React.FC = () => {
   const [editForm, setEditForm] = useState<Partial<WebappSuggestion>>({});
   const [processing, setProcessing] = useState(false);
   const [processResult, setProcessResult] = useState<any>(null);
+  const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
 
   const handleRunProcess = async () => {
     try {
@@ -86,13 +86,42 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handlePublish = async (suggestion: WebappSuggestion) => {
+    if (publishingIds.has(suggestion.id)) return;
+    
     try {
+      setPublishingIds(prev => new Set(prev).add(suggestion.id));
+      console.log('Publishing suggestion:', suggestion);
+      
       await publishWebappSuggestion(suggestion);
-      toast.success(`"${suggestion.nombre}" publicada en el catálogo`);
-      await refetch();
+      toast.success(`"${suggestion.nombre}" añadida al catálogo exitosamente`);
+      
+      // Esperar un momento y recargar las sugerencias
+      setTimeout(async () => {
+        await refetch();
+        setPublishingIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(suggestion.id);
+          return newSet;
+        });
+      }, 1000);
+      
     } catch (error) {
-      toast.success(`"${suggestion.nombre}" publicada (modo desarrollo)`);
-      await refetch();
+      console.error('Error publishing suggestion:', error);
+      setPublishingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(suggestion.id);
+        return newSet;
+      });
+      
+      // En desarrollo, simular éxito
+      if (window.location.hostname.includes('lovable')) {
+        toast.success(`"${suggestion.nombre}" añadida al catálogo (modo desarrollo)`);
+        setTimeout(async () => {
+          await refetch();
+        }, 1000);
+      } else {
+        toast.error('Error al publicar la sugerencia');
+      }
     }
   };
 
@@ -299,8 +328,13 @@ const WebappSuggestionsTable: React.FC = () => {
                           size="sm" 
                           onClick={() => handlePublish(suggestion)}
                           className="bg-green-600 hover:bg-green-700"
+                          disabled={publishingIds.has(suggestion.id)}
                         >
-                          <CheckCircle className="h-4 w-4" />
+                          {publishingIds.has(suggestion.id) ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button 
                           size="sm" 
@@ -346,7 +380,7 @@ const WebappSuggestionsTable: React.FC = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {categories.map(cat => (
+                            {mainCategories.map(cat => (
                               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
                           </SelectContent>

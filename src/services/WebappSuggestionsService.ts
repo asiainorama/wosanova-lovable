@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WebappSuggestion {
@@ -90,10 +89,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 
     if (appError) {
       console.error('Error creating app:', appError);
-      if (!window.location.hostname.includes('lovable')) {
-        throw appError;
-      }
-      return;
+      throw appError;
     }
 
     console.log('App created successfully with ID:', appId);
@@ -106,19 +102,14 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 
     if (updateError) {
       console.error('Error updating suggestion status:', updateError);
-      if (!window.location.hostname.includes('lovable')) {
-        throw updateError;
-      }
-      return;
+      throw updateError;
     }
 
     console.log('Suggestion marked as published');
 
   } catch (error) {
     console.error('Error publishing webapp suggestion:', error);
-    if (!window.location.hostname.includes('lovable')) {
-      throw error;
-    }
+    throw error;
   }
 };
 

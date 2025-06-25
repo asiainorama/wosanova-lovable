@@ -7,6 +7,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Categorías principales que usa el catálogo
+const MAIN_CATEGORIES = [
+  'Productividad',
+  'Entretenimiento', 
+  'Utilidades',
+  'Estilo de vida',
+  'Finanzas',
+  'Desarrollo',
+  'Diseño',
+  'Comunicación',
+  'Educación',
+  'IA'
+];
+
 interface WebappSuggestion {
   nombre: string;
   url: string;
@@ -64,20 +78,6 @@ serve(async (req) => {
       throw appsError
     }
 
-    // Get valid categories from existing apps
-    const { data: categoryData, error: categoryError } = await supabase
-      .from('apps')
-      .select('category')
-      .not('category', 'is', null)
-
-    if (categoryError) {
-      console.error('❌ Error fetching categories:', categoryError)
-      throw categoryError
-    }
-
-    const validCategories = [...new Set(categoryData?.map(item => item.category) || [])]
-    console.log('📋 Valid categories from catalog:', validCategories)
-
     const existingUrls = new Set(existingApps?.map(app => new URL(app.url).hostname.replace('www.', '')) || [])
     const existingNames = new Set(existingApps?.map(app => app.name.toLowerCase()) || [])
     
@@ -95,7 +95,7 @@ serve(async (req) => {
       console.log(`🔄 Processing product ${index + 1}/${products.length}: "${product.title}"`)
       
       try {
-        const suggestion = await processWithGroq(product, groqApiKey, validCategories)
+        const suggestion = await processWithGroq(product, groqApiKey, MAIN_CATEGORIES)
         if (suggestion) {
           // Check if this app already exists
           const suggestionDomain = extractDomain(suggestion.url).replace('www.', '')
@@ -154,7 +154,7 @@ serve(async (req) => {
           productsUsed: products.length,
           suggestionsGenerated: suggestions.length,
           existingAppsCount: existingUrls.size,
-          validCategories: validCategories.length,
+          mainCategories: MAIN_CATEGORIES.length,
           groqApiKey: groqApiKey ? 'Present' : 'Missing',
           groqKeyLength: groqApiKey?.length || 0
         }
@@ -271,22 +271,22 @@ CATEGORÍAS VÁLIDAS: ${categoriesStr}
 
 RESPONDE SOLO CON ESTE JSON (sin texto adicional ni explicaciones):
 {
-  "nombre": "nombre comercial exacto de la aplicación (máximo 30 caracteres, NO descripción)",
+  "nombre": "nombre comercial EXACTO de la aplicación (NO descripción, máximo 25 caracteres)",
   "url": "${product.websiteUrl}",
   "descripcion": "descripción clara y útil en español que explique qué hace la app (máximo 150 caracteres)",
-  "usa_ia": true o false (determina si la aplicación usa inteligencia artificial o machine learning),
-  "categoria": "una de las categorías válidas proporcionadas arriba",
+  "usa_ia": true o false (determina si la aplicación usa inteligencia artificial como característica principal),
+  "categoria": "una de las categorías válidas proporcionadas arriba que mejor describa la app",
   "etiquetas": ["máximo 3 etiquetas relevantes en español"]
 }
 
 REGLAS IMPORTANTES:
-- El nombre debe ser el nombre comercial exacto de la aplicación, NO una descripción
-- Ejemplo correcto: "Figma" no "Herramienta de diseño colaborativo"  
-- La descripción debe ser útil y explicar la funcionalidad principal
-- Usa exactamente la URL proporcionada
-- Solo marca usa_ia como true si realmente usa IA/ML de forma prominente
-- Usa exactamente una de las categorías válidas proporcionadas
-- Máximo 3 etiquetas relevantes en español`
+- El nombre debe ser EXACTAMENTE el nombre comercial de la aplicación tal como aparece en su web
+- Ejemplo correcto: "Figma" NO "Herramienta de diseño colaborativo"
+- Ejemplo correcto: "Notion" NO "App de productividad"
+- La descripción debe explicar qué hace la aplicación de forma clara
+- Solo marca usa_ia como true si la IA es una característica central y prominente
+- Elige la categoría que mejor describa la función principal de la app
+- Máximo 3 etiquetas relevantes y descriptivas`
 
     console.log('🔑 Making request to Groq API...')
 
@@ -343,7 +343,7 @@ REGLAS IMPORTANTES:
     // Validate category against valid categories
     if (!validCategories.includes(suggestion.categoria)) {
       console.log(`⚠️ Invalid category "${suggestion.categoria}", using default`)
-      suggestion.categoria = validCategories[0] || 'Herramientas'
+      suggestion.categoria = validCategories[0] || 'Utilidades'
     }
 
     // Ensure etiquetas is an array
