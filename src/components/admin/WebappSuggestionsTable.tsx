@@ -68,18 +68,49 @@ const WebappSuggestionsTable: React.FC = () => {
     });
   };
 
+  const validateEditForm = (): boolean => {
+    if (!editForm.nombre || editForm.nombre.trim() === '') {
+      toast.error('El nombre es obligatorio');
+      return false;
+    }
+    
+    if (!editForm.url || editForm.url.trim() === '') {
+      toast.error('La URL es obligatoria');
+      return false;
+    }
+    
+    if (!editForm.descripcion || editForm.descripcion.trim() === '') {
+      toast.error('La descripción es obligatoria');
+      return false;
+    }
+    
+    if (!editForm.categoria || editForm.categoria.trim() === '') {
+      toast.error('La categoría es obligatoria');
+      return false;
+    }
+    
+    // Validar formato de URL
+    try {
+      new URL(editForm.url);
+    } catch {
+      toast.error('La URL no tiene un formato válido');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSaveEdit = async () => {
     if (!editingId) return;
+
+    // Validar antes de enviar
+    if (!validateEditForm()) {
+      return;
+    }
 
     try {
       setSavingIds(prev => new Set(prev).add(editingId));
       console.log('Saving edit form:', editForm);
-      
-      // Validar que la categoría esté presente
-      if (!editForm.categoria) {
-        toast.error('La categoría es obligatoria');
-        return;
-      }
       
       await updateWebappSuggestion(editingId, editForm);
       toast.success('Sugerencia actualizada exitosamente');
@@ -93,7 +124,8 @@ const WebappSuggestionsTable: React.FC = () => {
       
     } catch (error) {
       console.error('Error updating suggestion:', error);
-      toast.error('Error al actualizar la sugerencia');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error(`Error al actualizar: ${errorMessage}`);
     } finally {
       setSavingIds(prev => {
         const newSet = new Set(prev);
@@ -111,9 +143,9 @@ const WebappSuggestionsTable: React.FC = () => {
   const handlePublish = async (suggestion: WebappSuggestion) => {
     if (publishingIds.has(suggestion.id)) return;
     
-    // Validar que la categoría esté presente
-    if (!suggestion.categoria) {
-      toast.error('La categoría es obligatoria para publicar. Por favor, edita la sugerencia primero.');
+    // Validar que todos los campos obligatorios estén presentes
+    if (!suggestion.categoria || !suggestion.nombre || !suggestion.url || !suggestion.descripcion) {
+      toast.error('Faltan campos obligatorios. Por favor, edita la sugerencia primero.');
       return;
     }
     

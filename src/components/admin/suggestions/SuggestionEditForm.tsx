@@ -33,12 +33,15 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium mb-2 block">Nombre</label>
+          <label className="text-sm font-medium mb-2 block">Nombre *</label>
           <Input
             value={editForm.nombre || ''}
             onChange={(e) => onFormChange({ nombre: e.target.value })}
             placeholder="Nombre de la aplicación"
           />
+          {!editForm.nombre && (
+            <p className="text-xs text-red-500 mt-1">El nombre es obligatorio</p>
+          )}
         </div>
         
         <div>
@@ -66,12 +69,15 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
       </div>
       
       <div>
-        <label className="text-sm font-medium mb-2 block">URL</label>
+        <label className="text-sm font-medium mb-2 block">URL *</label>
         <Input
           value={editForm.url || ''}
           onChange={(e) => onFormChange({ url: e.target.value })}
           placeholder="https://ejemplo.com"
         />
+        {!editForm.url && (
+          <p className="text-xs text-red-500 mt-1">La URL es obligatoria</p>
+        )}
       </div>
       
       <div>
@@ -84,7 +90,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
       </div>
       
       <div>
-        <label className="text-sm font-medium mb-2 block">Descripción</label>
+        <label className="text-sm font-medium mb-2 block">Descripción *</label>
         <Textarea
           value={editForm.descripcion || ''}
           onChange={(e) => onFormChange({ descripcion: e.target.value })}
@@ -95,6 +101,9 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <div className="text-xs text-gray-400 text-right mt-1">
           {(editForm.descripcion || '').length}/200
         </div>
+        {!editForm.descripcion && (
+          <p className="text-xs text-red-500 mt-1">La descripción es obligatoria</p>
+        )}
       </div>
 
       <div>

@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { mainCategories } from '@/data/mainCategories';
 
 export interface WebappSuggestion {
   id: string;
@@ -45,10 +46,55 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
   }
 };
 
+// Validar que los datos de la sugerencia sean correctos
+const validateSuggestionData = (data: Partial<WebappSuggestion>): void => {
+  if (!data.nombre || data.nombre.trim() === '') {
+    throw new Error('El nombre es obligatorio');
+  }
+  
+  if (!data.url || data.url.trim() === '') {
+    throw new Error('La URL es obligatoria');
+  }
+  
+  if (!data.descripcion || data.descripcion.trim() === '') {
+    throw new Error('La descripción es obligatoria');
+  }
+  
+  if (!data.categoria || data.categoria.trim() === '') {
+    throw new Error('La categoría es obligatoria');
+  }
+  
+  if (!mainCategories.includes(data.categoria)) {
+    throw new Error(`La categoría "${data.categoria}" no es válida. Debe ser una de: ${mainCategories.join(', ')}`);
+  }
+  
+  // Validar URL formato
+  try {
+    new URL(data.url);
+  } catch {
+    throw new Error('La URL no tiene un formato válido');
+  }
+};
+
 // Actualizar una sugerencia
 export const updateWebappSuggestion = async (id: string, updates: Partial<WebappSuggestion>): Promise<void> => {
   try {
     console.log('Updating webapp suggestion:', id, updates);
+    
+    // Validar datos antes de actualizar
+    if (updates.categoria || updates.nombre || updates.url || updates.descripcion) {
+      // Obtener datos actuales para validación completa
+      const { data: currentData } = await supabase
+        .from('webapp_suggestions')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (currentData) {
+        const mergedData = { ...currentData, ...updates };
+        validateSuggestionData(mergedData);
+      }
+    }
     
     // Preparar los datos para la actualización
     const updateData: any = {
@@ -56,12 +102,12 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
       updated_at: new Date().toISOString()
     };
 
-    // Validar que la categoría esté presente si se está intentando actualizar
+    // Asegurar que la categoría sea válida
     if (updateData.categoria) {
-      if (typeof updateData.categoria !== 'string') {
-        throw new Error('La categoría debe ser una cadena de texto');
-      }
       console.log('Updating with category:', updateData.categoria);
+      if (!mainCategories.includes(updateData.categoria)) {
+        throw new Error(`Categoría inválida: ${updateData.categoria}`);
+      }
     }
 
     // Validar etiquetas
@@ -95,13 +141,7 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
     console.log('Publishing suggestion:', suggestion.nombre, 'with category:', suggestion.categoria);
     
     // Validar datos obligatorios ANTES de continuar
-    if (!suggestion.categoria || suggestion.categoria.trim() === '') {
-      throw new Error('La categoría es obligatoria para publicar una sugerencia');
-    }
-
-    if (!suggestion.nombre || !suggestion.url || !suggestion.descripcion) {
-      throw new Error('Nombre, URL y descripción son obligatorios');
-    }
+    validateSuggestionData(suggestion);
     
     // Generate a unique ID for the new app
     const appId = crypto.randomUUID();
@@ -180,7 +220,7 @@ export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean;
     }
     
     const response = await supabase.functions.invoke('webapp-suggestions', {
-      body: {}
+      body: { categories: mainCategories }
     });
 
     console.log('Webapp suggestions response:', response);
