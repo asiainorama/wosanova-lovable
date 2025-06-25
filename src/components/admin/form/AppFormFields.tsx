@@ -26,15 +26,17 @@ const AppFormFields: React.FC<AppFormFieldsProps> = ({
   isLoadingInfo,
 }) => {
   const handleSwitchChange = (checked: boolean) => {
-    const event = {
+    // Create a properly typed mock event for the switch
+    const mockEvent = {
       target: {
         name: 'isAI',
-        value: checked,
+        value: checked.toString(),
         type: 'checkbox',
         checked: checked,
       },
-    } as React.ChangeEvent<HTMLInputElement>;
-    onChange(event);
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    onChange(mockEvent);
   };
 
   return (
