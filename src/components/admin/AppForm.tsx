@@ -1,11 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { AppData } from "@/data/types";
 import { useAppFormAutofill } from "@/hooks/useAppFormAutofill";
 import { mainCategories } from "@/data/mainCategories";
@@ -33,7 +28,7 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
   });
 
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
-  const { fetchAppInfo } = useAppFormAutofill();
+  const { isAutofilling, handleAutofill } = useAppFormAutofill(formData, setFormData, !!app);
 
   useEffect(() => {
     if (app) {
@@ -55,11 +50,18 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
   }, [app]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+    const checked = 'checked' in e.target ? e.target.checked : false;
+    
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    // Trigger autofill for name and url changes
+    if (name === 'name' || name === 'url') {
+      handleAutofill(name, value);
+    }
   };
 
   const handleSave = () => {
@@ -76,15 +78,7 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
     if (formData.url && !formData.icon) {
       setIsLoadingInfo(true);
       try {
-        const newInfo = await fetchAppInfo(formData.url);
-        if (newInfo) {
-          setFormData((prev) => ({
-            ...prev,
-            name: prev.name || newInfo.name,
-            description: prev.description || newInfo.description,
-            icon: prev.icon || newInfo.icon,
-          }));
-        }
+        await handleAutofill('url', formData.url);
       } catch (error) {
         console.error("Error fetching app info:", error);
       } finally {
@@ -109,7 +103,7 @@ const AppForm: React.FC<AppFormProps> = ({ app, onSave, onCancel }) => {
           onUrlBlur={handleUrlBlur}
           onIconError={handleIconError}
           categories={mainCategories}
-          isLoadingInfo={isLoadingInfo}
+          isLoadingInfo={isLoadingInfo || isAutofilling}
         />
         <AppFormActions onSave={handleSave} onCancel={onCancel} />
       </CardContent>

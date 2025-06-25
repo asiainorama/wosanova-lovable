@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface AppFormActionsProps {
+  onSave: () => void;
   onCancel: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
-const AppFormActions = ({ onCancel, isLoading }: AppFormActionsProps) => {
+const AppFormActions: React.FC<AppFormActionsProps> = ({ onSave, onCancel, isLoading = false }) => {
   return (
     <div className="flex justify-end space-x-2 pt-4">
       <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
         Cancelar
       </Button>
-      <Button type="submit" disabled={isLoading}>
+      <Button type="button" onClick={onSave} disabled={isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
