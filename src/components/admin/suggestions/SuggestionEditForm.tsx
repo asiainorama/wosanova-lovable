@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,12 +19,9 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   const handleCategoryChange = (value: string) => {
     console.log('=== CATEGORY CHANGE ===');
     console.log('Category selected:', value);
-    console.log('Available categories:', mainCategories);
     console.log('Current editForm before update:', editForm);
     
-    // Llamar directamente a onFormChange con la categoría
     onFormChange({ categoria: value });
-    
     console.log('onFormChange called with categoria:', value);
   };
 
@@ -38,6 +34,11 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   console.log('=== SUGGESTION EDIT FORM RENDER ===');
   console.log('Current editForm.categoria:', editForm.categoria);
   console.log('Full editForm:', editForm);
+
+  // Force re-render cuando cambie la categoría
+  useEffect(() => {
+    console.log('EditForm changed, categoria is now:', editForm.categoria);
+  }, [editForm.categoria]);
 
   return (
     <div className="space-y-4">
@@ -59,18 +60,13 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
           <Select 
             value={editForm.categoria || ''} 
             onValueChange={handleCategoryChange}
-            key={`select-${suggestionId}-${editForm.categoria}`} // Force re-render when category changes
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50 max-h-60 overflow-y-auto">
+            <SelectContent>
               {mainCategories.map(cat => (
-                <SelectItem 
-                  key={cat} 
-                  value={cat}
-                  className="cursor-pointer hover:bg-gray-100 px-3 py-2"
-                >
+                <SelectItem key={cat} value={cat}>
                   {cat}
                 </SelectItem>
               ))}

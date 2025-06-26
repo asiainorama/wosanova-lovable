@@ -56,7 +56,8 @@ const WebappSuggestionsTable: React.FC = () => {
   const handleEdit = (suggestion: WebappSuggestion) => {
     console.log('Starting edit for suggestion:', suggestion);
     setEditingId(suggestion.id);
-    setEditForm({
+    // Crear una copia completa del objeto con todos los campos
+    const formData: Partial<WebappSuggestion> = {
       nombre: suggestion.nombre,
       url: suggestion.url,
       descripcion: suggestion.descripcion,
@@ -64,7 +65,9 @@ const WebappSuggestionsTable: React.FC = () => {
       usa_ia: suggestion.usa_ia,
       etiquetas: suggestion.etiquetas,
       icono_url: suggestion.icono_url
-    });
+    };
+    console.log('Setting editForm to:', formData);
+    setEditForm(formData);
   };
 
   const validateEditForm = (): boolean => {
@@ -102,30 +105,31 @@ const WebappSuggestionsTable: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!editingId) return;
 
-    // Validar antes de enviar
+    console.log('=== SAVING EDIT ===');
+    console.log('EditingId:', editingId);
+    console.log('Current editForm state at save time:', editForm);
+    console.log('Category being saved:', editForm.categoria);
+
     if (!validateEditForm()) {
       return;
     }
 
     try {
       setSavingIds(prev => new Set(prev).add(editingId));
-      console.log('=== SAVING EDIT ===');
-      console.log('EditingId:', editingId);
-      console.log('Current editForm state:', editForm);
-      console.log('Category being saved:', editForm.categoria);
       
       // Crear una copia completa de los datos a actualizar
       const updateData: Partial<WebappSuggestion> = {
         nombre: editForm.nombre?.trim(),
         url: editForm.url?.trim(),
         descripcion: editForm.descripcion?.trim(),
-        categoria: editForm.categoria?.trim(),
+        categoria: editForm.categoria?.trim(), // Asegurar que la categoría se incluya
         usa_ia: editForm.usa_ia || false,
         etiquetas: editForm.etiquetas || [],
         icono_url: editForm.icono_url?.trim() || null
       };
 
       console.log('Final update data being sent:', updateData);
+      console.log('Categoria in updateData:', updateData.categoria);
       
       await updateWebappSuggestion(editingId, updateData);
       toast.success('Sugerencia actualizada exitosamente');
@@ -153,6 +157,7 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
+    console.log('Cancelling edit');
     setEditingId(null);
     setEditForm({});
   };
@@ -211,15 +216,10 @@ const WebappSuggestionsTable: React.FC = () => {
     console.log('Updates received:', updates);
     console.log('Current editForm before update:', editForm);
     
-    setEditForm(prev => {
-      const newForm = { ...prev, ...updates };
+    setEditForm(prevForm => {
+      const newForm = { ...prevForm, ...updates };
       console.log('New editForm after merge:', newForm);
-      
-      // Forzar actualización si es categoría
-      if (updates.categoria) {
-        console.log('Category update detected:', updates.categoria);
-      }
-      
+      console.log('New categoria:', newForm.categoria);
       return newForm;
     });
   };
