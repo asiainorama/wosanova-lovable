@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,15 +59,20 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <div>
           <label className="text-sm font-medium mb-2 block">Categoría *</label>
           <Select 
+            key={`category-${suggestionId}-${editForm.categoria || 'empty'}`}
             value={editForm.categoria || ''} 
             onValueChange={handleCategoryChange}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-60 overflow-y-auto z-50">
               {mainCategories.map(cat => (
-                <SelectItem key={cat} value={cat}>
+                <SelectItem 
+                  key={cat} 
+                  value={cat}
+                  className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer px-3 py-2"
+                >
                   {cat}
                 </SelectItem>
               ))}

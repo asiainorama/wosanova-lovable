@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -54,20 +55,31 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEdit = (suggestion: WebappSuggestion) => {
-    console.log('Starting edit for suggestion:', suggestion);
+    console.log('=== STARTING EDIT ===');
+    console.log('Original suggestion:', suggestion);
+    console.log('Original suggestion categoria:', suggestion.categoria);
+    
     setEditingId(suggestion.id);
-    // Crear una copia completa del objeto con todos los campos
-    const formData: Partial<WebappSuggestion> = {
+    
+    // Crear una copia exacta de la sugerencia original
+    const completeFormData = {
+      id: suggestion.id,
       nombre: suggestion.nombre,
       url: suggestion.url,
       descripcion: suggestion.descripcion,
-      categoria: suggestion.categoria,
-      usa_ia: suggestion.usa_ia,
-      etiquetas: suggestion.etiquetas,
-      icono_url: suggestion.icono_url
+      categoria: suggestion.categoria, // CRÍTICO: asegurar que se copie correctamente
+      usa_ia: suggestion.usa_ia || false,
+      etiquetas: suggestion.etiquetas || [],
+      icono_url: suggestion.icono_url || '',
+      estado: suggestion.estado,
+      created_at: suggestion.created_at,
+      updated_at: suggestion.updated_at
     };
-    console.log('Setting editForm to:', formData);
-    setEditForm(formData);
+    
+    console.log('Setting editForm to:', completeFormData);
+    console.log('Setting categoria to:', completeFormData.categoria);
+    
+    setEditForm(completeFormData);
   };
 
   const validateEditForm = (): boolean => {
@@ -105,45 +117,50 @@ const WebappSuggestionsTable: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!editingId) return;
 
-    console.log('=== SAVING EDIT ===');
+    console.log('=== SAVING EDIT - START ===');
     console.log('EditingId:', editingId);
-    console.log('Current editForm state at save time:', editForm);
-    console.log('Category being saved:', editForm.categoria);
+    console.log('Current editForm state:', editForm);
+    console.log('Categoria being saved:', editForm.categoria);
 
     if (!validateEditForm()) {
+      console.log('Validation failed, aborting save');
       return;
     }
 
     try {
       setSavingIds(prev => new Set(prev).add(editingId));
       
-      // Crear una copia completa de los datos a actualizar
-      const updateData: Partial<WebappSuggestion> = {
-        nombre: editForm.nombre?.trim(),
-        url: editForm.url?.trim(),
-        descripcion: editForm.descripcion?.trim(),
-        categoria: editForm.categoria?.trim(), // Asegurar que la categoría se incluya
+      // Preparar datos exactos para actualizar
+      const updateData = {
+        nombre: editForm.nombre!.trim(),
+        url: editForm.url!.trim(),
+        descripcion: editForm.descripcion!.trim(),
+        categoria: editForm.categoria!.trim(), // CRÍTICO: asegurar que se envíe
         usa_ia: editForm.usa_ia || false,
         etiquetas: editForm.etiquetas || [],
         icono_url: editForm.icono_url?.trim() || null
       };
 
-      console.log('Final update data being sent:', updateData);
-      console.log('Categoria in updateData:', updateData.categoria);
+      console.log('=== FINAL UPDATE DATA ===');
+      console.log('Update data to send:', updateData);
+      console.log('Categoria in update data:', updateData.categoria);
       
       await updateWebappSuggestion(editingId, updateData);
+      
+      console.log('=== UPDATE SUCCESSFUL ===');
       toast.success('Sugerencia actualizada exitosamente');
       
-      // Reset edit state
+      // Limpiar estados de edición
       setEditingId(null);
       setEditForm({});
       
-      // Refetch data to see changes
+      // Refrescar datos
       setTimeout(() => {
         refetch();
       }, 500);
       
     } catch (error) {
+      console.error('=== SAVE ERROR ===');
       console.error('Error updating suggestion:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       toast.error(`Error al actualizar: ${errorMessage}`);
@@ -212,14 +229,23 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEditFormChange = (updates: Partial<WebappSuggestion>) => {
-    console.log('=== FORM CHANGE EVENT ===');
+    console.log('=== FORM CHANGE EVENT - START ===');
     console.log('Updates received:', updates);
     console.log('Current editForm before update:', editForm);
     
+    // Actualizar el estado de manera inmutable y asegurándonos de que se preserve todo
     setEditForm(prevForm => {
-      const newForm = { ...prevForm, ...updates };
-      console.log('New editForm after merge:', newForm);
-      console.log('New categoria:', newForm.categoria);
+      const newForm = { 
+        ...prevForm, 
+        ...updates 
+      };
+      
+      console.log('=== FORM STATE UPDATE ===');
+      console.log('Previous form:', prevForm);
+      console.log('Updates applied:', updates);
+      console.log('New form after merge:', newForm);
+      console.log('New categoria value:', newForm.categoria);
+      
       return newForm;
     });
   };
