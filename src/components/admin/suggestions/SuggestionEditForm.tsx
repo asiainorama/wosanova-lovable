@@ -18,10 +18,15 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   suggestionId
 }) => {
   const handleCategoryChange = (value: string) => {
+    console.log('=== CATEGORY CHANGE ===');
     console.log('Category selected:', value);
     console.log('Available categories:', mainCategories);
     console.log('Current editForm before update:', editForm);
+    
+    // Llamar directamente a onFormChange con la categoría
     onFormChange({ categoria: value });
+    
+    console.log('onFormChange called with categoria:', value);
   };
 
   const handleTagsChange = (value: string) => {
@@ -29,6 +34,10 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
     console.log('Tags updated:', tags);
     onFormChange({ etiquetas: tags });
   };
+
+  console.log('=== SUGGESTION EDIT FORM RENDER ===');
+  console.log('Current editForm.categoria:', editForm.categoria);
+  console.log('Full editForm:', editForm);
 
   return (
     <div className="space-y-4">
@@ -50,16 +59,17 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
           <Select 
             value={editForm.categoria || ''} 
             onValueChange={handleCategoryChange}
+            key={`select-${suggestionId}-${editForm.categoria}`} // Force re-render when category changes
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50 max-h-60 overflow-y-auto">
               {mainCategories.map(cat => (
                 <SelectItem 
                   key={cat} 
                   value={cat}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer hover:bg-gray-100 px-3 py-2"
                 >
                   {cat}
                 </SelectItem>

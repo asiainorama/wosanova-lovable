@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -110,14 +109,32 @@ const WebappSuggestionsTable: React.FC = () => {
 
     try {
       setSavingIds(prev => new Set(prev).add(editingId));
-      console.log('Saving edit form:', editForm);
+      console.log('=== SAVING EDIT ===');
+      console.log('EditingId:', editingId);
+      console.log('Current editForm state:', editForm);
+      console.log('Category being saved:', editForm.categoria);
       
-      await updateWebappSuggestion(editingId, editForm);
+      // Crear una copia completa de los datos a actualizar
+      const updateData: Partial<WebappSuggestion> = {
+        nombre: editForm.nombre?.trim(),
+        url: editForm.url?.trim(),
+        descripcion: editForm.descripcion?.trim(),
+        categoria: editForm.categoria?.trim(),
+        usa_ia: editForm.usa_ia || false,
+        etiquetas: editForm.etiquetas || [],
+        icono_url: editForm.icono_url?.trim() || null
+      };
+
+      console.log('Final update data being sent:', updateData);
+      
+      await updateWebappSuggestion(editingId, updateData);
       toast.success('Sugerencia actualizada exitosamente');
       
+      // Reset edit state
       setEditingId(null);
       setEditForm({});
       
+      // Refetch data to see changes
       setTimeout(() => {
         refetch();
       }, 500);
@@ -190,12 +207,19 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEditFormChange = (updates: Partial<WebappSuggestion>) => {
-    console.log('Form change received:', updates);
+    console.log('=== FORM CHANGE EVENT ===');
+    console.log('Updates received:', updates);
     console.log('Current editForm before update:', editForm);
     
     setEditForm(prev => {
       const newForm = { ...prev, ...updates };
-      console.log('New editForm after update:', newForm);
+      console.log('New editForm after merge:', newForm);
+      
+      // Forzar actualización si es categoría
+      if (updates.categoria) {
+        console.log('Category update detected:', updates.categoria);
+      }
+      
       return newForm;
     });
   };

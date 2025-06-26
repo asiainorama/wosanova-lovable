@@ -81,7 +81,9 @@ const validateSuggestionData = (data: Partial<WebappSuggestion>): void => {
 // Actualizar una sugerencia
 export const updateWebappSuggestion = async (id: string, updates: Partial<WebappSuggestion>): Promise<void> => {
   try {
-    console.log('Updating webapp suggestion:', id, updates);
+    console.log('=== UPDATE WEBAPP SUGGESTION ===');
+    console.log('Suggestion ID:', id);
+    console.log('Updates received:', updates);
     
     // Validar datos antes de actualizar
     if (updates.categoria || updates.nombre || updates.url || updates.descripcion) {
@@ -93,25 +95,39 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
         .single();
         
       if (currentData) {
+        console.log('Current data from DB:', currentData);
         // Cast the current data to match our interface type
         const typedCurrentData = {
           ...currentData,
           estado: currentData.estado as 'borrador' | 'publicado' | 'descartado'
         } as WebappSuggestion;
         const mergedData = { ...typedCurrentData, ...updates };
+        console.log('Merged data for validation:', mergedData);
         validateSuggestionData(mergedData);
       }
     }
     
-    // Preparar los datos para la actualización
+    // Preparar los datos para la actualización - IMPORTANTE: usar nombres de columna correctos
     const updateData: any = {
-      ...updates,
       updated_at: new Date().toISOString()
     };
 
+    // Mapear campos del frontend a la base de datos
+    if (updates.nombre !== undefined) updateData.nombre = updates.nombre;
+    if (updates.url !== undefined) updateData.url = updates.url;
+    if (updates.descripcion !== undefined) updateData.descripcion = updates.descripcion;
+    if (updates.categoria !== undefined) {
+      console.log('Setting categoria in DB:', updates.categoria);
+      updateData.categoria = updates.categoria;
+    }
+    if (updates.usa_ia !== undefined) updateData.usa_ia = updates.usa_ia;
+    if (updates.etiquetas !== undefined) updateData.etiquetas = updates.etiquetas;
+    if (updates.icono_url !== undefined) updateData.icono_url = updates.icono_url;
+
+    console.log('Final update data for DB:', updateData);
+
     // Asegurar que la categoría sea válida
     if (updateData.categoria) {
-      console.log('Updating with category:', updateData.categoria);
       if (!mainCategories.includes(updateData.categoria)) {
         throw new Error(`Categoría inválida: ${updateData.categoria}`);
       }
@@ -121,8 +137,6 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     if (updateData.etiquetas && !Array.isArray(updateData.etiquetas)) {
       throw new Error('Las etiquetas deben ser un array');
     }
-
-    console.log('Final update data:', updateData);
     
     const { data, error } = await supabase
       .from('webapp_suggestions')
@@ -131,11 +145,11 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
       .select();
     
     if (error) {
-      console.error('Error updating webapp suggestion:', error);
+      console.error('Supabase update error:', error);
       throw new Error(`Error al actualizar la sugerencia: ${error.message}`);
     }
     
-    console.log('Webapp suggestion updated successfully:', data);
+    console.log('Update successful, returned data:', data);
   } catch (error) {
     console.error('Error updating webapp suggestion:', error);
     throw error;
