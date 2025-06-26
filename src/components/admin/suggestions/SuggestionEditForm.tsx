@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,29 +17,37 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   onFormChange,
   suggestionId
 }) => {
+  // Estado local para la categoría
+  const [localCategoria, setLocalCategoria] = useState<string>('');
+
+  // Sincronizar estado local con editForm cuando cambie
+  useEffect(() => {
+    console.log('=== SYNC EFFECT ===');
+    console.log('editForm.categoria changed to:', editForm.categoria);
+    setLocalCategoria(editForm.categoria || '');
+  }, [editForm.categoria]);
+
   const handleCategoryChange = (value: string) => {
-    console.log('=== CATEGORY CHANGE ===');
-    console.log('Category selected:', value);
-    console.log('Current editForm before update:', editForm);
+    console.log('=== LOCAL CATEGORY CHANGE ===');
+    console.log('New category value:', value);
     
+    // Actualizar estado local primero
+    setLocalCategoria(value);
+    
+    // Luego notificar al padre
     onFormChange({ categoria: value });
-    console.log('onFormChange called with categoria:', value);
+    
+    console.log('Local categoria updated to:', value);
   };
 
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
-    console.log('Tags updated:', tags);
     onFormChange({ etiquetas: tags });
   };
 
-  console.log('=== SUGGESTION EDIT FORM RENDER ===');
-  console.log('Current editForm.categoria:', editForm.categoria);
-  console.log('Full editForm:', editForm);
-
-  // Force re-render cuando cambie la categoría
-  useEffect(() => {
-    console.log('EditForm changed, categoria is now:', editForm.categoria);
-  }, [editForm.categoria]);
+  console.log('=== RENDER EDIT FORM ===');
+  console.log('editForm.categoria:', editForm.categoria);
+  console.log('localCategoria:', localCategoria);
 
   return (
     <div className="space-y-4">
@@ -59,11 +67,10 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
         <div>
           <label className="text-sm font-medium mb-2 block">Categoría *</label>
           <Select 
-            key={`category-${suggestionId}-${editForm.categoria || 'empty'}`}
-            value={editForm.categoria || ''} 
+            value={localCategoria} 
             onValueChange={handleCategoryChange}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
             <SelectContent className="bg-white border border-gray-200 shadow-lg max-h-60 overflow-y-auto z-50">
@@ -78,11 +85,11 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          {!editForm.categoria && (
+          {!localCategoria && (
             <p className="text-xs text-red-500 mt-1">La categoría es obligatoria para aprobar</p>
           )}
-          {editForm.categoria && (
-            <p className="text-xs text-green-600 mt-1">Categoría seleccionada: {editForm.categoria}</p>
+          {localCategoria && (
+            <p className="text-xs text-green-600 mt-1">Categoría seleccionada: {localCategoria}</p>
           )}
         </div>
       </div>
