@@ -91,7 +91,9 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
         .single();
         
       if (currentData) {
-        const mergedData = { ...currentData, ...updates };
+        // Cast the current data to match our interface type
+        const typedCurrentData = currentData as WebappSuggestion;
+        const mergedData = { ...typedCurrentData, ...updates };
         validateSuggestionData(mergedData);
       }
     }
