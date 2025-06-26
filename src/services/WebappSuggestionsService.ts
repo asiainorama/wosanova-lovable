@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { mainCategories } from '@/data/mainCategories';
 
@@ -36,7 +35,10 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     }
     
     console.log(`Successfully fetched ${data?.length || 0} suggestions`);
-    return (data || []) as WebappSuggestion[];
+    return (data || []).map(item => ({
+      ...item,
+      estado: item.estado as 'borrador' | 'publicado' | 'descartado'
+    }));
   } catch (error) {
     console.error('Error in fetchWebappSuggestions:', error);
     if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
@@ -92,7 +94,10 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
         
       if (currentData) {
         // Cast the current data to match our interface type
-        const typedCurrentData = currentData as WebappSuggestion;
+        const typedCurrentData = {
+          ...currentData,
+          estado: currentData.estado as 'borrador' | 'publicado' | 'descartado'
+        } as WebappSuggestion;
         const mergedData = { ...typedCurrentData, ...updates };
         validateSuggestionData(mergedData);
       }

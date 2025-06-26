@@ -20,6 +20,7 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
   const handleCategoryChange = (value: string) => {
     console.log('Category selected:', value);
     console.log('Available categories:', mainCategories);
+    console.log('Current editForm before update:', editForm);
     onFormChange({ categoria: value });
   };
 
@@ -50,12 +51,18 @@ const SuggestionEditForm: React.FC<SuggestionEditFormProps> = ({
             value={editForm.categoria || ''} 
             onValueChange={handleCategoryChange}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
               {mainCategories.map(cat => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                <SelectItem 
+                  key={cat} 
+                  value={cat}
+                  className="cursor-pointer hover:bg-gray-100"
+                >
+                  {cat}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

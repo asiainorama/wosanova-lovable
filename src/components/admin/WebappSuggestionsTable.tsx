@@ -190,8 +190,14 @@ const WebappSuggestionsTable: React.FC = () => {
   };
 
   const handleEditFormChange = (updates: Partial<WebappSuggestion>) => {
-    console.log('Form change:', updates);
-    setEditForm(prev => ({ ...prev, ...updates }));
+    console.log('Form change received:', updates);
+    console.log('Current editForm before update:', editForm);
+    
+    setEditForm(prev => {
+      const newForm = { ...prev, ...updates };
+      console.log('New editForm after update:', newForm);
+      return newForm;
+    });
   };
 
   if (loading) {
