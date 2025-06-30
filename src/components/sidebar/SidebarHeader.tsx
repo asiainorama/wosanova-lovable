@@ -42,8 +42,55 @@ const SidebarHeader = ({ username, avatarUrl, userId, onClose }: SidebarHeaderPr
 
   const handleProfileClick = () => {
     onClose();
+    
+    // Si no hay usuario autenticado, redirigir al login
+    if (!userId) {
+      toast.info('Inicia sesión para acceder a tu perfil');
+      navigate('/auth');
+      return;
+    }
+    
     navigate('/profile');
   };
+
+  const handleLoginClick = () => {
+    onClose();
+    navigate('/auth');
+  };
+
+  // Si no hay usuario autenticado, mostrar botón de login
+  if (!userId) {
+    return (
+      <div className="flex items-center justify-between w-full px-4">
+        <div className="flex items-center space-x-3">
+          <button onClick={handleLoginClick} className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                ?
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-foreground truncate">
+                Iniciar sesión
+              </span>
+            </div>
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {/* Close sidebar button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0 hover:bg-white/20 dark:hover:bg-gray-700/50"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-between w-full px-4">

@@ -18,12 +18,27 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Use the new custom hooks
+  // Use the new custom hooks - permitir null para usuarios no autenticados
   const userId = useAuthenticatedUser();
   const { favorites, setFavorites, syncFavoritesToSupabase, removeFromSupabase } = useFavoritesSync(userId);
   const { allApps, setAllApps } = useAppsManager();
 
   const addToFavorites = (app: AppData) => {
+    // Si no hay usuario, solo usar localStorage
+    if (!userId) {
+      if (!isFavorite(app.id)) {
+        const updatedFavorites = [...favorites, app];
+        setFavorites(updatedFavorites);
+        localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+        
+        toast.success(`${app.name} añadida a favoritos localmente`, {
+          className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
+        });
+      }
+      return;
+    }
+
+    // Usuario autenticado - funcionalidad original
     if (!isFavorite(app.id)) {
       const updatedFavorites = [...favorites, app];
       setFavorites(updatedFavorites);
@@ -32,9 +47,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
       
       // Sync to Supabase if logged in
-      if (userId) {
-        syncFavoritesToSupabase(updatedFavorites);
-      }
+      syncFavoritesToSupabase(updatedFavorites);
       
       toast.success(`${app.name} añadida a favoritos`, {
         className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
@@ -57,7 +70,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     
     if (app) {
-      toast.info(`${app.name} eliminada de favoritos`, {
+      const message = userId ? 
+        `${app.name} eliminada de favoritos` : 
+        `${app.name} eliminada de favoritos locales`;
+        
+      toast.info(message, {
         className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
       });
     }
