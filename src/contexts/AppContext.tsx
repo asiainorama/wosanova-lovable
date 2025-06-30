@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuthenticatedUser } from '@/hooks/useAuthenticatedUser';
 import { useFavoritesSync } from '@/hooks/useFavoritesSync';
 import { useAppsManager } from '@/hooks/useAppsManager';
+import { LocalStorageService } from '@/services/LocalStorageService';
 
 interface AppContextType {
   favorites: AppData[];
@@ -29,7 +30,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!isFavorite(app.id)) {
         const updatedFavorites = [...favorites, app];
         setFavorites(updatedFavorites);
-        localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+        LocalStorageService.saveFavorites(updatedFavorites);
         
         toast.success(`${app.name} añadida a favoritos localmente`, {
           className: document.documentElement.classList.contains('dark') ? 'dark-toast' : '',
@@ -44,7 +45,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setFavorites(updatedFavorites);
       
       // Update localStorage for immediate use
-      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      LocalStorageService.saveFavorites(updatedFavorites);
       
       // Sync to Supabase if logged in
       syncFavoritesToSupabase(updatedFavorites);
@@ -62,7 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFavorites(updatedFavorites);
     
     // Update localStorage immediately
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    LocalStorageService.saveFavorites(updatedFavorites);
     
     // Remove from Supabase if logged in
     if (userId) {
