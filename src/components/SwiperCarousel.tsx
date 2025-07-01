@@ -1,14 +1,13 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Virtual, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { AppData } from '@/data/apps';
-import { preparePaginatedApps } from '@/utils/gridCalculator';
 import useCarouselController from '@/hooks/useCarouselController';
 import useCarouselLayoutEffects from '@/hooks/useCarouselLayoutEffects';
+import { useSwiperSetup } from '@/hooks/useSwiperSetup';
 import CarouselGridPage from './carousel/CarouselGridPage';
 import CarouselPagination from './carousel/CarouselPagination';
 
@@ -58,16 +57,11 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
     saveGridState
   );
   
-  // Calculate how many apps per page
-  const appsPerPage = gridConfig.cols * gridConfig.rows;
-  
-  // Calculate total pages
-  const totalPages = Math.ceil(apps.length / appsPerPage);
-
-  // Create paginated apps with precise ordering algorithm
-  const paginatedApps = useMemo(() => {
-    return preparePaginatedApps(apps, appsPerPage, totalPages);
-  }, [apps, appsPerPage, totalPages]);
+  // Setup swiper configuration and pagination
+  const { paginatedApps, totalPages, swiperConfig } = useSwiperSetup({
+    apps,
+    gridConfig
+  });
 
   return (
     <div className="relative h-full w-full will-change-transform grid-container" key={`carousel-container-${resetKey}`}>
@@ -75,27 +69,7 @@ const SwiperCarousel: React.FC<SwiperCarouselProps> = ({
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         initialSlide={currentPage}
         onSlideChange={handleSlideChange}
-        modules={[Navigation, Pagination, Virtual, Mousewheel]}
-        mousewheel={{
-          forceToAxis: true,
-          sensitivity: 1.2,
-          thresholdDelta: 50,
-          thresholdTime: 150,
-        }}
-        speed={300}
-        cssMode={false}
-        resistanceRatio={0.85}
-        threshold={20}
-        followFinger={true}
-        touchRatio={1}
-        watchSlidesProgress={true}
-        grabCursor={true}
-        virtual={{
-          addSlidesAfter: 1,
-          addSlidesBefore: 1,
-        }}
-        className="h-full app-swiper"
-        wrapperClass="h-full"
+        {...swiperConfig}
       >
         {paginatedApps.map((pageApps, pageIndex) => (
           <SwiperSlide key={`page-${pageIndex}`} className="h-full" virtualIndex={pageIndex}>
