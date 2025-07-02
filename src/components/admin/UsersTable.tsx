@@ -86,7 +86,7 @@ const UsersTable = ({ onEdit }: UsersTableProps) => {
         
         const usersData: UserData[] = allUsers.map((user: AdminUserData) => ({
           id: user.id,
-          username: user.username || 'Usuario sin nombre',
+          username: user.username || user.email?.split('@')[0] || 'Usuario sin nombre',
           created_at: user.created_at,
           updated_at: user.updated_at,
           avatar_url: user.avatar_url,

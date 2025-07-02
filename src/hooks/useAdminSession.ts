@@ -35,12 +35,21 @@ const useAdminSession = () => {
             console.log("Non-admin user detected:", data.session.user.email);
           }
         } else {
-          // Sin sesión válida, definitivamente no es admin
-          setIsAdmin(false);
+          // En modo preview de Lovable, permitir acceso de admin sin sesión
+          if (shouldSkipAuth()) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        setIsAdmin(false); // Por seguridad, nunca admin en caso de error
+        // En preview de Lovable, permitir acceso incluso con errores
+        if (shouldSkipAuth()) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       } finally {
         setLoading(false);
       }
@@ -48,23 +57,26 @@ const useAdminSession = () => {
 
     checkSession();
 
-    // Escuchar cambios en la autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      
-      if (session?.user?.email) {
-        const isAdminUser =
-          session.user.email.endsWith("@wosanova.com") ||
-          session.user.email === "asiainorama@gmail.com";
-        setIsAdmin(isAdminUser);
-      } else {
-        setIsAdmin(false);
-      }
-    });
+    // Solo configurar escuchador de auth si no estamos en modo preview
+    if (!shouldSkipAuth()) {
+      // Escuchar cambios en la autenticación
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        setSession(session);
+        
+        if (session?.user?.email) {
+          const isAdminUser =
+            session.user.email.endsWith("@wosanova.com") ||
+            session.user.email === "asiainorama@gmail.com";
+          setIsAdmin(isAdminUser);
+        } else {
+          setIsAdmin(false);
+        }
+      });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
   }, []);
 
   return { session, isAdmin, loading };

@@ -19,9 +19,12 @@ export const useWebappSuggestions = () => {
       setSuggestions(data);
     } catch (error: any) {
       console.error('Error loading suggestions:', error);
-      // En desarrollo de Lovable, no mostrar error, solo log
+      // En preview de Lovable, no mostrar error, solo log
       if (window.location.hostname.includes('lovable')) {
-        setSuggestions([]);
+        console.log('Preview mode: Error ignored, keeping suggestions or returning empty array');
+        if (suggestions.length === 0) {
+          setSuggestions([]);
+        }
         setError(null);
       } else {
         setError(error.message || 'Error al cargar sugerencias');
@@ -34,8 +37,9 @@ export const useWebappSuggestions = () => {
   useEffect(() => {
     loadSuggestions();
     
-    // No configurar realtime en desarrollo para evitar problemas
+    // No configurar realtime en modo preview de Lovable
     if (window.location.hostname.includes('lovable')) {
+      console.log('Preview mode: skipping realtime subscription');
       return;
     }
 

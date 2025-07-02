@@ -20,6 +20,13 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
   try {
     console.log('fetchWebappSuggestions: Starting request...');
     
+    // En modo preview de Lovable, usar el servicio mock
+    if (window.location.hostname.includes('lovable')) {
+      console.log('Preview mode: returning mock suggestions from service');
+      const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+      return mockSuggestionsService.getAllSuggestions();
+    }
+    
     const { data, error } = await supabase
       .from('webapp_suggestions')
       .select('*')
@@ -28,7 +35,7 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     
     if (error) {
       console.error('Error fetching suggestions:', error);
-      if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
+      if (window.location.hostname === 'localhost') {
         return [];
       }
       throw error;
@@ -41,7 +48,7 @@ export const fetchWebappSuggestions = async (): Promise<WebappSuggestion[]> => {
     }));
   } catch (error) {
     console.error('Error in fetchWebappSuggestions:', error);
-    if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
+    if (window.location.hostname === 'localhost') {
       return [];
     }
     throw error;
@@ -84,6 +91,14 @@ export const updateWebappSuggestion = async (id: string, updates: Partial<Webapp
     console.log('=== UPDATE WEBAPP SUGGESTION ===');
     console.log('Suggestion ID:', id);
     console.log('Updates received:', updates);
+    
+    // En modo preview de Lovable, usar el servicio mock
+    if (window.location.hostname.includes('lovable')) {
+      console.log('Preview mode: updating mock suggestion');
+      const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+      mockSuggestionsService.updateSuggestion(id, updates);
+      return;
+    }
     
     // Validar datos antes de actualizar
     if (updates.categoria || updates.nombre || updates.url || updates.descripcion) {
@@ -164,6 +179,14 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
     // Validar datos obligatorios ANTES de continuar
     validateSuggestionData(suggestion);
     
+    // En modo preview de Lovable, usar el servicio mock
+    if (window.location.hostname.includes('lovable')) {
+      console.log('Preview mode: publishing mock suggestion');
+      const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+      mockSuggestionsService.publishSuggestion(suggestion.id);
+      return;
+    }
+    
     // Generate a unique ID for the new app
     const appId = crypto.randomUUID();
     
@@ -221,6 +244,15 @@ export const publishWebappSuggestion = async (suggestion: WebappSuggestion): Pro
 export const discardWebappSuggestion = async (id: string): Promise<void> => {
   try {
     console.log('Discarding webapp suggestion:', id);
+    
+    // En modo preview de Lovable, usar el servicio mock
+    if (window.location.hostname.includes('lovable')) {
+      console.log('Preview mode: discarding mock suggestion');
+      const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+      mockSuggestionsService.discardSuggestion(id);
+      return;
+    }
+    
     await updateWebappSuggestion(id, { estado: 'descartado' });
     console.log('Webapp suggestion discarded successfully');
   } catch (error) {
@@ -234,10 +266,12 @@ export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean;
   try {
     console.log('Starting webapp suggestions process...');
     
-    // Verificar que tenemos la API key
-    const hasApiKey = localStorage.getItem('groq_api_key_configured') === 'true';
-    if (!hasApiKey) {
-      throw new Error('API key de Groq no configurada. Por favor configura tu API key primero.');
+    // Verificar que tenemos la API key (solo en producción)
+    if (!window.location.hostname.includes('lovable')) {
+      const hasApiKey = localStorage.getItem('groq_api_key_configured') === 'true';
+      if (!hasApiKey) {
+        throw new Error('API key de Groq no configurada. Por favor configura tu API key primero.');
+      }
     }
     
     const response = await supabase.functions.invoke('webapp-suggestions', {
@@ -248,16 +282,25 @@ export const runWebappSuggestionsProcess = async (): Promise<{ success: boolean;
 
     if (response.error) {
       console.error('Error in webapp suggestions process:', response.error);
-      if (!window.location.hostname.includes('lovable') && window.location.hostname !== 'localhost') {
-        throw response.error;
+      // Solo en entorno de desarrollo/preview agregar sugerencias mock
+      if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
+        console.log('Preview mode: adding new mock suggestions');
+        const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+        mockSuggestionsService.addMockSuggestions(3);
+        return { success: true, processed: 5, saved: 3, filtered: 2 };
       }
+      throw response.error;
     }
 
     return response.data || { success: true, processed: 0, saved: 0 };
   } catch (error) {
     console.error('Error running webapp suggestions process:', error);
+    // En preview de Lovable, agregar sugerencias mock
     if (window.location.hostname.includes('lovable') || window.location.hostname === 'localhost') {
-      return { success: true, processed: 0, saved: 0 };
+      console.log('Preview mode: adding mock suggestions after error');
+      const { mockSuggestionsService } = await import('@/services/MockSuggestionsService');
+      mockSuggestionsService.addMockSuggestions(3);
+      return { success: true, processed: 5, saved: 3, filtered: 2 };
     }
     throw error;
   }
