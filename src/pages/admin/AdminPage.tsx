@@ -29,15 +29,20 @@ const AdminPage = () => {
   useEffect(() => {
     console.log("AdminPage - Session check:", { session, isAdmin, sessionLoading });
     
+    // Verificar inmediatamente si estamos en modo preview
+    const skipAuth = shouldSkipAuth();
+    console.log("Skip auth check:", skipAuth);
+    
+    if (skipAuth) {
+      console.log("Preview mode detected - granting admin access immediately");
+      toast.info("Modo preview: Acceso de administrador concedido", { duration: 3000 });
+      loadApps();
+      return;
+    }
+    
     if (!sessionLoading) {
-      // Permitir acceso en modo desarrollo/preview de Lovable
-      const skipAuth = shouldSkipAuth();
-      
-      if (isAdmin || skipAuth) {
+      if (isAdmin) {
         console.log("User has admin access, loading apps...");
-        if (skipAuth) {
-          toast.info("Modo desarrollo: Acceso de administrador concedido", { duration: 3000 });
-        }
         loadApps();
       } else {
         console.log("User is not admin, redirecting...");
@@ -98,9 +103,12 @@ const AdminPage = () => {
     );
   }
 
-  // Permitir acceso en desarrollo o si es admin real
+  // Permitir acceso en preview/desarrollo o si es admin real
   const skipAuth = shouldSkipAuth();
-  if (!skipAuth && (!session || !isAdmin)) {
+  if (skipAuth) {
+    // En modo preview, siempre permitir acceso
+    console.log("Preview mode: allowing admin access");
+  } else if (!session || !isAdmin) {
     return null; // Redirect handled in useEffect
   }
 
