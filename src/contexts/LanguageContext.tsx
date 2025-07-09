@@ -1,9 +1,8 @@
-
 import * as React from 'react';
 
 interface LanguageContextType {
-  language: 'es';
-  setLanguage: (language: 'es') => void;
+  language: 'es' | 'en';
+  setLanguage: (language: 'es' | 'en') => void;
   t: (key: string) => string;
 }
 
@@ -21,6 +20,7 @@ const translations = {
     'header.profile': 'Perfil',
     'header.language': 'Idioma',
     'header.spanish': 'Español',
+    'header.english': 'Inglés',
     
     // Home Page
     'home.title': 'Inicio',
@@ -56,6 +56,7 @@ const translations = {
     'profile.appearance': 'Preferencias de apariencia',
     'profile.language': 'Idioma',
     'profile.spanish': 'Español',
+    'profile.english': 'Inglés',
     'profile.logout': 'Cerrar sesión',
     'profile.delete': 'Eliminar mi cuenta',
     'profile.delete.confirm': '¿Estás seguro?',
@@ -72,6 +73,7 @@ const translations = {
     'profile.color.pink': 'Rosa',
     'profile.color.orange': 'Naranja',
     'profile.deleted': 'Cuenta eliminada correctamente',
+    'profile.view': 'Ver perfil',
     
     // Category Groups
     'category.productivity': 'Productividad',
@@ -113,7 +115,7 @@ const translations = {
     'app.info.screenshots': 'Capturas de pantalla',
     'app.info.relatedApps': 'Aplicaciones relacionadas',
     
-    // Subcategories - Nuevas traducciones para subcategorías
+    // Subcategories
     'subcategory.officeSuite': 'Suite de Oficina',
     'subcategory.documentEditing': 'Edición de Documentos',
     'subcategory.spreadsheets': 'Hojas de Cálculo',
@@ -178,6 +180,180 @@ const translations = {
     'error.signout': 'Error al cerrar sesión',
     'error.delete': 'Error al eliminar la cuenta',
     'error.profile': 'Error al actualizar el perfil',
+  },
+  en: {
+    // Global
+    'app.name': 'WosaNova',
+    'app.description': 'The world\'s largest collection of WebApps',
+    'app.preview': 'Preview',
+    
+    // Header
+    'header.home': 'Home',
+    'header.catalog': 'Catalog',
+    'header.manage': 'Manage',
+    'header.profile': 'Profile',
+    'header.language': 'Language',
+    'header.spanish': 'Spanish',
+    'header.english': 'English',
+    
+    // Home Page
+    'home.title': 'Home',
+    'home.myApps': 'My Applications',
+    'home.noApps': 'You have no added applications',
+    'home.addFromCatalog': 'Add applications from the catalog to see them here',
+    'home.exploreCatalog': 'Explore Catalog',
+    
+    // Installation Prompt
+    'install.title': 'Install',
+    'install.message': 'Download the App now!!',
+    'install.button': 'LET\'S GO',
+    
+    // Catalog Page
+    'catalog.title': 'Catalog',
+    'catalog.applications': 'Applications',
+    'catalog.search': 'Search applications...',
+    'catalog.allCategories': 'All categories',
+    'catalog.featured': 'Featured',
+    'catalog.allApps': 'All applications',
+    'catalog.results': 'Results',
+    'catalog.gridView': 'Grid view',
+    'catalog.listView': 'List view',
+    'catalog.category': 'Category',
+    'catalog.categoryGroup': 'Category group',
+    
+    // Profile Page
+    'profile.title': 'Personal Area',
+    'profile.description': 'Manage your profile and application preferences',
+    'profile.username': 'Username',
+    'profile.avatar': 'Profile picture',
+    'profile.save': 'Save changes',
+    'profile.appearance': 'Appearance preferences',
+    'profile.language': 'Language',
+    'profile.spanish': 'Spanish',
+    'profile.english': 'English',
+    'profile.logout': 'Sign out',
+    'profile.delete': 'Delete my account',
+    'profile.delete.confirm': 'Are you sure?',
+    'profile.delete.description': 'This action cannot be undone. Your account and all associated data will be permanently deleted.',
+    'profile.cancel': 'Cancel',
+    'profile.theme.light': 'Light',
+    'profile.theme.dark': 'Dark',
+    'profile.theme.mode': 'Appearance mode',
+    'profile.theme.accent': 'Accent color',
+    'profile.color.blue': 'Blue',
+    'profile.color.gray': 'Gray',
+    'profile.color.green': 'Green',
+    'profile.color.red': 'Red',
+    'profile.color.pink': 'Pink',
+    'profile.color.orange': 'Orange',
+    'profile.deleted': 'Account deleted successfully',
+    'profile.view': 'View profile',
+    
+    // Category Groups
+    'category.productivity': 'Productivity',
+    'category.entertainment': 'Entertainment',
+    'category.utilities': 'Utilities',
+    'category.lifestyle': 'Lifestyle',
+    'category.finance': 'Finance',
+    'category.other': 'Other',
+    'category.social': 'Social',
+    'category.education': 'Education',
+    'category.shopping': 'Shopping',
+    'category.travel': 'Travel',
+    'category.health': 'Health',
+    'category.sports': 'Sports',
+    'category.news': 'News',
+    'category.business': 'Business',
+    'category.food': 'Food',
+    'category.music': 'Music',
+    'category.video': 'Video',
+    'category.photo': 'Photography',
+    'category.games': 'Games',
+    'category.weather': 'Weather',
+    'category.books': 'Books',
+    'category.art': 'Art',
+    'category.development': 'Development',
+    'category.dating': 'Dating',
+    
+    // App Info
+    'app.info.category': 'Category',
+    'app.info.rating': 'Rating',
+    'app.info.author': 'Creator',
+    'app.info.lastUpdate': 'Last update',
+    'app.info.size': 'Size',
+    'app.info.languages': 'Languages',
+    'app.info.platforms': 'Platforms',
+    'app.info.description': 'Description',
+    'app.info.features': 'Features',
+    'app.info.reviews': 'Reviews',
+    'app.info.screenshots': 'Screenshots',
+    'app.info.relatedApps': 'Related applications',
+    
+    // Subcategories
+    'subcategory.officeSuite': 'Office Suite',
+    'subcategory.documentEditing': 'Document Editing',
+    'subcategory.spreadsheets': 'Spreadsheets',
+    'subcategory.presentations': 'Presentations',
+    'subcategory.notesTaking': 'Note Taking',
+    'subcategory.taskManager': 'Task Manager',
+    'subcategory.projectManager': 'Project Manager',
+    'subcategory.videoStreaming': 'Video Streaming',
+    'subcategory.musicStreaming': 'Music Streaming',
+    'subcategory.podcasts': 'Podcasts',
+    'subcategory.games': 'Games',
+    'subcategory.movieDatabase': 'Movie Database',
+    'subcategory.fileManager': 'File Manager',
+    'subcategory.calculator': 'Calculator',
+    'subcategory.calendar': 'Calendar',
+    'subcategory.translator': 'Translator',
+    'subcategory.converter': 'Converter',
+    'subcategory.scanner': 'Scanner',
+    'subcategory.healthTracking': 'Health Tracking',
+    'subcategory.fitnessTracker': 'Fitness Tracker',
+    'subcategory.meditation': 'Meditation',
+    'subcategory.sleep': 'Sleep',
+    'subcategory.cooking': 'Cooking',
+    'subcategory.budgetingTools': 'Budgeting Tools',
+    'subcategory.stockTrading': 'Stock Trading',
+    'subcategory.bankingApps': 'Banking Apps',
+    'subcategory.cryptoTracker': 'Crypto Tracker',
+    'subcategory.paymentApps': 'Payment Apps',
+    
+    // App Descriptions
+    'description.generalFeatured': 'Featured for its ease of use and functionality',
+    'description.productivityApp': 'Boost your productivity with this intuitive application',
+    'description.entertainmentApp': 'Enjoy the best entertainment content',
+    'description.socialApp': 'Connect with friends and family',
+    'description.educationApp': 'Learn new skills at your own pace',
+    'description.utilityApp': 'Essential tool for your daily life',
+    'description.financeApp': 'Manage your finances intelligently',
+    'description.gameApp': 'Have fun with this addictive game',
+    'description.healthApp': 'Improve your wellbeing with personalized tracking',
+    'description.newsApp': 'Stay informed with updated news',
+    'description.photoApp': 'Edit and organize your photos professionally',
+    'description.videoApp': 'View and edit videos with ease',
+    'description.musicApp': 'Enjoy your favorite music anytime',
+    'description.travelApp': 'Plan your trips easily',
+    'description.foodApp': 'Discover recipes and culinary tips',
+    'description.weatherApp': 'Accurate and updated weather forecast',
+    'description.shoppingApp': 'Shop online with exclusive offers',
+    
+    // Auth page
+    'auth.welcome': 'Welcome to WosaNova',
+    'auth.description': 'Sign in or register to continue',
+    'auth.login': 'Sign in',
+    'auth.signup': 'Sign up',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.remember': 'Remember me',
+    'auth.forgotPassword': 'Forgot your password?',
+    'auth.noAccount': 'Don\'t have an account?',
+    'auth.haveAccount': 'Already have an account?',
+    
+    // Error messages
+    'error.signout': 'Error signing out',
+    'error.delete': 'Error deleting account',
+    'error.profile': 'Error updating profile',
   }
 };
 
@@ -196,31 +372,32 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguageState] = React.useState<'es'>('es');
+  const [language, setLanguageState] = React.useState<'es' | 'en'>(() => {
+    // Default to English for non-registered users
+    const savedLanguage = localStorage.getItem('language') as 'es' | 'en';
+    return savedLanguage || 'en';
+  });
 
-  // Función para mantener compatibilidad con el resto del código
-  const setLanguage = () => {
-    // No hace nada, ya que solo tenemos español
-    console.log("Idioma fijo en español");
+  const setLanguage = (newLanguage: 'es' | 'en') => {
+    setLanguageState(newLanguage);
+    localStorage.setItem('language', newLanguage);
   };
 
-  // Función de traducción simplificada
   const t = (key: string): string => {
     if (!key) return '';
     
     try {
-      const currentTranslations = translations.es;
-      // TypeScript safety - verificar si la clave existe en las traducciones
+      const currentTranslations = translations[language];
       const result = currentTranslations[key as keyof typeof currentTranslations];
       
       if (result === undefined) {
-        console.debug(`Falta traducción para clave: ${key}`);
+        console.debug(`Missing translation for key: ${key} in language: ${language}`);
         return key;
       }
       
       return result;
     } catch (e) {
-      console.error("Error en función de traducción:", e);
+      console.error("Error in translation function:", e);
       return key;
     }
   };

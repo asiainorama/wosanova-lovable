@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   username?: string;
   avatar_url?: string;
+  language?: string;
 }
 
 export const useUserProfile = () => {
@@ -24,7 +24,7 @@ export const useUserProfile = () => {
           try {
             const { data, error } = await supabase
               .from('user_profiles')
-              .select('username, avatar_url')
+              .select('username, avatar_url, language')
               .eq('id', session.user.id)
               .single();
               
@@ -37,6 +37,11 @@ export const useUserProfile = () => {
               // Also update localStorage for immediate use
               localStorage.setItem('username', profileData.username || '');
               localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+              
+              // Update language if user has a saved preference
+              if (profileData.language) {
+                localStorage.setItem('language', profileData.language);
+              }
             }
           } catch (error) {
             console.error('Error fetching user profile:', error);
@@ -60,6 +65,7 @@ export const useUserProfile = () => {
         setAvatarUrl('');
         localStorage.removeItem('username');
         localStorage.removeItem('avatarUrl');
+        // Don't remove language on logout, keep user preference
       }
     });
     

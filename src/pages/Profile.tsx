@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { BackgroundSelector } from '@/components/BackgroundSelector';
+import LanguageSelector from '@/components/LanguageSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,12 +26,13 @@ interface UserProfile {
   avatar_url?: string;
   theme_mode?: string;
   background_preference?: string;
+  language?: string;
 }
 
 const Profile = () => {
   const navigate = useNavigate();
   const { mode } = useTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { getBackgroundStyle } = useBackground();
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -51,7 +53,7 @@ const Profile = () => {
         try {
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('username, avatar_url, theme_mode, background_preference')
+            .select('username, avatar_url, theme_mode, background_preference, language')
             .eq('id', session.user.id)
             .single();
             
@@ -67,6 +69,11 @@ const Profile = () => {
             // Also update localStorage for immediate use
             localStorage.setItem('username', profileData.username || '');
             localStorage.setItem('avatarUrl', profileData.avatar_url || '');
+            
+            // Update language if user has a saved preference
+            if (profileData.language) {
+              localStorage.setItem('language', profileData.language);
+            }
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
@@ -134,7 +141,8 @@ const Profile = () => {
             id: userId,
             username,
             avatar_url: avatarUrl,
-            theme_mode: mode
+            theme_mode: mode,
+            language: language
           }, { 
             onConflict: 'id'
           });
@@ -149,8 +157,9 @@ const Profile = () => {
       localStorage.setItem('username', username);
       localStorage.setItem('avatarUrl', avatarUrl);
       localStorage.setItem('themeMode', mode);
+      localStorage.setItem('language', language);
       
-      console.log('Profile updated successfully:', { username, avatarUrl, mode });
+      console.log('Profile updated successfully:', { username, avatarUrl, mode, language });
       // No toast notification for auto-save to avoid interruptions
     } catch (error: any) {
       toast.error(t('error.profile'));
@@ -219,6 +228,13 @@ const Profile = () => {
                   />
                 </div>
               </div>
+            </div>
+            
+            <Separator className="my-2" />
+            
+            {/* Language Selector Section */}
+            <div>
+              <LanguageSelector onLanguageChange={autoSaveChanges} />
             </div>
             
             <Separator className="my-2" />

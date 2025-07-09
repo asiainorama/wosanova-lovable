@@ -31,7 +31,7 @@ const UserProfileSection = ({
     onClose();
     
     if (!userId) {
-      toast.info('Inicia sesión para acceder a tu perfil');
+      toast.info(t('auth.login'));
       navigate('/auth');
       return;
     }
@@ -46,7 +46,7 @@ const UserProfileSection = ({
           <TooltipTrigger asChild>
             <button onClick={handleProfileClick} className="flex justify-center">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : 'Usuario'} />
+                <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : t('auth.login')} />
                 <AvatarFallback className="bg-primary/10">
                   <User size={18} />
                 </AvatarFallback>
@@ -54,7 +54,7 @@ const UserProfileSection = ({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{userId ? t('profile.view') : 'Iniciar sesión'}</p>
+            <p>{userId ? t('profile.view') : t('auth.login')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -69,18 +69,18 @@ const UserProfileSection = ({
             <TooltipTrigger asChild>
               <button onClick={handleProfileClick} className="flex items-center gap-2">
                 <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : 'Usuario'} />
+                  <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : t('auth.login')} />
                   <AvatarFallback className="bg-primary/10">
                     <User size={16} />
                   </AvatarFallback>
                 </Avatar>
                 <span className="font-medium dark:text-white truncate text-sm max-w-[80px]">
-                  {userId ? (username || t('profile.username')) : 'Iniciar sesión'}
+                  {userId ? (username || t('profile.username')) : t('auth.login')}
                 </span>
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{userId ? t('profile.view') : 'Iniciar sesión'}</p>
+              <p>{userId ? t('profile.view') : t('auth.login')}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -92,14 +92,14 @@ const UserProfileSection = ({
     <div className="flex flex-col items-center mt-4 mb-2">
       <button onClick={handleProfileClick} className="flex justify-center">
         <Avatar className="h-12 w-12 mb-2">
-          <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : 'Usuario'} />
+          <AvatarImage src={userId ? avatarUrl : undefined} alt={userId ? username : t('auth.login')} />
           <AvatarFallback className="bg-primary/10">
             <User size={20} />
           </AvatarFallback>
         </Avatar>
       </button>
       <span className="font-medium dark:text-white truncate theme-text text-center">
-        {userId ? (username || t('profile.username')) : 'Iniciar sesión'}
+        {userId ? (username || t('profile.username')) : t('auth.login')}
       </span>
     </div>
   );
