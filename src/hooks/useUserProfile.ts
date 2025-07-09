@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -74,5 +75,26 @@ export const useUserProfile = () => {
     };
   }, []);
 
-  return { username, avatarUrl, userId };
+  const updateProfile = async (newUsername: string, newAvatarUrl: string) => {
+    if (!userId) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        username: newUsername,
+        avatar_url: newAvatarUrl,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) throw error;
+
+    // Update local state and localStorage
+    setUsername(newUsername);
+    setAvatarUrl(newAvatarUrl);
+    localStorage.setItem('username', newUsername);
+    localStorage.setItem('avatarUrl', newAvatarUrl);
+  };
+
+  return { username, avatarUrl, userId, updateProfile };
 };

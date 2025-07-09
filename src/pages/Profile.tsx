@@ -36,7 +36,7 @@ const Profile = () => {
     setIsLoading(true);
     try {
       await updateProfile(localUsername, localAvatarUrl);
-      toast.success('Perfil actualizado correctamente');
+      toast.success(t('profile.updated'));
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error(t('error.profile'));
@@ -60,8 +60,24 @@ const Profile = () => {
     if (!userId) return;
     
     try {
-      const { error } = await supabase.rpc('delete_user_account');
-      if (error) throw error;
+      // Delete user profile first
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (profileError) throw profileError;
+      
+      // Delete user favorites
+      const { error: favoritesError } = await supabase
+        .from('user_favorites')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (favoritesError) throw favoritesError;
+      
+      // Sign out the user
+      await supabase.auth.signOut();
       
       toast.success(t('profile.deleted'));
       navigate('/auth');
@@ -124,7 +140,7 @@ const Profile = () => {
                   id="avatar"
                   value={localAvatarUrl}
                   onChange={(e) => setLocalAvatarUrl(e.target.value)}
-                  placeholder="URL de la imagen"
+                  placeholder={t('profile.avatarUrl')}
                 />
               </div>
 
@@ -133,7 +149,7 @@ const Profile = () => {
                 disabled={isLoading}
                 className="w-full"
               >
-                {isLoading ? 'Guardando...' : t('profile.save')}
+                {isLoading ? t('profile.saving') : t('profile.save')}
               </Button>
             </div>
           </Card>
