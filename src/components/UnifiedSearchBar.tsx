@@ -36,7 +36,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
 
   // Lista de categorías con "Todas las categorías" al inicio
   const categoryOptions = [
-    { value: null, label: t('catalog.allCategories') || 'Todas las categorías' },
+    { value: null, label: t('catalog.allCategories') },
     ...categories.map(cat => ({ value: cat, label: translateCategory(cat) }))
   ];
 
@@ -132,7 +132,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
     if (selectedCategory) {
       return translateCategory(selectedCategory);
     }
-    return 'Buscar y Filtrar';
+    return t('catalog.searchAndFilter');
   };
 
   const hasActiveFilter = searchTerm.trim() || selectedCategory;
@@ -154,7 +154,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
             selectedCategory && "border-l-4 border-l-primary bg-blue-50 dark:bg-gray-600",
             isOpen && "ring-2 ring-primary/20"
           )}
-          aria-label="Buscar aplicaciones o filtrar por categoría"
+          aria-label={t('catalog.searchAndFilter')}
         />
         
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">

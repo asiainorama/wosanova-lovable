@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 
 interface LanguageContextType {
@@ -38,6 +39,7 @@ const translations = {
     'catalog.title': 'Catálogo',
     'catalog.applications': 'Aplicaciones',
     'catalog.search': 'Buscar aplicaciones...',
+    'catalog.searchAndFilter': 'Buscar y Filtrar',
     'catalog.allCategories': 'Todas las categorías',
     'catalog.featured': 'Destacadas',
     'catalog.allApps': 'Todas las aplicaciones',
@@ -46,6 +48,8 @@ const translations = {
     'catalog.listView': 'Vista de lista',
     'catalog.category': 'Categoría',
     'catalog.categoryGroup': 'Grupo de categoría',
+    'catalog.visit': 'Visitar',
+    'catalog.filterByCategory': 'Filtrar por categoría...',
     
     // Profile Page
     'profile.title': 'Área Personal',
@@ -74,6 +78,33 @@ const translations = {
     'profile.color.orange': 'Naranja',
     'profile.deleted': 'Cuenta eliminada correctamente',
     'profile.view': 'Ver perfil',
+    'profile.chooseStyle': 'Elige tu estilo',
+    'profile.wallpaper': 'Fondo de pantalla',
+    'profile.wallpaper.none': 'Ninguno',
+    'profile.wallpaper.gradient': 'Gradiente',
+    'profile.wallpaper.space': 'Espacio',
+    'profile.wallpaper.abstract': 'Abstracto',
+    
+    // Sidebar & Widgets
+    'sidebar.calendar': 'Calendario',
+    'sidebar.time': 'Hora',
+    'sidebar.weather': 'El Tiempo',
+    'widget.calculator': 'Calculadora',
+    'widget.notes': 'Notas',
+    'widget.alarm': 'Alarma',
+    'widget.converter': 'Conversor',
+    'notes.title': 'Mis Notas',
+    'notes.newNote': 'Nueva Nota',
+    'notes.untitled': 'Sin título',
+    'notes.save': 'Guardar',
+    'notes.delete': 'Eliminar',
+    'notes.content': 'Contenido de la nota...',
+    'calculator.title': 'Calculadora',
+    'alarm.title': 'Alarma',
+    'alarm.setTime': 'Establecer hora',
+    'alarm.start': 'Iniciar',
+    'alarm.stop': 'Detener',
+    'converter.title': 'Conversor de Unidades',
     
     // Category Groups
     'category.productivity': 'Productividad',
@@ -100,6 +131,11 @@ const translations = {
     'category.art': 'Arte',
     'category.development': 'Desarrollo',
     'category.dating': 'Citas',
+    'category.comunicación': 'Comunicación',
+    'category.creatividad': 'Creatividad',
+    'category.comercio electrónico': 'Comercio electrónico',
+    'category.noticias e información': 'Noticias e información',
+    'category.redes sociales': 'Redes sociales',
     
     // App Info
     'app.info.category': 'Categoría',
@@ -212,6 +248,7 @@ const translations = {
     'catalog.title': 'Catalog',
     'catalog.applications': 'Applications',
     'catalog.search': 'Search applications...',
+    'catalog.searchAndFilter': 'Search and Filter',
     'catalog.allCategories': 'All categories',
     'catalog.featured': 'Featured',
     'catalog.allApps': 'All applications',
@@ -220,6 +257,8 @@ const translations = {
     'catalog.listView': 'List view',
     'catalog.category': 'Category',
     'catalog.categoryGroup': 'Category group',
+    'catalog.visit': 'Visit',
+    'catalog.filterByCategory': 'Filter by category...',
     
     // Profile Page
     'profile.title': 'Personal Area',
@@ -248,6 +287,33 @@ const translations = {
     'profile.color.orange': 'Orange',
     'profile.deleted': 'Account deleted successfully',
     'profile.view': 'View profile',
+    'profile.chooseStyle': 'Choose your style',
+    'profile.wallpaper': 'Wallpaper',
+    'profile.wallpaper.none': 'None',
+    'profile.wallpaper.gradient': 'Gradient',
+    'profile.wallpaper.space': 'Space',
+    'profile.wallpaper.abstract': 'Abstract',
+    
+    // Sidebar & Widgets
+    'sidebar.calendar': 'Calendar',
+    'sidebar.time': 'Time',
+    'sidebar.weather': 'Weather',
+    'widget.calculator': 'Calculator',
+    'widget.notes': 'Notes',
+    'widget.alarm': 'Alarm',
+    'widget.converter': 'Converter',
+    'notes.title': 'My Notes',
+    'notes.newNote': 'New Note',
+    'notes.untitled': 'Untitled',
+    'notes.save': 'Save',
+    'notes.delete': 'Delete',
+    'notes.content': 'Note content...',
+    'calculator.title': 'Calculator',
+    'alarm.title': 'Alarm',
+    'alarm.setTime': 'Set time',
+    'alarm.start': 'Start',
+    'alarm.stop': 'Stop',
+    'converter.title': 'Unit Converter',
     
     // Category Groups
     'category.productivity': 'Productivity',
@@ -274,6 +340,11 @@ const translations = {
     'category.art': 'Art',
     'category.development': 'Development',
     'category.dating': 'Dating',
+    'category.comunicación': 'Communication',
+    'category.creatividad': 'Creativity',
+    'category.comercio electrónico': 'E-commerce',
+    'category.noticias e información': 'News & Information',
+    'category.redes sociales': 'Social Networks',
     
     // App Info
     'app.info.category': 'Category',

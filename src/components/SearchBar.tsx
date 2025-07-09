@@ -2,6 +2,7 @@
 import React from 'react';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SearchBarProps {
   searchTerm: string;
@@ -9,16 +10,18 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="relative w-full">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
       <Input
         type="text"
-        placeholder="Buscar aplicaciones..."
+        placeholder={t('catalog.search')}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
         className="pl-10 pr-8 py-2 w-full bg-gray-100 border-none text-gray-800 placeholder:text-gray-500"
-        aria-label="Buscar aplicaciones"
+        aria-label={t('catalog.search')}
       />
       {searchTerm && (
         <button

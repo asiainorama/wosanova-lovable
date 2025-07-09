@@ -1,7 +1,9 @@
+
 import React from 'react';
 import AppGrid from '@/components/AppGrid';
 import GradientSeparator from '@/components/ui/GradientSeparator';
 import { AppData } from '@/data/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CatalogContentProps {
   loading: boolean;
@@ -16,6 +18,8 @@ const CatalogContent: React.FC<CatalogContentProps> = ({
   searchTerm,
   processedApps
 }) => {
+  const { t } = useLanguage();
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -26,7 +30,7 @@ const CatalogContent: React.FC<CatalogContentProps> = ({
     
     return (
       <>
-        <h2 className="text-xl font-semibold mb-3 dark:text-white">Todas las categorías</h2>
+        <h2 className="text-xl font-semibold mb-3 dark:text-white">{t('catalog.allCategories')}</h2>
         <GradientSeparator />
         {sortedApps.length > 0 ? (
           <AppGrid 
@@ -82,17 +86,21 @@ const LoadingIndicator = () => (
 const EmptyState: React.FC<{ searchTerm: string; selectedCategory?: string | null }> = ({ 
   searchTerm, 
   selectedCategory 
-}) => (
-  <div className="text-center py-10">
-    <p className="text-gray-500 dark:text-gray-400">
-      {searchTerm.trim() 
-        ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
-        : selectedCategory 
-          ? `No hay aplicaciones en la categoría "${selectedCategory}"`
-          : "No hay aplicaciones que coincidan con los criterios de búsqueda"
-      }
-    </p>
-  </div>
-);
+}) => {
+  const { t } = useLanguage();
+  
+  return (
+    <div className="text-center py-10">
+      <p className="text-gray-500 dark:text-gray-400">
+        {searchTerm.trim() 
+          ? `No se encontraron aplicaciones que coincidan con "${searchTerm}"`
+          : selectedCategory 
+            ? `No hay aplicaciones en la categoría "${selectedCategory}"`
+            : "No hay aplicaciones que coincidan con los criterios de búsqueda"
+        }
+      </p>
+    </div>
+  );
+};
 
 export default CatalogContent;

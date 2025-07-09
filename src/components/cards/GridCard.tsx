@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import AppAvatarFallback from './AvatarFallback';
 import FavoriteButton from './FavoriteButton';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface GridCardProps {
   app: AppData;
@@ -32,6 +33,7 @@ const GridCard: React.FC<GridCardProps> = ({
   smallerIcons = false
 }) => {
   const { iconUrl, imageLoading, imageError, imageRef, handleImageError, handleImageLoad } = useAppLogo(app);
+  const { t } = useLanguage();
   
   return (
     <Card 
@@ -88,7 +90,7 @@ const GridCard: React.FC<GridCardProps> = ({
             }}
           >
             <ExternalLink className="h-3 w-3 mr-1" />
-            Visitar
+            {t('catalog.visit')}
           </Button>
           
           <FavoriteButton

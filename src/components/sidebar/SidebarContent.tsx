@@ -4,8 +4,11 @@ import TimeWidget from './TimeWidget';
 import WeatherWidget from './WeatherWidget';
 import CalendarWidget from './CalendarWidget';
 import WidgetIconsRow from './WidgetIconsRow';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SidebarContent: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
       {/* Top section with Time and Weather - takes natural space */}
@@ -21,7 +24,7 @@ const SidebarContent: React.FC = () => {
       
       {/* Bottom section with Calendar - takes natural space at bottom */}
       <div className="flex-shrink-0 px-3 pb-2">
-        <h3 className="text-xs font-medium mb-2 dark:text-gray-300">Calendario</h3>
+        <h3 className="text-xs font-medium mb-2 dark:text-gray-300">{t('sidebar.calendar')}</h3>
         <div className="w-full">
           <CalendarWidget />
         </div>
