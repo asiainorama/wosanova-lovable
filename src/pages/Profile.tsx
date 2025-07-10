@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
-import LanguageSelector from '@/components/LanguageSelector';
+import LanguageToggle from '@/components/LanguageToggle';
 import ThemeSelector from '@/components/ThemeSelector';
 import BackgroundSelector from '@/components/BackgroundSelector';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -112,7 +112,12 @@ const Profile = () => {
       <main className="container mx-auto px-4 py-6 flex-1">
         <div className="max-w-2xl mx-auto space-y-6">
           <Card className="p-6">
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 relative">
+              {/* Language Toggle in top-right corner */}
+              <div className="absolute top-0 right-0">
+                <LanguageToggle />
+              </div>
+              
               <Avatar className="h-20 w-20 mx-auto mb-4">
                 <AvatarImage src={localAvatarUrl} alt={localUsername} />
                 <AvatarFallback className="bg-primary/10">
@@ -152,15 +157,6 @@ const Profile = () => {
                 {isLoading ? t('profile.saving') : t('profile.save')}
               </Button>
             </div>
-          </Card>
-
-          {/* Language Selector */}
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings size={20} className="text-primary" />
-              <h2 className="text-lg font-semibold gradient-text">{t('profile.language')}</h2>
-            </div>
-            <LanguageSelector />
           </Card>
 
           {/* Appearance Preferences */}
