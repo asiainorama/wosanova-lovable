@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { User, LogOut, AlertTriangle, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -110,42 +111,45 @@ const Profile = () => {
       <Header title={t('profile.title')} />
       
       <main className="container mx-auto px-4 py-6 flex-1">
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto">
           <Card className="p-6">
+            {/* Profile Header with Language Toggle */}
             <div className="text-center mb-6 relative">
-              {/* Language Toggle in top-right corner */}
               <div className="absolute top-0 right-0">
                 <LanguageToggle />
               </div>
               
-              <Avatar className="h-20 w-20 mx-auto mb-4">
+              <Avatar className="h-16 w-16 mx-auto mb-3">
                 <AvatarImage src={localAvatarUrl} alt={localUsername} />
                 <AvatarFallback className="bg-primary/10">
-                  <User size={24} />
+                  <User size={20} />
                 </AvatarFallback>
               </Avatar>
-              <h1 className="text-2xl font-bold gradient-text">{t('profile.title')}</h1>
-              <p className="text-gray-600 dark:text-gray-400">{t('profile.description')}</p>
+              <h1 className="text-xl font-bold gradient-text">{t('profile.title')}</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('profile.description')}</p>
             </div>
 
-            <div className="space-y-4">
+            {/* Profile Information */}
+            <div className="space-y-4 mb-6">
               <div>
-                <Label htmlFor="username">{t('profile.username')}</Label>
+                <Label htmlFor="username" className="text-sm">{t('profile.username')}</Label>
                 <Input
                   id="username"
                   value={localUsername}
                   onChange={(e) => setLocalUsername(e.target.value)}
                   placeholder={t('profile.username')}
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <Label htmlFor="avatar">{t('profile.avatar')}</Label>
+                <Label htmlFor="avatar" className="text-sm">{t('profile.avatar')}</Label>
                 <Input
                   id="avatar"
                   value={localAvatarUrl}
                   onChange={(e) => setLocalAvatarUrl(e.target.value)}
                   placeholder={t('profile.avatarUrl')}
+                  className="mt-1"
                 />
               </div>
 
@@ -153,53 +157,60 @@ const Profile = () => {
                 onClick={handleSave} 
                 disabled={isLoading}
                 className="w-full"
+                size="sm"
               >
                 {isLoading ? t('profile.saving') : t('profile.save')}
               </Button>
             </div>
-          </Card>
 
-          {/* Appearance Preferences */}
-          <Card className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings size={20} className="text-primary" />
-              <h2 className="text-lg font-semibold gradient-text">{t('profile.chooseStyle')}</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <ThemeSelector />
+            <Separator className="my-6" />
+
+            {/* Appearance Preferences */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Settings size={18} className="text-primary" />
+                <h2 className="text-base font-semibold gradient-text">{t('profile.chooseStyle')}</h2>
+              </div>
               
-              <div>
-                <h3 className="text-md font-medium mb-3 dark:text-white">{t('profile.wallpaper')}</h3>
-                <BackgroundSelector />
+              <div className="space-y-4">
+                <ThemeSelector />
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2 dark:text-white">{t('profile.wallpaper')}</h3>
+                  <BackgroundSelector />
+                </div>
               </div>
             </div>
-          </Card>
 
-          {/* Actions */}
-          <Card className="p-6">
+            <Separator className="my-6" />
+
+            {/* Actions */}
             <div className="space-y-3">
-              <Button 
-                onClick={handleSignOut}
-                variant="outline" 
-                className="w-full"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                {t('profile.logout')}
-              </Button>
-
               {!showDeleteConfirm ? (
-                <Button 
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive" 
-                  className="w-full"
-                >
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  {t('profile.delete')}
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="outline" 
+                    className="flex-1"
+                    size="sm"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {t('profile.logout')}
+                  </Button>
+
+                  <Button 
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="destructive" 
+                    className="flex-1"
+                    size="sm"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    {t('profile.delete')}
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
                     {t('profile.delete.description')}
                   </p>
                   <div className="flex gap-2">
@@ -207,6 +218,7 @@ const Profile = () => {
                       onClick={() => setShowDeleteConfirm(false)}
                       variant="outline" 
                       className="flex-1"
+                      size="sm"
                     >
                       {t('profile.cancel')}
                     </Button>
@@ -214,6 +226,7 @@ const Profile = () => {
                       onClick={handleDeleteAccount}
                       variant="destructive" 
                       className="flex-1"
+                      size="sm"
                     >
                       {t('profile.delete.confirm')}
                     </Button>
