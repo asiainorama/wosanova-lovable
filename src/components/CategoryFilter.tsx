@@ -106,7 +106,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
       >
         <SelectTrigger className="w-full bg-gray-100 border-none text-gray-500">
           <SelectValue 
-            placeholder="Filtrar por categoría..."
+            placeholder={t('form.filterByCategory')}
           />
         </SelectTrigger>
         <SelectContent className="max-h-80">

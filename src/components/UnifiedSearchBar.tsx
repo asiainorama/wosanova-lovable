@@ -164,7 +164,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
               size="sm"
               onClick={handleClear}
               className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
-              aria-label="Limpiar filtros"
+              aria-label={t('form.clearFilters')}
             >
               <X className="h-3 w-3 text-gray-600 dark:text-gray-300" />
             </Button>
@@ -178,7 +178,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
               "h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
-            aria-label="Mostrar categorías"
+            aria-label={t('form.showCategories')}
           >
             <ChevronDown className="h-3 w-3 text-gray-600 dark:text-gray-300" />
           </Button>

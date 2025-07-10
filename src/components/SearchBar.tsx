@@ -27,7 +27,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => 
         <button
           onClick={() => onSearchChange('')}
           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 p-1"
-          aria-label="Borrar búsqueda"
+          aria-label={t('form.clearSearch')}
         >
           <X className="h-4 w-4" />
         </button>

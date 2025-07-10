@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PaginationIndicatorProps {
   totalPages: number;
@@ -12,6 +13,7 @@ const PaginationIndicator: React.FC<PaginationIndicatorProps> = ({
   currentPage,
   onPageChange
 }) => {
+  const { t } = useLanguage();
   // Mostrar un máximo de 7 indicadores con un ellipsis si hay más
   const getVisibleDots = () => {
     if (totalPages <= 7) {
@@ -68,7 +70,7 @@ const PaginationIndicator: React.FC<PaginationIndicatorProps> = ({
                 ? 'bg-primary scale-125'
                 : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
             }`}
-            aria-label={`Ir a la página ${pageIndex + 1}`}
+            aria-label={t('form.goToPage').replace('{page}', (pageIndex + 1).toString())}
           />
         );
       })}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   Select,
   SelectContent,
@@ -88,6 +89,7 @@ const conversionFactors: Record<string, Record<string, number>> = {
 };
 
 const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
   const [conversionType, setConversionType] = useState<string>(conversionTypes[0].name);
   const [fromUnit, setFromUnit] = useState<string>(conversionTypes[0].units[0].value);
@@ -200,7 +202,7 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
             onValueChange={(value) => setConversionType(value)}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar tipo" />
+              <SelectValue placeholder={t('form.selectType')} />
             </SelectTrigger>
             <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
               {conversionTypes.map((type) => (
@@ -230,7 +232,7 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
             <div className="flex-1">
               <Select value={fromUnit} onValueChange={(value) => setFromUnit(value)}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Unidad" />
+                  <SelectValue placeholder={t('form.unit')} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
                   {activeUnits.map((unit) => (
@@ -273,7 +275,7 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ onClose }) => {
             <div className="flex-1">
               <Select value={toUnit} onValueChange={(value) => setToUnit(value)}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Unidad" />
+                  <SelectValue placeholder={t('form.unit')} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-[20000]">
                   {activeUnits.map((unit) => (

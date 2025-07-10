@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { CloudSun } from 'lucide-react';
 import { safeOpenWindow } from '@/utils/windowUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Widget para mostrar el clima con API real
 const WeatherWidget = () => {
+  const { t, language } = useLanguage();
   const [weather, setWeather] = useState({ temp: null, condition: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,7 +21,7 @@ const WeatherWidget = () => {
           const { latitude, longitude } = position.coords;
           
           // Llamada a la API de OpenWeatherMap
-          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=es&appid=${API_KEY}`);
+          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=${language}&appid=${API_KEY}`);
           
           if (!response.ok) {
             throw new Error('Error al obtener datos del clima');
@@ -34,12 +36,12 @@ const WeatherWidget = () => {
         }, 
         (err) => {
           console.error('Error de geolocalización:', err);
-          setError('No se pudo obtener la ubicación');
+          setError(t('weather.locationError'));
           setLoading(false);
         });
       } catch (err) {
         console.error('Error al obtener el clima:', err);
-        setError('Error al obtener el clima');
+        setError(t('weather.error'));
         setLoading(false);
       }
     };
@@ -54,7 +56,7 @@ const WeatherWidget = () => {
   if (loading) {
     return (
       <div className="p-2 bg-blue-50/30 rounded-lg flex items-center justify-center h-16 dark:bg-gray-800">
-        <span className="text-sm">Cargando clima...</span>
+        <span className="text-sm">{t('weather.loading')}</span>
       </div>
     );
   }
