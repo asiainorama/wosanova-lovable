@@ -3,6 +3,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useCalculator } from './calculator/useCalculator';
 import CalculatorDisplay from './calculator/CalculatorDisplay';
 import CalculatorGrid from './calculator/CalculatorGrid';
@@ -13,6 +14,7 @@ interface CalculatorProps {
 
 const Calculator = ({ onClose }: CalculatorProps) => {
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
   const {
     input,
     prevValue,
@@ -37,7 +39,7 @@ const Calculator = ({ onClose }: CalculatorProps) => {
   return (
     <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800" data-widget-header>
-        <h2 className="text-xl font-bold">Calculadora</h2>
+        <h2 className="text-xl font-bold">{t('calculator.title')}</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />
         </Button>

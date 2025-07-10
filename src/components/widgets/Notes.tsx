@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface NotesProps {
@@ -32,6 +33,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
 
   // Get current user
@@ -177,7 +179,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   const createNewNote = async () => {
     const newNote: NoteItem = {
       id: Date.now().toString(),
-      title: `Nueva nota ${notes.length + 1}`,
+      title: `${t('notes.newNote')} ${notes.length + 1}`,
       content: '',
       updatedAt: new Date().toISOString(),
       user_id: userId || undefined
@@ -305,7 +307,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
   return (
     <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800" data-widget-header>
-        <h2 className="text-xl font-bold">Notas</h2>
+        <h2 className="text-xl font-bold">{t('notes.title')}</h2>
         <Button variant="ghost" size="icon" onClick={handleClose}>
           <X className="h-5 w-5" />
         </Button>
@@ -315,7 +317,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
         {/* Notes list sidebar */}
         <div className={`${isMobile ? (selectedNoteId ? 'hidden' : 'flex-1') : 'w-1/3'} flex flex-col border-r border-gray-200 dark:border-gray-800 overflow-y-auto`}>
           <div className="p-2 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
-            <span className="font-medium">Mis notas</span>
+            <span className="font-medium">{t('notes.title')}</span>
             <Button variant="ghost" size="icon" onClick={createNewNote}>
               <Plus className="h-4 w-4" />
             </Button>
@@ -324,8 +326,8 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
           <div className="overflow-y-auto">
             {notes.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
-                <p>No hay notas</p>
-                <p className="text-sm">Crea una nueva nota con el botón +</p>
+                <p>{t('notes.noNotes')}</p>
+                <p className="text-sm">{t('notes.createFirst')}</p>
               </div>
             ) : (
               notes
@@ -382,7 +384,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                   value={currentNote.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   className="border-none text-lg font-medium focus-visible:ring-0 p-0 h-auto flex-1"
-                  placeholder="Título de la nota"
+                  placeholder={t('notes.untitled')}
                 />
                 <div className="flex items-center gap-1 ml-1">
                   {hasUnsavedChanges && (
@@ -396,13 +398,13 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                     disabled={!hasUnsavedChanges}
                   >
                     <Save className="h-4 w-4" />
-                    <span>Guardar</span>
+                    <span>{t('notes.save')}</span>
                   </Button>
                 </div>
               </div>
               
-              <Textarea 
-                placeholder="Escribe tu nota aquí..."
+                <Textarea 
+                placeholder={t('notes.content')}
                 className="flex-1 resize-none text-base p-3 border-none focus-visible:ring-0"
                 value={currentNote.content}
                 onChange={(e) => handleContentChange(e.target.value)}
@@ -417,7 +419,7 @@ const Notes: React.FC<NotesProps> = ({ onClose }) => {
                 onClick={createNewNote}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nueva Nota
+                {t('notes.newNote')}
               </Button>
             </div>
           )}

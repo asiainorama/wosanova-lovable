@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AlarmProps {
   onClose?: () => void;
@@ -34,6 +35,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   const [isAlarmRinging, setIsAlarmRinging] = useState(false);
   const [currentRingingAlarm, setCurrentRingingAlarm] = useState<AlarmItem | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
   
@@ -78,7 +80,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         // Show toast asking for permission
         setTimeout(() => {
           toast({
-            title: "Permisos de notificación",
+            title: t('alarm.permissions'),
             description: "Permite las notificaciones para recibir alertas de alarma",
             duration: 5000,
           });
@@ -216,8 +218,8 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     // Show browser notification
     if (notificationsPermission === 'granted') {
       try {
-        const notification = new Notification('🔔 ¡Alarma!', {
-          body: `Es hora: ${alarm.time}`,
+        const notification = new Notification(`🔔 ${t('alarm.ringing')}!`, {
+          body: `${t('alarm.time')}: ${alarm.time}`,
           icon: '/icons/icon-192x192.png',
           requireInteraction: true,
           tag: `alarm-${alarm.id}`,
@@ -246,17 +248,17 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
     
     // Show toast notification
     toast({
-      title: "🔔 ¡Alarma!",
-      description: `Es hora: ${alarm.time}`,
+      title: `🔔 ${t('alarm.ringing')}!`,
+      description: `${t('alarm.time')}: ${alarm.time}`,
       duration: 15000,
     });
     
     // Also show a sonner toast for redundancy
-    sonnerToast("🔔 ¡Alarma activada!", {
-      description: `Es hora: ${alarm.time}`,
+    sonnerToast(`🔔 ${t('alarm.ringing')}!`, {
+      description: `${t('alarm.time')}: ${alarm.time}`,
       duration: 20000,
       action: {
-        label: "Detener",
+        label: t('alarm.stop'),
         onClick: stopAlarm
       }
     });
@@ -360,19 +362,19 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
   };
 
   const dayLabels = {
-    mon: 'L',
-    tue: 'M',
-    wed: 'X',
-    thu: 'J',
-    fri: 'V',
-    sat: 'S',
-    sun: 'D'
+    mon: t('alarm.mon'),
+    tue: t('alarm.tue'),
+    wed: t('alarm.wed'),
+    thu: t('alarm.thu'),
+    fri: t('alarm.fri'),
+    sat: t('alarm.sat'),
+    sun: t('alarm.sun')
   };
 
   return (
     <div className={`bg-background flex flex-col rounded-lg ${isMobile ? 'h-screen w-screen' : 'h-full w-full'}`}>
       <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
-        <h2 className="text-xl font-bold">Alarmas</h2>
+        <h2 className="text-xl font-bold">{t('alarm.title')}</h2>
         <div className="flex items-center gap-2">
           {isCheckingAlarms && (
             <Bell className="h-4 w-4 animate-pulse text-green-500" />
@@ -391,7 +393,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
               <Bell className="h-5 w-5 text-red-600 animate-bounce" />
               <div>
                 <p className="font-semibold text-red-800 dark:text-red-200">
-                  ¡Alarma sonando!
+                  {t('alarm.ringing')}!
                 </p>
                 <p className="text-sm text-red-700 dark:text-red-300">
                   {currentRingingAlarm.time}
@@ -404,7 +406,7 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
               size="lg"
             >
               <VolumeX className="h-4 w-4" />
-              Detener Alarma
+              {t('alarm.turnOff')}
             </Button>
           </div>
         </div>
@@ -455,8 +457,8 @@ const Alarm: React.FC<AlarmProps> = ({ onClose }) => {
         {alarms.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground h-full">
             <Bell className="h-10 w-10 mb-2 opacity-50" />
-            <p>No tienes alarmas configuradas</p>
-            <p className="text-sm">Agrega una nueva alarma usando el botón +</p>
+            <p>{t('alarm.noAlarms')}</p>
+            <p className="text-sm">{t('alarm.create')}</p>
           </div>
         ) : (
           alarms.map(alarm => (
