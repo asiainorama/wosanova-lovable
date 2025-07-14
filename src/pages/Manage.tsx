@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { useAppContext } from '@/contexts/AppContext';
 import { Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppAvatarFallback from '@/components/cards/AvatarFallback';
@@ -113,6 +114,7 @@ const AppListItem = ({ app, onRemove }: { app: any, onRemove: () => void }) => {
 const Manage = () => {
   const { favorites, removeFromFavorites } = useAppContext();
   const { t } = useLanguage();
+  const { getBackgroundStyle } = useBackground();
   
   // Use the scroll behavior hook instead of manual effect
   useScrollBehavior();
@@ -143,7 +145,10 @@ const Manage = () => {
   }, [favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={getBackgroundStyle()}
+    >
       <Header title={t('header.manage') || "Gestionar Apps"} />
       
       <main className="container mx-auto px-4 py-6 flex-1 overflow-y-auto">
