@@ -10,7 +10,7 @@ import HomeContent from '@/components/home/HomeContent';
 const Index = () => {
   const { t } = useLanguage();
   const { getBackgroundStyle } = useBackground();
-  const { sortedFavorites, isLoading } = useHomePageLogic();
+  const { sortedFavorites, isLoading, isAuthenticated } = useHomePageLogic();
   useScrollBehavior();
 
   // Listen for custom sidebar open event
@@ -36,7 +36,8 @@ const Index = () => {
       <main className="container mx-auto px-1 py-1 flex-1 flex flex-col">
         <HomeContent 
           sortedFavorites={sortedFavorites} 
-          isLoading={isLoading} 
+          isLoading={isLoading}
+          isAuthenticated={isAuthenticated}
         />
       </main>
     </div>
