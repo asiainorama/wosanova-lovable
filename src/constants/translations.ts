@@ -1,4 +1,3 @@
-
 export const translations = {
   es: {
     // Global
@@ -85,6 +84,9 @@ export const translations = {
     'profile.wallpaper.sky': 'Cielo',
     'profile.wallpaper.mango': 'Mango',
     'profile.wallpaper.cotton': 'Algodón',
+    'profile.managePreferences': 'Gestiona tus preferencias de la aplicación',
+    'profile.lightDarkMode': 'Modo Claro/Oscuro',
+    'profile.deleteAccount': 'Eliminar cuenta',
     
     // Sidebar & Widgets
     'sidebar.calendar': 'Calendario',
@@ -559,6 +561,9 @@ export const translations = {
     'profile.wallpaper.sky': 'Sky',
     'profile.wallpaper.mango': 'Mango',
     'profile.wallpaper.cotton': 'Cotton',
+    'profile.managePreferences': 'Manage your application preferences',
+    'profile.lightDarkMode': 'Light/Dark Mode',
+    'profile.deleteAccount': 'Delete account',
     
     // Sidebar & Widgets
     'sidebar.calendar': 'Calendar',

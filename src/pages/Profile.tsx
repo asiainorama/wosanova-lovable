@@ -9,17 +9,18 @@ import { toast } from 'sonner';
 import Header from '@/components/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useBackground } from '@/contexts/BackgroundContext';
 import { supabase } from '@/integrations/supabase/client';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileForm from '@/components/profile/ProfileForm';
 import AppearanceSettings from '@/components/profile/AppearanceSettings';
 import ProfileActions from '@/components/profile/ProfileActions';
-import SpaceBackground from '@/components/SpaceBackground';
 
 const Profile = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { username, avatarUrl, userId, updateProfile } = useUserProfile();
+  const { getBackgroundStyle } = useBackground();
   const [localUsername, setLocalUsername] = useState(username);
   const [localAvatarUrl, setLocalAvatarUrl] = useState(avatarUrl);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,8 +90,7 @@ const Profile = () => {
 
   if (!userId) {
     return (
-      <div className="min-h-screen flex flex-col relative">
-        <SpaceBackground />
+      <div className="min-h-screen flex flex-col relative" style={getBackgroundStyle()}>
         <Header title={t('profile.title')} />
         <main className="flex-1 flex items-center justify-center relative z-10">
           <Card className="p-6 text-center">
@@ -107,8 +107,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <SpaceBackground />
+    <div className="min-h-screen flex flex-col relative" style={getBackgroundStyle()}>
       <Header title={t('profile.title')} />
       
       <main className="container mx-auto px-4 py-6 flex-1 relative z-10">
