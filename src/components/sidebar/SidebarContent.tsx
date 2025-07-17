@@ -7,7 +7,22 @@ import WidgetIconsRow from './WidgetIconsRow';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const SidebarContent: React.FC = () => {
-  const { t } = useLanguage();
+  let t: (key: string) => string;
+  
+  try {
+    const languageContext = useLanguage();
+    t = languageContext.t;
+  } catch (error) {
+    // Fallback if LanguageProvider is not available
+    console.warn('LanguageProvider not available, using fallback translations');
+    t = (key: string) => {
+      const fallbackTranslations: Record<string, string> = {
+        'sidebar.calendar': 'Calendar',
+        // Add other fallback translations as needed
+      };
+      return fallbackTranslations[key] || key;
+    };
+  }
 
   return (
     <div className="flex flex-col justify-between flex-1 overflow-y-auto overflow-x-hidden">
