@@ -66,7 +66,7 @@ const ProfileActions = ({
         size="sm"
       >
         <AlertTriangle className="h-4 w-4 mr-2" />
-        {t('profile.delete')}
+        Eliminar cuenta
       </Button>
     </div>
   );

@@ -45,13 +45,7 @@ const ProfileForm = ({
 
   // If it's a Google user, don't show the form fields
   if (isGoogleUser) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Tu perfil se sincroniza automáticamente con Google
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -31,7 +31,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ onThemeChange }) =
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">
-          Elige tu estilo
+          Modo Claro/Oscuro
         </span>
         
         <div className="flex items-center space-x-2">

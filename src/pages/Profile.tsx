@@ -14,6 +14,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileForm from '@/components/profile/ProfileForm';
 import AppearanceSettings from '@/components/profile/AppearanceSettings';
 import ProfileActions from '@/components/profile/ProfileActions';
+import SpaceBackground from '@/components/SpaceBackground';
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -88,9 +89,10 @@ const Profile = () => {
 
   if (!userId) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative">
+        <SpaceBackground />
         <Header title={t('profile.title')} />
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center relative z-10">
           <Card className="p-6 text-center">
             <User size={48} className="mx-auto mb-4 text-gray-400" />
             <h2 className="text-xl font-semibold mb-2">{t('auth.login')}</h2>
@@ -105,10 +107,11 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <SpaceBackground />
       <Header title={t('profile.title')} />
       
-      <main className="container mx-auto px-4 py-6 flex-1">
+      <main className="container mx-auto px-4 py-6 flex-1 relative z-10">
         <div className="max-w-2xl mx-auto">
           <Card className="p-6">
             <ProfileHeader username={localUsername} avatarUrl={localAvatarUrl} />

@@ -26,7 +26,7 @@ const ProfileHeader = ({ username, avatarUrl }: ProfileHeaderProps) => {
         </AvatarFallback>
       </Avatar>
       <h1 className="text-xl font-bold gradient-text">{t('profile.title')}</h1>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{t('profile.description')}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">Gestiona tus preferencias de la aplicación</p>
     </div>
   );
 };
