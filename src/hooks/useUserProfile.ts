@@ -1,100 +1,111 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface UserProfile {
-  username?: string;
-  avatar_url?: string;
-  language?: string;
-}
+import { toast } from 'sonner';
 
 export const useUserProfile = () => {
-  const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  
+  const [username, setUsername] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserProfile = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user) {
-          setUserId(session.user.id);
-          
-          // Try to get user profile data
-          try {
-            const { data, error } = await supabase
-              .from('user_profiles')
-              .select('username, avatar_url, language')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (data && !error) {
-              // Type assertion to ensure data is treated as UserProfile
-              const profileData = data as unknown as UserProfile;
-              setUsername(profileData.username || '');
-              setAvatarUrl(profileData.avatar_url || '');
-              
-              // Also update localStorage for immediate use
-              localStorage.setItem('username', profileData.username || '');
-              localStorage.setItem('avatarUrl', profileData.avatar_url || '');
-              
-              // Update language if user has a saved preference
-              if (profileData.language) {
-                localStorage.setItem('language', profileData.language);
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching user profile:', error);
-          }
+        if (!session?.user) {
+          setUserId(null);
+          setUsername('');
+          setAvatarUrl('');
+          return;
         }
+
+        const user = session.user;
+        setUserId(user.id);
+
+        // Try to get profile from database first
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('username, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching profile:', error);
+        }
+
+        // Use Google data if available and no profile exists, or if profile is empty
+        const googleName = user.user_metadata?.full_name || user.user_metadata?.name;
+        const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+
+        const finalUsername = profile?.username || googleName || '';
+        const finalAvatarUrl = profile?.avatar_url || googleAvatar || '';
+
+        setUsername(finalUsername);
+        setAvatarUrl(finalAvatarUrl);
+
+        // If we got Google data and no profile exists, create/update the profile
+        if ((googleName || googleAvatar) && (!profile || !profile.username || !profile.avatar_url)) {
+          await supabase
+            .from('user_profiles')
+            .upsert({
+              id: user.id,
+              username: finalUsername,
+              avatar_url: finalAvatarUrl
+            });
+        }
+
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Error in fetchUserProfile:', error);
       }
     };
-    
-    fetchUserData();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-        fetchUserData();
-      } else {
+
+    fetchUserProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        fetchUserProfile();
+      } else if (event === 'SIGNED_OUT') {
         setUserId(null);
         setUsername('');
         setAvatarUrl('');
-        localStorage.removeItem('username');
-        localStorage.removeItem('avatarUrl');
-        // Don't remove language on logout, keep user preference
       }
     });
-    
-    return () => {
-      subscription.unsubscribe();
-    };
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const updateProfile = async (newUsername: string, newAvatarUrl: string) => {
-    if (!userId) throw new Error('User not authenticated');
+    if (!userId) return;
 
-    const { error } = await supabase
-      .from('user_profiles')
-      .upsert({
-        id: userId,
-        username: newUsername,
-        avatar_url: newAvatarUrl,
-        updated_at: new Date().toISOString()
-      });
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          id: userId,
+          username: newUsername,
+          avatar_url: newAvatarUrl
+        });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    // Update local state and localStorage
-    setUsername(newUsername);
-    setAvatarUrl(newAvatarUrl);
-    localStorage.setItem('username', newUsername);
-    localStorage.setItem('avatarUrl', newAvatarUrl);
+      setUsername(newUsername);
+      setAvatarUrl(newAvatarUrl);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return { username, avatarUrl, userId, updateProfile };
+  return {
+    userId,
+    username,
+    avatarUrl,
+    updateProfile,
+    isLoading
+  };
 };

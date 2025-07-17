@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 interface ProfileFormProps {
   username: string;
@@ -23,6 +25,34 @@ const ProfileForm = ({
   isLoading
 }: ProfileFormProps) => {
   const { t } = useLanguage();
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
+
+  useEffect(() => {
+    const checkIfGoogleUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Check if user has Google metadata
+        const hasGoogleData = session.user.user_metadata?.full_name || 
+                            session.user.user_metadata?.name || 
+                            session.user.user_metadata?.avatar_url || 
+                            session.user.user_metadata?.picture;
+        setIsGoogleUser(!!hasGoogleData);
+      }
+    };
+
+    checkIfGoogleUser();
+  }, []);
+
+  // If it's a Google user, don't show the form fields
+  if (isGoogleUser) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Tu perfil se sincroniza automáticamente con Google
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

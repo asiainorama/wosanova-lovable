@@ -17,11 +17,7 @@ const AppearanceSettings = () => {
       
       <div className="space-y-4">
         <ThemeSelector />
-        
-        <div>
-          <h3 className="text-sm font-medium mb-2 dark:text-white">{t('profile.wallpaper')}</h3>
-          <BackgroundSelector />
-        </div>
+        <BackgroundSelector />
       </div>
     </div>
   );
