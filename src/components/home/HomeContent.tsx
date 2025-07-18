@@ -2,6 +2,7 @@
 import React from 'react';
 import AppGrid from '@/components/AppGrid';
 import AppLogoLoader from '@/components/loading/AppLogoLoader';
+import HomeLoadingAnimation from '@/components/loading/HomeLoadingAnimation';
 import EmptyHomeState from './EmptyHomeState';
 import { AppData } from '@/data/types';
 
@@ -17,8 +18,13 @@ const HomeContent: React.FC<HomeContentProps> = ({ sortedFavorites, isLoading, i
     return <AppLogoLoader />;
   }
 
-  // For unauthenticated users or users with no favorites, show empty state
-  if (!isAuthenticated || sortedFavorites.length === 0) {
+  // Show loading animation while favorites are being loaded for authenticated users
+  if (isAuthenticated && sortedFavorites.length === 0) {
+    return <HomeLoadingAnimation apps={[]} />;
+  }
+
+  // For unauthenticated users with no favorites, show empty state
+  if (!isAuthenticated && sortedFavorites.length === 0) {
     return <EmptyHomeState />;
   }
 
