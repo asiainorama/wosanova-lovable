@@ -350,12 +350,23 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
     console.log(`Fetching Brandfetch icon for ${domain}`);
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    // Get current session token for authenticated access
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'apikey': supabaseKey,
+    };
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    
     const response = await fetch(`${supabaseUrl}/functions/v1/fetch-brandfetch`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseKey,
-      },
+      headers,
       body: JSON.stringify({ domain }),
     });
 
