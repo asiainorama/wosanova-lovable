@@ -1,9 +1,9 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 // Categorías principales que usa el catálogo
@@ -42,41 +42,7 @@ serve(async (req) => {
   }
 
   try {
-    // ===== AUTHENTICATION & AUTHORIZATION =====
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
-    }
-
-    // Verify the user's identity
-    const authClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token)
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      )
-    }
-
-    const userEmail = claimsData.claims.email as string | undefined
-    if (!userEmail || (!userEmail.endsWith('@wosanova.com') && userEmail !== 'asiainorama@gmail.com')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Forbidden: Admin access required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      )
-    }
-
-    // ===== MAIN LOGIC =====
-    // Initialize Supabase client with service role for DB operations
+    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -99,7 +65,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('✅ Groq API key found')
+    console.log('✅ Groq API key found, length:', groqApiKey.length)
 
     // Get existing apps to avoid duplicates
     const { data: existingApps, error: appsError } = await supabase
@@ -182,7 +148,15 @@ serve(async (req) => {
         success: true, 
         processed: products.length,
         saved: suggestions.length,
-        filtered: products.length - suggestions.length
+        filtered: products.length - suggestions.length,
+        debug: {
+          productsUsed: products.length,
+          suggestionsGenerated: suggestions.length,
+          existingAppsCount: existingUrls.size,
+          mainCategories: MAIN_CATEGORIES.length,
+          groqApiKey: groqApiKey ? 'Present' : 'Missing',
+          groqKeyLength: groqApiKey?.length || 0
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -205,8 +179,10 @@ serve(async (req) => {
 })
 
 function getDynamicProducts(): ProductItem[] {
+  // Crear pools de diferentes tipos de productos con más variedad
   const currentTime = Date.now()
   const pools = [
+    // Pool 1: AI y herramientas modernas
     [
       { title: "v0.dev", description: "AI-powered interface design tool by Vercel", websiteUrl: "https://v0.dev" },
       { title: "Cursor", description: "AI-powered code editor", websiteUrl: "https://cursor.sh" },
@@ -215,6 +191,8 @@ function getDynamicProducts(): ProductItem[] {
       { title: "Replit Agent", description: "AI coding assistant for collaborative programming", websiteUrl: "https://replit.com/agent" },
       { title: "Claude Computer Use", description: "AI assistant that can interact with computer interfaces", websiteUrl: "https://claude.ai" },
     ],
+    
+    // Pool 2: Herramientas de desarrollo
     [
       { title: "Vercel", description: "Frontend cloud platform for static sites and serverless functions", websiteUrl: "https://vercel.com" },
       { title: "Netlify", description: "Platform for automating modern web projects", websiteUrl: "https://netlify.com" },
@@ -223,6 +201,8 @@ function getDynamicProducts(): ProductItem[] {
       { title: "Upstash", description: "Serverless data platform", websiteUrl: "https://upstash.com" },
       { title: "Convex", description: "Backend application platform with real-time sync", websiteUrl: "https://convex.dev" },
     ],
+    
+    // Pool 3: Herramientas de diseño
     [
       { title: "Linear", description: "Issue tracking and project management for modern teams", websiteUrl: "https://linear.app" },
       { title: "Notion", description: "All-in-one workspace for notes, tasks, wikis, and databases", websiteUrl: "https://notion.so" },
@@ -231,6 +211,8 @@ function getDynamicProducts(): ProductItem[] {
       { title: "Excalidraw", description: "Virtual collaborative whiteboard for sketching hand-drawn diagrams", websiteUrl: "https://excalidraw.com" },
       { title: "Rive", description: "Real-time interactive design and animation tool", websiteUrl: "https://rive.app" },
     ],
+    
+    // Pool 4: Productividad y comunicación
     [
       { title: "Discord", description: "Voice, video and text communication platform", websiteUrl: "https://discord.com" },
       { title: "Slack", description: "Business communication platform", websiteUrl: "https://slack.com" },
@@ -241,22 +223,26 @@ function getDynamicProducts(): ProductItem[] {
     ]
   ]
 
+  // Seleccionar productos de forma más dinámica basada en el tiempo
   const selectedProducts: ProductItem[] = []
-  const timeBasedSeed = Math.floor(currentTime / (1000 * 60 * 30))
+  const timeBasedSeed = Math.floor(currentTime / (1000 * 60 * 30)) // Cambia cada 30 minutos
   
   pools.forEach((pool, poolIndex) => {
+    // Mezclar cada pool usando el seed temporal
     const shuffled = pool.sort(() => {
       const seed = (timeBasedSeed + poolIndex) % 1000
       return (seed % 2) - 0.5
     })
+    // Tomar 1-2 elementos de cada pool
     const count = 1 + (timeBasedSeed + poolIndex) % 2
     selectedProducts.push(...shuffled.slice(0, count))
   })
 
+  // Mezclar la selección final
   return selectedProducts.sort(() => {
     const seed = timeBasedSeed % 1000
     return (seed % 2) - 0.5
-  }).slice(0, 8)
+  }).slice(0, 8) // Aumentar a 8 productos para más variedad
 }
 
 function extractDomain(url: string): string {
@@ -269,6 +255,8 @@ function extractDomain(url: string): string {
 
 async function processWithGroq(product: ProductItem, apiKey: string, validCategories: string[]): Promise<WebappSuggestion | null> {
   try {
+    console.log(`🤖 Processing with Groq: "${product.title}"`)
+
     const categoriesStr = validCategories.join(', ')
     
     const prompt = `Analiza esta aplicación web y devuelve SOLO un JSON válido con la información solicitada.
@@ -292,10 +280,14 @@ RESPONDE SOLO CON ESTE JSON (sin texto adicional ni explicaciones):
 
 REGLAS IMPORTANTES:
 - El nombre debe ser EXACTAMENTE el nombre comercial de la aplicación tal como aparece en su web
+- Ejemplo correcto: "Figma" NO "Herramienta de diseño colaborativo"
+- Ejemplo correcto: "Notion" NO "App de productividad"
 - La descripción debe explicar qué hace la aplicación de forma clara
 - Solo marca usa_ia como true si la IA es una característica central y prominente
 - Elige la categoría que mejor describa la función principal de la app
 - Máximo 3 etiquetas relevantes y descriptivas`
+
+    console.log('🔑 Making request to Groq API...')
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -318,7 +310,7 @@ REGLAS IMPORTANTES:
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Groq API error:', response.status, errorText)
+      console.error('❌ Groq API error:', response.status, response.statusText, errorText)
       return null
     }
 
@@ -329,6 +321,8 @@ REGLAS IMPORTANTES:
       console.error('❌ No content from Groq API')
       return null
     }
+
+    console.log(`🤖 Groq response: ${content}`)
 
     // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/)
@@ -347,17 +341,21 @@ REGLAS IMPORTANTES:
 
     // Validate category against valid categories
     if (!validCategories.includes(suggestion.categoria)) {
+      console.log(`⚠️ Invalid category "${suggestion.categoria}", using default`)
       suggestion.categoria = validCategories[0] || 'Utilidades'
     }
 
+    // Ensure etiquetas is an array
     if (!Array.isArray(suggestion.etiquetas)) {
       suggestion.etiquetas = []
     }
 
+    // Ensure usa_ia is boolean
     if (typeof suggestion.usa_ia !== 'boolean') {
       suggestion.usa_ia = false
     }
 
+    // Ensure correct URL
     suggestion.url = product.websiteUrl
 
     return suggestion
