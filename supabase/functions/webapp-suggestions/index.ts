@@ -192,11 +192,11 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('💥 Error in webapp-suggestions function:', error)
+    console.error('webapp-suggestions error:', error)
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message,
+        error: 'Internal server error',
         processed: 0,
         saved: 0
       }),
