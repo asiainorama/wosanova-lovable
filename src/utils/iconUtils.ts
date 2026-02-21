@@ -1,7 +1,7 @@
 import { AppData } from '@/data/apps';
 
 const DEFAULT_ICON = "/placeholder.svg";
-const BRANDFETCH_API_KEY = "aJ5lYIRJ+USZ1gYZaEjt9iNosNoWh4XtrLxTR1vsPHc=";
+// Brandfetch API key moved to server-side edge function
 const ICON_CACHE_KEY = "app_icon_cache_v3"; // Updated version for new cache format
 const ICON_CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // Extended to 30 days
 
@@ -337,95 +337,26 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
     if (iconCache[cacheKey]) {
       return iconCache[cacheKey].url;
     }
-    
-    // Avoid making too many requests if we're getting rate limited
-    if (window.localStorage.getItem('brandfetch_rate_limited') === 'true') {
-      const timestamp = Number(window.localStorage.getItem('brandfetch_rate_limit_time') || '0');
-      if (timestamp > Date.now() - 300000) { // 5 minutes
-        return null;
-      } else {
-        window.localStorage.removeItem('brandfetch_rate_limited');
-      }
-    }
 
-    console.log(`Fetching Brandfetch icon for ${domain}`);
-    const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${BRANDFETCH_API_KEY}`,
-      },
+    // Use edge function to fetch icon (API key is server-side)
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase.functions.invoke('fetch-icon', {
+      body: { domain }
     });
 
-    if (response.status === 429) {
-      console.warn(`Brandfetch API rate limited for ${domain}`);
-      window.localStorage.setItem('brandfetch_rate_limited', 'true');
-      window.localStorage.setItem('brandfetch_rate_limit_time', Date.now().toString());
+    if (error || !data?.icon_url) {
       return null;
     }
 
-    if (!response.ok) {
-      console.warn(`Brandfetch API error for ${domain}:`, response.status);
-      return null;
-    }
-
-    const data = await response.json();
-    
-    // Try to find a logo in the response
-    if (data.logos && data.logos.length > 0) {
-      // Look for vector format first (svg)
-      const vectorLogo = data.logos.find((logo: any) => 
-        logo.formats && logo.formats.find((format: any) => format.format === 'svg')
-      );
-      
-      if (vectorLogo && vectorLogo.formats) {
-        const svgFormat = vectorLogo.formats.find((format: any) => format.format === 'svg');
-        if (svgFormat && svgFormat.src) {
-          // Cache the result
-          iconCache[cacheKey] = {
-            url: svgFormat.src,
-            timestamp: Date.now(),
-            source: 'brandfetch-svg',
-            success: true
-          }; 
-          saveIconCache(iconCache);
-          return svgFormat.src;
-        }
-      }
-      
-      // If no vector, take the first logo with any format
-      for (const logo of data.logos) {
-        if (logo.formats && logo.formats.length > 0 && logo.formats[0].src) {
-          // Cache the result
-          iconCache[cacheKey] = {
-            url: logo.formats[0].src,
-            timestamp: Date.now(),
-            source: 'brandfetch-logo',
-            success: true
-          };
-          saveIconCache(iconCache);
-          return logo.formats[0].src;
-        }
-      }
-    }
-    
-    // If no logos, try to find an icon
-    if (data.icons && data.icons.length > 0) {
-      for (const icon of data.icons) {
-        if (icon.formats && icon.formats.length > 0 && icon.formats[0].src) {
-          // Cache the result
-          iconCache[cacheKey] = {
-            url: icon.formats[0].src,
-            timestamp: Date.now(),
-            source: 'brandfetch-icon',
-            success: true
-          };
-          saveIconCache(iconCache);
-          return icon.formats[0].src;
-        }
-      }
-    }
-    
-    return null;
+    // Cache the result
+    iconCache[cacheKey] = {
+      url: data.icon_url,
+      timestamp: Date.now(),
+      source: 'brandfetch-edge',
+      success: true
+    };
+    saveIconCache(iconCache);
+    return data.icon_url;
   } catch (error) {
     console.error(`Error fetching Brandfetch icon for ${domain}:`, error);
     return null;
