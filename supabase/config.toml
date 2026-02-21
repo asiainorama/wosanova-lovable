@@ -1,1 +1,4 @@
 project_id = "cpjnuasoahkwcirpssxt"
+
+[functions.webapp-suggestions]
+verify_jwt = false
