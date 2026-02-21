@@ -2,9 +2,3 @@ project_id = "cpjnuasoahkwcirpssxt"
 
 [functions.webapp-suggestions]
 verify_jwt = false
-
-[functions.get-weather]
-verify_jwt = false
-
-[functions.fetch-icon]
-verify_jwt = false
