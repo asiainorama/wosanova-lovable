@@ -1,7 +1,6 @@
 import { AppData } from '@/data/apps';
 
 const DEFAULT_ICON = "/placeholder.svg";
-const BRANDFETCH_API_KEY = "aJ5lYIRJ+USZ1gYZaEjt9iNosNoWh4XtrLxTR1vsPHc=";
 const ICON_CACHE_KEY = "app_icon_cache_v3"; // Updated version for new cache format
 const ICON_CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // Extended to 30 days
 
@@ -349,11 +348,15 @@ const fetchBrandfetchIcon = async (domain: string): Promise<string | null> => {
     }
 
     console.log(`Fetching Brandfetch icon for ${domain}`);
-    const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
-      method: 'GET',
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const response = await fetch(`${supabaseUrl}/functions/v1/fetch-brandfetch`, {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${BRANDFETCH_API_KEY}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
       },
+      body: JSON.stringify({ domain }),
     });
 
     if (response.status === 429) {
