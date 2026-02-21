@@ -42,7 +42,38 @@ serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client
+    // Verify authentication
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify admin access
+    if (!user.email?.endsWith('@wosanova.com') && user.email !== 'asiainorama@gmail.com') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Forbidden - Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Initialize Supabase client with service role for admin operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -149,13 +180,12 @@ serve(async (req) => {
         processed: products.length,
         saved: suggestions.length,
         filtered: products.length - suggestions.length,
-        debug: {
+      debug: {
           productsUsed: products.length,
           suggestionsGenerated: suggestions.length,
           existingAppsCount: existingUrls.size,
           mainCategories: MAIN_CATEGORIES.length,
-          groqApiKey: groqApiKey ? 'Present' : 'Missing',
-          groqKeyLength: groqApiKey?.length || 0
+          groqApiKey: groqApiKey ? 'Configured' : 'Not configured'
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
