@@ -67,8 +67,20 @@ serve(async (req) => {
       )
     }
 
-    const userEmail = claimsData.claims.email as string | undefined
-    if (!userEmail || (!userEmail.endsWith('@wosanova.com') && userEmail !== 'asiainorama@gmail.com')) {
+    // Check admin role via user_roles table
+    const adminCheck = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+    const userId = claimsData.claims.sub as string
+    const { data: roleData } = await adminCheck
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (!roleData) {
       return new Response(
         JSON.stringify({ success: false, error: 'Forbidden: Admin access required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }

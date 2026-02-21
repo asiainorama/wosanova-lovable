@@ -42,10 +42,9 @@ const AdminDashboard = () => {
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
 
-      if (data.session?.user?.email) {
-        const isAdminUser =
-          data.session.user.email.endsWith("@wosanova.com") ||
-          data.session.user.email === "asiainorama@gmail.com";
+      if (data.session?.user) {
+        const { data: isAdminData, error } = await supabase.rpc('is_admin_user');
+        const isAdminUser = !error && !!isAdminData;
         setIsAdmin(isAdminUser);
 
         if (!isAdminUser) {
