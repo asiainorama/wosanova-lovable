@@ -44,15 +44,16 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get('BRANDFETCH_API_KEY');
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'API key not configured' }), {
-        status: 500,
+    // Validate domain format to prevent SSRF and malformed requests
+    const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!domainRegex.test(domain) || domain.length > 253) {
+      return new Response(JSON.stringify({ error: 'Invalid domain format' }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const response = await fetch(`https://api.brandfetch.io/v2/brands/${domain}`, {
+    const response = await fetch(`https://api.brandfetch.io/v2/brands/${encodeURIComponent(domain)}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${apiKey}` },
     });
@@ -76,7 +77,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('fetch-brandfetch error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
