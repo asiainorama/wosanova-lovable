@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CloudSun } from 'lucide-react';
 import { safeOpenWindow } from '@/utils/windowUtils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Widget para mostrar el clima con API real
 const WeatherWidget = () => {
@@ -10,27 +11,25 @@ const WeatherWidget = () => {
   const [weather, setWeather] = useState({ temp: null, condition: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const API_KEY = 'ce46da3d0d80c45822b28b8f001e838f';
 
   useEffect(() => {
     const getWeather = async () => {
       try {
         setLoading(true);
-        // Obtener la ubicación actual
         navigator.geolocation.getCurrentPosition(async (position) => {
           const { latitude, longitude } = position.coords;
           
-          // Llamada a la API de OpenWeatherMap
-          const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=${language}&appid=${API_KEY}`);
+          const { data, error: fnError } = await supabase.functions.invoke('get-weather', {
+            body: { latitude, longitude, language }
+          });
           
-          if (!response.ok) {
+          if (fnError || !data) {
             throw new Error('Error al obtener datos del clima');
           }
           
-          const data = await response.json();
           setWeather({ 
-            temp: Math.round(data.main.temp), 
-            condition: data.weather[0].description
+            temp: data.temp, 
+            condition: data.condition
           });
           setLoading(false);
         }, 
