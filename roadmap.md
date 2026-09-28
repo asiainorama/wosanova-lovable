@@ -7,7 +7,7 @@
 
 # Catalog refinements
 
-- [ ] Remove counts and unwanted labels; randomize featured apps once per visit.
-- [ ] Center category labels in a single row on large screens.
-- [ ] Match card backgrounds to logos and add featured imagery with legible text.
-- [ ] Verify desktop/mobile layout, repeat visits, and interactions.
+- [x] Remove counts and unwanted labels; randomize featured apps once per visit.
+- [x] Center category labels in a single row on large screens.
+- [x] Match card backgrounds to logos and add featured imagery with legible text.
+- [x] Verify desktop/mobile layout, repeat visits, and interactions.
