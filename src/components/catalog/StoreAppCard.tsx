@@ -1,5 +1,4 @@
 import { ExternalLink, Heart } from 'lucide-react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -50,7 +49,7 @@ export default function StoreAppCard({ app, featured = false, prominent = false 
     }
   };
 
-  const icon = !iconUrl || failedUrl === iconUrl ? (
+  const icon = !hasLogo ? (
     <AppAvatarFallback appName={app.name} className={featured ? 'h-16 w-16 rounded-lg' : 'h-12 w-12 rounded-lg'} />
   ) : (
     <img ref={imageRef} src={iconUrl} alt="" onError={handleImageError} onLoad={handleImageLoad} loading="lazy" className={`${featured ? 'h-16 w-16' : 'h-12 w-12'} rounded-lg object-contain bg-card p-1`} />
