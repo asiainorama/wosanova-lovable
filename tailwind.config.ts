@@ -29,6 +29,11 @@ export default {
 				'feature-amber': 'hsl(var(--feature-amber))',
 				'feature-blue': 'hsl(var(--feature-blue))',
 				'feature-foreground': 'hsl(var(--feature-foreground))',
+				'feature-overlay': 'hsl(var(--feature-overlay))',
+				'logo-rose': 'hsl(var(--logo-rose))',
+				'logo-teal': 'hsl(var(--logo-teal))',
+				'logo-amber': 'hsl(var(--logo-amber))',
+				'logo-blue': 'hsl(var(--logo-blue))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

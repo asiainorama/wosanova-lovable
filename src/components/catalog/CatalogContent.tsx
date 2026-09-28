@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAppContext } from '@/contexts/AppContext';
 import StoreAppCard from './StoreAppCard';
 
 interface CatalogContentProps {
@@ -18,11 +19,27 @@ const byName = (a: AppData, b: AppData) => a.name.localeCompare(b.name);
 
 const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange, onClear }: CatalogContentProps) => {
   const { t } = useLanguage();
+  const { allApps } = useAppContext();
   const [visibleCount, setVisibleCount] = useState(12);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const searching = Boolean(searchTerm.trim());
   const filteredView = searching || selectedCategory !== null;
 
   useEffect(() => setVisibleCount(12), [searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    if (featuredIds.length || !allApps.length) return;
+    const previous = new Set(JSON.parse(sessionStorage.getItem('catalog-last-featured') || '[]') as string[]);
+    const unused = allApps.filter(app => !previous.has(app.id));
+    const pool = unused.length >= Math.min(3, allApps.length) ? [...unused] : [...allApps];
+    for (let i = 0; i < Math.min(3, pool.length); i++) {
+      const chosen = i + Math.floor(Math.random() * (pool.length - i));
+      [pool[i], pool[chosen]] = [pool[chosen], pool[i]];
+    }
+    const nextIds = pool.slice(0, 3).map(app => app.id);
+    sessionStorage.setItem('catalog-last-featured', JSON.stringify(nextIds));
+    setFeaturedIds(nextIds);
+  }, [allApps, featuredIds.length]);
 
   const groups = useMemo(() => {
     const map = new Map<string, AppData[]>();
@@ -30,11 +47,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => ({ category, items: items.sort(byName) }));
   }, [apps]);
 
-  const featured = useMemo(() => [...apps].sort((a, b) => {
-    const aTime = a.created_at ? Date.parse(a.created_at) || 0 : 0;
-    const bTime = b.created_at ? Date.parse(b.created_at) || 0 : 0;
-    return bTime - aTime || byName(a, b);
-  }).slice(0, 3), [apps]);
+  const featured = useMemo(() => featuredIds.map(id => allApps.find(app => app.id === id)).filter((app): app is AppData => Boolean(app)), [allApps, featuredIds]);
 
   const sortedApps = useMemo(() => [...apps].sort(byName), [apps]);
 
@@ -60,9 +73,8 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
   return (
     <div className="space-y-12 pb-16">
       <div className="border-b border-border pb-6 pt-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">WosaNova</p>
-        <h1 className="mt-2 text-3xl font-bold text-foreground sm:text-4xl">{filteredView ? selectedCategory && !searching ? categoryLabel(selectedCategory) : t('catalog.results') : t('catalog.title')}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{filteredView ? `${apps.length} ${t('catalog.applications').toLowerCase()}` : t('catalog.storeSubtitle')}</p>
+        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{filteredView ? selectedCategory && !searching ? categoryLabel(selectedCategory) : t('catalog.results') : t('catalog.title')}</h1>
+        {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
       {filteredView ? (
@@ -75,26 +87,23 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
       ) : (
         <>
           <section aria-labelledby="featured-title">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
-              <span className="hidden text-sm text-muted-foreground sm:block">{t('catalog.featuredSubtitle')}</span>
-            </div>
+            <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} tone={(['rose', 'teal', 'amber'] as const)[index]} /></div>)}
+              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
             </div>
           </section>
 
           <section aria-labelledby="categories-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.explore')}</p><h2 id="categories-title" className="mt-1 text-2xl font-bold">{t('catalog.allCategories')}</h2></div>
-            <div className="flex flex-wrap gap-2">
-              {groups.map(({ category }) => <Button key={category} variant="outline" size="sm" className="rounded-full" onClick={() => onCategoryChange(category)}>{categoryLabel(category)}</Button>)}
+            <div className="flex flex-wrap justify-center gap-2 lg:flex-nowrap lg:gap-1">
+              {groups.map(({ category }) => <Button key={category} variant="outline" size="sm" className="max-w-full rounded-full px-3 text-xs lg:px-2" onClick={() => onCategoryChange(category)}>{categoryLabel(category)}</Button>)}
             </div>
           </section>
 
           {groups.map(({ category, items }) => (
             <section key={category} aria-label={categoryLabel(category)} className="border-t border-border pt-8">
               <div className="mb-5 flex items-center justify-between gap-4">
-                <div><h2 className="text-xl font-bold sm:text-2xl">{categoryLabel(category)}</h2><p className="mt-1 text-sm text-muted-foreground">{items.length} {t('catalog.applications').toLowerCase()}</p></div>
+                <h2 className="text-xl font-bold sm:text-2xl">{categoryLabel(category)}</h2>
                 <Button variant="ghost" className="shrink-0 gap-1 text-primary" onClick={() => onCategoryChange(category)}>{t('catalog.viewAll')}<ArrowRight className="h-4 w-4" /></Button>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -104,7 +113,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           ))}
 
           <section aria-labelledby="all-apps-title" className="border-t border-border pt-8">
-            <div className="mb-5 flex items-center justify-between"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2><span className="text-sm text-muted-foreground">{apps.length}</span></div>
+            <div className="mb-5"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2></div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sortedApps.slice(0, visibleCount).map(app => <StoreAppCard key={app.id} app={app} />)}
             </div>
