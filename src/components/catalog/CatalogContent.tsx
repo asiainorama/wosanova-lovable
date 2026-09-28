@@ -80,7 +80,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
               <span className="hidden text-sm text-muted-foreground sm:block">{t('catalog.featuredSubtitle')}</span>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured tone={(['rose', 'teal', 'amber'] as const)[index]} /></div>)}
+              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} tone={(['rose', 'teal', 'amber'] as const)[index]} /></div>)}
             </div>
           </section>
 

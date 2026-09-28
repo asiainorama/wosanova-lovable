@@ -1,4 +1,5 @@
 import { ExternalLink, Heart } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import AppAvatarFallback from '@/components/cards/AvatarFallback';
 interface StoreAppCardProps {
   app: AppData;
   featured?: boolean;
+  prominent?: boolean;
   tone?: 'rose' | 'teal' | 'amber' | 'blue';
 }
 
@@ -22,8 +24,9 @@ const tones = {
   blue: 'bg-feature-blue',
 };
 
-export default function StoreAppCard({ app, featured = false, tone = 'rose' }: StoreAppCardProps) {
-  const { iconUrl, imageError, handleImageError } = useAppLogo(app);
+export default function StoreAppCard({ app, featured = false, prominent = false, tone = 'rose' }: StoreAppCardProps) {
+  const { iconUrl } = useAppLogo(app);
+  const [failedUrl, setFailedUrl] = useState('');
   const { addToFavorites, removeFromFavorites, isFavorite } = useAppContext();
   const userId = useAuthenticatedUser();
   const navigate = useNavigate();
@@ -45,10 +48,10 @@ export default function StoreAppCard({ app, featured = false, tone = 'rose' }: S
     }
   };
 
-  const icon = imageError || !iconUrl ? (
+  const icon = !iconUrl || failedUrl === iconUrl ? (
     <AppAvatarFallback appName={app.name} className={featured ? 'h-16 w-16 rounded-lg' : 'h-12 w-12 rounded-lg'} />
   ) : (
-    <img src={iconUrl} alt="" onError={handleImageError} loading="lazy" className={`${featured ? 'h-16 w-16' : 'h-12 w-12'} rounded-lg object-contain bg-card p-1`} />
+    <img src={iconUrl} alt="" onError={() => setFailedUrl(iconUrl)} loading="lazy" className={`${featured ? 'h-16 w-16' : 'h-12 w-12'} rounded-lg object-contain bg-card p-1`} />
   );
 
   if (featured) {
@@ -69,8 +72,8 @@ export default function StoreAppCard({ app, featured = false, tone = 'rose' }: S
               <a href={app.url} target="_blank" rel="noopener noreferrer" aria-label={`${t('catalog.visit')} ${app.name}`}><ExternalLink className="h-4 w-4" />{t('catalog.visit')}</a>
             </Button>
           </div>
-          <div className="hidden shrink-0 sm:flex h-28 w-28 items-center justify-center rounded-lg border border-feature-foreground/10 bg-background/10 lg:h-36 lg:w-36">
-            {imageError || !iconUrl ? <AppAvatarFallback appName={app.name} className="h-20 w-20 rounded-lg" /> : <img src={iconUrl} alt="" onError={handleImageError} className="h-20 w-20 object-contain lg:h-24 lg:w-24" />}
+          <div className={`${prominent ? 'hidden shrink-0 sm:flex' : 'hidden'} h-28 w-28 items-center justify-center rounded-lg border border-feature-foreground/10 bg-background/10 lg:h-36 lg:w-36`}>
+            {icon}
           </div>
         </div>
       </article>
