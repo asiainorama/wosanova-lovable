@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -73,6 +73,11 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
   return (
     <div className="space-y-12 pb-16">
       <div className="border-b border-border pb-6 pt-3">
+        {filteredView && (
+          <Button variant="ghost" size="sm" className="-ml-2 mb-2" onClick={() => { onClear(); onCategoryChange(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <ArrowLeft className="h-4 w-4" /> {t('catalog.back')}
+          </Button>
+        )}
         <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{filteredView ? selectedCategory && !searching ? categoryLabel(selectedCategory) : t('catalog.results') : t('catalog.title')}</h1>
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
