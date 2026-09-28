@@ -75,6 +75,11 @@
     --feature-amber: 38 90% 88%;
     --feature-blue: 207 75% 89%;
     --feature-foreground: 223 35% 15%;
+    --logo-rose: 344 71% 95%;
+    --logo-teal: 169 50% 94%;
+    --logo-amber: 38 75% 94%;
+    --logo-blue: 207 65% 95%;
+    --feature-overlay: 0 0% 100% / 0.08;
   }
 
   .dark {
@@ -147,6 +152,11 @@
     --feature-amber: 36 39% 28%;
     --feature-blue: 208 40% 29%;
     --feature-foreground: 0 0% 98%;
+    --logo-rose: 343 29% 24%;
+    --logo-teal: 173 29% 22%;
+    --logo-amber: 36 31% 23%;
+    --logo-blue: 208 31% 24%;
+    --feature-overlay: 0 0% 0% / 0.12;
   }
 }
 
