@@ -20,6 +20,9 @@ export type Database = {
           created_at: string | null
           icon_url: string
           id: string
+          last_checked_at: string | null
+          source: string | null
+          status: string | null
           storage_path: string
           updated_at: string | null
         }
@@ -28,6 +31,9 @@ export type Database = {
           created_at?: string | null
           icon_url: string
           id?: string
+          last_checked_at?: string | null
+          source?: string | null
+          status?: string | null
           storage_path: string
           updated_at?: string | null
         }
@@ -36,6 +42,9 @@ export type Database = {
           created_at?: string | null
           icon_url?: string
           id?: string
+          last_checked_at?: string | null
+          source?: string | null
+          status?: string | null
           storage_path?: string
           updated_at?: string | null
         }
