@@ -24,6 +24,11 @@ export default {
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
+				'feature-rose': 'hsl(var(--feature-rose))',
+				'feature-teal': 'hsl(var(--feature-teal))',
+				'feature-amber': 'hsl(var(--feature-amber))',
+				'feature-blue': 'hsl(var(--feature-blue))',
+				'feature-foreground': 'hsl(var(--feature-foreground))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

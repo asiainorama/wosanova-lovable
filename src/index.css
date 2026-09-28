@@ -70,6 +70,11 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     
     --theme-color: var(--primary);
+    --feature-rose: 344 84% 91%;
+    --feature-teal: 169 56% 85%;
+    --feature-amber: 38 90% 88%;
+    --feature-blue: 207 75% 89%;
+    --feature-foreground: 223 35% 15%;
   }
 
   .dark {
@@ -137,6 +142,11 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     
     --theme-color: var(--primary);
+    --feature-rose: 343 35% 31%;
+    --feature-teal: 173 37% 25%;
+    --feature-amber: 36 39% 28%;
+    --feature-blue: 208 40% 29%;
+    --feature-foreground: 0 0% 98%;
   }
 }
 
