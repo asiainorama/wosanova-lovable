@@ -2,3 +2,5 @@ project_id = "cpjnuasoahkwcirpssxt"
 
 [functions.fetch-brandfetch]
 verify_jwt = false
+[functions.refresh-app-icons]
+verify_jwt = false
