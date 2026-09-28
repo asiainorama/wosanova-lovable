@@ -3,6 +3,15 @@
 @tailwind components;
 @tailwind utilities;
 
+.catalog-feature-art {
+  mask-image: radial-gradient(ellipse at 65% 55%, black 5%, transparent 75%);
+}
+
+.catalog-card-wash {
+  filter: blur(22px) saturate(1.5);
+  mask-image: radial-gradient(ellipse at center, black 8%, transparent 76%);
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%; /* Cambiado a blanco grisáceo */

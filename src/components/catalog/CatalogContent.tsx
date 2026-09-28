@@ -92,7 +92,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           <section aria-labelledby="categories-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.explore')}</p><h2 id="categories-title" className="mt-1 text-2xl font-bold">{t('catalog.allCategories')}</h2></div>
             <div className="flex flex-wrap justify-center gap-2 lg:flex-nowrap lg:gap-1">
-              {groups.map(({ category }) => <Button key={category} variant="outline" size="sm" className="max-w-full rounded-full px-3 text-xs lg:px-2 lg:text-[11px]" onClick={() => onCategoryChange(category)}>{categoryLabel(category)}</Button>)}
+              {groups.map(({ category }) => <Button key={category} variant="outline" size="sm" className="max-w-full rounded-full px-3 text-xs lg:px-2" onClick={() => onCategoryChange(category)}>{categoryLabel(category)}</Button>)}
             </div>
           </section>
 

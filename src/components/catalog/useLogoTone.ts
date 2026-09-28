@@ -46,11 +46,11 @@ function classifyLogo(image: HTMLImageElement): LogoTone | null {
   return 'blue';
 }
 
-export function useLogoTone(url: string, key: string): LogoTone {
-  const [tone, setTone] = useState<LogoTone>(() => fallbackTone(key));
+export function useLogoTone(url: string, key: string): { tone: LogoTone; detected: boolean } {
+  const [result, setResult] = useState<{ tone: LogoTone; detected: boolean }>(() => ({ tone: fallbackTone(key), detected: false }));
 
   useEffect(() => {
-    setTone(fallbackTone(key));
+    setResult({ tone: fallbackTone(key), detected: false });
     if (!url) return;
     const image = new Image();
     image.crossOrigin = 'anonymous';
@@ -58,7 +58,7 @@ export function useLogoTone(url: string, key: string): LogoTone {
     image.onload = () => {
       try {
         const result = classifyLogo(image);
-        if (active && result) setTone(result);
+        if (active && result) setResult({ tone: result, detected: true });
       } catch {
         // Remote logos without CORS permission still receive a stable themed fallback.
       }
@@ -67,5 +67,5 @@ export function useLogoTone(url: string, key: string): LogoTone {
     return () => { active = false; };
   }, [url, key]);
 
-  return tone;
+  return result;
 }
