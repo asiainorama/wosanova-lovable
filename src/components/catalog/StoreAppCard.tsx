@@ -61,6 +61,7 @@ export default function StoreAppCard({ app, featured = false, prominent = false 
     return (
       <article className={`relative flex min-h-[240px] flex-col justify-between overflow-hidden rounded-lg border border-border p-5 sm:p-6 ${cardBackground} ${detected || !hasLogo ? 'text-feature-foreground' : 'text-card-foreground'}`}>
         {hasLogo && <img src={iconUrl} alt="" aria-hidden="true" onError={() => setFailedUrl(iconUrl)} className="catalog-feature-art pointer-events-none absolute -right-8 bottom-0 h-48 w-48 object-cover opacity-25 sm:h-56 sm:w-56" />}
+        {!hasLogo && <span aria-hidden="true" className="catalog-feature-art pointer-events-none absolute -right-6 bottom-0 text-[180px] font-black leading-none opacity-10">{app.name.charAt(0)}</span>}
         <div className="pointer-events-none absolute inset-0 bg-feature-overlay" aria-hidden="true" />
         <div className="relative flex items-start justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-widest opacity-70">{categoryLabel}</span>

@@ -29,12 +29,16 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
   useEffect(() => {
     if (featuredIds.length || !allApps.length) return;
-    const pool = [...allApps];
+    const previous = new Set(JSON.parse(sessionStorage.getItem('catalog-last-featured') || '[]') as string[]);
+    const unused = allApps.filter(app => !previous.has(app.id));
+    const pool = unused.length >= Math.min(3, allApps.length) ? [...unused] : [...allApps];
     for (let i = 0; i < Math.min(3, pool.length); i++) {
       const chosen = i + Math.floor(Math.random() * (pool.length - i));
       [pool[i], pool[chosen]] = [pool[chosen], pool[i]];
     }
-    setFeaturedIds(pool.slice(0, 3).map(app => app.id));
+    const nextIds = pool.slice(0, 3).map(app => app.id);
+    sessionStorage.setItem('catalog-last-featured', JSON.stringify(nextIds));
+    setFeaturedIds(nextIds);
   }, [allApps, featuredIds.length]);
 
   const groups = useMemo(() => {

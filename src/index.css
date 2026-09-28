@@ -8,7 +8,7 @@
 }
 
 .catalog-card-wash {
-  filter: blur(22px) saturate(1.5);
+  filter: blur(18px) saturate(1.6);
   mask-image: radial-gradient(ellipse at center, black 8%, transparent 76%);
 }
 
