@@ -17,6 +17,12 @@ const Catalog = () => {
   
   useScrollBehavior();
 
+  const selectCategory = (category: string | null) => {
+    setSearchTerm('');
+    setSelectedCategory(category);
+    document.getElementById('catalog-container')?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div id="catalog-container" className="min-h-screen bg-background text-foreground overflow-y-auto flex flex-col">
       <CatalogHeader 
@@ -32,7 +38,8 @@ const Catalog = () => {
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
           apps={filteredApps}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={selectCategory}
+          onClear={() => selectCategory(null)}
         />
       </div>
     </div>

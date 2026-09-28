@@ -11,11 +11,12 @@ interface CatalogContentProps {
   searchTerm: string;
   apps: AppData[];
   onCategoryChange: (category: string | null) => void;
+  onClear: () => void;
 }
 
 const byName = (a: AppData, b: AppData) => a.name.localeCompare(b.name);
 
-const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange }: CatalogContentProps) => {
+const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange, onClear }: CatalogContentProps) => {
   const { t } = useLanguage();
   const [visibleCount, setVisibleCount] = useState(12);
   const searching = Boolean(searchTerm.trim());
@@ -51,7 +52,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
       <div className="py-20 text-center">
         <h1 className="text-2xl font-bold">{t('catalog.noResults')}</h1>
         <p className="mt-2 text-muted-foreground">{t('catalog.tryAnother')}</p>
-        {filteredView && <Button variant="outline" className="mt-6" onClick={() => { onCategoryChange(null); window.dispatchEvent(new CustomEvent('catalogClearSearch')); }}>{t('catalog.allApps')}</Button>}
+        {filteredView && <Button variant="outline" className="mt-6" onClick={onClear}>{t('catalog.allApps')}</Button>}
       </div>
     );
   }
@@ -78,8 +79,8 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
               <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
               <span className="hidden text-sm text-muted-foreground sm:block">{t('catalog.featuredSubtitle')}</span>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {featured.map((app, index) => <StoreAppCard key={app.id} app={app} featured tone={(['rose', 'teal', 'amber'] as const)[index]} />)}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured tone={(['rose', 'teal', 'amber'] as const)[index]} /></div>)}
             </div>
           </section>
 
