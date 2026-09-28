@@ -12,13 +12,13 @@ const Catalog = () => {
     selectedCategory,
     setSelectedCategory,
     loading,
-    processedApps
+    filteredApps
   } = useCatalogLogic();
   
   useScrollBehavior();
 
   return (
-    <div id="catalog-container" className="min-h-screen bg-gray-100 dark:bg-gray-950 overflow-y-auto flex flex-col">
+    <div id="catalog-container" className="min-h-screen bg-background text-foreground overflow-y-auto flex flex-col">
       <CatalogHeader 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -26,12 +26,13 @@ const Catalog = () => {
         onCategoryChange={setSelectedCategory}
       />
 
-      <div className="flex-1 container max-w-7xl mx-auto px-4 py-6">
+      <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <CatalogContent 
           loading={loading}
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
-          processedApps={processedApps}
+          apps={filteredApps}
+          onCategoryChange={setSelectedCategory}
         />
       </div>
     </div>
