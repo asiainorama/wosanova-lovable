@@ -9,8 +9,11 @@ export const useSwipeGestures = (
     let startX = 0;
     let startY = 0;
     let startTime = 0;
+    let singleTouch = false;
 
     const handleTouchStart = (e: TouchEvent) => {
+      singleTouch = e.touches.length === 1;
+      if (!singleTouch) return;
       const touch = e.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
@@ -18,6 +21,8 @@ export const useSwipeGestures = (
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (!singleTouch || e.changedTouches.length !== 1) return;
+      singleTouch = false;
       const touch = e.changedTouches[0];
       const endX = touch.clientX;
       const endY = touch.clientY;
@@ -33,7 +38,7 @@ export const useSwipeGestures = (
       if (!isValidSwipe) return;
 
       // Right swipe from left edge to open sidebar
-      if (startX <= 100 && deltaX > 0) {
+      if (!isSidebarOpen && startX <= 24 && deltaX > 0) {
         setIsSidebarOpen(true);
       }
       
