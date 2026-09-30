@@ -9,11 +9,13 @@ import StoreAppCard from './StoreAppCard';
 import AppIconTile from './AppIconTile';
 import AppDetailDialog from './AppDetailDialog';
 import { getCategoryIcon } from './categoryIcons';
+import UnifiedSearchBar from '@/components/UnifiedSearchBar';
 
 interface CatalogContentProps {
   loading: boolean;
   selectedCategory: string | null;
   searchTerm: string;
+  onSearchChange: (term: string) => void;
   apps: AppData[];
   onCategoryChange: (category: string | null) => void;
   onClear: () => void;
@@ -21,7 +23,7 @@ interface CatalogContentProps {
 
 const byName = (a: AppData, b: AppData) => a.name.localeCompare(b.name);
 
-const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange, onClear }: CatalogContentProps) => {
+const CatalogContent = ({ loading, selectedCategory, searchTerm, onSearchChange, apps, onCategoryChange, onClear }: CatalogContentProps) => {
   const { t } = useLanguage();
   const { allApps } = useAppContext();
   const [visibleCount, setVisibleCount] = useState(30);
@@ -65,16 +67,6 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
     return <div className="flex min-h-[50vh] items-center justify-center" role="status" aria-label={t('catalog.loading')}><div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>;
   }
 
-  if (!apps.length) {
-    return (
-      <div className="py-20 text-center">
-        <h1 className="text-2xl font-bold">{t('catalog.noResults')}</h1>
-        <p className="mt-2 text-muted-foreground">{t('catalog.tryAnother')}</p>
-        {filteredView && <Button variant="outline" className="mt-6" onClick={onClear}>{t('catalog.allApps')}</Button>}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-12 pb-16">
       <div className="border-b border-border pb-6 pt-3">
@@ -110,7 +102,17 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
-      {filteredView ? (
+      {filteredView ? <div className="relative z-20 max-w-2xl">
+        <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={[...new Set(allApps.map(app => app.category))].sort()} />
+      </div> : null}
+
+      {!apps.length ? (
+        <div className="py-12 text-center">
+          <h2 className="text-2xl font-bold">{t('catalog.noResults')}</h2>
+          <p className="mt-2 text-muted-foreground">{t('catalog.tryAnother')}</p>
+          <Button variant="outline" className="mt-6" onClick={onClear}>{t('catalog.allApps')}</Button>
+        </div>
+      ) : filteredView ? (
         <section aria-label={t('catalog.results')}>
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
             {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
@@ -125,6 +127,10 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
               {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'min-w-0 md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
             </div>
           </section>
+
+          <div className="relative z-20 max-w-2xl">
+            <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={[...new Set(allApps.map(app => app.category))].sort()} />
+          </div>
 
           <section aria-labelledby="categories-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.explore')}</p><h2 id="categories-title" className="mt-1 text-2xl font-bold">{t('catalog.allCategories')}</h2></div>

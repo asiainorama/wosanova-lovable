@@ -25,7 +25,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Función para traducir categorías
   const translateCategory = (category: string) => {
@@ -44,10 +44,8 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -95,7 +93,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   }, [isOpen, hoveredIndex, categoryOptions, onCategoryChange]);
 
   const handleInputClick = () => {
-    setIsOpen(true);
+    setIsOpen(open => !open);
     setHoveredIndex(-1);
   };
 
@@ -138,7 +136,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   const hasActiveFilter = searchTerm.trim() || selectedCategory;
 
   return (
-    <div className="relative w-full">
+    <div ref={searchRef} className="relative w-full">
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
         <Input
@@ -179,6 +177,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
               isOpen && "rotate-180"
             )}
             aria-label={t('form.showCategories')}
+            aria-expanded={isOpen}
           >
             <ChevronDown className="h-3 w-3 text-gray-600 dark:text-gray-300" />
           </Button>
@@ -188,7 +187,6 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
       {/* Dropdown de categorías */}
       {isOpen && (
         <div
-          ref={dropdownRef}
           className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
         >
           <div className="p-1">

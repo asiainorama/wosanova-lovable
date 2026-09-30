@@ -4,35 +4,21 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAppContext } from '@/contexts/AppContext';
-import UnifiedSearchBar from '@/components/UnifiedSearchBar';
 
 interface HeaderProps {
   title: string;
   onSidebarOpen?: () => void;
-  searchTerm?: string;
-  onSearchChange?: (term: string) => void;
-  selectedCategory?: string | null;
-  onCategoryChange?: (category: string | null) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   title, 
-  onSidebarOpen,
-  searchTerm = '',
-  onSearchChange,
-  selectedCategory = null,
-  onCategoryChange
+  onSidebarOpen
 }) => {
   const { t } = useLanguage();
-  const { allApps } = useAppContext();
   const location = useLocation();
 
-  // Determine if we're on catalog page to show search
   const isCatalogPage = location.pathname === '/catalog';
-
-  // Get unique categories from all apps
-  const categories = [...new Set(allApps.map(app => app.category))].sort();
+  const isHomePage = location.pathname === '/';
 
   // Get sidebar open function from parent or create a default one
   const handleSidebarOpen = () => {
@@ -56,20 +42,13 @@ const Header: React.FC<HeaderProps> = ({
             <Button variant="ghost" size="icon" className="text-foreground" onClick={handleSidebarOpen} aria-label={t('header.menu')} title={t('header.menu')}>
               <Menu className="h-5 w-5" />
             </Button>
-            <Button asChild variant="ghost" size="icon" className="absolute left-1/2 -translate-x-1/2 text-foreground" aria-label={t('header.home')}>
-              <Link to="/" aria-label={t('header.home')} title={t('header.home')}><Home className="h-5 w-5" /></Link>
+            <Button asChild variant="ghost" size="icon" className={`absolute left-1/2 -translate-x-1/2 ${isHomePage ? 'text-[hsl(var(--blue-500))]' : 'text-foreground'}`}>
+              <Link to="/" aria-label={t('header.home')} aria-current={isHomePage ? 'page' : undefined} title={t('header.home')}><Home className="h-5 w-5" /></Link>
             </Button>
-            {!isCatalogPage && (
-              <Button asChild variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('header.catalog')}>
-                <Link to="/catalog" aria-label={t('header.catalog')} title={t('header.catalog')}><Search className="h-5 w-5" /></Link>
-              </Button>
-            )}
+            <Button asChild variant="ghost" size="icon" className={isCatalogPage ? 'text-[hsl(var(--blue-500))]' : 'text-foreground'}>
+              <Link to="/catalog" aria-label={t('header.catalog')} aria-current={isCatalogPage ? 'page' : undefined} title={t('header.catalog')}><Search className="h-5 w-5" /></Link>
+            </Button>
           </div>
-          {isCatalogPage && onSearchChange && onCategoryChange && (
-            <div className="mt-2">
-              <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={categories} />
-            </div>
-          )}
         </div>
       </div>
     </header>
