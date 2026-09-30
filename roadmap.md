@@ -31,4 +31,4 @@
 - [x] Show Installed apps only on the main catalog and add Back to home there.
 - [x] Place the menu first and Home at the center of the header.
 - [x] Open the sidebar by swiping from the first 24px of the left edge only.
-- [ ] Verify catalog navigation and mobile edge swipe.
+- [x] Verify catalog navigation and mobile edge swipe.
