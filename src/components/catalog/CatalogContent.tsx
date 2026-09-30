@@ -5,6 +5,9 @@ import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppContext } from '@/contexts/AppContext';
 import StoreAppCard from './StoreAppCard';
+import AppIconTile from './AppIconTile';
+import AppDetailDialog from './AppDetailDialog';
+import { getCategoryIcon } from './categoryIcons';
 
 interface CatalogContentProps {
   loading: boolean;
@@ -22,6 +25,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
   const { allApps } = useAppContext();
   const [visibleCount, setVisibleCount] = useState(12);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const searching = Boolean(searchTerm.trim());
   const filteredView = searching || selectedCategory !== null;
 
