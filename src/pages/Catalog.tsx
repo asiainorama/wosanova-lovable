@@ -25,18 +25,14 @@ const Catalog = () => {
 
   return (
     <div id="catalog-container" className="catalog-background min-h-screen text-foreground overflow-y-auto flex flex-col">
-      <CatalogHeader 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-      />
+      <CatalogHeader />
 
       <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <CatalogContent 
           loading={loading}
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
           apps={filteredApps}
           onCategoryChange={selectCategory}
           onClear={() => selectCategory(null)}

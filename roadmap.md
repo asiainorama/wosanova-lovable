@@ -32,3 +32,10 @@
 - [x] Place the menu first and Home at the center of the header.
 - [x] Open the sidebar by swiping from the first 24px of the left edge only.
 - [x] Verify catalog navigation and mobile edge swipe.
+
+# Catalog search and header consistency
+
+- [x] Match neutral header icon colors and highlight the current Home or Catalog icon in blue.
+- [x] Move catalog search beneath featured apps, retaining it in filtered and empty views.
+- [x] Make the category dropdown close on repeated click and outside click.
+- [x] Verify header and search interactions on desktop and mobile.
