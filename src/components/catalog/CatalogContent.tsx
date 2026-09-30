@@ -102,9 +102,18 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, onSearchChange,
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
-      {filteredView ? <div className="relative z-20 max-w-2xl">
+      {!filteredView && apps.length > 0 && (
+        <section aria-labelledby="featured-title">
+          <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'min-w-0 md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
+          </div>
+        </section>
+      )}
+
+      <div className="relative z-20 max-w-2xl">
         <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={[...new Set(allApps.map(app => app.category))].sort()} />
-      </div> : null}
+      </div>
 
       {!apps.length ? (
         <div className="py-12 text-center">
@@ -121,17 +130,6 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, onSearchChange,
         </section>
       ) : (
         <>
-          <section aria-labelledby="featured-title">
-            <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'min-w-0 md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
-            </div>
-          </section>
-
-          <div className="relative z-20 max-w-2xl">
-            <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={[...new Set(allApps.map(app => app.category))].sort()} />
-          </div>
-
           <section aria-labelledby="categories-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.explore')}</p><h2 id="categories-title" className="mt-1 text-2xl font-bold">{t('catalog.allCategories')}</h2></div>
             <div className="flex flex-wrap justify-center gap-2 lg:flex-nowrap lg:gap-1">
