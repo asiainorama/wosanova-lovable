@@ -89,6 +89,10 @@
     --logo-amber: 38 75% 94%;
     --logo-blue: 207 65% 95%;
     --feature-overlay: 0 0% 100% / 0.08;
+    --install: 217 91% 45%;
+    --install-foreground: 0 0% 100%;
+    --install-soft: 217 60% 94%;
+    --install-soft-foreground: 217 75% 28%;
   }
 
   .dark {

@@ -34,6 +34,12 @@ export default {
 				'logo-teal': 'hsl(var(--logo-teal))',
 				'logo-amber': 'hsl(var(--logo-amber))',
 				'logo-blue': 'hsl(var(--logo-blue))',
+				install: {
+					DEFAULT: 'hsl(var(--install))',
+					foreground: 'hsl(var(--install-foreground))',
+					soft: 'hsl(var(--install-soft))',
+					'soft-foreground': 'hsl(var(--install-soft-foreground))'
+				},
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

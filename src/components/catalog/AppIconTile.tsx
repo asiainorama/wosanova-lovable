@@ -28,9 +28,7 @@ export default function AppIconTile({ app, onSelect }: AppIconTileProps) {
       onClick={() => onSelect(app)}
       className="group flex w-full flex-col items-center gap-2 rounded-lg p-2 text-center transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span
-        className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-border ${surface} transition-transform group-hover:scale-105`}
-      >
+      <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl transition-transform group-hover:scale-105">
         {hasLogo ? (
           <img
             ref={imageRef}
@@ -39,10 +37,10 @@ export default function AppIconTile({ app, onSelect }: AppIconTileProps) {
             onError={handleImageError}
             onLoad={handleImageLoad}
             loading="lazy"
-            className="h-12 w-12 rounded-lg bg-card object-contain p-1"
+            className={`h-16 w-16 rounded-2xl object-contain ${surface}`}
           />
         ) : (
-          <AppAvatarFallback appName={app.name} className="h-12 w-12 rounded-lg" />
+          <AppAvatarFallback appName={app.name} className="h-16 w-16 rounded-2xl" />
         )}
       </span>
       <span className="line-clamp-2 w-full text-xs font-medium leading-tight text-foreground">{app.name}</span>
