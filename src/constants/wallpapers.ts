@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import liquidGlass from '@/assets/wallpapers/liquid-glass.jpg';
 import obsidian from '@/assets/wallpapers/obsidian.jpg';
 import cosmos from '@/assets/wallpapers/cosmos.jpg';
@@ -13,7 +14,7 @@ export type BackgroundType =
   | 'gradient-orange'
   | 'gradient-pink';
 
-const base: React.CSSProperties = {
+const base: CSSProperties = {
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -45,8 +46,8 @@ export const lightBackgrounds: BackgroundType[] = [
   'gradient-pink',
 ];
 
-export const backgroundStyles: Record<BackgroundType, React.CSSProperties> =
+export const backgroundStyles: Record<BackgroundType, CSSProperties> =
   (Object.keys(wallpaperImages) as BackgroundType[]).reduce((acc, key) => {
     acc[key] = { ...base, backgroundImage: `url(${wallpaperImages[key]})` };
     return acc;
-  }, {} as Record<BackgroundType, React.CSSProperties>);
+  }, {} as Record<BackgroundType, CSSProperties>);
