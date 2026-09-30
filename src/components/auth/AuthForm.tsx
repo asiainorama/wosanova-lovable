@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { BackgroundType } from '@/contexts/BackgroundContext';
+import { lightBackgrounds } from '@/constants/wallpapers';
 
 interface AuthFormProps {
   background: BackgroundType;
@@ -21,14 +22,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   onGoogleSignIn,
   onDevModeEnter
 }) => {
-  // Check if background is light
-  const isLightBackground = (): boolean => {
-    const lightBackgrounds: BackgroundType[] = ['default', 'gradient-green', 'gradient-orange', 'gradient-pink'];
-    return lightBackgrounds.includes(background);
-  };
+  const isLightBackground = (): boolean => lightBackgrounds.includes(background);
 
-  const textColorClass = isLightBackground() ? 'text-gray-800' : 'text-white';
-  const buttonColorClass = isLightBackground() 
+  const light = isLightBackground();
+  const textColorClass = light ? 'text-slate-900' : 'text-white';
+  const titleShadow = light
+    ? '0 1px 2px rgba(255,255,255,0.7)'
+    : '0 2px 6px rgba(0,0,0,0.5)';
+  const buttonColorClass = light
     ? 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50' 
     : 'bg-gray-800 text-white border-gray-700 hover:bg-gray-700';
 
@@ -42,17 +43,18 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             className="w-24 h-24"
           />
         </div>
-        <h1 className="text-4xl font-bold mb-3 gradient-text" style={{
-          backgroundImage: 'linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-          display: 'inline-block',
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}>
+        <h1
+          className={`text-4xl font-bold mb-3 tracking-tight ${textColorClass}`}
+          style={{ textShadow: titleShadow }}
+        >
           WosaNova
         </h1>
-        <p className="mb-1 text-amber-500 font-normal text-xl">La mejor colección de WebApps del mundo</p>
+        <p
+          className={`mb-1 font-normal text-xl ${light ? 'text-slate-700' : 'text-slate-200'}`}
+          style={{ textShadow: titleShadow }}
+        >
+          La mejor colección de WebApps del mundo
+        </p>
       </div>
       
       {authError && (

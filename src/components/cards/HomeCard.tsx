@@ -56,10 +56,12 @@ const HomeCard: React.FC<HomeCardProps> = ({
       ? "h-2 w-2 md:h-2.5 md:w-2.5 lg:h-3 lg:w-3" // Restaurado tamaño original
       : "h-2.5 w-2.5 md:h-3 md:w-3 lg:h-3.5 lg:w-3.5"; // Restaurado tamaño original
 
-  // Determinar el color del texto según el fondo (fuerza texto oscuro para fondos claros)
-  const textColorClass = isLightBackground() 
-    ? "text-gray-800" 
-    : "text-white dark:text-white";
+  // Determinar el color del texto según el fondo (máximo contraste sobre cada fondo)
+  const light = isLightBackground();
+  const textColorClass = light ? "text-slate-900" : "text-white";
+  const textShadow = light
+    ? '0 1px 2px rgba(255,255,255,0.75)'
+    : '0 1px 3px rgba(0,0,0,0.6)';
 
   // Much faster animation delay
   const animationDelay = `${index * 15}ms`;
@@ -130,6 +132,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
         className={`font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
+          textShadow,
           lineHeight: isLandscapeMobile ? '0.9' : '1.1', // Ligeramente reducido
           wordWrap: 'break-word',
           hyphens: 'auto',
