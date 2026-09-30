@@ -5,6 +5,9 @@ import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppContext } from '@/contexts/AppContext';
 import StoreAppCard from './StoreAppCard';
+import AppIconTile from './AppIconTile';
+import AppDetailDialog from './AppDetailDialog';
+import { getCategoryIcon } from './categoryIcons';
 
 interface CatalogContentProps {
   loading: boolean;
@@ -22,6 +25,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
   const { allApps } = useAppContext();
   const [visibleCount, setVisibleCount] = useState(12);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const searching = Boolean(searchTerm.trim());
   const filteredView = searching || selectedCategory !== null;
 
@@ -101,21 +105,35 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           <section aria-labelledby="categories-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.explore')}</p><h2 id="categories-title" className="mt-1 text-2xl font-bold">{t('catalog.allCategories')}</h2></div>
             <div className="flex flex-wrap justify-center gap-2 lg:flex-nowrap lg:gap-1">
-              {groups.map(({ category }) => <Button key={category} variant="outline" size="sm" className="max-w-full rounded-full px-3 text-xs lg:px-2" onClick={() => onCategoryChange(category)}>{categoryLabel(category)}</Button>)}
+              {groups.map(({ category }) => {
+                const Icon = getCategoryIcon(category);
+                return (
+                  <Button key={category} variant="outline" size="sm" className="max-w-full gap-1.5 rounded-full px-3 text-xs lg:px-2" onClick={() => onCategoryChange(category)}>
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+                    {categoryLabel(category)}
+                  </Button>
+                );
+              })}
             </div>
           </section>
 
-          {groups.map(({ category, items }) => (
-            <section key={category} aria-label={categoryLabel(category)} className="border-t border-border pt-8">
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <h2 className="text-xl font-bold sm:text-2xl">{categoryLabel(category)}</h2>
-                <Button variant="ghost" className="shrink-0 gap-1 text-primary" onClick={() => onCategoryChange(category)}>{t('catalog.viewAll')}<ArrowRight className="h-4 w-4" /></Button>
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {items.slice(0, 4).map(app => <StoreAppCard key={app.id} app={app} />)}
-              </div>
-            </section>
-          ))}
+          {groups.map(({ category, items }) => {
+            const Icon = getCategoryIcon(category);
+            return (
+              <section key={category} aria-label={categoryLabel(category)} className="border-t border-border pt-8">
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <h2 className="flex min-w-0 items-center gap-2 text-xl font-bold sm:text-2xl">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+                    <span className="truncate">{categoryLabel(category)}</span>
+                  </h2>
+                  <Button variant="ghost" className="shrink-0 gap-1 text-primary" onClick={() => onCategoryChange(category)}>{t('catalog.viewAll')}<ArrowRight className="h-4 w-4" /></Button>
+                </div>
+                <div className="-mx-1 grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-1 pb-2 auto-cols-[minmax(84px,1fr)] sm:auto-cols-[minmax(96px,1fr)]">
+                  {items.slice(0, 16).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
+                </div>
+              </section>
+            );
+          })}
 
           <section aria-labelledby="all-apps-title" className="border-t border-border pt-8">
             <div className="mb-5"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2></div>
@@ -126,6 +144,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           </section>
         </>
       )}
+      <AppDetailDialog app={selectedApp} onOpenChange={open => { if (!open) setSelectedApp(null); }} />
     </div>
   );
 };

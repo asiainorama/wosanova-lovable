@@ -54,6 +54,9 @@ export const translations = {
     'catalog.signInFavorites': 'Inicia sesión para añadir favoritos',
     'catalog.addFavorite': 'Añadir a favoritos',
     'catalog.removeFavorite': 'Eliminar de favoritos',
+    'catalog.install': 'Instalar',
+    'catalog.installed': 'Instalada',
+    'catalog.signInInstall': 'Inicia sesión para instalar aplicaciones',
     
     // Profile Page
     'profile.title': 'Área Personal',
@@ -544,6 +547,9 @@ export const translations = {
     'catalog.signInFavorites': 'Sign in to add favorites',
     'catalog.addFavorite': 'Add to favorites',
     'catalog.removeFavorite': 'Remove from favorites',
+    'catalog.install': 'Install',
+    'catalog.installed': 'Installed',
+    'catalog.signInInstall': 'Sign in to install applications',
     
     // Profile Page
     'profile.title': 'Personal Area',
