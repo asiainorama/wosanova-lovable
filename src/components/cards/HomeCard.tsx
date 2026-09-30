@@ -132,6 +132,7 @@ const HomeCard: React.FC<HomeCardProps> = ({
         className={`font-medium text-center line-clamp-2 leading-tight ${textColorClass} transition-opacity duration-100 max-w-full break-words`}
         style={{ 
           opacity: imageLoading && !imageError ? 0.7 : 1,
+          textShadow,
           lineHeight: isLandscapeMobile ? '0.9' : '1.1', // Ligeramente reducido
           wordWrap: 'break-word',
           hyphens: 'auto',
