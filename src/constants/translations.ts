@@ -7,6 +7,7 @@ export const translations = {
     
     // Header
     'header.home': 'Inicio',
+    'header.menu': 'Abrir menú',
     'header.catalog': 'Catálogo',
     'header.manage': 'Gestionar',
     'header.profile': 'Perfil',
@@ -35,6 +36,7 @@ export const translations = {
     'catalog.featured': 'Destacadas',
     'catalog.allApps': 'Todas las aplicaciones',
     'catalog.installedApps': 'Apps instaladas',
+    'catalog.backHome': 'Volver al inicio',
     'catalog.results': 'Resultados',
     'catalog.back': 'Volver al catálogo',
     'catalog.gridView': 'Vista de cuadrícula',
@@ -507,6 +509,7 @@ export const translations = {
     
     // Header
     'header.home': 'Home',
+    'header.menu': 'Open menu',
     'header.catalog': 'Catalog',
     'header.manage': 'Manage',
     'header.profile': 'Profile',
@@ -535,6 +538,7 @@ export const translations = {
     'catalog.featured': 'Featured',
     'catalog.allApps': 'All applications',
     'catalog.installedApps': 'Installed apps',
+    'catalog.backHome': 'Back to home',
     'catalog.results': 'Results',
     'catalog.back': 'Back to catalog',
     'catalog.gridView': 'Grid view',

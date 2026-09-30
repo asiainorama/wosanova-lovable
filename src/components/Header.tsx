@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Search } from 'lucide-react';
+import { Home, Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppContext } from '@/contexts/AppContext';
@@ -52,48 +52,24 @@ const Header: React.FC<HeaderProps> = ({
       {/* Glassmorphism effect with backdrop blur and translucent background */}
       <div className="backdrop-blur-md bg-white/80 dark:bg-gray-900/80 w-full border-b border-white/20 dark:border-gray-800/30 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="w-full px-4 py-2">
-          <div className="flex items-center justify-between gap-2">
-            {/* Left side - clickeable app logo and hamburger menu */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Link to="/" className="flex items-center">
-                <img 
-                  src="/lovable-uploads/b14d8d91-9012-44c8-8337-2fb868e8575e.png"
-                  alt="WosaNova Logo" 
-                  className="w-8 h-8 hover:scale-110 transition-transform cursor-pointer"
-                />
-              </Link>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="dark:text-white dark:hover:bg-white/10 hover:bg-black/5 transition-colors"
-                onClick={handleSidebarOpen}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Center - Search Bar (only on catalog page) */}
-            {isCatalogPage && onSearchChange && onCategoryChange && (
-              <div className="flex-1 mx-2 max-w-none">
-                <UnifiedSearchBar
-                  searchTerm={searchTerm}
-                  onSearchChange={onSearchChange}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={onCategoryChange}
-                  categories={categories}
-                />
-              </div>
-            )}
-            
-            {/* Catalog shortcut sits at the far right on other pages. */}
+          <div className="relative flex h-10 items-center justify-between">
+            <Button variant="ghost" size="icon" className="text-foreground" onClick={handleSidebarOpen} aria-label={t('header.menu')} title={t('header.menu')}>
+              <Menu className="h-5 w-5" />
+            </Button>
+            <Button asChild variant="ghost" size="icon" className="absolute left-1/2 -translate-x-1/2 text-foreground" aria-label={t('header.home')}>
+              <Link to="/" aria-label={t('header.home')} title={t('header.home')}><Home className="h-5 w-5" /></Link>
+            </Button>
             {!isCatalogPage && (
-              <Button asChild variant="ghost" size="icon" className="ml-auto rounded-full text-muted-foreground" aria-label={t('header.catalog')}>
-                <Link to="/catalog" aria-label={t('header.catalog')} title={t('header.catalog')}>
-                  <Search className="h-5 w-5" />
-                </Link>
+              <Button asChild variant="ghost" size="icon" className="text-muted-foreground" aria-label={t('header.catalog')}>
+                <Link to="/catalog" aria-label={t('header.catalog')} title={t('header.catalog')}><Search className="h-5 w-5" /></Link>
               </Button>
             )}
           </div>
+          {isCatalogPage && onSearchChange && onCategoryChange && (
+            <div className="mt-2">
+              <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={categories} />
+            </div>
+          )}
         </div>
       </div>
     </header>
