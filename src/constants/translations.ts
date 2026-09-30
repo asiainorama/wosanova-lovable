@@ -54,6 +54,9 @@ export const translations = {
     'catalog.signInFavorites': 'Inicia sesión para añadir favoritos',
     'catalog.addFavorite': 'Añadir a favoritos',
     'catalog.removeFavorite': 'Eliminar de favoritos',
+    'catalog.install': 'Instalar',
+    'catalog.installed': 'Instalada',
+    'catalog.signInInstall': 'Inicia sesión para instalar aplicaciones',
     
     // Profile Page
     'profile.title': 'Área Personal',
