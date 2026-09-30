@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LayoutGrid } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AppData } from '@/data/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -82,6 +83,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             <ArrowLeft className="h-4 w-4" /> {t('catalog.back')}
           </Button>
         )}
+        <div className="flex flex-wrap items-center justify-between gap-4">
         {(() => {
           const showCategory = filteredView && selectedCategory && !searching;
           const HeadingIcon = showCategory ? getCategoryIcon(selectedCategory) : null;
@@ -96,6 +98,10 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             </h1>
           );
         })()}
+          <Button asChild variant="outline" className="shrink-0 gap-2">
+            <Link to="/manage"><LayoutGrid className="h-4 w-4" aria-hidden="true" />{t('catalog.installedApps')}</Link>
+          </Button>
+        </div>
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
@@ -104,14 +110,14 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
             {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
           </div>
-          {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
+          {visibleCount < sortedApps.length && <div className="mt-6 flex justify-center"><Button variant="outline" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button></div>}
         </section>
       ) : (
         <>
           <section aria-labelledby="featured-title">
             <div className="mb-5"><p className="text-xs font-semibold uppercase tracking-widest text-primary">{t('catalog.discover')}</p><h2 id="featured-title" className="mt-1 text-2xl font-bold">{t('catalog.featured')}</h2></div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
+              {featured.map((app, index) => <div key={app.id} className={index === 0 ? 'min-w-0 md:col-span-2' : 'min-w-0'}><StoreAppCard app={app} featured prominent={index === 0} /></div>)}
             </div>
           </section>
 
@@ -153,7 +159,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
               {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
             </div>
-            {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
+            {visibleCount < sortedApps.length && <div className="mt-6 flex justify-center"><Button variant="outline" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button></div>}
           </section>
         </>
       )}

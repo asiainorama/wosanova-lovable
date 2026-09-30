@@ -24,7 +24,7 @@ const Catalog = () => {
   };
 
   return (
-    <div id="catalog-container" className="min-h-screen bg-background text-foreground overflow-y-auto flex flex-col">
+    <div id="catalog-container" className="catalog-background min-h-screen text-foreground overflow-y-auto flex flex-col">
       <CatalogHeader 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
