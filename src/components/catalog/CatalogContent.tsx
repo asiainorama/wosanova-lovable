@@ -23,13 +23,13 @@ const byName = (a: AppData, b: AppData) => a.name.localeCompare(b.name);
 const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange, onClear }: CatalogContentProps) => {
   const { t } = useLanguage();
   const { allApps } = useAppContext();
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [visibleCount, setVisibleCount] = useState(30);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const searching = Boolean(searchTerm.trim());
   const filteredView = searching || selectedCategory !== null;
 
-  useEffect(() => setVisibleCount(12), [searchTerm, selectedCategory]);
+  useEffect(() => setVisibleCount(30), [searchTerm, selectedCategory]);
 
   useEffect(() => {
     if (featuredIds.length || !allApps.length) return;
