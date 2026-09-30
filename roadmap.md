@@ -24,4 +24,4 @@
 - [x] Remove the trash shortcut from every header and align the search icon right.
 - [x] Make the Explore Catalog button label white.
 - [x] Show four icon columns on small screens in category and all-app views.
-- [ ] Verify header, button contrast, and category layout on mobile and desktop.
+- [x] Verify header, button contrast, and category layout on mobile and desktop.
