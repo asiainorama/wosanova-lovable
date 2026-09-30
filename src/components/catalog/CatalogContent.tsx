@@ -89,7 +89,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             <h1 className="flex items-center gap-3 text-3xl font-bold text-foreground sm:text-4xl">
               {HeadingIcon && (
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
-                  <Icon-placeholder />
+                  <HeadingIcon className="h-6 w-6" aria-hidden="true" />
                 </span>
               )}
               <span className="min-w-0">{filteredView ? (showCategory ? categoryLabel(selectedCategory) : t('catalog.results')) : t('catalog.title')}</span>
