@@ -170,6 +170,10 @@
     --logo-amber: 36 31% 23%;
     --logo-blue: 208 31% 24%;
     --feature-overlay: 0 0% 0% / 0.12;
+    --install: 217 91% 58%;
+    --install-foreground: 0 0% 100%;
+    --install-soft: 217 40% 24%;
+    --install-soft-foreground: 210 60% 92%;
   }
 }
 

@@ -82,7 +82,20 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             <ArrowLeft className="h-4 w-4" /> {t('catalog.back')}
           </Button>
         )}
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{filteredView ? selectedCategory && !searching ? categoryLabel(selectedCategory) : t('catalog.results') : t('catalog.title')}</h1>
+        {(() => {
+          const showCategory = filteredView && selectedCategory && !searching;
+          const HeadingIcon = showCategory ? getCategoryIcon(selectedCategory) : null;
+          return (
+            <h1 className="flex items-center gap-3 text-3xl font-bold text-foreground sm:text-4xl">
+              {HeadingIcon && (
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+                  <Icon-placeholder />
+                </span>
+              )}
+              <span className="min-w-0">{filteredView ? (showCategory ? categoryLabel(selectedCategory) : t('catalog.results')) : t('catalog.title')}</span>
+            </h1>
+          );
+        })()}
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
