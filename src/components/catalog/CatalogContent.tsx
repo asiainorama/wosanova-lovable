@@ -144,6 +144,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
           </section>
         </>
       )}
+      <AppDetailDialog app={selectedApp} onOpenChange={open => { if (!open) setSelectedApp(null); }} />
     </div>
   );
 };
