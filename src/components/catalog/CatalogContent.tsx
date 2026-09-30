@@ -23,13 +23,13 @@ const byName = (a: AppData, b: AppData) => a.name.localeCompare(b.name);
 const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategoryChange, onClear }: CatalogContentProps) => {
   const { t } = useLanguage();
   const { allApps } = useAppContext();
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [visibleCount, setVisibleCount] = useState(30);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const [selectedApp, setSelectedApp] = useState<AppData | null>(null);
   const searching = Boolean(searchTerm.trim());
   const filteredView = searching || selectedCategory !== null;
 
-  useEffect(() => setVisibleCount(12), [searchTerm, selectedCategory]);
+  useEffect(() => setVisibleCount(30), [searchTerm, selectedCategory]);
 
   useEffect(() => {
     if (featuredIds.length || !allApps.length) return;
@@ -82,16 +82,29 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
             <ArrowLeft className="h-4 w-4" /> {t('catalog.back')}
           </Button>
         )}
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{filteredView ? selectedCategory && !searching ? categoryLabel(selectedCategory) : t('catalog.results') : t('catalog.title')}</h1>
+        {(() => {
+          const showCategory = filteredView && selectedCategory && !searching;
+          const HeadingIcon = showCategory ? getCategoryIcon(selectedCategory) : null;
+          return (
+            <h1 className="flex items-center gap-3 text-3xl font-bold text-foreground sm:text-4xl">
+              {HeadingIcon && (
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+                  <HeadingIcon className="h-6 w-6" aria-hidden="true" />
+                </span>
+              )}
+              <span className="min-w-0">{filteredView ? (showCategory ? categoryLabel(selectedCategory) : t('catalog.results')) : t('catalog.title')}</span>
+            </h1>
+          );
+        })()}
         {!filteredView && <p className="mt-2 text-sm text-muted-foreground">{t('catalog.storeSubtitle')}</p>}
       </div>
 
       {filteredView ? (
         <section aria-label={t('catalog.results')}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sortedApps.slice(0, visibleCount).map(app => <StoreAppCard key={app.id} app={app} />)}
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+            {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
           </div>
-          {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 12)}>{t('catalog.showMore')}</Button>}
+          {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
         </section>
       ) : (
         <>
@@ -137,10 +150,10 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
           <section aria-labelledby="all-apps-title" className="border-t border-border pt-8">
             <div className="mb-5"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2></div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sortedApps.slice(0, visibleCount).map(app => <StoreAppCard key={app.id} app={app} />)}
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+              {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
             </div>
-            {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 12)}>{t('catalog.showMore')}</Button>}
+            {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
           </section>
         </>
       )}

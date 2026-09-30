@@ -1,4 +1,4 @@
-import { Check, Plus } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -35,16 +35,20 @@ export default function InstallButton({ app, className = '' }: InstallButtonProp
     }
   };
 
+  const palette = installed
+    ? 'bg-install-soft text-install-soft-foreground hover:bg-install-soft/80'
+    : 'bg-install text-install-foreground hover:bg-install/90';
+
   return (
     <Button
       type="button"
       size="sm"
-      variant={installed ? 'secondary' : 'default'}
+      variant="ghost"
       onClick={toggle}
       aria-pressed={installed}
-      className={`h-8 gap-1.5 rounded-full px-3 text-xs font-semibold ${className}`}
+      className={`h-8 gap-1.5 rounded-full px-4 text-xs font-semibold ${palette} ${className}`}
     >
-      {installed ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+      {installed && <Check className="h-3.5 w-3.5" />}
       {installed ? t('catalog.installed') : t('catalog.install')}
     </Button>
   );
