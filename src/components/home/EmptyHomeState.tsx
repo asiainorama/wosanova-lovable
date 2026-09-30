@@ -19,7 +19,7 @@ const EmptyHomeState: React.FC = () => {
       <p className="text-gray-500 mb-4 dark:text-gray-400">{t('home.addFromCatalog') || "Agrega aplicaciones desde el catálogo para verlas aquí"}</p>
       <div className="flex justify-center">
         <Link to="/catalog">
-          <Button size="sm" className="flex items-center gap-2">
+          <Button size="sm" className="flex items-center gap-2 text-[hsl(var(--home-explore-foreground))]">
             <Store className="h-4 w-4" />
             <span>{t('home.exploreCatalog') || "Explorar Catálogo"}</span>
           </Button>

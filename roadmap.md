@@ -18,3 +18,10 @@
 - [x] Add an Installed apps link to Manage from the catalog heading.
 - [x] Add a subtle themed catalog gradient and featured-card shadows.
 - [x] Verify desktop/mobile layout and catalog navigation.
+
+# Header and catalog alignment
+
+- [x] Remove the trash shortcut from every header and align the search icon right.
+- [x] Make the Explore Catalog button label white.
+- [x] Show four icon columns on small screens in category and all-app views.
+- [x] Verify header, button contrast, and category layout on mobile and desktop.

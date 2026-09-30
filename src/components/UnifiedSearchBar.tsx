@@ -140,7 +140,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   return (
     <div className="relative w-full">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -149,7 +149,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
           onChange={handleInputChange}
           onClick={handleInputClick}
           className={cn(
-            "pl-10 pr-20 py-2 w-full border-none text-gray-800 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-200",
+            "pl-3 pr-24 py-2 w-full border-none text-gray-800 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-200",
             "bg-gray-100 dark:bg-gray-700",
             selectedCategory && "border-l-4 border-l-primary bg-blue-50 dark:bg-gray-600",
             isOpen && "ring-2 ring-primary/20"
@@ -157,7 +157,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
           aria-label={t('catalog.searchAndFilter')}
         />
         
-        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+        <div className="absolute right-9 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
           {hasActiveFilter && (
             <Button
               variant="ghost"

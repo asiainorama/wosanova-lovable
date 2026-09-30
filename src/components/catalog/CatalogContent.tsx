@@ -107,7 +107,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
       {filteredView ? (
         <section aria-label={t('catalog.results')}>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
             {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
           </div>
           {visibleCount < sortedApps.length && <div className="mt-6 flex justify-center"><Button variant="outline" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button></div>}
@@ -156,7 +156,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
           <section aria-labelledby="all-apps-title" className="border-t border-border pt-8">
             <div className="mb-5"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2></div>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+             <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
               {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
             </div>
             {visibleCount < sortedApps.length && <div className="mt-6 flex justify-center"><Button variant="outline" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button></div>}
