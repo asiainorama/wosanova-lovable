@@ -14,7 +14,7 @@
 
 # Catalog polish
 
-- [ ] Center both Show more buttons and give featured cards equal height.
-- [ ] Add an Installed apps link to Manage from the catalog heading.
-- [ ] Add a subtle themed catalog gradient and featured-card shadows.
-- [ ] Verify desktop/mobile layout and catalog navigation.
+- [x] Center both Show more buttons and give featured cards equal height.
+- [x] Add an Installed apps link to Manage from the catalog heading.
+- [x] Add a subtle themed catalog gradient and featured-card shadows.
+- [x] Verify desktop/mobile layout and catalog navigation.
