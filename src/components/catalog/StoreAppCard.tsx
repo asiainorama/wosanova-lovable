@@ -39,7 +39,7 @@ export default function StoreAppCard({ app, featured = false, prominent = false,
 
   if (featured) {
     return (
-      <article className={`catalog-feature-shadow relative flex h-full min-h-[280px] flex-col justify-between overflow-hidden rounded-lg border border-border p-5 sm:p-6 ${cardBackground} ${themed ? 'text-feature-foreground' : 'text-card-foreground'}`}>
+      <article className={`catalog-feature-shadow relative flex h-[320px] flex-col justify-between overflow-hidden rounded-lg border border-border p-5 sm:p-6 ${cardBackground} ${themed ? 'text-feature-foreground' : 'text-card-foreground'}`}>
         {hasLogo && <img src={iconUrl} alt="" aria-hidden="true" className="catalog-feature-art pointer-events-none absolute -right-8 bottom-0 h-48 w-48 object-cover opacity-25 sm:h-56 sm:w-56" />}
         {!hasLogo && <span aria-hidden="true" className="catalog-feature-art pointer-events-none absolute -right-6 bottom-0 text-[180px] font-black leading-none opacity-10">{app.name.charAt(0)}</span>}
         <div className="pointer-events-none absolute inset-0 bg-feature-overlay" aria-hidden="true" />
