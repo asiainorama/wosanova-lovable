@@ -12,6 +12,14 @@
   mask-image: radial-gradient(ellipse at center, black 8%, transparent 76%);
 }
 
+.catalog-background {
+  background: linear-gradient(145deg, hsl(var(--catalog-tint-start)), hsl(var(--background)) 45%, hsl(var(--catalog-tint-end)));
+}
+
+.catalog-feature-shadow {
+  box-shadow: var(--catalog-feature-shadow);
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%; /* Cambiado a blanco grisáceo */
@@ -89,6 +97,9 @@
     --logo-amber: 38 75% 94%;
     --logo-blue: 207 65% 95%;
     --feature-overlay: 0 0% 100% / 0.08;
+    --catalog-tint-start: 344 64% 97%;
+    --catalog-tint-end: 169 40% 96%;
+    --catalog-feature-shadow: 0 12px 28px -12px hsl(var(--foreground) / 0.18), 0 3px 9px -5px hsl(var(--foreground) / 0.12);
     --install: 217 91% 45%;
     --install-foreground: 0 0% 100%;
     --install-soft: 217 60% 94%;
@@ -170,6 +181,9 @@
     --logo-amber: 36 31% 23%;
     --logo-blue: 208 31% 24%;
     --feature-overlay: 0 0% 0% / 0.12;
+    --catalog-tint-start: 343 23% 11%;
+    --catalog-tint-end: 173 22% 10%;
+    --catalog-feature-shadow: 0 12px 30px -10px hsl(var(--foreground) / 0.1), 0 3px 10px -4px hsl(var(--foreground) / 0.08);
     --install: 217 91% 58%;
     --install-foreground: 0 0% 100%;
     --install-soft: 217 40% 24%;
