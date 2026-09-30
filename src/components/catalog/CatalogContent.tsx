@@ -101,10 +101,10 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
       {filteredView ? (
         <section aria-label={t('catalog.results')}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {sortedApps.slice(0, visibleCount).map(app => <StoreAppCard key={app.id} app={app} />)}
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+            {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
           </div>
-          {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 12)}>{t('catalog.showMore')}</Button>}
+          {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
         </section>
       ) : (
         <>
@@ -150,10 +150,10 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, apps, onCategor
 
           <section aria-labelledby="all-apps-title" className="border-t border-border pt-8">
             <div className="mb-5"><h2 id="all-apps-title" className="text-xl font-bold sm:text-2xl">{t('catalog.allApps')}</h2></div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sortedApps.slice(0, visibleCount).map(app => <StoreAppCard key={app.id} app={app} />)}
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+              {sortedApps.slice(0, visibleCount).map(app => <AppIconTile key={app.id} app={app} onSelect={setSelectedApp} />)}
             </div>
-            {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 12)}>{t('catalog.showMore')}</Button>}
+            {visibleCount < sortedApps.length && <Button variant="outline" className="mt-6" onClick={() => setVisibleCount(count => count + 24)}>{t('catalog.showMore')}</Button>}
           </section>
         </>
       )}
