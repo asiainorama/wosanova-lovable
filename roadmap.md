@@ -38,4 +38,4 @@
 - [x] Match neutral header icon colors and highlight the current Home or Catalog icon in blue.
 - [x] Move catalog search beneath featured apps, retaining it in filtered and empty views.
 - [x] Make the category dropdown close on repeated click and outside click.
-- [ ] Verify header and search interactions on desktop and mobile.
+- [x] Verify header and search interactions on desktop and mobile.
