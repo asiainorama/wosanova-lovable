@@ -33,6 +33,7 @@
 
     --primary: 322 100% 50%;
     --primary-foreground: 0 0% 7%;
+    --home-explore-foreground: 0 0% 100%;
     --primary-border: 322 100% 70%;
 
     --secondary: 210 40% 96.1%;
@@ -118,6 +119,7 @@
 
     --primary: 322 100% 65%; /* Brighter primary in dark mode */
     --primary-foreground: 0 0% 100%;
+    --home-explore-foreground: 0 0% 100%;
     --primary-border: 322 100% 80%;
 
     --secondary: 217.2 32.6% 17.5%;
