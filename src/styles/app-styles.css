@@ -110,24 +110,24 @@
   border-radius: 10px;
 }
 
-/* New gradient text style for the WosaNova title */
+/* Sober slate gradient for titles and subtitles */
 .gradient-text {
-  background: linear-gradient(90deg, #ff719a 0%, #ffa99f 48%, #ffe29f 100%);
+  background: linear-gradient(90deg, #0f172a 0%, #334155 55%, #475569 100%);
   -webkit-background-clip: text;
   -moz-background-clip: text;
   background-clip: text;
   color: transparent !important;
   display: inline-block;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  animation: gradient-shift 8s ease infinite;
-  /* Aseguramos que el gradiente se vea en todos los navegadores */
+  letter-spacing: -0.01em;
   -webkit-text-fill-color: transparent;
 }
 
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.dark .gradient-text {
+  background: linear-gradient(90deg, #ffffff 0%, #cbd5e1 55%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Styles for the home page grid */
