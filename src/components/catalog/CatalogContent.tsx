@@ -111,7 +111,7 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, onSearchChange,
         </section>
       )}
 
-      <div className="relative z-20 max-w-2xl">
+      <div className="relative z-20 ml-auto w-full sm:w-1/2">
         <UnifiedSearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} selectedCategory={selectedCategory} onCategoryChange={onCategoryChange} categories={[...new Set(allApps.map(app => app.category))].sort()} />
       </div>
 
