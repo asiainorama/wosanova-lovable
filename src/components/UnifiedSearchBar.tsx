@@ -138,7 +138,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   return (
     <div ref={searchRef} className="relative w-full">
       <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-background pointer-events-none z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -147,39 +147,46 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
           onChange={handleInputChange}
           onClick={handleInputClick}
           className={cn(
-            "pl-3 pr-24 py-2 w-full border-none text-gray-800 dark:text-gray-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-200",
-            "bg-gray-100 dark:bg-gray-700",
-            selectedCategory && "border-l-4 border-l-primary bg-blue-50 dark:bg-gray-600",
-            isOpen && "ring-2 ring-primary/20"
+            "rounded-full border-none bg-foreground text-background placeholder:text-background/60 shadow-md transition-all duration-200",
+            "pr-24 py-2.5 w-full",
+            selectedCategory && "pl-3 font-medium",
+            isOpen && "ring-2 ring-primary/40"
           )}
           aria-label={t('catalog.searchAndFilter')}
         />
-        
+
+        {selectedCategory && (
+          <span
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary z-10"
+            aria-hidden="true"
+          />
+        )}
+
         <div className="absolute right-9 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
           {hasActiveFilter && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600"
+              className="h-6 w-6 p-0 rounded-full hover:bg-background/10"
               aria-label={t('form.clearFilters')}
             >
-              <X className="h-3 w-3 text-gray-600 dark:text-gray-300" />
+              <X className="h-3 w-3 text-background" />
             </Button>
           )}
-          
+
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
-              "h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-600 transition-transform duration-200",
+              "h-6 w-6 p-0 rounded-full hover:bg-background/10 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
             aria-label={t('form.showCategories')}
             aria-expanded={isOpen}
           >
-            <ChevronDown className="h-3 w-3 text-gray-600 dark:text-gray-300" />
+            <ChevronDown className="h-3 w-3 text-background" />
           </Button>
         </div>
       </div>
@@ -187,21 +194,20 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
       {/* Dropdown de categorías */}
       {isOpen && (
         <div
-          className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
+          className="absolute top-full left-0 right-0 mt-2 rounded-2xl bg-foreground text-background shadow-xl z-50 max-h-60 overflow-y-auto animate-in fade-in-0 slide-in-from-top-2 duration-200"
         >
-          <div className="p-1">
+          <div className="p-1.5">
             {categoryOptions.map((option, index) => (
               <button
                 key={option.value || 'all'}
                 onClick={() => handleCategorySelect(option.value)}
                 onMouseEnter={() => setHoveredIndex(index)}
                 className={cn(
-                  "w-full text-left px-3 py-2 rounded-sm text-sm transition-colors",
-                  "hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none",
-                  "text-gray-900 dark:text-gray-100",
-                  hoveredIndex === index && "bg-gray-100 dark:bg-gray-700",
-                  selectedCategory === option.value && "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary font-medium",
-                  !option.value && "font-medium border-b border-gray-100 dark:border-gray-700"
+                  "w-full text-left px-3 py-2 rounded-xl text-sm transition-colors",
+                  "hover:bg-background/10 focus:bg-background/10 focus:outline-none",
+                  "text-background",
+                  selectedCategory === option.value && "font-semibold",
+                  !option.value && "font-medium border-b border-background/10 rounded-b-none"
                 )}
               >
                 {option.label}
