@@ -149,7 +149,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
           className={cn(
             "rounded-full border-none bg-foreground text-background placeholder:text-background/60 shadow-md transition-all duration-200",
             "pr-24 py-2.5 w-full",
-            selectedCategory && "pl-3 font-medium",
+            selectedCategory && "pl-8 font-medium",
             isOpen && "ring-2 ring-primary/40"
           )}
           aria-label={t('catalog.searchAndFilter')}
