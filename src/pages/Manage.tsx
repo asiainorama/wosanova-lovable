@@ -1,14 +1,15 @@
-import React, { useMemo, useEffect } from 'react';
-import Header from '@/components/Header';
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/contexts/AppContext';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBackground } from '@/contexts/BackgroundContext';
 import { useAppLogo } from '@/hooks/useAppLogo';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppAvatarFallback from '@/components/cards/AvatarFallback';
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import ScreenOverlay from '@/components/overlay/ScreenOverlay';
 
 // Define category groups (same as in Catalog.tsx)
 interface CategoryGroup {
@@ -116,8 +117,6 @@ const Manage = () => {
   const { t } = useLanguage();
   const { getBackgroundStyle } = useBackground();
   
-  // Use the scroll behavior hook instead of manual effect
-  useScrollBehavior();
   
   // Group favorites by category group and sort alphabetically
   const groupedFavorites = useMemo(() => {
@@ -145,15 +144,15 @@ const Manage = () => {
   }, [favorites]);
 
   return (
-    <div 
-      className="min-h-screen flex flex-col"
-      style={getBackgroundStyle()}
-    >
-      <Header title={t('header.manage') || "Gestionar Apps"} />
-      
-      <main className="container mx-auto px-4 py-6 flex-1 overflow-y-auto">
+    <ScreenOverlay style={getBackgroundStyle()}>
+      <main className="container mx-auto px-4 pt-16 pb-6">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4 gradient-text">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 className="text-lg font-semibold gradient-text">{t('home.myApps') || "Mis Aplicaciones Favoritas"}</h2>
+            <Button asChild variant="outline" size="sm" className="gap-2">
+              <Link to="/catalog"><ArrowLeft className="h-4 w-4" aria-hidden="true" />{t('manage.backToCatalog')}</Link>
+            </Button>
+          </div>
           
           {favorites.length === 0 ? (
             <p className="text-gray-500">{t('home.noApps') || "No hay aplicaciones que mostrar"}</p>
@@ -175,7 +174,7 @@ const Manage = () => {
           )}
         </Card>
       </main>
-    </div>
+    </ScreenOverlay>
   );
 };
 

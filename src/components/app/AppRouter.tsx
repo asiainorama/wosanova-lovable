@@ -32,33 +32,11 @@ export const AppRouter: React.FC<AppRouterProps> = ({ session, skipAuthCheck }) 
                 <Index />
               </AppWithContextUpdater>
             }
-          />
-          <Route
-            path="/catalog"
-            element={
-              <AppWithContextUpdater>
-                <Catalog />
-              </AppWithContextUpdater>
-            }
-          />
-          <Route
-            path="/manage"
-            element={isAuthenticated ? 
-              <AppWithContextUpdater>
-                <Manage />
-              </AppWithContextUpdater> : 
-              <Navigate to="/auth" />
-            }
-          />
-          <Route
-            path="/profile"
-            element={isAuthenticated ? 
-              <AppWithContextUpdater>
-                <Profile />
-              </AppWithContextUpdater> : 
-              <Navigate to="/auth" />
-            }
-          />
+          >
+            <Route path="catalog" element={<Catalog />} />
+            <Route path="manage" element={isAuthenticated ? <Manage /> : <Navigate to="/auth" />} />
+            <Route path="profile" element={isAuthenticated ? <Profile /> : <Navigate to="/auth" />} />
+          </Route>
           <Route
             path="/admin"
             element={isAuthenticated ? 

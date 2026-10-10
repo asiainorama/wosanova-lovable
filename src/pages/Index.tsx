@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from '@/components/Header';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBackground } from '@/contexts/BackgroundContext';
@@ -40,6 +41,7 @@ const Index = () => {
           isAuthenticated={isAuthenticated}
         />
       </main>
+      <Outlet />
     </div>
   );
 };

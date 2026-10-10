@@ -7,6 +7,8 @@ export const translations = {
     
     // Header
     'header.home': 'Inicio',
+    'overlay.close': 'Cerrar',
+    'manage.backToCatalog': 'Volver al catálogo',
     'header.menu': 'Abrir menú',
     'header.catalog': 'Catálogo',
     'header.manage': 'Gestionar',
@@ -509,6 +511,8 @@ export const translations = {
     
     // Header
     'header.home': 'Home',
+    'overlay.close': 'Close',
+    'manage.backToCatalog': 'Back to catalog',
     'header.menu': 'Open menu',
     'header.catalog': 'Catalog',
     'header.manage': 'Manage',
