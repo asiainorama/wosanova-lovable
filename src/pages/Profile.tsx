@@ -90,9 +90,8 @@ const Profile = () => {
 
   if (!userId) {
     return (
-      <div className="min-h-screen flex flex-col relative" style={getBackgroundStyle()}>
-        <Header title={t('profile.title')} />
-        <main className="flex-1 flex items-center justify-center relative z-10">
+      <ScreenOverlay style={getBackgroundStyle()}>
+        <main className="min-h-screen flex items-center justify-center px-4">
           <Card className="p-6 text-center">
             <User size={48} className="mx-auto mb-4 text-gray-400" />
             <h2 className="text-xl font-semibold mb-2">{t('auth.login')}</h2>
@@ -102,15 +101,13 @@ const Profile = () => {
             </Button>
           </Card>
         </main>
-      </div>
+      </ScreenOverlay>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={getBackgroundStyle()}>
-      <Header title={t('profile.title')} />
-      
-      <main className="container mx-auto px-4 py-6 flex-1 relative z-10">
+    <ScreenOverlay style={getBackgroundStyle()}>
+      <main className="container mx-auto px-4 pt-16 pb-6">
         <div className="max-w-2xl mx-auto">
           <Card className="p-6">
             <ProfileHeader username={localUsername} avatarUrl={localAvatarUrl} />
