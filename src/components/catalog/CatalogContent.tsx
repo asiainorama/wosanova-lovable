@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Home, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LayoutGrid } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AppData } from '@/data/types';
@@ -91,9 +91,6 @@ const CatalogContent = ({ loading, selectedCategory, searchTerm, onSearchChange,
           );
         })()}
           {!filteredView && <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="ghost" className="gap-2">
-              <Link to="/"><Home className="h-4 w-4" aria-hidden="true" />{t('catalog.backHome')}</Link>
-            </Button>
             <Button asChild variant="outline" className="shrink-0 gap-2">
               <Link to="/manage"><LayoutGrid className="h-4 w-4" aria-hidden="true" />{t('catalog.installedApps')}</Link>
             </Button>

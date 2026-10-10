@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useCatalogLogic } from '@/hooks/useCatalogLogic';
-import CatalogHeader from '@/components/catalog/CatalogHeader';
 import CatalogContent from '@/components/catalog/CatalogContent';
+import ScreenOverlay from '@/components/overlay/ScreenOverlay';
 
 const Catalog = () => {
   const {
@@ -14,8 +13,6 @@ const Catalog = () => {
     loading,
     filteredApps
   } = useCatalogLogic();
-  
-  useScrollBehavior();
 
   const selectCategory = (category: string | null) => {
     setSearchTerm('');
@@ -24,10 +21,8 @@ const Catalog = () => {
   };
 
   return (
-    <div id="catalog-container" className="catalog-background min-h-screen text-foreground overflow-y-auto flex flex-col">
-      <CatalogHeader />
-
-      <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <ScreenOverlay id="catalog-container" className="catalog-background text-foreground">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-6">
         <CatalogContent 
           loading={loading}
           selectedCategory={selectedCategory}
@@ -38,7 +33,7 @@ const Catalog = () => {
           onClear={() => selectCategory(null)}
         />
       </div>
-    </div>
+    </ScreenOverlay>
   );
 };
 
