@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import Header from '@/components/Header';
+import ScreenOverlay from '@/components/overlay/ScreenOverlay';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useBackground } from '@/contexts/BackgroundContext';
@@ -136,7 +136,7 @@ const Profile = () => {
           </Card>
         </div>
       </main>
-    </div>
+    </ScreenOverlay>
   );
 };
 
